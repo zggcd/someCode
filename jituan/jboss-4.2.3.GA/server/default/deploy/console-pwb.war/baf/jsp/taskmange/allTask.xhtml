@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script>	
+	    //<![CDATA[	
+	    //触发事件
+	 function onObjectFireMouseEvent(obj, eventname) { 					
+		if (document.all) {
+		//IE
+			obj.fireEvent(eventname);
+		} else {
+		//firefox						
+			var name = eventname.replace("on", "");
+			var evtObj = document.createEvent('MouseEvents');     
+			evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+			obj.dispatchEvent(evtObj);
+		}
+	}
+
+		
+	    //]]>
+		</script>
+		<style type="text/css">
+		.column1{
+			width:15%;
+			text-align:right;
+		}
+		.column2{
+			width:85%;
+			text-align:right;
+		}
+		</style>
+	</head>
+	<body  style="background-color:white;">
+	  <f:loadBundle basename="messages" var="msgs" />
+	  <f:view  contentType="text/html">	
+
+	  
+	  <regaltec:toolPanel title="所有任务列表" titleWidth="80" width="98%" style="margin:5 5 15 5;"  >
+      <f:facet name="content">
+      <h:form id="selectForm">
+      <table width="95%" style="font-size:13px;" class=".rich-text-color-general">
+       <tr>
+       <td width="10%"><h:outputText value="任务名称"></h:outputText></td><td><h:inputText id="searchTaskName" style="width:95%;height:23px;" value="#{taskBean.searchTaskName}" styleClass="rich-gradient-input"></h:inputText></td>
+       <td width="10%"><h:outputText value="任务IP"></h:outputText></td><td><h:inputText id="searchIp" style="width:95%;height:23px;" value="#{taskBean.searchIp}" styleClass="rich-gradient-input"></h:inputText></td>
+       <td width="10%"><a4j:commandButton styleClass="rich-button" value="查询" action="#{taskBean.loadAllTask}" limitToList="true" reRender="taskList"></a4j:commandButton></td>
+       </tr>
+      </table>   
+       	<rich:panel style="margin:10 5 5 5;">
+			<rich:dataTable width="100%" id="taskList"  columnClasses="col" 
+            value="#{taskBean.allTaskList}" var="taskItem"    headerClass="rich-gradient-tab"   >
+		            <rich:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.task.taskName']}" />
+				        </f:facet>
+		                <h:outputText value="#{taskItem.taskName}" />
+		            </rich:column>
+		             	  	
+		             <rich:column visible="false">
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.task.taskPlan']}" />
+				        </f:facet>
+		                <h:outputText value="" />
+		            </rich:column>								    
+				        <rich:column width="15%" >
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.prevFireTime']}" />
+					        </f:facet>
+				            <h:outputText id="t_prevFireTime" value="#{taskItem.prevFireTime}"/>
+				        </rich:column>
+                        <rich:column width="20%" >
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="指定的IP" />
+					        </f:facet>
+				            <h:outputText  value="#{taskItem.machineIp}"/>
+				        </rich:column>
+				        <rich:column width="20%" >
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.discription']}" />
+					        </f:facet>
+				            <h:outputText id="t_taskDescription" value="#{taskItem.taskDescription}"/>
+				        </rich:column>    
+        </rich:dataTable>
+		</rich:panel>
+		<a4j:keepAlive beanName="taskBean"/> 
+ 			</h:form>
+      </f:facet>
+	  </regaltec:toolPanel>
+
+	  </f:view>
+	  <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</html>

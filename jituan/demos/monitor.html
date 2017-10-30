@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>装维工单实时监控</title>
+    <link rel="stylesheet" href="lib/css/style_monitor.css">
+</head>
+<body id="monitor">
+    <div id="info">
+        <p class="tittxt"><b>全网装维工单实时监测</b><img class="img" src="lib/images/u276.png">当前时间：<div id="nowTime"></div></p>
+    </div>
+    <table id="itemli">
+        <tr>
+            <td class="item">
+                <img src="lib/images/01.png">
+                <div class="tit">当前单总量:</div>
+                <div class="num">{{ sum1 }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="item">
+                <img src="lib/images/02.png">
+                <div class="tit">开通单总量:</div>
+                <div class="num">{{ sum2 }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="item">
+                <img src="lib/images/03.png">
+                <div class="tit">保障单总量:</div>
+                <div class="num">{{ sum3 }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td class="item">
+                <img src="lib/images/04.png">
+                <div class="tit">当前装维人员:</div>
+                <div class="num">{{ sum4 }}</div>
+                <div class="tit">总数:</div>
+                <div class="num">112,844</div>
+            </td>
+        </tr>
+    </table>
+    <div id="main"></div>
+    <div id="right"></div>
+    <div id="table">
+        <div class="table_header_th">
+            <div class="text_th">
+                <p><span>省份</span></p>
+            </div>
+            <div class="text_th">
+                <p><span>工单类型</span></p>
+            </div>
+            <div class="text_th">
+                <p><span>产品</span></p>
+            </div>
+            <div class="text_th_last">
+                <p><span>工单总数</span></p>
+            </div>
+        </div>
+        <div class="ease">
+            <div id="ease_data" >
+                <div class="table_body" v-for="rows in tables">
+                    <div class="text_body">
+                        <p><span>{{ rows.regionName }}</span></p>
+                    </div>
+                    <div class="text_body">
+                        <p><span>{{ rows.orderTypename }}</span></p>
+                    </div>
+                    <div class="text_body">
+                        <p><span>{{ rows.productTypename }}</span></p>
+                    </div>
+                    <div class="text_body_last">
+                        <p><span>{{ this.toThousands(rows.orderSum) }}</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="lib/script/echarts.min.js"></script>
+    <script type="text/javascript" src="lib/script/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src='lib/script/Polyfill.js'></script>
+    <script type="text/javascript" src='lib/script/vue.js'></script>
+    <script type="text/javascript" src="lib/maps/china.js"></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#monitor',
+            data : function(){
+                return {
+                    tables : [],
+                    sum1 : 0,
+                    sum2 : 0,
+                    sum3 : 0,
+                    sum4 : 0,
+                    pageCount : 0,
+                    nowPage : 1,
+                    cursor : 0,
+                    tableHeig : 0
+                }
+            },
+            created : function(){
+                this.winHeight();
+            },
+            ready : function(){
+                this.reloadwin(),
+                this.timer(),
+                this.table("./monitor.json",{"nowPage":"1"})
+                setInterval(
+                    function(){
+                        if(this.pageCount){
+                            if(this.nowPage == this.pageCount){
+                                this.nowPage = 0
+                            }
+                            this.nowPage = this.nowPage + 1;
+                            this.table("./monitor.json",{"nowPage":this.nowPage})
+                        }
+                    }.bind(this),10000
+                )
+            },
+            methods : {
+                table : function (url,param) {
+                    $.ajax({
+                        url : url,
+                        data : param,
+                        success : function(data){      
+                            data = JSON.parse(data)                   
+                            // if(!data.orderMonitor.length || !data.pageCount.length || !data.city.length || !data.region.length){
+                            //     alert("数据异常！");
+                            //     return false;
+                            // }
+                            this.tables = data.orderMonitor;
+                            this.sum1 = data.sum1;
+                            this.sum2 = data.sum2;
+                            this.sum3 = data.sum3;
+                            this.sum4 = data.sum4;
+                            this.pageCount = data.pageCount;
+                            var city = data.city;
+                            var region = eval(data.region)
+                            myChart.setOption({
+                                backgroundColor: '#404a59',
+                                tooltip : {
+                                    trigger: 'item',
+                                    // formatter: function (params) {
+                                    //     return params.name + ' : ' + params.value[2];
+                                    // }
+                                    formatter: function (obj) {
+                                        for (var i = 0; i < city.length; i++) {
+                                            if(city[i].name == obj.name){
+                                                var son = city[i].value
+                                                var str = ''
+                                                for(var j = 0; j < son.length; j++){
+                                                    str += son[j].name + ' ： ' + son[j].value + '<br>';
+                                                }
+                                                return '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 15px;padding-bottom: 7px;margin-bottom: 7px">'
+                                                + obj.seriesName 
+                                                // + '<br>' 
+                                                // + obj.name + ' : ' + obj.value[2]
+                                                + '</div>' + str;
+                                            }
+                                        };
+                                        return '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 15px;padding-bottom: 7px;margin-bottom: 7px">'
+                                            + obj.seriesName
+                                            // + '<br>' 
+                                            // + obj.name + ' : ' + obj.value[2]
+                                            + '</div>';
+                                    }
+                                },
+                                geo: {
+                                    map: 'china',
+                                    label: {
+                                        emphasis: {
+                                            show: false
+                                        }
+                                    },
+                                    roam: 'move',
+                                    itemStyle: {
+                                        normal: {
+                                            areaColor: '#323c48',
+                                            borderColor: '#111'
+                                        },
+                                        emphasis: {
+                                            areaColor: '#2a333d'
+                                        }
+                                    }
+                                },
+                                series : [
+                                    {
+                                        name: '本地网：工单总数',
+                                        type: 'scatter',
+                                        coordinateSystem: 'geo',
+                                        data: convertData(region),
+                                        symbolSize: function (val) {
+                                            if(val[2] > 10000000 )return 29;
+                                            if(val[2] < 10000000 && val[2] > 1000000)return 25;
+                                            if(val[2] < 1000000 && val[2] > 100000)return 21;
+                                            if(val[2] < 100000 && val[2] > 10000)return 17;
+                                            if(val[2] < 10000 && val[2] > 1000)return 13;
+                                            if(val[2] < 1000 && val[2] > 100)return 9;
+                                            if(val[2] < 100 )return 5;
+                                        },
+                                        label: {
+                                            normal: {
+                                                formatter: '{b}',
+                                                position: 'right',
+                                                show: true
+                                            },
+                                            emphasis: {
+                                                show: true
+                                            }
+                                        },
+                                        itemStyle: {
+                                            normal: {
+                                                color: '#ddb926'
+                                            }
+                                        }
+                                    },
+                                    {
+                                        name: '本地网：工单总数',
+                                        type: 'effectScatter',
+                                        coordinateSystem: 'geo',
+                                            
+                                        data: convertData(region.sort(function (a, b) {
+                                            return b.value - a.value;
+                                        }).slice(0, 7)),
+                                        symbolSize: function (val) {
+                                            if(val[2] > 10000000 )return 29;
+                                            if(val[2] < 10000000 && val[2] > 1000000)return 25;
+                                            if(val[2] < 1000000 && val[2] > 100000)return 21;
+                                            if(val[2] < 100000 && val[2] > 10000)return 17;
+                                            if(val[2] < 10000 && val[2] > 1000)return 13;
+                                            if(val[2] < 1000 && val[2] > 100)return 9;
+                                            if(val[2] < 100 )return 5;
+                                        },
+                                        showEffectOn: 'render',
+                                        rippleEffect: {
+                                            brushType: 'stroke'
+                                        },
+                                        hoverAnimation: true,
+                                        label: {
+                                            normal: {
+                                                formatter: '{b}',
+                                                position: 'right',
+                                                show: true
+                                            }
+                                        },
+                                        itemStyle: {
+                                            normal: {
+                                                color: '#f4e925',
+                                                shadowBlur: 10,
+                                                shadowColor: '#333'
+                                            }
+                                        },
+                                        zlevel: 1
+                                    }
+                                ]
+                            });
+                        }.bind(this),
+                        error : function() {
+                            alert("数据加载错误！");  
+                        }
+                    })
+                },
+                winHeight : function(){
+                    var main = document.getElementById('main');
+                    var right = document.getElementById('right');
+                    var h = document.documentElement.clientHeight;
+                    main.style.height = h + "px";
+                    right.style.height = h + "px";
+                },
+                reloadwin : function(){
+                    //每隔15分钟刷新
+                    setInterval(
+                        function(){
+                            window.location.reload();
+                        },900000
+                    );
+                },
+                timer : function(){
+                    //获取当前时间 
+                    function current(){ 
+                        var d=new Date(),str=''; 
+                        str +=d.getFullYear()+'年'; 
+                        str +=d.getMonth()+1+'月';  
+                        str +=d.getDate()+'日 '; 
+                        str +=d.getHours()+'：'; 
+                        str +=d.getMinutes()+'：'; 
+                        str +=d.getSeconds()+''; 
+                        return str; 
+                    } 
+                    setInterval(
+                        function(){
+                            $("#nowTime").html(current)
+                        },1000
+                    );
+                },
+                toThousands : function(num) {
+                    return (num || 0).toString().replace(/(\d)(?=(?:\d{3})+$)/g, '$1,');
+                }
+            }
+        })
+
+        var myChart = echarts.init(
+            document.getElementById('main')
+        );
+        var geoCoordMap = {'北京':[116.46,39.92],'天津':[117.2,39.13],'河北':[114.48,38.03],'山西':[112.53,37.87],'内蒙':[111.65,40.82],'辽宁':[123.38,41.8],'吉林':[125.35,43.88],'黑龙江':[126.63,45.75],'上海':[121.48,31.22],'江苏':[118.78,32.04],'浙江':[120.19,30.26],'安徽':[117.27,31.86],'福建':[119.3,26.08],'江西':[115.89,28.68],'山东':[117,36.65],'河南':[113.65,34.76],'湖北':[114.31,30.52],'湖南':[113,28.21],'广东':[113.23,23.16],'广西':[108.33,22.84],'海南':[110.35,20.02],'重庆':[106.54,29.59],'四川':[104.06,30.67],'贵州':[106.71,26.57],'云南':[102.73,25.04],'西藏':[91.11,29.97],'陕西':[108.95,34.27],'甘肃':[103.73,36.03],'青海':[101.74,36.56],'宁夏':[106.27,38.47],'新疆':[87.68,43.77]};
+        
+        myChart.showLoading({
+            text : '数据读取中...',
+            textStyle : {
+                fontSize : 20
+            },
+            zlevel: 1
+        });
+
+        var convertData = function (data) {
+            var res = [];
+            for (var i = 0; i < data.length; i++) {
+                var geoCoord = geoCoordMap[data[i].name];
+                if (geoCoord) {
+                    res.push({
+                        name: data[i].name,
+                        value: geoCoord.concat(data[i].value)
+                    });
+                }
+            }
+            return res;
+        };
+        myChart.hideLoading();
+    </script>
+</body>
+</html>

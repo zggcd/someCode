@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<head>
+		<script type="text/javascript">
+		//<![CDATA[
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		
+		 //响应check点击事件
+		function checkBoxClick(object, value) {	
+			//alert("响应check点击事件");	
+		   var itemIdsArr = document.getElementById("queryForm:gotItemIdValues").value;
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 			
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index>0){
+							str = "#"+value;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+							} else {
+								str = value;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("queryForm:gotItemIdValues").value = itemIdsArr;
+		}
+		
+		 //判断是否选择单行或者多行
+		function checkSelectRow() {	
+			//alert("进入判断是否选择单行或者多行");				
+			var oTable = document.getElementById("queryForm:itemLists");
+			//获取当前页码数
+			var pageNum = document.getElementById("queryForm:pageNo").value;
+			if (pageNum <= 0) {
+				pageNum = 1;
+			}
+			//获取每页数据个数
+			var pageSize = document.getElementById("queryForm:pageSize").value;					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+		    	for (var i=0; i<size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+					//请勾选需要删除的数据
+					alert("${msgs['baf.org.WarningDeleteRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		 //编辑,判断是否选择了一行
+	    function checkSelectOneRow() {
+	    	//alert("编辑,判断是否选择了一行");										
+		  var oTable = document.getElementById("queryForm:itemLists");
+		  //获取当前页码数
+		  var pageNum = document.getElementById("queryForm:pageNo").value;
+		  if (pageNum <= 0) {
+				pageNum = 1;
+			}
+		  //获取每页数据个数
+		  var pageSize = document.getElementById("queryForm:pageSize").value;
+		  var size = oTable.rows.length - 1; //去除列头一行
+		  var selectCount = 0;
+		  if (size != null) {
+		  	for (var i=0; i<size; i++) {
+		   	    var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");						
+				if (e != null && e.checked) {
+			    	selectCount ++;
+				}
+		  	}
+		  	if (selectCount != 1) {
+		   		 //请勾选一行需要编辑的数据
+				alert("${msgs['baf.org.WarningEditOneRow']}");
+				return false;
+		  	}
+		  }
+		  return true;
+		}	
+		
+		//删除完成
+		function onDicItemsDelComplete(data) {
+			if(a4jcomplete()==false){
+	 			return;
+	 		}
+			if (data == "N") {
+				//处理失败
+				alert("${msgs['baf.org.WarningHandleFailure']}");
+				
+		    }else{    
+		    	document.getElementById("queryForm:gotItemIdValues").value = "";
+		    	rereshItemScroller();
+		    }
+			//如果全选框已经选中，则撤销掉勾选
+			var oChkAll = document.getElementById("queryForm:itemLists:selectAll");  
+			if (oChkAll.checked)
+				oChkAll.checked = !oChkAll.checked;
+		}
+
+		//翻页时全选框撤销掉勾选
+		function checkChkAll(){
+			var oChkAll = document.getElementById("queryForm:itemLists:selectAll"); 
+			if (oChkAll.checked)
+			oChkAll.checked = !oChkAll.checked;
+		}
+		
+		 //全选select操作表所有项
+		function onSelectALlItems() {
+		   // alert("全选select操作表所有项");
+			var oTable = document.getElementById("queryForm:itemLists");
+			var oChkAll = document.getElementById("queryForm:itemLists:selectAll"); 
+			//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+		    if (!oChkAll.checked){
+		      document.getElementById("queryForm:gotItemIdValues").value = "";
+		    }
+			//获取当前页码数
+			var pageNum = document.getElementById("queryForm:pageNo").value;
+			if (pageNum <= 0) {
+				pageNum = 1;
+			}
+			//获取每页数据个数
+			var pageSize = document.getElementById("queryForm:pageSize").value; 
+			if (oTable != null && oChkAll != null) {
+				for (j = 0; j < oTable.rows.length -1; j++) {
+					var realNum = (pageNum-1)*pageSize + j;
+					//取得当前页中的第几行
+					var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");
+					if (e.id.indexOf("selectedItem") >= 0) {   
+						//触发CheckBox onclick事件，用来设置itemid
+						if (document.all) {
+							//IE
+							//alert(e);
+							var oldValue= e.checked;
+							//alert("oldValue="+oldValue);
+							e.checked = oChkAll.checked;
+							if (!oldValue && e.checked) {
+								onObjectFireMouseEvent(e, "onclick");
+							}
+						} else {
+							//firefox
+							if (oChkAll.checked) {
+								var oldValue= e.checked;
+								if (!oldValue)
+									onObjectFireMouseEvent(e, "onclick");
+								} else {
+									e.checked = oChkAll.checked;
+								}
+							}
+						}
+					}
+			 	}
+			}		
+		
+		//标识当前是点击查询按钮执行的查询
+		function checkQueryInputValues(){
+		   document.getElementById("queryForm:flagId").value = "Y";
+		   return true;
+		}
+		
+		//按回车调用查询按钮的单击事件
+		function forSelect(){
+			if(event.keyCode==13){
+				document.getElementById('queryForm:itemForSearch').onclick();
+			}
+		}	
+		
+		//保存或修改完触发事件
+	    function onItemAddOrEditComplete(data) {
+		    
+	    	document.getElementById("queryForm:gotItemIdValues").value = "";
+	    	 if (data == "R") {
+	   		  //视图名称已经存在
+	   		  alert("${msgs['baf.desktop.define.ifonly']}");
+	   	    }else if(data == "N") {
+			  //处理失败，录入非法字符
+				  var s = "${msgs['baf.desktop.define.error2']}".replace("&lt;","<").replace("&gt;",">");
+			  	  alert(s);
+				  //alert("${msgs['baf.desktop.define.error']}");
+		    }else if(data == "L") {
+		    	//视图内容长度超过5000字符
+			  	  alert("${msgs['baf.desktop.define.error1']}");
+		    }else{
+		   	   if(a4jcomplete()==false){
+	 			return;
+		   	   }
+	   	   }
+		}
+		
+		//验证不能输入字母
+		function numberOnly() {
+		    if (! ((window.event.keyCode >= 48) && (window.event.keyCode <= 57))) {
+				window.event.keyCode = 0;
+			}
+		}
+		
+		//检查输入字符是否为数字,如果有非数字就返回false
+		function checkIsInt(obj){
+			var num="0123456789.";
+			var str=obj.value;
+			var ch;
+			for(i=0;i<str.length;i++){
+			ch=str.charAt(i);
+				if(num.indexOf(ch)==-1){
+					alert("${msgs['baf.checkInt']}");
+					obj.value="";
+					obj.focus();
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		//点击新增按钮
+		function onAddNew(){
+			var e = document.getElementById("addForm:isBatchSave");
+			if (e.checked)
+			{
+				  e.checked = !e.checked;
+			}
+			//设置焦点
+			setFocus("addForm:viewName");
+		}
+		
+		//点击新增按钮时，默认选择视图类型为‘链接类型’
+		function myReadyOnly(type){
+		if (type == "C") {
+			document.getElementById("addForm:viewLinkText").style.display='none';
+			document.getElementById("addForm:vlink").style.display='none';
+			
+			document.getElementById("addForm:viewEdit").style.display='block';
+			document.getElementById("addForm:viewEditText").style.display='block';
+			
+		}else{
+			document.getElementById("addForm:viewLinkText").style.display='block';
+			document.getElementById("addForm:vlink").style.display='block';
+			
+			document.getElementById("addForm:viewEdit").style.display='none';
+			document.getElementById("addForm:viewEditText").style.display='none';
+			}
+		}
+		
+		//点击编辑按钮，修改
+		function onItemInTabEdit(obj) {	
+			//隐藏'批量新增'勾选框
+			var e = document.getElementById("addForm:isBatchSave");
+				var isBatchSaveGroup = document.getElementById("addForm:isBatchSaveGroup");
+					isBatchSaveGroup.style.visibility = "hidden";
+				if (e.checked)
+				{
+				  e.checked = !e.checked;
+				}	
+				//设置焦点
+			setFocus("addForm:viewName");			
+			if (obj == "C") {
+			//视图类型为‘手工录入’
+			document.getElementById("addForm:viewLinkText").style.display='none';
+			document.getElementById("addForm:vlink").style.display='none';
+			
+			document.getElementById("addForm:viewEdit").style.display='block';
+			document.getElementById("addForm:viewEditText").style.display='block';
+			
+			}else{
+			//视图类型为‘链接类型’
+			document.getElementById("addForm:viewLinkText").style.display='block';
+			document.getElementById("addForm:vlink").style.display='block';
+			
+			document.getElementById("addForm:viewEdit").style.display='none';
+			document.getElementById("addForm:viewEditText").style.display='none';
+			}
+		}
+		//选择链接的模板url
+		function moduleOnClick(){
+		
+			var itemId = moduleNavigationTree_tree.getSelectedItemId();
+			var url = moduleNavigationTree_tree.getUserData(itemId,'url');
+			document.getElementById("addForm:viewlink").value = url;
+		}
+
+		function refreshTree(){
+			moduleNavigationTree_tree.refreshItem("0"); 
+		}
+
+		//双击列表行，修改模板
+		function onDblClickTemplateEdit(rowID) {			
+			rowDblClick(rowID);
+		}
+
+		//双击列表一行
+		function onRowDblClick(vid, vname, vheight, vtype, vlink, vedit) {					
+			document.getElementById("addForm:viewID").value = vid;
+			document.getElementById("addForm:viewName").value = vname;
+			document.getElementById("addForm:viewHeight").value = vheight;
+			document.getElementById("addForm:viewtype").value = vtype;
+			document.getElementById("addForm:viewlink").value = vlink;
+			document.getElementById("addForm:viewEdit").value = vedit;
+		}
+		//点击查询按纽列表未渲染前置灰
+		function ondisabled(){
+		  	document.getElementById("queryForm:itemForSearch").disabled = true;
+		}
+		 //]]>
+		</script>
+		</head>
+		<body>
+			<f:loadBundle basename="messages" var="msgs" />
+			
+			<regaltec:dhtmlXtree id="moduleNavigationTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="moduleNavigation_tree"
+				loadXML="/baf/jsp/desktop/moduleNavigationXMLData.jsp"
+				xmlAutoLoading="/baf/jsp/desktop/moduleNavigationXMLData.jsp">
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="moduleOnClick" />	
+			</regaltec:dhtmlXtree>
+								
+			<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+				<rich:tabPanel id="tabPanel" style="margin-left:0;margin-right:0;margin-top:5px;margin-bottom:5px;" width="100%" height="97%" switchType="client" >
+					<rich:tab id="viewTab" name="viewTab" label="#{msgs['baf.desktop.viewLabel']}" >
+			            <a4j:form id="queryForm">
+			            <table cellspacing="0" cellpadding="0" border="0" width="100%" height="100%" style="font-size:13px;table-layout:fixed">
+				            <tr>
+				            	<td width="61%" height="100%" >
+					           		<fieldset id="tablist" style="height:100%;">
+						           		<legend ><h:outputText value="#{msgs['baf.desktop.viewList']}"/></legend>
+						                <rich:dataTable width="100%" id="itemLists" rows="#{desktopViewBean.pageSize}" columnClasses="col"  style="text-align:center;"
+						           		 	value="#{desktopViewBean.defaultDataModel}" var="viewItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+						           		 	 title="#{msgs['baf.org.dataTableTip']}" onRowDblClick="onDblClickTemplateEdit('#{viewItem.viewId}');">
+							           		<h:column>
+								            	<f:facet name="header">
+										        <h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+										        </f:facet>
+												 <h:selectBooleanCheckbox id="selectedItem" onclick="checkBoxClick(this, '#{viewItem.viewId}');"/>
+							            	</h:column>	  
+							           	 	<h:column>
+								            	<f:facet name="header">
+										        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.viewname']}" style="font-weight:normal;"/>
+										        </f:facet>
+								                <h:outputText value="#{viewItem.viewName}" />
+								            </h:column>
+								            <h:column>
+								            	<f:facet name="header">
+										        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.viewtype']}" style="font-weight:normal;"/>
+										        </f:facet>
+								                <h:outputText value="#{viewItem.viewType}" />
+								            </h:column>
+								             <h:column>
+								            	<f:facet name="header">
+										        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.viewheight']}" style="font-weight:normal;"/>
+										        </f:facet>
+								                <h:outputText value="#{viewItem.viewHeight}" />
+							            	</h:column>
+							        	</rich:dataTable>
+							        	<a4j:keepAlive beanName="desktopViewBean"/>
+							       		<table align="right">
+								        	<tr>
+								        		<td><rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{desktopViewBean.scrollerPage}" id="itemScroller" reRender="pageNo" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';checkChkAll();"/></td>
+								        	</tr>
+								        </table>
+					            	</fieldset>
+				            	</td>
+				            	
+				            	<td width="1%"></td>
+				            	
+								<td width="38%" height="100%" align="right">
+									<fieldset style="height:40%;font-size:13px;">
+										<legend ><h:outputText value="#{msgs['baf.desktop.define.search']}"/></legend>
+										<center>
+											<h:panelGrid id="panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">	
+											<h:outputText value="#{msgs['baf.desktop.define.viewname']}:"/>
+											<h:inputText id="searchViewName" value="#{desktopViewBean.searchViewName}" style="width:100px;height:23px;" styleClass="rich-gradient-input">
+												<rich:hotKey key="return" handler="forSelect();"/>
+											</h:inputText>
+											
+											<h:outputText value="#{msgs['baf.desktop.define.viewtype']}:"/>
+											<h:selectOneMenu style="width:100px;height:26px;" id="searchViewType" styleClass="rich-box-border-color-control-select rich-text-control-select"   value="#{desktopViewBean.searchViewType}" >
+												<f:selectItems value="#{desktopViewBean.viewTypeMap}" />
+											</h:selectOneMenu> 
+											</h:panelGrid>
+											<br/>
+											<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.desktop.define.search']}" onclick="if (checkQueryInputValues()==false) return false;ondisabled();" disabled="false" action="#{desktopViewBean.searchItems}" limitToList="true" reRender="queryForm,itemScroller,pageNo,pageSize,itemForSearch" />
+										</center>
+									</fieldset>
+									
+									<fieldset style="height:60%;font-size:13px;">
+										<legend><h:outputText value="#{msgs['baf.desktop.layoutOperate']}"/></legend>
+							            <center>
+								           <rich:spacer height="30px"></rich:spacer>
+											<a4j:commandButton styleClass="rich-button" type="submit" id="viewAdd" value="#{msgs['baf.calendar.add']}">
+												<a4j:support event="onclick" action="#{desktopViewBean.addWiew}" oncomplete="#{rich:component('modalPanel')}.show();onAddNew(); " reRender="addForm,queryForm"/>
+												<rich:spacer width="40px"/>
+											</a4j:commandButton>
+											<br/>
+								            <rich:spacer height="30px"></rich:spacer>
+											<a4j:commandButton styleClass="rich-button" type="submit" id="viewEdit" value="#{msgs['baf.desktop.define..update']}"> 
+												<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{desktopViewBean.showEditView}" oncomplete="#{rich:component('modalPanel')}.show();onItemInTabEdit('#{desktopViewBean.viewType}');" reRender="addForm,queryForm"/>
+												<rich:spacer width="40px"/>	
+											</a4j:commandButton>
+											<br/>
+								            <rich:spacer height="30px"></rich:spacer>
+								            <a4j:commandButton styleClass="rich-button" type="button" id="viewDelete" value="#{msgs['baf.desktop.define.del']}"> 
+												<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('delItemPanel')}.show();} return false;"/>
+												<rich:spacer width="40px"/>
+											</a4j:commandButton>
+							            </center>
+						            </fieldset>
+								</td>
+				            </tr>	
+			            </table>
+			            
+			            <!-- 删除确认模态框 -->
+						 <rich:modalPanel id="delItemPanel" autosized="true" width="300">
+				    	     <f:facet name="header">
+								<h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}" style="padding-right:15px;" />
+					         	</f:facet> 
+								<!-- 关闭按钮 -->
+						    	<f:facet name="controls">
+									<h:panelGroup>
+							 			<h:graphicImage value="/baf/images/icons/close.png"
+							 				id="hidelinkDelete" styleClass="hidelink"/>
+										<rich:componentControl for="delItemPanel" attachTo="hidelinkDelete"
+											operation="hide" event="onclick" />
+									</h:panelGroup>
+								</f:facet>	
+							<center>
+								<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+							                 	data="#{desktopViewBean.dealFlag}"
+							                    action="#{desktopViewBean.delView}"
+							                    oncomplete="#{rich:component('delItemPanel')}.hide();onDicItemsDelComplete(data);"
+							                    reRender="itemLists,itemScroller,pageNo,pageSize" />
+								<rich:spacer width="40px"/>
+								<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button" onclick="#{rich:component('delItemPanel')}.hide();return false;" />
+							</center>
+						</rich:modalPanel>	
+			
+			            <h:inputHidden id="gotItemIdValues" value="#{desktopViewBean.selectedItemIds}" />
+						<h:inputHidden id="flagId" value="#{desktopViewBean.searchFlag}" />
+						<h:inputHidden id="pageNo" value="#{desktopViewBean.scrollerPage}"/>
+					    <h:inputHidden id="pageSize" value="#{desktopViewBean.pageSize}"/>
+					    <h:inputHidden id="dataTableSize" value="#{desktopViewBean.dataTableSize}"/>
+						    
+			            </a4j:form>	
+			            
+			            <!-- 选择部门模板   -->
+						<rich:modalPanel id="templateModalPanel" autosized="false" keepVisualState="false" width="450" height="400">			
+							<f:facet name="header">
+								<h:outputText value="#{msgs['baf.desktop.define.selectUrl']}"/>
+							</f:facet>
+							<!-- 关闭按钮 -->
+							<f:facet name="controls">
+							<h:panelGroup>
+							    <h:graphicImage value="/baf/images/icons/close.png" id="hidelinks" styleClass="hidelink"/>
+							    <rich:componentControl for="templateModalPanel" attachTo="hidelinks" operation="hide" event="onclick" />
+							</h:panelGroup>
+							</f:facet>	
+							<fieldset style="width:100%;height:90%">
+					       		<legend><h:outputText value="#{msgs['baf.desktop.define.selectUrl']}" /></legend>				           		
+					       		<rich:spacer height="1px;"/>	
+					       		<table style="width:100%;height:92%;overflow-x:auto;overflow-y:auto;">
+					      			<tr><td id="moduleNavigation_tree"></td></tr>
+					      		</table>
+							</fieldset>
+							<center>
+							<h:commandButton type="button" id="templateModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.desktop.define.ok']}" onclick="refreshTree();#{rich:component('templateModalPanel')}.hide(); return false;"/>
+							</center>
+						</rich:modalPanel>
+			            
+			            <!--新增/编辑模态框 -->
+						<rich:modalPanel id="modalPanel" autosized="true" keepVisualState="false" width="550" height="450">			
+						<f:facet name="header">
+							<h:outputText value="#{msgs['baf.desktop.layoutEditWindow']}"/>
+						</f:facet>
+						<!-- 关闭按钮 -->
+						<f:facet name="controls">
+						<h:panelGroup>
+						    <h:graphicImage value="/baf/images/icons/close.png"
+						    id="hidelink" styleClass="hidelink"/>
+						    <rich:componentControl for="modalPanel" attachTo="hidelink"
+						    operation="hide" event="onclick" />
+							</h:panelGroup>
+						</f:facet>				
+						<a4j:form id="addForm">			
+						<center><br/><br/>   
+								<h:panelGrid id="viewItem" columns="2" columnClasses="column1,column2" style="font-size:13px;width:80%;">						
+									
+									<h:outputText value="#{msgs['baf.desktop.define.viewname']}:" />
+									<h:inputText id="viewName" style="width:355px;height:23px;" value="#{desktopViewBean.viewName}" styleClass="rich-gradient-input">
+										<s:commonsValidator type="required" arg="#{msgs['baf.desktop.define.viewname']}" server="false" client="true"/>
+										<s:commonsValidator type="maxlength"  arg="#{msgs['baf.desktop.define.viewname']}" maxLength="64" server="false" client="true"/>
+									</h:inputText>
+									
+									<h:outputText value="#{msgs['baf.desktop.define.viewheight']}:" />
+									<h:inputText id="viewHeight" style="width:355px;height:23px;" value="#{desktopViewBean.viewHeight}" onkeypress="numberOnly()" onblur="checkIsInt(this)" styleClass="rich-gradient-input">
+										<s:commonsValidator type="required" arg="#{msgs['baf.desktop.define.viewheight']}" server="false" client="true"/>
+										<s:commonsValidator type="mask" mask="[0-9]" arg="#{msgs['baf.desktop.define.viewheight']}" server="false" client="true"/>
+										<s:commonsValidator type="maxlength"  arg="#{msgs['baf.desktop.define.viewheight']}" maxLength="64" server="false" client="true"/>
+									</h:inputText>
+									
+									<h:outputText value="#{msgs['baf.desktop.define.viewtype']}:" />
+									<h:selectOneRadio id="viewtype" style="font-size:13px" value="#{desktopViewBean.viewType}"  onclick="myReadyOnly(this.value);" >
+										<f:selectItem itemLabel="#{msgs['baf.desktop.define.linktype']}" itemValue="L" />
+										<f:selectItem itemLabel="#{msgs['baf.desktop.define.manualentry']}" itemValue="C"/>
+									</h:selectOneRadio>
+									
+									<h:outputText value="#{msgs['baf.desktop.define.viewlink']}:" id="viewLinkText" style="display:block;"/>
+									<h:panelGroup id="vlink" style="display:block;">
+									<h:inputText id="viewlink" value="#{desktopViewBean.viewUrl}" style="width:255px;height:23px;"  styleClass="rich-gradient-input"/>
+									<rich:spacer width="10px"/>
+									<a4j:commandButton id="viewbutton" type="button" style="width:90px;" styleClass="rich-button" value="#{msgs['baf.desktop.define.selectUrl']}" >
+										<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('templateModalPanel'); return false;" />
+									</a4j:commandButton>
+									</h:panelGroup>
+									
+									<h:outputText value="#{msgs['baf.desktop.define.viewcontent']}:" id="viewEditText" style="display:none"/>
+									<rich:editor id="viewEdit" width="200" height="100"  value="#{desktopViewBean.content}" 
+									theme="advanced" language="zh" plugins="contextmenu,advimage,advlink" style="display:none">
+									</rich:editor>									
+								</h:panelGrid>	
+							  </center>	
+						 	  <rich:spacer height="20px"/>
+					    	 
+						     <center>
+						        <h:panelGroup id="isBatchSaveGroup">	
+						           <h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+						           <h:selectBooleanCheckbox id="isBatchSave"/>
+						        </h:panelGroup>
+						
+						        <rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+						        </rich:toolTip>	<rich:spacer height="2px"/><rich:spacer height="2px"/>							 
+						        <a4j:commandButton styleClass="rich-button" type="submit" id="itemAddOrEditSave" value="#{msgs['baf.org.Save']}">	
+							       <a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('addForm'))==false) {return false;}" action="#{desktopViewBean.addOrEdit}" data="#{desktopViewBean.dealFlag}" oncomplete="var e=document.getElementById('addForm:isBatchSave'); onItemAddOrEditComplete(data); if(data=='Y' &amp;&amp; !e.checked) {#{rich:component('modalPanel')}.hide();};checkChkAll();" reRender="queryForm,viewID,itemScroller,pageNo,pageSize" />
+						        </a4j:commandButton> <rich:spacer height="2px"/>
+						        <a4j:commandButton styleClass="rich-button" type="button" id="itemCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+						     </center>	
+						     
+						      <h:inputHidden id="addOrEdit" value="#{desktopViewBean.addOrEdit}"/>
+							  <h:inputHidden id="viewID" value="#{desktopViewBean.viewId}"/>  
+						     <s:validatorScript functionName="validateForm"/>   	
+						</a4j:form>	
+						</rich:modalPanel>	
+					</rich:tab>
+				</rich:tabPanel>
+			</div>
+			
+			<a4j:form>
+				<a4j:jsFunction name="refresh" actionListener="#{desktopViewBean.refresh}" reRender="queryForm">
+					<a4j:actionparam name="viewId" assignTo="#{desktopViewBean.viewId}"/>
+					<a4j:actionparam name="scrollerPage"  value="1" assignTo="#{desktopViewBean.scrollerPage}"  />
+				</a4j:jsFunction>
+				
+		        <a4j:jsFunction name="rereshItemScroller" action="#{desktopViewBean.searchItems}" reRender="pageNo">
+			    </a4j:jsFunction>	
+			    
+			    <a4j:jsFunction name="rowDblClick" action="#{desktopViewBean.showEditView}" oncomplete="#{rich:component('modalPanel')}.show();onItemInTabEdit('#{desktopViewBean.viewType}');" reRender="addForm">
+			    	<a4j:actionparam name="rowID" value="" assignTo="#{desktopViewBean.selectedItemIds}"/>
+			    </a4j:jsFunction>			
+			</a4j:form>
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+</f:view>
+</html>

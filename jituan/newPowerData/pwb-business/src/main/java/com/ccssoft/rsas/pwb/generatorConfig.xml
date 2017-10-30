@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+ <classPathEntry location="D:/jee-app-server/jboss-4.2.3.GA/server/default/lib/ojdbc6.jar" />
+  <context id="context1" >
+    <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"/>
+    <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+    <plugin type="com.ccssoft.mybatis.generater.plugin.OraclePaginationPlugin" />
+    <commentGenerator type="com.ccssoft.mybatis.generater.plugin.CcssoftCommentGenerator" />
+    <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@172.1.1.169:1521:orcl" userId="baf" password="SCccssoft028" />
+     <javaTypeResolver>  
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->  
+            <property name="forceBigDecimals" value="true"/>  
+        </javaTypeResolver>  
+    <javaModelGenerator  targetPackage="com.ccssoft.rsas.pwb.portal.model" targetProject="pwb-business" />
+    <sqlMapGenerator     targetPackage="com.ccssoft.rsas.pwb.portal.dao" targetProject="pwb-business" />
+    <javaClientGenerator targetPackage="com.ccssoft.rsas.pwb.portal.dao" targetProject="pwb-business" type="XMLMAPPER" />
+  
+  
+   <table schema="" tableName="pdw_portal_instance" >  </table>
+   <table schema="" tableName="pdw_portlet_instance" >  </table>
+ 
+   <table schema="" tableName="pdw_portal_layout" >  </table>
+   <table schema="" tableName="pdw_portal_layout_panel" >  </table>
+   <table schema="" tableName="pdw_portal_portlet_relation" >  </table>
+   <table schema="" tableName="pdw_portal_chart_instance"></table>
+  </context>
+</generatorConfiguration>

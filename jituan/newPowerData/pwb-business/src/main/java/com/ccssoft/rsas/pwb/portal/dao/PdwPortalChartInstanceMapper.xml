@@ -1,0 +1,714 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.portal.dao.PdwPortalChartInstanceMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstance" >
+    <id column="CHART_ID" property="chartId" jdbcType="VARCHAR" />
+    <result column="TITLE" property="title" jdbcType="VARCHAR" />
+    <result column="LEGEND" property="legend" jdbcType="VARCHAR" />
+    <result column="GRID" property="grid" jdbcType="VARCHAR" />
+    <result column="XAXIS" property="xaxis" jdbcType="VARCHAR" />
+    <result column="YAXIS" property="yaxis" jdbcType="VARCHAR" />
+    <result column="POLAR" property="polar" jdbcType="VARCHAR" />
+    <result column="RADIUSAXIS" property="radiusaxis" jdbcType="VARCHAR" />
+    <result column="ANGLEAXIS" property="angleaxis" jdbcType="VARCHAR" />
+    <result column="RADAR" property="radar" jdbcType="VARCHAR" />
+    <result column="DATAZOOM" property="datazoom" jdbcType="VARCHAR" />
+    <result column="VISUALMAP" property="visualmap" jdbcType="VARCHAR" />
+    <result column="TOOLTIP" property="tooltip" jdbcType="VARCHAR" />
+    <result column="TOOLBOX" property="toolbox" jdbcType="VARCHAR" />
+    <result column="BRUSH" property="brush" jdbcType="VARCHAR" />
+    <result column="GEO" property="geo" jdbcType="VARCHAR" />
+    <result column="PARALLEL" property="parallel" jdbcType="VARCHAR" />
+    <result column="PARALLELAXIS" property="parallelaxis" jdbcType="VARCHAR" />
+    <result column="SINGLEAXIS" property="singleaxis" jdbcType="VARCHAR" />
+    <result column="TIMELINE" property="timeline" jdbcType="VARCHAR" />
+    <result column="COLOR" property="color" jdbcType="VARCHAR" />
+    <result column="SERIES" property="series" jdbcType="VARCHAR" />
+    <result column="BACKGROUNDCOLOR" property="backgroundcolor" jdbcType="VARCHAR" />
+    <result column="TEXTSTYLE" property="textstyle" jdbcType="VARCHAR" />
+    <result column="ANIMATION" property="animation" jdbcType="VARCHAR" />
+    <result column="ANIMATIONTHRESHOLD" property="animationthreshold" jdbcType="VARCHAR" />
+    <result column="ANIMATIONDURATION" property="animationduration" jdbcType="VARCHAR" />
+    <result column="ANIMATIONEASING" property="animationeasing" jdbcType="VARCHAR" />
+    <result column="ANIMATIONDELAY" property="animationdelay" jdbcType="VARCHAR" />
+    <result column="ANIMATIONDURATIONUPDATE" property="animationdurationupdate" jdbcType="VARCHAR" />
+    <result column="ANIMATIONEASINGUPDATE" property="animationeasingupdate" jdbcType="VARCHAR" />
+    <result column="ANIMATIONDELAYUPDATE" property="animationdelayupdate" jdbcType="VARCHAR" />
+    <result column="PROGRESSIVE" property="progressive" jdbcType="VARCHAR" />
+    <result column="PROGRESSIVETHRESHOLD" property="progressivethreshold" jdbcType="VARCHAR" />
+    <result column="BLENDMODE" property="blendmode" jdbcType="VARCHAR" />
+    <result column="HOVERLAYERTHRESHOLD" property="hoverlayerthreshold" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    CHART_ID, TITLE, LEGEND, GRID, XAXIS, YAXIS, POLAR, RADIUSAXIS, ANGLEAXIS, RADAR, 
+    DATAZOOM, VISUALMAP, TOOLTIP, TOOLBOX, BRUSH, GEO, PARALLEL, PARALLELAXIS, SINGLEAXIS, 
+    TIMELINE, COLOR, SERIES, BACKGROUNDCOLOR, TEXTSTYLE, ANIMATION, ANIMATIONTHRESHOLD, 
+    ANIMATIONDURATION, ANIMATIONEASING, ANIMATIONDELAY, ANIMATIONDURATIONUPDATE, ANIMATIONEASINGUPDATE, 
+    ANIMATIONDELAYUPDATE, PROGRESSIVE, PROGRESSIVETHRESHOLD, BLENDMODE, HOVERLAYERTHRESHOLD
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstanceExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_CHART_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_CHART_INSTANCE
+    where CHART_ID = #{chartId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PDW_PORTAL_CHART_INSTANCE
+    where CHART_ID = #{chartId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstanceExample" >
+    delete from PDW_PORTAL_CHART_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstance" >
+    insert into PDW_PORTAL_CHART_INSTANCE (CHART_ID, TITLE, LEGEND, 
+      GRID, XAXIS, YAXIS, 
+      POLAR, RADIUSAXIS, ANGLEAXIS, 
+      RADAR, DATAZOOM, VISUALMAP, 
+      TOOLTIP, TOOLBOX, BRUSH, 
+      GEO, PARALLEL, PARALLELAXIS, 
+      SINGLEAXIS, TIMELINE, COLOR, 
+      SERIES, BACKGROUNDCOLOR, TEXTSTYLE, 
+      ANIMATION, ANIMATIONTHRESHOLD, ANIMATIONDURATION, 
+      ANIMATIONEASING, ANIMATIONDELAY, ANIMATIONDURATIONUPDATE, 
+      ANIMATIONEASINGUPDATE, ANIMATIONDELAYUPDATE, 
+      PROGRESSIVE, PROGRESSIVETHRESHOLD, BLENDMODE, 
+      HOVERLAYERTHRESHOLD)
+    values (#{chartId,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{legend,jdbcType=VARCHAR}, 
+      #{grid,jdbcType=VARCHAR}, #{xaxis,jdbcType=VARCHAR}, #{yaxis,jdbcType=VARCHAR}, 
+      #{polar,jdbcType=VARCHAR}, #{radiusaxis,jdbcType=VARCHAR}, #{angleaxis,jdbcType=VARCHAR}, 
+      #{radar,jdbcType=VARCHAR}, #{datazoom,jdbcType=VARCHAR}, #{visualmap,jdbcType=VARCHAR}, 
+      #{tooltip,jdbcType=VARCHAR}, #{toolbox,jdbcType=VARCHAR}, #{brush,jdbcType=VARCHAR}, 
+      #{geo,jdbcType=VARCHAR}, #{parallel,jdbcType=VARCHAR}, #{parallelaxis,jdbcType=VARCHAR}, 
+      #{singleaxis,jdbcType=VARCHAR}, #{timeline,jdbcType=VARCHAR}, #{color,jdbcType=VARCHAR}, 
+      #{series,jdbcType=VARCHAR}, #{backgroundcolor,jdbcType=VARCHAR}, #{textstyle,jdbcType=VARCHAR}, 
+      #{animation,jdbcType=VARCHAR}, #{animationthreshold,jdbcType=VARCHAR}, #{animationduration,jdbcType=VARCHAR}, 
+      #{animationeasing,jdbcType=VARCHAR}, #{animationdelay,jdbcType=VARCHAR}, #{animationdurationupdate,jdbcType=VARCHAR}, 
+      #{animationeasingupdate,jdbcType=VARCHAR}, #{animationdelayupdate,jdbcType=VARCHAR}, 
+      #{progressive,jdbcType=VARCHAR}, #{progressivethreshold,jdbcType=VARCHAR}, #{blendmode,jdbcType=VARCHAR}, 
+      #{hoverlayerthreshold,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstance" >
+    insert into PDW_PORTAL_CHART_INSTANCE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="chartId != null" >
+        CHART_ID,
+      </if>
+      <if test="title != null" >
+        TITLE,
+      </if>
+      <if test="legend != null" >
+        LEGEND,
+      </if>
+      <if test="grid != null" >
+        GRID,
+      </if>
+      <if test="xaxis != null" >
+        XAXIS,
+      </if>
+      <if test="yaxis != null" >
+        YAXIS,
+      </if>
+      <if test="polar != null" >
+        POLAR,
+      </if>
+      <if test="radiusaxis != null" >
+        RADIUSAXIS,
+      </if>
+      <if test="angleaxis != null" >
+        ANGLEAXIS,
+      </if>
+      <if test="radar != null" >
+        RADAR,
+      </if>
+      <if test="datazoom != null" >
+        DATAZOOM,
+      </if>
+      <if test="visualmap != null" >
+        VISUALMAP,
+      </if>
+      <if test="tooltip != null" >
+        TOOLTIP,
+      </if>
+      <if test="toolbox != null" >
+        TOOLBOX,
+      </if>
+      <if test="brush != null" >
+        BRUSH,
+      </if>
+      <if test="geo != null" >
+        GEO,
+      </if>
+      <if test="parallel != null" >
+        PARALLEL,
+      </if>
+      <if test="parallelaxis != null" >
+        PARALLELAXIS,
+      </if>
+      <if test="singleaxis != null" >
+        SINGLEAXIS,
+      </if>
+      <if test="timeline != null" >
+        TIMELINE,
+      </if>
+      <if test="color != null" >
+        COLOR,
+      </if>
+      <if test="series != null" >
+        SERIES,
+      </if>
+      <if test="backgroundcolor != null" >
+        BACKGROUNDCOLOR,
+      </if>
+      <if test="textstyle != null" >
+        TEXTSTYLE,
+      </if>
+      <if test="animation != null" >
+        ANIMATION,
+      </if>
+      <if test="animationthreshold != null" >
+        ANIMATIONTHRESHOLD,
+      </if>
+      <if test="animationduration != null" >
+        ANIMATIONDURATION,
+      </if>
+      <if test="animationeasing != null" >
+        ANIMATIONEASING,
+      </if>
+      <if test="animationdelay != null" >
+        ANIMATIONDELAY,
+      </if>
+      <if test="animationdurationupdate != null" >
+        ANIMATIONDURATIONUPDATE,
+      </if>
+      <if test="animationeasingupdate != null" >
+        ANIMATIONEASINGUPDATE,
+      </if>
+      <if test="animationdelayupdate != null" >
+        ANIMATIONDELAYUPDATE,
+      </if>
+      <if test="progressive != null" >
+        PROGRESSIVE,
+      </if>
+      <if test="progressivethreshold != null" >
+        PROGRESSIVETHRESHOLD,
+      </if>
+      <if test="blendmode != null" >
+        BLENDMODE,
+      </if>
+      <if test="hoverlayerthreshold != null" >
+        HOVERLAYERTHRESHOLD,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="chartId != null" >
+        #{chartId,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="legend != null" >
+        #{legend,jdbcType=VARCHAR},
+      </if>
+      <if test="grid != null" >
+        #{grid,jdbcType=VARCHAR},
+      </if>
+      <if test="xaxis != null" >
+        #{xaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="yaxis != null" >
+        #{yaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="polar != null" >
+        #{polar,jdbcType=VARCHAR},
+      </if>
+      <if test="radiusaxis != null" >
+        #{radiusaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="angleaxis != null" >
+        #{angleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="radar != null" >
+        #{radar,jdbcType=VARCHAR},
+      </if>
+      <if test="datazoom != null" >
+        #{datazoom,jdbcType=VARCHAR},
+      </if>
+      <if test="visualmap != null" >
+        #{visualmap,jdbcType=VARCHAR},
+      </if>
+      <if test="tooltip != null" >
+        #{tooltip,jdbcType=VARCHAR},
+      </if>
+      <if test="toolbox != null" >
+        #{toolbox,jdbcType=VARCHAR},
+      </if>
+      <if test="brush != null" >
+        #{brush,jdbcType=VARCHAR},
+      </if>
+      <if test="geo != null" >
+        #{geo,jdbcType=VARCHAR},
+      </if>
+      <if test="parallel != null" >
+        #{parallel,jdbcType=VARCHAR},
+      </if>
+      <if test="parallelaxis != null" >
+        #{parallelaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="singleaxis != null" >
+        #{singleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="timeline != null" >
+        #{timeline,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null" >
+        #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="series != null" >
+        #{series,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundcolor != null" >
+        #{backgroundcolor,jdbcType=VARCHAR},
+      </if>
+      <if test="textstyle != null" >
+        #{textstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="animation != null" >
+        #{animation,jdbcType=VARCHAR},
+      </if>
+      <if test="animationthreshold != null" >
+        #{animationthreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="animationduration != null" >
+        #{animationduration,jdbcType=VARCHAR},
+      </if>
+      <if test="animationeasing != null" >
+        #{animationeasing,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdelay != null" >
+        #{animationdelay,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdurationupdate != null" >
+        #{animationdurationupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="animationeasingupdate != null" >
+        #{animationeasingupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdelayupdate != null" >
+        #{animationdelayupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="progressive != null" >
+        #{progressive,jdbcType=VARCHAR},
+      </if>
+      <if test="progressivethreshold != null" >
+        #{progressivethreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="blendmode != null" >
+        #{blendmode,jdbcType=VARCHAR},
+      </if>
+      <if test="hoverlayerthreshold != null" >
+        #{hoverlayerthreshold,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstanceExample" resultType="java.lang.Integer" >
+    select count(*) from PDW_PORTAL_CHART_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update PDW_PORTAL_CHART_INSTANCE
+    <set >
+      <if test="record.chartId != null" >
+        CHART_ID = #{record.chartId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.title != null" >
+        TITLE = #{record.title,jdbcType=VARCHAR},
+      </if>
+      <if test="record.legend != null" >
+        LEGEND = #{record.legend,jdbcType=VARCHAR},
+      </if>
+      <if test="record.grid != null" >
+        GRID = #{record.grid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.xaxis != null" >
+        XAXIS = #{record.xaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.yaxis != null" >
+        YAXIS = #{record.yaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.polar != null" >
+        POLAR = #{record.polar,jdbcType=VARCHAR},
+      </if>
+      <if test="record.radiusaxis != null" >
+        RADIUSAXIS = #{record.radiusaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.angleaxis != null" >
+        ANGLEAXIS = #{record.angleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.radar != null" >
+        RADAR = #{record.radar,jdbcType=VARCHAR},
+      </if>
+      <if test="record.datazoom != null" >
+        DATAZOOM = #{record.datazoom,jdbcType=VARCHAR},
+      </if>
+      <if test="record.visualmap != null" >
+        VISUALMAP = #{record.visualmap,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tooltip != null" >
+        TOOLTIP = #{record.tooltip,jdbcType=VARCHAR},
+      </if>
+      <if test="record.toolbox != null" >
+        TOOLBOX = #{record.toolbox,jdbcType=VARCHAR},
+      </if>
+      <if test="record.brush != null" >
+        BRUSH = #{record.brush,jdbcType=VARCHAR},
+      </if>
+      <if test="record.geo != null" >
+        GEO = #{record.geo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parallel != null" >
+        PARALLEL = #{record.parallel,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parallelaxis != null" >
+        PARALLELAXIS = #{record.parallelaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.singleaxis != null" >
+        SINGLEAXIS = #{record.singleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="record.timeline != null" >
+        TIMELINE = #{record.timeline,jdbcType=VARCHAR},
+      </if>
+      <if test="record.color != null" >
+        COLOR = #{record.color,jdbcType=VARCHAR},
+      </if>
+      <if test="record.series != null" >
+        SERIES = #{record.series,jdbcType=VARCHAR},
+      </if>
+      <if test="record.backgroundcolor != null" >
+        BACKGROUNDCOLOR = #{record.backgroundcolor,jdbcType=VARCHAR},
+      </if>
+      <if test="record.textstyle != null" >
+        TEXTSTYLE = #{record.textstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animation != null" >
+        ANIMATION = #{record.animation,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationthreshold != null" >
+        ANIMATIONTHRESHOLD = #{record.animationthreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationduration != null" >
+        ANIMATIONDURATION = #{record.animationduration,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationeasing != null" >
+        ANIMATIONEASING = #{record.animationeasing,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationdelay != null" >
+        ANIMATIONDELAY = #{record.animationdelay,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationdurationupdate != null" >
+        ANIMATIONDURATIONUPDATE = #{record.animationdurationupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationeasingupdate != null" >
+        ANIMATIONEASINGUPDATE = #{record.animationeasingupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.animationdelayupdate != null" >
+        ANIMATIONDELAYUPDATE = #{record.animationdelayupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="record.progressive != null" >
+        PROGRESSIVE = #{record.progressive,jdbcType=VARCHAR},
+      </if>
+      <if test="record.progressivethreshold != null" >
+        PROGRESSIVETHRESHOLD = #{record.progressivethreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="record.blendmode != null" >
+        BLENDMODE = #{record.blendmode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.hoverlayerthreshold != null" >
+        HOVERLAYERTHRESHOLD = #{record.hoverlayerthreshold,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update PDW_PORTAL_CHART_INSTANCE
+    set CHART_ID = #{record.chartId,jdbcType=VARCHAR},
+      TITLE = #{record.title,jdbcType=VARCHAR},
+      LEGEND = #{record.legend,jdbcType=VARCHAR},
+      GRID = #{record.grid,jdbcType=VARCHAR},
+      XAXIS = #{record.xaxis,jdbcType=VARCHAR},
+      YAXIS = #{record.yaxis,jdbcType=VARCHAR},
+      POLAR = #{record.polar,jdbcType=VARCHAR},
+      RADIUSAXIS = #{record.radiusaxis,jdbcType=VARCHAR},
+      ANGLEAXIS = #{record.angleaxis,jdbcType=VARCHAR},
+      RADAR = #{record.radar,jdbcType=VARCHAR},
+      DATAZOOM = #{record.datazoom,jdbcType=VARCHAR},
+      VISUALMAP = #{record.visualmap,jdbcType=VARCHAR},
+      TOOLTIP = #{record.tooltip,jdbcType=VARCHAR},
+      TOOLBOX = #{record.toolbox,jdbcType=VARCHAR},
+      BRUSH = #{record.brush,jdbcType=VARCHAR},
+      GEO = #{record.geo,jdbcType=VARCHAR},
+      PARALLEL = #{record.parallel,jdbcType=VARCHAR},
+      PARALLELAXIS = #{record.parallelaxis,jdbcType=VARCHAR},
+      SINGLEAXIS = #{record.singleaxis,jdbcType=VARCHAR},
+      TIMELINE = #{record.timeline,jdbcType=VARCHAR},
+      COLOR = #{record.color,jdbcType=VARCHAR},
+      SERIES = #{record.series,jdbcType=VARCHAR},
+      BACKGROUNDCOLOR = #{record.backgroundcolor,jdbcType=VARCHAR},
+      TEXTSTYLE = #{record.textstyle,jdbcType=VARCHAR},
+      ANIMATION = #{record.animation,jdbcType=VARCHAR},
+      ANIMATIONTHRESHOLD = #{record.animationthreshold,jdbcType=VARCHAR},
+      ANIMATIONDURATION = #{record.animationduration,jdbcType=VARCHAR},
+      ANIMATIONEASING = #{record.animationeasing,jdbcType=VARCHAR},
+      ANIMATIONDELAY = #{record.animationdelay,jdbcType=VARCHAR},
+      ANIMATIONDURATIONUPDATE = #{record.animationdurationupdate,jdbcType=VARCHAR},
+      ANIMATIONEASINGUPDATE = #{record.animationeasingupdate,jdbcType=VARCHAR},
+      ANIMATIONDELAYUPDATE = #{record.animationdelayupdate,jdbcType=VARCHAR},
+      PROGRESSIVE = #{record.progressive,jdbcType=VARCHAR},
+      PROGRESSIVETHRESHOLD = #{record.progressivethreshold,jdbcType=VARCHAR},
+      BLENDMODE = #{record.blendmode,jdbcType=VARCHAR},
+      HOVERLAYERTHRESHOLD = #{record.hoverlayerthreshold,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstance" >
+    update PDW_PORTAL_CHART_INSTANCE
+    <set >
+      <if test="title != null" >
+        TITLE = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="legend != null" >
+        LEGEND = #{legend,jdbcType=VARCHAR},
+      </if>
+      <if test="grid != null" >
+        GRID = #{grid,jdbcType=VARCHAR},
+      </if>
+      <if test="xaxis != null" >
+        XAXIS = #{xaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="yaxis != null" >
+        YAXIS = #{yaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="polar != null" >
+        POLAR = #{polar,jdbcType=VARCHAR},
+      </if>
+      <if test="radiusaxis != null" >
+        RADIUSAXIS = #{radiusaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="angleaxis != null" >
+        ANGLEAXIS = #{angleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="radar != null" >
+        RADAR = #{radar,jdbcType=VARCHAR},
+      </if>
+      <if test="datazoom != null" >
+        DATAZOOM = #{datazoom,jdbcType=VARCHAR},
+      </if>
+      <if test="visualmap != null" >
+        VISUALMAP = #{visualmap,jdbcType=VARCHAR},
+      </if>
+      <if test="tooltip != null" >
+        TOOLTIP = #{tooltip,jdbcType=VARCHAR},
+      </if>
+      <if test="toolbox != null" >
+        TOOLBOX = #{toolbox,jdbcType=VARCHAR},
+      </if>
+      <if test="brush != null" >
+        BRUSH = #{brush,jdbcType=VARCHAR},
+      </if>
+      <if test="geo != null" >
+        GEO = #{geo,jdbcType=VARCHAR},
+      </if>
+      <if test="parallel != null" >
+        PARALLEL = #{parallel,jdbcType=VARCHAR},
+      </if>
+      <if test="parallelaxis != null" >
+        PARALLELAXIS = #{parallelaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="singleaxis != null" >
+        SINGLEAXIS = #{singleaxis,jdbcType=VARCHAR},
+      </if>
+      <if test="timeline != null" >
+        TIMELINE = #{timeline,jdbcType=VARCHAR},
+      </if>
+      <if test="color != null" >
+        COLOR = #{color,jdbcType=VARCHAR},
+      </if>
+      <if test="series != null" >
+        SERIES = #{series,jdbcType=VARCHAR},
+      </if>
+      <if test="backgroundcolor != null" >
+        BACKGROUNDCOLOR = #{backgroundcolor,jdbcType=VARCHAR},
+      </if>
+      <if test="textstyle != null" >
+        TEXTSTYLE = #{textstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="animation != null" >
+        ANIMATION = #{animation,jdbcType=VARCHAR},
+      </if>
+      <if test="animationthreshold != null" >
+        ANIMATIONTHRESHOLD = #{animationthreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="animationduration != null" >
+        ANIMATIONDURATION = #{animationduration,jdbcType=VARCHAR},
+      </if>
+      <if test="animationeasing != null" >
+        ANIMATIONEASING = #{animationeasing,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdelay != null" >
+        ANIMATIONDELAY = #{animationdelay,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdurationupdate != null" >
+        ANIMATIONDURATIONUPDATE = #{animationdurationupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="animationeasingupdate != null" >
+        ANIMATIONEASINGUPDATE = #{animationeasingupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="animationdelayupdate != null" >
+        ANIMATIONDELAYUPDATE = #{animationdelayupdate,jdbcType=VARCHAR},
+      </if>
+      <if test="progressive != null" >
+        PROGRESSIVE = #{progressive,jdbcType=VARCHAR},
+      </if>
+      <if test="progressivethreshold != null" >
+        PROGRESSIVETHRESHOLD = #{progressivethreshold,jdbcType=VARCHAR},
+      </if>
+      <if test="blendmode != null" >
+        BLENDMODE = #{blendmode,jdbcType=VARCHAR},
+      </if>
+      <if test="hoverlayerthreshold != null" >
+        HOVERLAYERTHRESHOLD = #{hoverlayerthreshold,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where CHART_ID = #{chartId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalChartInstance" >
+    update PDW_PORTAL_CHART_INSTANCE
+    set TITLE = #{title,jdbcType=VARCHAR},
+      LEGEND = #{legend,jdbcType=VARCHAR},
+      GRID = #{grid,jdbcType=VARCHAR},
+      XAXIS = #{xaxis,jdbcType=VARCHAR},
+      YAXIS = #{yaxis,jdbcType=VARCHAR},
+      POLAR = #{polar,jdbcType=VARCHAR},
+      RADIUSAXIS = #{radiusaxis,jdbcType=VARCHAR},
+      ANGLEAXIS = #{angleaxis,jdbcType=VARCHAR},
+      RADAR = #{radar,jdbcType=VARCHAR},
+      DATAZOOM = #{datazoom,jdbcType=VARCHAR},
+      VISUALMAP = #{visualmap,jdbcType=VARCHAR},
+      TOOLTIP = #{tooltip,jdbcType=VARCHAR},
+      TOOLBOX = #{toolbox,jdbcType=VARCHAR},
+      BRUSH = #{brush,jdbcType=VARCHAR},
+      GEO = #{geo,jdbcType=VARCHAR},
+      PARALLEL = #{parallel,jdbcType=VARCHAR},
+      PARALLELAXIS = #{parallelaxis,jdbcType=VARCHAR},
+      SINGLEAXIS = #{singleaxis,jdbcType=VARCHAR},
+      TIMELINE = #{timeline,jdbcType=VARCHAR},
+      COLOR = #{color,jdbcType=VARCHAR},
+      SERIES = #{series,jdbcType=VARCHAR},
+      BACKGROUNDCOLOR = #{backgroundcolor,jdbcType=VARCHAR},
+      TEXTSTYLE = #{textstyle,jdbcType=VARCHAR},
+      ANIMATION = #{animation,jdbcType=VARCHAR},
+      ANIMATIONTHRESHOLD = #{animationthreshold,jdbcType=VARCHAR},
+      ANIMATIONDURATION = #{animationduration,jdbcType=VARCHAR},
+      ANIMATIONEASING = #{animationeasing,jdbcType=VARCHAR},
+      ANIMATIONDELAY = #{animationdelay,jdbcType=VARCHAR},
+      ANIMATIONDURATIONUPDATE = #{animationdurationupdate,jdbcType=VARCHAR},
+      ANIMATIONEASINGUPDATE = #{animationeasingupdate,jdbcType=VARCHAR},
+      ANIMATIONDELAYUPDATE = #{animationdelayupdate,jdbcType=VARCHAR},
+      PROGRESSIVE = #{progressive,jdbcType=VARCHAR},
+      PROGRESSIVETHRESHOLD = #{progressivethreshold,jdbcType=VARCHAR},
+      BLENDMODE = #{blendmode,jdbcType=VARCHAR},
+      HOVERLAYERTHRESHOLD = #{hoverlayerthreshold,jdbcType=VARCHAR}
+    where CHART_ID = #{chartId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

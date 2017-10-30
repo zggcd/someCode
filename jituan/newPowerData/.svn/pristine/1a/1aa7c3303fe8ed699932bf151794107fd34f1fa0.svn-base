@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.table.dao.TableDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.table.model.TableVO">
+		<id column="FDUTABLEID" jdbcType="VARCHAR" property="tableID" />
+		<result column="FDUOBJECTID" jdbcType="VARCHAR" property="objectID" />
+		<result column="FDCOBJECTTYPE" jdbcType="CHAR" property="objectType" />
+		<result column="FDCTABLENAME" jdbcType="VARCHAR" property="tableName" />
+		<result column="FDCTABLECAPTION" jdbcType="VARCHAR" property="tableCaption" />
+		<result column="FDCALIAS" jdbcType="VARCHAR" property="alias" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+		<result column="FDILEFT" jdbcType="INTEGER" property="left" />
+		<result column="FDITOP" jdbcType="INTEGER" property="top" />
+		<result column="FDIWIDTH" jdbcType="INTEGER" property="width" />
+		<result column="FDIHEIGHT" jdbcType="INTEGER" property="height" />
+		<result column="FDITBTYPE" jdbcType="INTEGER" property="tbType" />
+	</resultMap>
+	<insert id="addTable" parameterType="com.ccssoft.rsas.metadata.table.model.TableVO">
+		insert into TBTABLE (FDUTABLEID, FDUOBJECTID, FDCOBJECTTYPE, 
+		FDCTABLENAME, FDCTABLECAPTION, FDCALIAS, FDCDESC, FDILEFT, 
+		FDITOP, FDIWIDTH, FDIHEIGHT, FDITBTYPE)
+		values (#{tableID,jdbcType=VARCHAR}, #{objectID,jdbcType=VARCHAR}, #{objectType,jdbcType=CHAR}, 
+		#{tableName,jdbcType=VARCHAR}, #{tableCaption,jdbcType=VARCHAR}, #{alias,jdbcType=VARCHAR}, 
+		#{desc,jdbcType=VARCHAR}, #{left,jdbcType=INTEGER}, #{top,jdbcType=INTEGER}, #{width,jdbcType=INTEGER}, 
+		#{height,jdbcType=INTEGER}, #{tbType,jdbcType=INTEGER})
+	</insert>
+	
+	<update id="updateTable" parameterType="com.ccssoft.rsas.metadata.table.model.TableVO">
+		update TBTABLE 
+		set FDUOBJECTID = #{objectID,jdbcType=VARCHAR},
+		FDCOBJECTTYPE = #{objectType,jdbcType=CHAR}, 
+		FDCTABLENAME = #{tableName,jdbcType=VARCHAR},
+		FDCTABLECAPTION = #{tableCaption,jdbcType=VARCHAR},
+		FDCALIAS = #{alias,jdbcType=VARCHAR},
+		FDCDESC = #{desc,jdbcType=VARCHAR},
+		FDILEFT = #{left,jdbcType=INTEGER},
+		FDITOP = #{top,jdbcType=INTEGER},
+		FDIWIDTH = #{width,jdbcType=INTEGER},
+		FDIHEIGHT = #{height,jdbcType=INTEGER},
+		FDITBTYPE = #{tbType,jdbcType=INTEGER}
+		where FDUTABLEID = #{tableID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delTable" parameterType="java.lang.String">
+		delete from TBTABLE
+		where FDUTABLEID = #{tableID,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="delObjectTable" parameterType="java.util.Map">
+		delete from TBTABLE
+		where FDUOBJECTID = #{objectID,jdbcType=VARCHAR}
+		and FDCOBJECTTYPE = #{objectType,jdbcType=CHAR}
+	</delete>
+	
+	<select id="getTable" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUTABLEID, FDUOBJECTID, FDCOBJECTTYPE, 
+		FDCTABLENAME, FDCTABLECAPTION, FDCALIAS,
+		FDCDESC, FDILEFT, FDITOP, FDIWIDTH,
+		FDIHEIGHT, FDITBTYPE
+		from TBTABLE
+		where FDUTABLEID = #{tableID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getTables" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select FDUTABLEID, FDUOBJECTID, FDCOBJECTTYPE, 
+		FDCTABLENAME, FDCTABLECAPTION, FDCALIAS,
+		FDCDESC, FDILEFT, FDITOP, FDIWIDTH,
+		FDIHEIGHT, FDITBTYPE
+		from TBTABLE
+		where FDUOBJECTID = #{objectID,jdbcType=VARCHAR} and FDCOBJECTTYPE = #{objectType,jdbcType=CHAR}
+	</select>
+</mapper>

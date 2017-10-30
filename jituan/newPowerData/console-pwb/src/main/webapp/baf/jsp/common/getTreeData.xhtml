@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ajax="http://richfaces.org/ajax"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+
+<script type="text/javascript">
+//<![CDATA[
+	
+	var isFirstShow#{modalName} = "Y"; //初次加载页面load数据
+	var last#{modalName}TreeId = "";
+	var param#{modalName} = "";
+	var #{modalName}RootId = "";
+	
+	/**
+	 * 显示树形选择界面
+	 * 每次触发检查treeId是否有变化，如有变化将重新加载树
+	 */
+	function show#{modalName}(treeId){
+		
+		var lastParam = param#{modalName}; // 保存前一次使用的参数
+		
+		//传入参数初始化
+		if("#{paramName}" != "")
+		{
+			var paramNames = "#{paramName}".split("#");
+			var paramLabels = "#{paramLabel}".split("#");
+			var paramInputs = "#{paramInput}".split("#");
+			
+			var paramArray = new Array();
+			for(var i = 0; i < paramNames.length; i++)
+			{
+				if(paramNames[i] != "")
+				{
+					if(document.getElementById(paramInputs[i]).value == "")
+					{
+						alert("请先选择"+paramLabels[i]+"！");
+						return false;
+					}
+					else
+					{
+						paramArray.push(paramNames[i]+"="+document.getElementById(paramInputs[i]).value+":string");
+					}
+				}
+			}
+			
+			
+			if(paramArray.length > 1)
+			{
+				param#{modalName} = "&param=" + paramArray.join("$");
+				
+			}
+			else if(paramArray.length == 1)
+			{
+				param#{modalName} = "&param=" + paramArray[0];
+			}
+		}
+
+		//根节点
+		var lastRootId = #{modalName}RootId;
+		if("#{rootIdInput}" != "")
+		{
+			#{modalName}RootId = '&rootId=' + document.getElementById("#{rootIdInput}").value;
+		}
+		else if("#{rootId}" != "")
+		{
+			#{modalName}RootId = '&rootId=#{rootId}';
+		}
+		
+		if(isFirstShow#{modalName} == "Y")
+		{
+			//初次加载树
+			init#{modalName}Tree();
+			
+			isFirstShow#{modalName} ="N";
+			last#{modalName}TreeId = treeId;
+		}
+		else if("#{isReload}" == "Y")
+		{
+			//每次显示都刷新树
+			query#{modalName}Tree_tree.deleteChildItems(0); //删除所有已加载的节点
+			
+			init#{modalName}Tree();
+			
+			last#{modalName}TreeId = treeId;
+		}
+		else if(last#{modalName}TreeId != treeId)
+		{
+			//需要刷新树
+			query#{modalName}Tree_tree.deleteChildItems(0); //删除所有已加载的节点
+			
+			init#{modalName}Tree();
+			
+			last#{modalName}TreeId = treeId;
+		}
+		else if(#{modalName}RootId != lastRootId)
+		{
+			//根节点改变，刷新树
+			query#{modalName}Tree_tree.deleteChildItems(0); //删除所有已加载的节点
+			
+			init#{modalName}Tree();
+		}
+		else if(param#{modalName} != lastParam)
+		{
+			//参数已改变重载树
+			query#{modalName}Tree_tree.deleteChildItems(0); //删除所有已加载的节点
+	
+			init#{modalName}Tree();
+		}
+
+		query#{modalName}Tree_tree.setSubChecked(0,0); //清除所有节点的选中状态
+		
+		document.getElementById('query#{modalName}Panel').component.show();
+		return true;
+	}
+	
+	/**
+	 * 初始化数据
+	 */
+	function init#{modalName}Tree()
+	{
+		query#{modalName}Tree_tree.loadXML('/baf/jsp/tree/publicTreeXMLData.jsp?dataSource=#{dataSource}&showFullPath=0&oneOffLoad=#{oneOffLoad}'+#{modalName}RootId+param#{modalName});
+		query#{modalName}Tree_tree.setXMLAutoLoading('/baf/jsp/tree/publicTreeXMLData.jsp?dataSource=#{dataSource}&showFullPath=0'+param#{modalName});
+		query#{modalName}Tree_tree.setOnCheckHandler(check#{modalName}Tree);
+	}
+	
+	/**
+	 * check事件响应
+	 */
+	function check#{modalName}Tree()
+	{
+		//单选时将原来选中的数据清除
+		if("#{selectNum}" != "0")
+		{
+			var selectitemid = arguments[0]; //选中的id
+			
+	  		var allChecked = query#{modalName}Tree_tree.getAllChecked();
+	  		var allCheckeds = allChecked.split(",");
+	  		for(var i = 0; i < allCheckeds.length; i++)
+	  		{
+	  			if(allCheckeds[i] != selectitemid)
+	  			{
+	  				query#{modalName}Tree_tree.setSubChecked(allCheckeds[i],0);
+	  	  		}
+	  		}
+		}
+	}
+	
+	/**
+	 * 返回选中的值
+	 */
+	function return#{modalName}()
+	{
+		var allChecked = query#{modalName}Tree_tree.getAllChecked();
+		
+		if(allChecked != "")
+		{
+			var allCheckeds = allChecked.split(",");
+
+			var extInputList = new Array();
+			var extNameList = new Array();
+  			if("#{extInput}" != "" && "#{extName}" != "")
+  			{
+  				extInputList = "#{extInput}".split("#");
+  				extNameList = "#{extName}".split("#");
+  			}
+			
+	  		for(var i = 0; i < allCheckeds.length; i++)
+	  		{
+		  		var selectitemid = allCheckeds[i];
+		  		
+	  			//树对于重复的id自动在id后加下划线及13位数字，根据此特性进行截取，保证能返回所需真实id
+	  			if(selectitemid.indexOf("_") > 0)
+	  			{
+	  				if(selectitemid.substr(selectitemid.indexOf("_")).length == 14)
+	  				{
+	  					selectitemid = selectitemid.substr(0,selectitemid.indexOf("_"));
+	  				}
+	  			}
+
+	  			//增加选中对象
+	  			
+	  			if("#{inputId}" != "")
+				{
+					if("#{selectNum}" == "0" && i > 0)
+					{
+						//多选且回写框已经有数据时，将选中的数据拼在最后
+						document.getElementById("#{inputId}").value += "," + selectitemid;
+					}
+					else
+					{
+						// 继续判断，如果多选且回写框中已有数据，将选中的数据拼在后面。
+						if("#{selectNum}" == "0" && document.getElementById("#{inputId}").value != "") 
+						{
+							document.getElementById("#{inputId}").value += "," + selectitemid;
+						} 
+						else 
+						{
+							document.getElementById("#{inputId}").value = selectitemid;
+						}
+					}
+				}
+	  			
+				if("#{inputName}" != "")
+				{
+					if("#{selectNum}" == "0" && i > 0)
+					{
+						//多选且回写框已经有数据时，将选中的数据拼在最后
+						document.getElementById("#{inputName}").value += "," + query#{modalName}Tree_tree.getItemText(selectitemid);
+					}
+					else
+					{
+						// 继续判断，如果多选且回写框中已有数据，将选中的数据拼在后面。
+						if("#{selectNum}" == "0" && document.getElementById("#{inputName}").value != "") 
+						{
+							document.getElementById("#{inputName}").value += "," + query#{modalName}Tree_tree.getItemText(selectitemid);
+						} 
+						else 
+						{
+							document.getElementById("#{inputName}").value = query#{modalName}Tree_tree.getItemText(selectitemid);
+						}
+					}
+				}
+
+				if("#{extInput}" != "" && "#{extName}" != "")
+				{
+					for(var j = 0; j < extNameList.length; j++)
+					{
+						if(extNameList[j] != "")
+						{
+							if("#{selectNum}" == "0" && i > 0)
+							{
+								//多选且回写框已经有数据时，将选中的数据拼在最后
+								document.getElementById(extInputList[j]).value += ',' + query#{modalName}Tree_tree.getUserData(selectitemid,extNameList[j]);
+							}
+							else
+							{
+								document.getElementById(extInputList[j]).value = query#{modalName}Tree_tree.getUserData(selectitemid,extNameList[j]);
+							}
+						}
+					}
+				}
+	  		}
+		}
+		
+		#{afterConfirm}; //选中数据后回调函数
+		
+		document.getElementById('query#{modalName}Panel').component.hide();
+		
+	}
+	
+	/**
+	 * 清除已选中的数据
+	 */
+	function clean#{modalName}()
+	{
+		query#{modalName}Tree_tree.setSubChecked(0,0); //清除所有节点的选中状态
+
+		//增加选中对象
+		if("#{inputId}" != "")
+		{
+			document.getElementById("#{inputId}").value = "";
+		}
+			
+		if("#{inputName}" != "")
+		{
+			document.getElementById("#{inputName}").value = "";
+		}
+
+		if("#{extInput}" != "" && "#{extName}" != "")
+		{
+			var extInputList = "#{extInput}".split("#");
+			var extNameList = "#{extName}".split("#");
+			
+			for(var j = 0; j < extNameList.length; j++)
+			{
+				if(extNameList[j] != "")
+				{
+					document.getElementById(extInputList[j]).value = "";
+				}
+			}
+		}
+	}
+//]]>
+</script>
+
+<!--模态框 -->
+<regaltec:dhtmlXtree id="query#{modalName}Tree" 
+imagePath="/baf/images/dhtmlxtree/" contentEl="query#{modalName}TreeDiv" showFullPath="0">
+	<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+</regaltec:dhtmlXtree>
+
+<rich:modalPanel id="query#{modalName}Panel" autosized="false" keepVisualState="false" width="400" height="470" onkeydown="if(window.event.keyCode=='27'){document.getElementById('query#{modalName}Panel').component.hide();}">
+	<f:facet name="header">
+		<h:outputText value="#{label}选择"/>
+	</f:facet>
+	<!-- 关闭按钮 -->
+	<f:facet name="controls">
+		<h:panelGroup>
+			<h:graphicImage value="/baf/images/icons/close.png" id="query#{modalName}PanelHidelink" style="cursor:hand;" styleClass="hidelink"/>
+			<rich:componentControl for="query#{modalName}Panel" attachTo="query#{modalName}PanelHidelink" operation="hide" event="onclick" />
+		</h:panelGroup>
+	</f:facet>
+	<fieldset style="height:380px;" >
+		<legend><h:outputText value="#{label}视图" /></legend>
+		<div id="query#{modalName}TreeDiv"  style="width:100%;height:360px;overflow:auto;">
+			
+		</div>
+	</fieldset>
+	<center>
+		<h:commandButton styleClass="rich-button" value="确认(S)" accesskey="S" onclick="return#{modalName}();"></h:commandButton>
+		<rich:spacer width="5px" />
+		<h:commandButton styleClass="rich-button" value="取消(C)" accesskey="C" onclick="document.getElementById('query#{modalName}Panel').component.hide();"></h:commandButton>
+		<rich:spacer width="5px" />
+		<h:commandButton styleClass="rich-button" value="清除(R)" accesskey="R" onclick="clean#{modalName}();"></h:commandButton>
+	</center>
+</rich:modalPanel>  
+</ui:composition>

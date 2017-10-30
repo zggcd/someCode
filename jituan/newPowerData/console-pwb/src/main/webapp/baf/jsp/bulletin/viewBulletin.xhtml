@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+     function setStatus(num){
+     document.getElementById("bulletinForm:statusFlag").value=num;
+     }
+ 	//屏蔽退格键的事件监听
+	function forCheck(){
+		if(event.keyCode == 8){
+		    event.returnValue   =   false;
+		}
+	}
+	//按清除键
+	function clean(){
+	    document.getElementById("bulletinForm:searchTitl").value="";
+	    document.getElementById("bulletinForm:searchKeyWord").value="";
+	    document.getElementById("bulletinForm:startdateInputDate").value="";
+	    document.getElementById("bulletinForm:enddateInputDate").value="";
+	    return false;
+	}
+	//增加新tab
+	function addTab(id,url,title){
+    var tab = Ext.getCmp("bulletin_"+id);
+	var tabpanel = Ext.getCmp('extTabPanel');
+	url = "${request.contextPath}/baf/jsp/bulletin/"+ url;
+	if(tab){
+		tabpanel.setActiveTab(tab);
+	}else {
+	tabpanel.add({
+        id:"bulletin_"+id,
+        title:"${msgs['baf.bulletin.bulletinContent']}_"+title+"&nbsp;&nbsp;&nbsp;",
+        iconCls: 'tabs',
+         html:"<iframe onload='initHeight(this);' width='100%'  style='overflow-x:auto;overflow-y:auto;' height='100%' src='"+url+"'/>",
+        closable:true,
+        autoScroll:true
+       }).show();
+	}
+
+	addRead(id);
+}
+//初始化iframe的高度
+function initHeight(iframe){
+	//iframe.style.height = window.screen.availHeight - window.screenTop-100;
+	iframe.style.height = 1200;
+}
+
+//点击查询按纽人员列表未渲染前置灰
+function ondisabled(obj){
+  	obj.disabled = true;
+}
+     //]]>
+</script>
+	<style>
+	   column1{
+	   width:30%;
+	   text-align:center;
+	   }	
+	   column2{
+	   width:70%;
+	   }	
+    </style> 
+</head>
+<body >
+    <h:form id="bulletinForm"> 
+    <a4j:keepAlive beanName="viewBulletinBean"></a4j:keepAlive>
+    <regaltec:extTabPanel 
+	defaults="{autoHeight:true}" frame="false" plain="true" activeTab="0"
+	tabPosition="top" split="true" collapsible="true" margins="0 0 0 0" enableTabScroll="true" 
+	renderTo="my-tabs" componentId="extTabPanel"  autoScroll="true" plugins="new Ext.ux.TabCloseMenu()"
+	items="[{contentEl:'mytab', title:'#{msgs['baf.bulletin.browseBulletin']}', id:'mainPanel'}]">
+    </regaltec:extTabPanel>
+    <div id="my-tabs"></div>
+    <div id="mytab" style="background:white;width:100%;padding:0 0 0 10;overflow:auto;margin:0 0 40 0;padding:0 0 20 0;" >
+    <fieldset>
+    <legend><h:outputText value="#{msgs['baf.bulletin.searchCondition']}"></h:outputText></legend>
+    <table width="100%" style="font-size:13px;">
+    <tr>
+    <td><h:outputText value="#{msgs['baf.bulletin.title']}:"></h:outputText></td><td><h:inputText id="searchTitl" style="height:23;" value="#{viewBulletinBean.searchTitle}" styleClass="rich-gradient-input"></h:inputText></td>
+    <td><h:outputText value="关键字:"></h:outputText></td><td><h:inputText id="searchKeyWord" style="height:23;" value="#{viewBulletinBean.searchKeyWord}" styleClass="rich-gradient-input"></h:inputText></td>
+    </tr>
+    <tr>
+    <td><h:outputText value="#{msgs['baf.bulletin.publishTimeBegin']}:"></h:outputText></td>
+    <td>				
+    <rich:calendar id="startdate"  value="#{viewBulletinBean.searchStartDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+    </rich:calendar>
+    </td> 
+    <td><h:outputText value="#{msgs['baf.bulletin.publishTimeEnd']}:"></h:outputText></td>
+    <td>
+    <rich:calendar id="enddate"  value="#{viewBulletinBean.searchEndDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+    </rich:calendar>
+    </td>
+    </tr>
+    <tr>
+    <td><rich:spacer width="2px"></rich:spacer></td><td><rich:spacer width="2px"></rich:spacer></td>
+    <td><rich:spacer width="2px"></rich:spacer></td><td><a4j:commandButton value="#{msgs['baf.bulletin.search']}" requestDelay="100" action="#{viewBulletinBean.doQuery}" onclick="ondisabled(this);" disabled="false" id="search_btn" reRender="itemLists,search_btn" styleClass="rich-button"></a4j:commandButton><h:commandButton type="button" id="clear" value="清除" styleClass="rich-button" onclick="clean();return false;"></h:commandButton></td>
+    </tr>
+    </table>
+    </fieldset>
+    <rich:spacer height="15px"></rich:spacer>
+    <div style="margin:30px 0px;border:solid #69C 1px;">
+		<rich:panel>
+        <f:facet name="header">
+          	<h:outputText value="置顶公告"/>
+        </f:facet>	
+		<rich:dataTable width="100%" columnClasses="col" id="toplist"  title="双击查看公告内容"
+		onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+		 value="#{viewBulletinBean.topBulletinList}" rows="#{manageBulletinBean.pageSize}" var="vo" align="center"
+		 onRowDblClick="addTab('#{vo.bulletinId}','bulletinDetail.xhtml?bulletinId=#{vo.bulletinId}','#{vo.title}')">
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.emergency']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" rendered="#{vo.emergency == '2'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" rendered="#{vo.emergency == '1'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" rendered="#{vo.emergency == '0'}"/>
+		    			    	
+		    </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.status']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:outputText value="#{msgs['baf.bulletin.draft']}" rendered="#{vo.status == '0'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.pendingPublish']}" rendered="#{vo.status == '1'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.published']}" rendered="#{vo.status == '2'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.rubbish']}" rendered="#{vo.status == '3'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.cancel']}" rendered="#{vo.status == '4'}"/>
+		    </center>
+		 </rich:column>
+		 <ui:remove>
+		  <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.responseStatus']}" style="font-weight:normal;"/>
+			</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_reverted1.gif" alt="#{msgs['baf.bulletin.answered']}" rendered="#{vo.isResponsed == 'Y' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_norevert1.gif" alt="#{msgs['baf.bulletin.answering']}" rendered="#{vo.isResponsed == 'N' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_nlrevert1.gif" alt="#{msgs['baf.bulletin.noAnswer']}" rendered="#{vo.needResponse == 'N'}"/>
+		    </center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column>
+		   	<f:facet name="header">
+		 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.title']}" style="font-weight:normal;"/>
+		 </f:facet>
+		    <center><a4j:commandLink onclick="addTab('#{vo.bulletinId}','bulletinDetail.xhtml?bulletinId=#{vo.bulletinId}','#{vo.title}')" value="#{vo.title}"></a4j:commandLink></center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.author']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.publisherName}" /></center>
+		 </rich:column>
+		<ui:remove>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.inscription']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.inscription}" /></center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.publishTime']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.publishTime}" title="#{msgs['baf.bulletin.publishTime']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.expireDate']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.expireDate}" title="#{msgs['baf.bulletin.expireDate']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.hasAttachment']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/noAttachment.gif" alt="#{msgs['baf.bulletin.noAttachment']}" title="#{msgs['baf.bulletin.noAttachment']}" rendered="#{vo.hasAttachment == 'N'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" alt="#{msgs['baf.bulletin.withAttachment']}" title="#{msgs['baf.bulletin.withAttachment']}" rendered="#{vo.hasAttachment == 'Y'}"/>      	
+		    </center>
+		 </rich:column>
+		</rich:dataTable>
+		</rich:panel>
+		</div>
+    <rich:dataTable width="100%" id="itemLists" rows="#{viewBulletinBean.pageSize}" columnClasses="col"  style="text-align:center;" title="单击链接或双击查看"
+	onRowDblClick="addTab('#{insItem.bulletinId}','bulletinDetail.xhtml?bulletinId=#{insItem.bulletinId}','#{insItem.title}')"  value="#{viewBulletinBean.dataList}" var="insItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+
+    <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.isCheck']}" style="font-weight:normal;"/>
+    </f:facet>
+    
+   <center>
+    	<h:graphicImage url="/baf/images/bulletin/bulletin_open.gif" alt="#{msgs['baf.bulletin.checked']}" title="#{msgs['baf.bulletin.checked']}" rendered="#{insItem.readCount &gt;= 1}"/>
+    	<h:graphicImage url="/baf/images/bulletin/bulletin_close.gif" alt="#{msgs['baf.bulletin.checking']}" title="#{msgs['baf.bulletin.checking']}" rendered="#{insItem.readCount != 1}"/>      	
+    </center>
+   </h:column>
+   <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.urgentDegree']}" style="font-weight:normal;"/>
+    </f:facet>
+    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" title="#{msgs['baf.bulletin.plain']}" rendered="#{insItem.emergency == '2'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" title="#{msgs['baf.bulletin.urgent']}" rendered="#{insItem.emergency == '1'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" title="#{msgs['baf.bulletin.exurgent']}" rendered="#{insItem.emergency == '0'}"/>
+		    			    	
+		    </center>
+    </h:column>
+    <ui:remove>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.state']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.status}" />
+    
+    </h:column>
+    </ui:remove>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.title']}" style="font-weight:normal;"/>
+    </f:facet>
+    <a4j:commandLink onclick="addTab('#{insItem.bulletinId}','bulletinDetail.xhtml?bulletinId=#{insItem.bulletinId}','#{insItem.title}')" value="#{insItem.title}"></a4j:commandLink>
+    </h:column>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.drafter']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.publisherName}" />
+    </h:column>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.publishDate']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.publishTime}" >
+    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+    </h:outputText>
+    </h:column>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.validDate']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.expireDate}" >
+    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+    </h:outputText>
+    </h:column>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.includeAccessory']}" style="font-weight:normal;"/>
+    </f:facet>
+    <center>   
+    	<h:graphicImage url="/baf/images/bulletin/noAttachment.gif" alt="#{msgs['baf.bulletin.noAttachment']}" title="#{msgs['baf.bulletin.noAttachment']}" rendered="#{insItem.hasAttachment == 'N'}"/>
+    	<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" alt="#{msgs['baf.bulletin.withAttachment']}" title="#{msgs['baf.bulletin.withAttachment']}" rendered="#{insItem.hasAttachment == 'Y'}"/>      	
+    </center>
+    </h:column>
+    <f:facet name="footer">				
+			<rich:datascroller align="right" id="itemScroller" page="#{viewBulletinBean.scrollPage}" selectedStyle="background-color:#FFB93F;"  />
+	</f:facet>
+    </rich:dataTable>
+    
+    <rich:spacer height="10px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.photoExplain']}：" style="font-weight:normal;"/>	
+	<rich:spacer width="10px"/>
+	<h:graphicImage url="/baf/images/bulletin/blt_plain.gif"/>
+	<rich:spacer width="8px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.plain']}" style="font-weight:normal;"/>
+	<rich:spacer width="10px"/>
+	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" />
+	<rich:spacer width="8px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.urgent']}" style="font-weight:normal;"/>
+	<rich:spacer width="10px"/>
+	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" />
+	<rich:spacer width="8px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.exurgent']}" style="font-weight:normal;"/>
+	<rich:spacer width="8px"/>
+	<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif"/>
+	<rich:spacer width="8px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.withAttachment']}" style="font-weight:normal;"/>
+	<rich:spacer width="8px"/>
+	<h:graphicImage url="/baf/images/bulletin/noAttachment.gif"/>
+	<rich:spacer width="8px"/>
+	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.noAttachment']}" style="font-weight:normal;"/>
+    </div>
+    <!-- mytab div end-->
+    <h:inputHidden id="statusFlag" value=""></h:inputHidden>
+    </h:form>
+        
+    <a4j:form>
+		<a4j:jsFunction name="addRead" action="#{viewBulletinBean.addRead}" reRender="bulletinForm:itemLists">
+        	<a4j:actionparam name="bulletinId" />                
+        </a4j:jsFunction> 
+	</a4j:form>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

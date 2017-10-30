@@ -1,0 +1,1116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<a4j:include viewId="commonq.xhtml" />	
+<script>
+//<![CDATA[
+//更改高级面板的重复表格的disabled
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+     //根据任务类型改变下边的div
+     function changeTypeDiv(obj){
+              if(obj.value=="PlanEveryDay"){
+            	  document.getElementById("dayType").style.display="";
+            	  document.getElementById("weekType").style.display="none";
+            	  document.getElementById("monthType").style.display="none";
+              }
+              else
+              if(obj.value=="PlanEveryWeek"){
+            	  document.getElementById("dayType").style.display="none";
+            	  document.getElementById("weekType").style.display="";
+            	  document.getElementById("monthType").style.display="none";
+              }
+              else
+              if(obj.value=="PlanEveryMonth"){
+            	  document.getElementById("dayType").style.display="none";
+            	  document.getElementById("weekType").style.display="none";
+            	  document.getElementById("monthType").style.display="";
+              }
+              else{
+            	  document.getElementById("dayType").style.display="none";
+            	  document.getElementById("weekType").style.display="none";
+            	  document.getElementById("monthType").style.display="none";
+ 
+              }
+     }
+   //响应check点击事件
+		function checkBoxClick(object, value,notRun) {
+		   var itemIdsArr = document.getElementById("schForm:gotItemIdValues").value;
+		   var notRuns=document.getElementById("schForm:notRuns").value;
+		   var systemTaskId = document.getElementById("schForm:systemTaskId").value;
+		   if(systemTaskId == value) //如果为系统内置任务时，不允许选择.
+		   {
+		   	object.checked = false;
+		   	return;
+		   }
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+				notRuns=notRun;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 	
+					notRuns=notRuns+"#"+notRun;		
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						var tmpflag="";
+						if(index>0){
+							str = "#"+value;
+							tmpflag="#"+notRun;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+								tmpflag=notRun+"#";
+							} else {
+								str = value;
+								tmpflag=notRun;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					notRuns=notRuns.replace(tmpflag,"");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("schForm:gotItemIdValues").value = itemIdsArr;		
+			document.getElementById("schForm:notRuns").value=notRuns;	
+		}
+		//全选select操作表所有项
+		function onSelectALlTemplate() {
+			//设置元素类型操作数据的已选CheckBox的value值为operateid
+			var oTable = document.getElementById("schForm:itemLists");
+			var oChkAll = document.getElementById("schForm:itemLists:selectAll");
+			//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+		    if (!oChkAll.checked){
+		      document.getElementById("schForm:gotItemIdValues").value = "";
+		    } 
+			//获取当前页码数
+			//var pageNum = document.getElementById("TemplateForm:pageNo").value;
+		//	if (pageNum <= 0) pageNum = 1;
+			//获取每页数据个数
+		//	var pageSize = document.getElementById("TemplateForm:pageSize").value;             	
+			if (oTable != null && oChkAll != null) {
+				for (j = 0; j < oTable.rows.length -1; j++) {
+					//var realNum = (pageNum-1)*pageSize + j;
+					var e = document.getElementById("schForm:itemLists:"+j+":selectFlag");
+					if (e.id.indexOf("selectFlag") >= 0) {   
+						//触发CheckBox onclick事件，用来设置operateid
+						if (document.all) {
+							//IE
+							var oldValue= e.checked;
+							e.checked = oChkAll.checked;
+							if (!oldValue && e.checked) {
+								onObjectFireMouseEvent(e, "onclick");
+							}
+						} else {
+							//firefox
+							if (oChkAll.checked) {
+								var oldValue= e.checked;
+								if (!oldValue)
+									onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+				}
+			}
+		}	
+
+		
+		G=function(str){
+           return document.getElementById(str);
+		}
+		//判断勾选的任务是否能在本机运行，能就返回true，不能运行返回false
+		function canRun(){
+			var flag=G("schForm:notRuns").value;
+            for(i=0;i<flag.length;i++){
+               tmp=flag.charAt(i);
+               if(tmp==1){
+                   alert("你勾选的任务当中有不能在本机操作的，请在运行该任务的机器上进行操作!");
+                   return false;
+               }
+            }
+			return true;
+		}
+		//判断是否选择单行或者多行
+		function checkSelectRow(obj) {	
+			//检查勾选的任务是否能在本机操作
+			if(!canRun()){
+                return false;
+			}
+			
+			var oTable = document.getElementById("schForm:itemLists");
+			
+			//获取每页数据个数					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+		    	for (var i=0; i<size; i++) {
+					var e = document.getElementById("schForm:itemLists:"+i+":selectFlag");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+				    if(obj!=null&&obj.id=="schForm:delBtn"){
+					//请勾选需要删除的数据
+					alert("${msgs['baf.org.WarningDeleteRow']}");
+					}
+					else if(obj!=null&&obj.id=="schForm:stopBtn"){
+					//请勾选需要停止的数据
+					alert("${msgs['baf.task.choiceStop']}");
+					}
+					else if(obj!=null&&obj.id=="schForm:delBtn"){
+					//请勾选需要启动的数据
+					alert("${msgs['baf.task.choiceRun']}");
+					}
+					else if(obj!=null&&obj.id=="schForm:killBtn"){
+					//请勾选需要杀死的数据
+					alert("${msgs['baf.task.choiceKill']}");
+					}
+					else {
+					//请勾选需要杀死的数据
+					alert("${msgs['baf.task.choiceRaise']}");
+					}
+					return false;
+				}
+			}
+			return true;
+		}
+		//让重复任务的表格可见
+		
+		function setTableEditable(obj){
+		//先赋值，再做表格处理	
+		setHideValue();
+		var otable=document.getElementById("repeatTab");
+		if(obj.checked){
+		   otable.disabled=false;
+		}
+		else{
+		   otable.disabled=true;
+		}
+		}
+		
+		//给隐藏域赋值
+		function setHideValue(){
+		   document.getElementById("addForm:responsePhone").value=document.getElementById("optForm:responsePhone").value;
+		   var isIe= (navigator.userAgent.indexOf('MSIE') >= 0) && (navigator.userAgent.indexOf('Opera') < 0);
+		   document.getElementById("addForm:endDate").value=document.getElementById("optForm:endDateInputDate").value;
+		   //document.getElementById("addForm:repeatFlag").checked=document.getElementById("optForm:repeatFlag").checked;
+		  // document.getElementById("addForm:repeatFlag").value=document.getElementById("optForm:repeatFlag").value;
+		//   if(document.getElementById("optForm:repeatFlag").checked){
+              //如果是IE
+			  if(isIe){
+		      document.getElementById("addForm:repeatInterval").value=document.getElementsByName("optForm:repeatInterval")[1].value;
+		      var modeArr=document.getElementsByName("repeatMode");
+		      for(i=0;i<modeArr.length;i++){
+		          if(modeArr[i].checked){
+		          document.getElementById("addForm:repeatMode").value=modeArr[i].value;
+		          break;
+		          }
+		      }
+		      document.getElementById("addForm:endHour").value=document.getElementsByName("optForm:endHour")[1].value;
+		      document.getElementById("addForm:endMinute").value=document.getElementsByName("optForm:endMinute")[1].value;
+		      document.getElementById("addForm:lastHour").value=document.getElementsByName("optForm:lastHour")[1].value;
+		      document.getElementById("addForm:lastMinute").value=document.getElementsByName("optForm:lastMinute")[1].value;
+		      document.getElementById("addForm:hourOrMin").value=document.getElementById("optForm:hourOrMin2").value;
+		      document.getElementById("addForm:runningTimes").value=document.getElementsByName("optForm:runningTimes")[1].value;
+		   }
+			   //不是IE
+			  if(!isIe){
+			      document.getElementById("addForm:repeatInterval").value=document.getElementsByName("optForm:repeatInterval")[0].value;
+			      var modeArr=document.getElementsByName("repeatMode");
+			      for(i=0;i<modeArr.length;i++){
+			          if(modeArr[i].checked){
+			          document.getElementById("addForm:repeatMode").value=modeArr[i].value;
+			          break;
+			          }
+			      }
+			      document.getElementById("addForm:endHour").value=document.getElementsByName("optForm:endHour")[0].value;
+			      document.getElementById("addForm:endMinute").value=document.getElementsByName("optForm:endMinute")[0].value;
+			      document.getElementById("addForm:lastHour").value=document.getElementsByName("optForm:lastHour")[0].value;
+			      document.getElementById("addForm:lastMinute").value=document.getElementsByName("optForm:lastMinute")[0].value;
+			      document.getElementById("addForm:hourOrMin").value=document.getElementById("optForm:hourOrMin2").value;
+			      document.getElementById("addForm:runningTimes").value=document.getElementsByName("optForm:runningTimes")[0].value;
+			   }
+		//   }
+		}
+		//清空表单内容
+		function clearInfo(form1){
+         var length = form1.length
+	     for(i=0;i<length;i++)
+	       {
+	             //获取类型;
+	             var type = form1.elements[i].type;
+	
+	             //针对特定类型做处理。
+	             if(type == "text" || type == "password")
+	             {
+	
+	                  //清空类容
+	                  form1.elements[i].value = ""
+	              }
+	
+	             if(type == "select-one")
+	             {
+	
+	                 //给它指定回默认值
+	                  form1.elements[i].value = "-1"
+	              }
+	   
+	     }
+}
+         //设置月份
+         function setMonths(){
+         var monthsString=document.getElementById("addForm:monthsString");
+         var monTab=document.getElementById("monthForm:monTab");
+         var month=monTab.getElementsByTagName("input");
+         monthsString.value="";
+         //var month=document.getElementsByName("months");
+         
+         for(i=0;i<11;i++){
+         if(month[i].checked){
+            monthsString.value=monthsString.value+"1,";
+         }
+         else{
+            monthsString.value=monthsString.value+"0,";
+         }
+         }
+         if(month[11].checked){
+            monthsString.value=monthsString.value+"1";
+         }
+         else{
+            monthsString.value=monthsString.value+"0";
+         }
+         }	
+         /**
+         停止或者启动任务
+         */		
+         function runOrStop(status,id,notRun,daemonTask){
+         	 if(isDaemonTask(daemonTask)){
+				return;
+			}
+             if(notRun==1){
+               alert("该任务和本机IP不匹配，请在运行该任务的机器上进行操作。");
+               return ;
+             }
+               //启动
+               if(status=="0"){
+                  //document.getElementById('schForm:runPanel').component.show();
+                  runTask(id);
+               }
+               //停止
+               else{
+                 stopTask(id);
+               }
+         }
+         
+         //屏蔽退格键的事件监听
+		function forCheck(){
+			if(event.keyCode == 8){
+			    event.returnValue   =   false;
+			}
+		}
+		
+		function changeStartAtonce(obj){
+			var startDiv=document.getElementById("startDiv");
+		    if(obj.value=='Y'){
+		    	startDiv.style.display="none";
+		    }else{
+		    	startDiv.style.display="";
+		    }
+		}
+
+		function showGroup(){
+           var timeoutGroup=document.getElementById("addForm:timeoutGroup");
+           var single=document.getElementById("addForm:single");
+           if(single.checked){
+        	   timeoutGroup.style.display="";
+           }
+           else{
+        	   timeoutGroup.style.display="none";
+           }
+           
+		}
+		function clearOptPanel(){
+			document.optForm.reset();
+			#{rich:component('addPanel')}.show();
+		}
+
+
+		function killTaskThread(taskId){
+           if(window.confirm("确认杀死当前任务当前时刻的所有线程?")){
+        	   killThread(taskId);
+           }
+		}
+
+		//打开一个新的tabPanel
+		function openNewTab() {
+			var url = "/baf/jsp/taskmange/allTask.xhtml";
+			this.parent.addTab("view_all_task", "查看所有任务", url);
+		}
+		
+		function loadTask(taskId,daemonTask,notRun) {
+			if(isDaemonTask(daemonTask)){
+				return;
+			}
+			if(notRun==1){
+               alert("该任务和本机IP不匹配，请在运行该任务的机器上进行操作。");
+               return ;
+            }
+			getTask(taskId);
+		}
+		// 
+		function isDaemonTask(daemonTask) {
+			var val = false;
+			if("Y"==daemonTask) {
+				alert("该任务为系统内置任务，不允许编辑！");
+				val = true;
+			}
+			return val;
+		}
+		notExistTip=function(data){
+            if(data=='N'){
+                alert("当前任务在调度容器没有实例，请双击保存该任务.");
+            }
+		}
+		function shutdown(isShutdown) {
+			var shutdown = true;
+			if(isShutdown==true){
+                alert("当前任务调度容器开关未打开，请先开启。");
+            }else{
+            	shutdown = false;
+            	a4jcomplete();
+            }
+            return shutdown; 
+		}
+		function querySelfMachineIp(obj){
+			queryByMachineIp(obj.checked);
+		}
+		function checkboxStatus(status){
+			if('true' === status){
+				document.getElementById("schForm:itemLists:querySelfMachineIp").checked = true;
+			}else{
+				document.getElementById("schForm:itemLists:querySelfMachineIp").checked = false;
+			}
+			
+		}
+		function isShutdown(){
+			isShutdownFunction();
+			var is = document.getElementById("schForm:shutdownBtn").value;
+			if("true" == is){
+				alert("当前任务调度容器开关未打开，请先开启。");
+				return true;
+			}
+			return false;
+		}
+         //]]>
+</script>
+<style type="text/css">
+		 .scrolls{
+           overflow:auto;
+       }
+       td{
+       white-space:nowrap;
+       }
+
+</style>
+</head>
+
+<body>
+     <f:loadBundle basename="messages" var="msgs" />
+     <b style="position:absolute;top:5px;right:20px;margin:0;padding:0;text-align:right;">
+    <h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" >
+	</h:graphicImage>
+	</b>
+    <h:form id="schForm">
+    <div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+	<rich:tabPanel id="tabPanel">		
+		  <rich:tab id="templateOperate" name="templateOperate" label="当前机器运行的任务列表">
+		  <center>
+		  <h:panelGrid columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">
+		  <a4j:commandButton value="#{msgs['baf.task.addTask']}"  styleClass="rich-button" type="button" id="addBtn" action="#{taskBean.clearAdd}"   oncomplete="clearOptPanel();setFocus('addForm:taskName');return false" reRender="addPanel,effectPanel,monthForm">
+		  </a4j:commandButton>
+		  <rich:spacer width="10px"></rich:spacer>
+		  <a4j:commandButton value="#{msgs['baf.task.delTask']}" styleClass="rich-button" type="button" id="delBtn"  >
+		  <a4j:support event="onclick"  onsubmit="if (checkSelectRow(this)==false) {return false;}else{#{rich:component('delPanel')}.show();}return false;" ></a4j:support>
+		  </a4j:commandButton>
+		  <rich:spacer width="10px"></rich:spacer>
+		  <a4j:commandButton value="#{msgs['baf.task.raiseTask']}" styleClass="rich-button" type="button" id="raiseBtn"  >
+		  <a4j:support event="onclick"  onsubmit="if (checkSelectRow(this)==false) {return false;}else if(isShutdown()){return false}else{#{rich:component('rasiePanel')}.show();}return false;" ></a4j:support>
+		  </a4j:commandButton>
+		  <rich:spacer width="10px"></rich:spacer>
+		  </h:panelGrid>
+		  </center>
+		  <rich:spacer height="10px"></rich:spacer>
+		  <rich:dataTable width="100%" id="itemLists"  columnClasses="col"  style="text-align:center;" title="#{msgs['baf.org.dataTableTip']}" onRowDblClick="loadTask('#{taskItem.taskID}','#{taskItem.daemonTask}','#{taskItem.notRun}')"
+		   value="#{taskBean.taskList}" var="taskItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'"  onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  
+		            <rich:column width="5%" style="text-align:center;font-weight:normal;">
+					        <f:facet name="header">
+					        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlTemplate();"/>
+					        </f:facet>
+				             <h:selectBooleanCheckbox id="selectFlag"  onclick="checkBoxClick(this, '#{taskItem.taskID}','#{taskItem.notRun}');"/>
+				    </rich:column>
+		            <rich:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.task.taskName']}" />
+				        </f:facet>
+		                <h:outputText value="#{taskItem.taskName}" />
+		            </rich:column>
+		             	  	
+		             <rich:column visible="false">
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.task.taskPlan']}" />
+				        </f:facet>
+		                <h:outputText value="" />
+		            </rich:column>
+		             	  					
+			        	<rich:column width="8%">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.powerBtn']}" />
+					        </f:facet>
+					        <h:graphicImage  url="#{taskItem.picUrl}" style="cursor:hand;" onclick="runOrStop('#{taskItem.taskStatus}','#{taskItem.taskID}','#{taskItem.notRun}','#{taskItem.daemonTask}')">
+	                        </h:graphicImage>
+				        </rich:column>					    
+				        <rich:column width="15%">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.nextFireTime']}" />
+					        </f:facet>
+				            <h:outputText id="t_nextFireTime" value="#{taskItem.nextFireTime}"/>
+				        </rich:column>
+				        <rich:column width="15%" >
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.prevFireTime']}" />
+					        </f:facet>
+				            <h:outputText id="t_prevFireTime" value="#{taskItem.prevFireTime}"/>
+				        </rich:column>
+                        <rich:column width="20%" >
+					        <f:facet name="header">
+					        	<h:panelGroup>
+					        		<h:selectBooleanCheckbox id="querySelfMachineIp" onclick="querySelfMachineIp(this)" style="float: left;" />
+						        	<h:outputText style="float:left;vertical-align:middle;margin-top: 4px;" value="本机"/>
+						        	<h:outputText styleClass="headerText" value="指定的IP" />
+					        	</h:panelGroup>
+					        </f:facet>
+				            <h:outputText  value="#{taskItem.machineIpDesc}"/>
+				        </rich:column>
+				        <rich:column width="20%" >
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.task.discription']}" />
+					        </f:facet>
+				            <h:outputText id="t_taskDescription" value="#{taskItem.taskDescription}"/>
+				        </rich:column>    
+		        </rich:dataTable>
+		        <h:inputHidden id="gotItemIdValues" value="#{taskBean.gotItemIdValues}"></h:inputHidden>
+		        <h:inputHidden id="notRuns" ></h:inputHidden>
+		        <h:inputHidden id="systemTaskId" value="#{taskBean.systemTaskId}"></h:inputHidden>
+		        <h:inputHidden id="shutdownBtn"  value="#{taskBean.shutdown}"></h:inputHidden>
+		  </rich:tab>
+	</rich:tabPanel>
+
+	  <a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('schForm:panel').component.show()" onstop="document.getElementById('schForm:panel').component.hide()">
+	</a4j:status>
+			<rich:modalPanel id="panel" width="350" height="100">
+            <h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+            </rich:modalPanel>      
+     <s:validatorScript functionName="validateForm"/>  
+     </div> 
+     
+     
+      	<rich:modalPanel id="delPanel" autosized="true" width="300">
+        <f:facet name="header">
+        <h:outputText id="condel" value="#{msgs['baf.task.confirmDelTask']}"
+                style="padding-right:15px;" /> 
+        </f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		<h:graphicImage value="/baf/images/icons/close.png"
+		 id="deleteLink" styleClass="hidelink"/>
+		<rich:componentControl for="delPanel" attachTo="deleteLink"
+		 operation="hide" event="onclick" />
+	    </h:panelGroup>
+		</f:facet>			
+        	<center>		        	      	
+            <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+                    action="#{taskBean.deleteTask}" data="#{taskBean.shutdown}" 
+                    oncomplete="#{rich:component('delPanel')}.hide();document.getElementById('schForm:gotItemIdValues').value ='';checkboxStatus('#{taskBean.querySelfMachineIp}');" reRender="itemLists"/>
+			<rich:spacer width="40px"/>
+            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+                    onclick="#{rich:component('delPanel')}.hide();return false;" />
+			</center>
+	</rich:modalPanel>
+	
+	<!-- 销毁容器提示面板 -->
+	<ui:remove>
+	 <rich:modalPanel id="destroyPanel" autosized="true" width="300" >
+        <f:facet name="header">
+        <h:outputText id="condestroy" value="查看组内当前信息"
+                style="padding-right:15px;" /> 
+        </f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		<h:graphicImage value="/baf/images/icons/close.png"
+		 id="destroyLink" styleClass="hidelink"/>
+		<rich:componentControl for="destroyPanel" attachTo="destroyLink"
+		 operation="hide" event="onclick" />
+	    </h:panelGroup>
+		</f:facet>			
+        	<center>
+        	<h:panelGrid id="groupInfo" style="margin: 0px 0px 40px 0px;">
+        	<h:outputText  value="#{taskBean.schedulerNull}"></h:outputText>
+        	<h:outputText value="#{taskBean.isMasterNode}" style="color:red;font-size:18px;" id="masterTip"></h:outputText>	
+        	<h:outputText value="主节点:#{taskBean.masterNodeAddress}"></h:outputText>        	      	
+            <rich:dataTable width="100%" id="groupList"  columnClasses="col"  style="text-align:center;" title="当前组内成员" 
+		   value="#{taskBean.groupList}" var="groupItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'"  onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  
+		            <rich:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="当前组内成员" />
+				        </f:facet>
+		                <h:outputText value="#{groupItem}" />
+		            </rich:column> 
+		        </rich:dataTable>
+            </h:panelGrid>
+            <ui:remove>
+            <a4j:commandButton value="销毁当前机器调度容器" type="submit" styleClass="rich-button"
+                    action="#{taskBean.destroyQuartz}" 
+                    oncomplete="if(a4jcomplete()==false){return;};#{rich:component('destroyPanel')}.hide();" />
+            </ui:remove>
+			<rich:spacer width="40px"/>
+            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+                    onclick="#{rich:component('destroyPanel')}.hide();return false;" />
+			</center>
+	</rich:modalPanel>
+	</ui:remove>
+	<!-- 销毁容器提示面板  END-->
+	
+	
+         <rich:modalPanel id="rasiePanel" autosized="true" width="300">
+        <f:facet name="header">
+        <h:outputText id="rasieText" value="#{msgs['baf.task.confirmRasieTask']}"
+                style="padding-right:15px;" /> 
+        </f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		<h:graphicImage value="/baf/images/icons/close.png"
+		 id="rasieLink" styleClass="hidelink"/>
+		<rich:componentControl for="rasiePanel" attachTo="rasieLink"
+		 operation="hide" event="onclick" />
+	    </h:panelGroup>
+		</f:facet>			
+        	<center>		        	      	
+            <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+                    action="#{taskBean.raseTask}" data="#{taskBean.shutdown}"
+                    oncomplete="#{rich:component('rasiePanel')}.hide();document.getElementById('schForm:gotItemIdValues').value = '';shutdown(data);checkboxStatus('#{taskBean.querySelfMachineIp}');" reRender="schForm"/>
+			<rich:spacer width="40px"/>
+            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+                    onclick="#{rich:component('rasiePanel')}.hide();return false;" />
+			</center>
+        </rich:modalPanel> 
+        
+	 </h:form>
+	   
+	      <rich:modalPanel id="addPanel"  width="600" height="430" >
+	       <f:facet name="header">
+	       <h:outputText value="#{msgs['baf.task.addTask']}"
+	               style="padding-right:15px;" />
+	       </f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			<h:graphicImage value="/baf/images/icons/close.png"
+			id="hidelinkAdd" styleClass="hidelink"/>
+			<rich:componentControl for="addPanel" attachTo="hidelinkAdd"
+			operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>
+			
+			<!--div  class="scrolls" style="position:fixed;width:625px;height:410px;margin:0;padding:0;"-->
+			<h:form id="addForm" onsubmit="if (validateForm(document.getElementById('addForm'))==false) {return false;}">	
+	          <rich:panel style="margin:0;padding:0;" id="taskPanel">
+              <table width="95%"  cellspacing="0" cellpadding="0"  style="font-size:13px;" class=".rich-text-color-general" >
+              <tr>
+              <td width="20%">  
+              		<h:outputText value="#{msgs['baf.task.taskName']}">     		
+              		</h:outputText>
+              		<font color="red">*</font>
+              </td>
+              <td width="40%">
+              		<h:inputText id="taskName" value="#{taskBean.taskName}" style="width:92%;" maxlength="50">
+              		<s:commonsValidator type="required" arg="#{msgs['baf.task.taskName']}" server="false" client="true"/>
+				    <s:commonsValidator type="maxlength" arg="#{msgs['baf.task.taskName']}" server="false" client="true" maxLength="64"/>					 			
+              		</h:inputText>
+              </td>
+              <td align="center" width="20%">
+                    <h:outputText value="单线程"></h:outputText><h:selectBooleanCheckbox id="single" value="#{taskBean.single}" onclick="showGroup()"></h:selectBooleanCheckbox>
+              </td>
+              <td width="20%">
+              <rich:spacer width="2px"></rich:spacer>
+              <h:panelGroup id="timeoutGroup" style="#{taskBean.timeDivStyle}">
+                   <h:outputText value="超时"></h:outputText><h:inputText size="7" maxlength="10" value="#{taskBean.timeOut}" ></h:inputText>
+                   <h:outputText value="秒"></h:outputText>
+              </h:panelGroup>
+              </td>
+              </tr>
+			  <tr>
+			  <td>
+			        <h:outputText value="运行时间"></h:outputText>
+			        <font color="red">*</font>
+			  </td>
+			  <td>
+			       <h:selectOneRadio id="startAtonce" onclick="changeStartAtonce(this)" style="font-size:13px" value="#{taskBean.startAtonce}">
+					<f:selectItem itemLabel="即时" itemValue="Y" />
+					<f:selectItem itemLabel="指定时间" itemValue="N" />
+					</h:selectOneRadio>  
+			  </td>
+			  <td align="right">
+			        <h:outputText value="随调度器启动:"></h:outputText> 
+			  </td>
+			  <td >
+			        <h:selectBooleanCheckbox value="#{taskBean.bootwithserver}"></h:selectBooleanCheckbox>
+			  </td>
+			  </tr>
+			  
+			  <tr>
+			  <td> 
+	                <h:outputText value="在此指定时间"></h:outputText>
+	          </td>
+	          <td colspan="2">
+	          <table id="startDiv" style="#{taskBean.startDivStyle}">
+	             <tr><td>
+		                <rich:calendar id="startDate"   value="#{taskBean.startDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:100px;height:17px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+				        <s:commonsValidator type="required" arg="#{msgs['baf.task.startDate']}" server="false" client="true"/>
+				        </rich:calendar>
+				     </td>
+				     <td>
+	                    <h:panelGrid columns="3">
+		              	<rich:inputNumberSpinner  id="hour" value="#{taskBean.startDateHour}" step="1" maxValue="23"  inputStyle="width:16px;"/>
+		              	<span>:</span>
+		              	<rich:inputNumberSpinner  id="minute" value="#{taskBean.startDateMin}" step="1" maxValue="59" inputStyle="width:16px;"/>
+		              	</h:panelGrid> 
+		              </td>
+		         </tr>
+	          </table> 
+	          <rich:spacer width="2px"></rich:spacer>
+              </td>
+              <td>
+                   <a4j:commandButton value="#{msgs['baf.task.option']}" id="showBtn" styleClass="rich-button" onclick="#{rich:component('optionPanel')}.show();return false;">
+		            </a4j:commandButton> 
+              </td>
+              </tr>
+              <tr>
+              <ui:remove>
+              <!-- 暂时屏蔽此部分:主机IP(多IP用#分割) -->
+			  <td> 
+	                <h:outputText value="主机IP(多IP用#分割)"></h:outputText>
+	          </td>
+	          <td colspan="3">
+        		    <h:inputText id="appointedIP" value="#{taskBean.appointedIP}"  style="width:92%;"></h:inputText>	
+              </td>
+              </ui:remove>
+               <td> 
+	                <h:outputText value="分配IP"></h:outputText><font color="red">*</font>
+	          </td>
+	          <td colspan="3">
+        		    <h:selectOneMenu style="width:92%;height:23px;" id="machineIp"
+						value="#{taskBean.machineIp}" styleClass="rich-box-border-color-control-select rich-text-control-select" >
+						<f:selectItems value="#{taskBean.machineIpList}" />
+						<s:commonsValidator type="required" arg="分配IP" server="false" client="true"/>
+					</h:selectOneMenu>	
+              </td>
+              </tr>
+              <tr>
+			  <td> 
+	                                        执行类配置<font color="red">*</font>
+	          </td>
+	          <td colspan="3">
+        		    <h:selectOneRadio id="beanType" style="font-size:13px" value="#{taskBean.beanType}">
+					<f:selectItem itemLabel="自定义执行类" itemValue="N" />
+					<f:selectItem itemLabel="实现通用任务接口" itemValue="I" />
+					</h:selectOneRadio>
+              </td>
+              </tr>
+              
+              <tr>
+			  <td> 
+	               <h:outputText value="执行类/(bean简称)"></h:outputText>
+	               <font color="red">*</font>
+	          </td>
+	          <td colspan="3">
+        		    <h:inputText id="className" value="#{taskBean.className}" style="width:92%;">
+        		    <s:commonsValidator type="required" arg="#{msgs['baf.task.executeClass']}" server="false" client="true"/>
+				    <s:commonsValidator type="maxlength" arg="#{msgs['baf.task.executeClass']}" server="false" client="true" maxLength="256"/>				 			
+        		    </h:inputText>	
+              </td>
+              </tr>
+              
+              <tr>
+			  <td> 
+	                <h:outputText value="参数"></h:outputText>
+	          </td>
+	          <td colspan="3">
+        		    <h:inputText id="parameter" value="#{taskBean.parameter}" maxlength="50" style="width:92%;"></h:inputText>	
+              </td>
+              </tr>
+              
+              <tr>
+			  <td> 
+	                <h:outputText value="#{msgs['baf.task.taskDescription']}"></h:outputText>
+	          </td>
+	          <td colspan="3">
+        		     <h:inputTextarea id="taskDescription" rows="4" cols="67" onkeypress="strMaxLength(100,this.value)" styleClass="rich-gradient-input" value="#{taskBean.taskDescription}">				
+					 <s:commonsValidator type="maxlength"  arg="#{msgs['baf.task.taskDescription']}" maxLength="128"  server="false" client="true"/>
+			         </h:inputTextarea>	
+              </td>
+              </tr>
+              <tr>
+              <td> 
+	                <h:outputText value="#{msgs['baf.task.taskType']}"></h:outputText>
+	          </td>
+	          <td colspan="3">
+        		    <h:selectOneMenu style="width:100px;height:23px;" id="taskType"
+						value="#{taskBean.taskType}" styleClass="rich-box-border-color-control-select rich-text-control-select" onchange="changeTypeDiv(this)" >
+						<f:selectItems value="#{taskBean.selectTaskType}" />
+					</h:selectOneMenu>	
+              </td>
+              </tr>
+              </table>
+              
+               
+		      <div id="dayType" style="font-size:13px;${taskBean.dayDivStyle }"> 
+		      <fieldset>  
+		      <legend><h:outputText value="#{msgs['baf.task.everyDay']}"/></legend>
+		      <h:panelGrid columns="3" width="20%" style="font-size:13px;">
+		      <h:outputText value="#{msgs['baf.task.tmp1']}"></h:outputText>
+		      <rich:inputNumberSpinner id="day" value="#{taskBean.daycycle}" step="1" minValue="1" maxValue="100" inputSize="3"/>
+		      <h:outputText value="#{msgs['baf.task.tmp2']}"></h:outputText>
+		      </h:panelGrid>
+		      </fieldset>
+		      </div>
+		      
+		      <div id="weekType" style="font-size:13px;${taskBean.weekDivStyle }"> 
+		      <fieldset>
+		      <legend><h:outputText value="#{msgs['baf.task.everyWeek']}"/></legend>
+		      <table>
+		      <tr><td valign="top" width="50%">
+			      <h:panelGrid columns="4" width="50%" >
+			      <h:outputText value="#{msgs['baf.task.tmp1']}"></h:outputText>
+			      <rich:inputNumberSpinner id="week" value="#{taskBean.weekCycle}" step="1" minValue="1" maxValue="7" inputSize="3"/>
+			      <h:outputText value="#{msgs['baf.task.tmp3']}"></h:outputText>
+			      </h:panelGrid>
+               </td>
+               <td>
+			      <table  width="50%" style="font-size:13px;">
+			      <tr>
+			      <td><h:selectBooleanCheckbox value="#{taskBean.mon}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.mon']}"></h:outputText></td><td><h:selectBooleanCheckbox value="#{taskBean.tue}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.tue']}"></h:outputText></td><td><h:selectBooleanCheckbox value="#{taskBean.wed}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.wed']}"></h:outputText></td>
+			      </tr>
+			      <tr>
+			      <td><h:selectBooleanCheckbox value="#{taskBean.thu}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.thu']}"></h:outputText></td><td><h:selectBooleanCheckbox value="#{taskBean.fri}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.fri']}"></h:outputText></td><td><h:selectBooleanCheckbox value="#{taskBean.sat}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.sat']}"/></td>
+			      </tr>
+			      <tr>
+			      <td><h:selectBooleanCheckbox value="#{taskBean.sun}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.sun']}"/></td><td></td><td></td>
+			      </tr>
+			      </table >
+			  </td></tr>    
+		      </table>
+		      </fieldset>
+		      </div>
+		      <div id="monthType" style="font-size:13px;${taskBean.monthDivStyle }'">
+		      <fieldset>
+		      <legend><h:outputText value="#{msgs['baf.task.everyMonth']}"/></legend>
+		      <table width="40%" CELLSPACING="0" CELLPADDING="0" border="0" style="font-size:13px;">
+		      <tr>
+		      <td width="50%">
+									<h:outputText value="#{msgs['baf.task.thisMonth']}"></h:outputText>
+		      </td>
+		      <td width="30%">
+		      <rich:inputNumberSpinner id="day_of_month"  minValue="1" value="#{taskBean.monthCycle}" step="1" maxValue="31" inputStyle="width:16px;"/>
+		      </td>
+		      <td>
+		      <h:outputText value="#{msgs['baf.task.tmp4']}"></h:outputText>
+		      </td>
+		      </tr>
+		      </table>
+		      <br></br>
+		       <a4j:commandButton value="#{msgs['baf.task.choseMonth']}" styleClass="rich-button" type="button" id="monBtn" >
+		       <a4j:support event="onclick"   onsubmit="#{rich:component('monthPanel')}.show();return false;" ></a4j:support>
+		       </a4j:commandButton>
+		      </fieldset>
+		      </div>
+		      
+              <h:inputHidden id="endDate" value=""></h:inputHidden>
+              <h:inputHidden id="repeatInterval" value="#{taskBean.repeatInterval}"></h:inputHidden>
+              <h:inputHidden id="hourOrMin" ></h:inputHidden>
+              <h:inputHidden id="repeatMode" value="#{taskBean.repeatMode}"></h:inputHidden>
+              <h:inputHidden id="responsePhone" value="#{taskBean.responsePhone}"></h:inputHidden>
+              <h:inputHidden id="endHour"></h:inputHidden>
+              <h:inputHidden id="endMinute"></h:inputHidden>
+              <h:inputHidden id="lastHour" value="#{taskBean.lastHour}"></h:inputHidden>
+              <h:inputHidden id="lastMinute" value="#{taskBean.lastMinute}"></h:inputHidden>
+              <h:inputHidden id="monthsString"></h:inputHidden>
+              <h:inputHidden id="runningTimes" value="#{taskBean.runningTimes}"></h:inputHidden>
+              <h:inputHidden id="taskID" value="#{taskBean.taskID}"></h:inputHidden>
+              </rich:panel>	
+              <s:validatorScript functionName="validateForm"/> 
+               <p style="position:absolute;width:100%;clear:both;bottom:5px;text-align:center;">
+	                <a4j:commandButton id="save" styleClass="rich-button" type="submit" value="#{msgs['baf.Save']}" action="#{taskBean.saveTaskVO}" reRender="schForm" oncomplete="if(a4jcomplete()==false){return;}	#{rich:component('addPanel')}.hide();checkboxStatus('#{taskBean.querySelfMachineIp}');">
+	                </a4j:commandButton>	        	      	
+				    <rich:spacer width="40px"/>
+		            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"  onclick="this.form.reset();#{rich:component('addPanel')}.hide();return false;" />
+	           </p>
+				
+			</h:form>
+			<!--/div-->
+	</rich:modalPanel>      
+	 
+   <rich:modalPanel id="monthPanel" height="250" width="300" autosized="true">
+       <f:facet name="header">
+       <h:outputText id="rasieText" value="#{msgs['baf.task.choseMonth']}"
+               style="padding-right:15px;" /> 
+       </f:facet>
+	<!-- 关闭按钮 -->
+	<f:facet name="controls">
+	<h:panelGroup>
+	<h:graphicImage value="/baf/images/icons/close.png"
+	 id="monthLink" styleClass="hidelink"/>
+	<rich:componentControl for="monthPanel" attachTo="monthLink"
+	 operation="hide" event="onclick" />
+    </h:panelGroup>
+	</f:facet>
+	    <h:form id="monthForm">			
+       	<center>
+       	<h:panelGrid columns="4" width="280" id="monTab">
+		    <h:selectBooleanCheckbox id="month1" value="#{taskBean.month1}"></h:selectBooleanCheckbox><h:outputText value="#{msgs['baf.task.month1']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month2" value="#{taskBean.month2}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month2']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month3" value="#{taskBean.month3}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month3']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month4" value="#{taskBean.month4}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month4']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month5" value="#{taskBean.month5}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month5']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month6" value="#{taskBean.month6}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month6']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month7" value="#{taskBean.month7}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month7']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month8" value="#{taskBean.month8}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month8']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month9" value="#{taskBean.month9}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month9']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month10" value="#{taskBean.month10}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month10']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month11" value="#{taskBean.month11}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month11']}"></h:outputText>
+		    <h:selectBooleanCheckbox id="month12" value="#{taskBean.month12}"></h:selectBooleanCheckbox> <h:outputText value="#{msgs['baf.task.month12']}"></h:outputText>
+		    </h:panelGrid>
+		    <br></br> 		        	      	
+        <a4j:commandButton value="#{msgs['baf.Confirm']}" type="button" styleClass="rich-button"
+                    onclick="setMonths();#{rich:component('monthPanel')}.hide();return false;" />
+		<rich:spacer width="40px"/>
+           <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+                   onclick="#{rich:component('monthPanel')}.hide();return false;" />
+		</center>
+		</h:form>
+       </rich:modalPanel>
+	 
+	 <rich:modalPanel id="optionPanel" autosized="true" width="500">
+        <f:facet name="header">
+        <h:outputText id="optionStop" value="#{msgs['baf.task.optionChoice']}"
+                style="padding-right:15px;" /> 
+        </f:facet>
+	<!-- 关闭按钮 -->
+	<f:facet name="controls">
+	<h:panelGroup>
+	<h:graphicImage value="/baf/images/icons/close.png"
+	 id="optionLink" styleClass="hidelink"/>
+	<rich:componentControl for="optionPanel" attachTo="optionLink"
+	 operation="hide" event="onclick" />
+    </h:panelGroup>
+	</f:facet>	
+        	<h:form id="optForm">	
+        	<rich:panel id="effectPanel" >		
+	            <h:outputText value="#{msgs['baf.task.endDate']}" ></h:outputText>
+				<rich:calendar id="endDate" value="#{taskBean.endDate}"  datePattern="yyyy-MM-dd" oninputkeydown="forCheck();" weekDayLabelsShort="日,一,二,三,四,五,六" inputStyle="width:100px;height:17px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+	            </rich:calendar>
+	            <rich:spacer width="10px"></rich:spacer>
+	            <h:outputText value="任务异常告警手机号:"></h:outputText>
+	            <h:inputText id="responsePhone" value="#{taskBean.responsePhone}" inputClass="rich-gradient-input" styleClass="rich-gradient-input" size="15"></h:inputText>
+			  <fieldset >
+			  <legend>
+		  
+			  <h:outputText value="#{msgs['baf.task.repeat']}"></h:outputText></legend>
+			  <table id="repeatTab"   width="80%" style="table-layout:fixed;font-size:13px;">
+			  <tr>
+			  <td width="10%" align="right">
+			  <h:outputText value="#{msgs['baf.task.repeatInteal']}"></h:outputText>
+			  </td>
+			  <td width="20%">
+			  <rich:inputNumberSpinner id="repeatInterval" value="#{taskBean.repeatInterval}" step="1" maxValue="9999999999999999999999999999999999999999999999" inputSize="5"/>
+			  </td>
+			  <td width="20%">
+			  <h:outputText value="(以秒为单位)"></h:outputText>
+			  <h:inputHidden id="hourOrMin2" value="second"></h:inputHidden>
+			  <!-- 
+			  <select id="hourOrMin">
+			  <option value="second"><h:outputText value="秒" ></h:outputText></option>
+			  <option value="min"><h:outputText value="#{msgs['baf.task.minute']}" ></h:outputText></option>
+			  <option value="hour"><h:outputText value="#{msgs['baf.task.hour']}" ></h:outputText></option>
+			  </select>
+			   -->
+			  </td>
+			  <td width="20%"></td>
+			  </tr>
+			  
+			  <tr>
+			  <td align="right">
+			  <h:outputText value="#{msgs['baf.task.until']}"></h:outputText>
+			  </td>
+			  <!-- 重复方式为截止时间 -->
+			  <td >
+			  <c:if test="${taskBean.repeatMode==2}">
+			  <input type="radio" name="repeatMode" value="2" checked="checked" />
+			  </c:if>
+			  <c:if test="${taskBean.repeatMode!=2}">
+			  <input type="radio" name="repeatMode" value="2" />
+			  </c:if>
+			  <h:outputText value="#{msgs['baf.task.time']}"></h:outputText>
+			  </td>
+			  <td>  <h:panelGrid columns="3">
+			  	    <rich:inputNumberSpinner id="endHour" value="#{taskBean.endHour}" step="1" maxValue="23"  inputStyle="width:16px;"/>
+	              	<span>:</span>
+	              	<rich:inputNumberSpinner id="endMinute" value="#{taskBean.endMinute}" step="1" maxValue="59" inputStyle="width:16px;"/>
+	              	</h:panelGrid>
+			  </td>
+			  <td align="right"></td>
+			  </tr>
+			  
+			  <tr>
+			  <td>
+			  </td>
+			  <td>
+			   <!-- 重复方式为时间段 -->
+			  <c:if test="${taskBean.repeatMode==1}">
+			  <input type="radio" name="repeatMode" value="1" checked="checked" />
+			  </c:if>
+			  <c:if test="${taskBean.repeatMode!=1}">
+			  <input type="radio" name="repeatMode" value="1" />
+			  </c:if>
+			  <h:outputText value="#{msgs['baf.task.lastTime']}"></h:outputText>
+			  </td>
+			  <td >
+			      <h:panelGrid columns="2"> 
+			      <rich:inputNumberSpinner id="lastHour" value="#{taskBean.lastHour}" step="1" maxValue="9999999999999999999999999999999999999999999999" inputStyle="width:16px;"/>
+			      <h:outputText value="#{msgs['baf.task.hour']}" style="font-size:13px;"/>
+			      </h:panelGrid>
+			  </td>
+			  <td > 
+			        <h:panelGrid columns="2">
+			        <rich:inputNumberSpinner id="lastMinute" value="#{taskBean.lastMinute}" step="1" maxValue="9999999999999999999999999999999999999999999999" inputStyle="width:16px;"/>
+			        <h:outputText value="#{msgs['baf.task.minute']}" style="font-size:13px;"/>
+			        </h:panelGrid>
+			  </td>
+			  </tr>
+			  
+			  <tr>
+			  <td>
+			  </td>
+			   <!-- 重复方式为运行次数 -->
+			  <td>
+			  <c:if test="${taskBean.repeatMode==0}">
+			  <input type="radio" name="repeatMode" value="0" checked="checked" />
+			  </c:if>
+			  <c:if test="${taskBean.repeatMode!=0}">
+			  <input type="radio" name="repeatMode" value="0" />
+			  </c:if>
+			  <h:outputText value="#{msgs['baf.task.runTimes']}"></h:outputText></td>
+			  <td> 
+			      <h:panelGrid columns="1">
+			      <rich:inputNumberSpinner id="runningTimes" value="#{taskBean.runningTimes}" step="1" maxValue="59" inputStyle="width:16px;"/>
+			      </h:panelGrid>
+			  </td>
+			  <td align="right"></td>
+			  </tr>
+	  		  
+			  </table>
+			  </fieldset>
+		      </rich:panel>	
+		      	
+		    <center>        	      	
+            <a4j:commandButton value="#{msgs['baf.Confirm']}" type="button" styleClass="rich-button"
+                    onclick="setHideValue();#{rich:component('optionPanel')}.hide();return false;" 
+                    />
+
+			</center>
+			</h:form>
+	       </rich:modalPanel>     
+	        
+            <h:form>
+            <a4j:jsFunction name="getTask" reRender="addForm,optForm,monthForm" action="#{taskBean.getTaskById}" oncomplete="#{rich:component('addPanel')}.show();setFocus('addForm:taskName');">
+			<a4j:actionparam name="taskId" assignTo="#{taskBean.taskID}"></a4j:actionparam>
+			</a4j:jsFunction>
+			<a4j:jsFunction name="runTask" reRender="schForm" action="#{taskBean.runTask}" data="#{taskBean.shutdown}" oncomplete="notExistTip('#{taskBean.data}');shutdown(data);checkboxStatus('#{taskBean.querySelfMachineIp}');">
+			<a4j:actionparam name="taskId" assignTo="#{taskBean.taskID}"></a4j:actionparam>
+			</a4j:jsFunction>
+			<a4j:jsFunction name="stopTask" reRender="schForm" action="#{taskBean.stopTask}" data="#{taskBean.shutdown}" oncomplete="notExistTip('#{taskBean.data}');shutdown(data);checkboxStatus('#{taskBean.querySelfMachineIp}');">
+			<a4j:actionparam name="taskId" assignTo="#{taskBean.taskID}"></a4j:actionparam>
+			</a4j:jsFunction>
+			<a4j:jsFunction name="killThread" reRender="schForm" action="#{taskBean.killThread}" >
+			<a4j:actionparam name="taskId" assignTo="#{taskBean.taskID}"></a4j:actionparam>
+			</a4j:jsFunction>
+			<a4j:jsFunction name="queryByMachineIp" reRender="schForm" action="#{taskBean.loadData}" oncomplete="checkboxStatus('#{taskBean.querySelfMachineIp}');">
+				<a4j:actionparam name="querySelfMachineIp" assignTo="#{taskBean.querySelfMachineIp}"></a4j:actionparam>
+			</a4j:jsFunction>
+			<a4j:jsFunction  name="isShutdownFunction" reRender="shutdownBtn" action="#{taskBean.isShutdown}" data="#{taskBean.shutdown}" >
+			</a4j:jsFunction>
+            </h:form>
+		    <rich:toolTip for="helpicon">
+		    <div style="width:300;">
+		      <h:outputText value="#{msgs['baf.task.taskDescription']}"></h:outputText><br></br>
+		      <h:outputText value="#{msgs['baf.task.description1']}"></h:outputText><br></br>
+		      <h:outputText value="2)如果分配给这个任务的IP是本机IP，则这个任务能直接进入调度；如果分配的IP是别的机器的IP，需要进入这个IP的机器的任务调度页面，再进行一次编辑保存，任务才能进入调度"></h:outputText><br/>
+		      <h:outputText value="3)如果要在数据库里更改任务的ip,请务必要关闭服务开关,再启动服务开关,防止多台机器运行同一个任务"></h:outputText><br/>
+		      <h:outputText value="4)不推荐在数据库里直接更改任务表的数据"></h:outputText><br/>
+		      <h:outputText value="5)整个服务器重启之前，尽量先把任务开关关闭。服务器重启后，再开启任务开关"></h:outputText><br/>
+		    </div>
+		    </rich:toolTip>
+		    
+		    <a4j:keepAlive beanName="taskBean"/>
+		    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

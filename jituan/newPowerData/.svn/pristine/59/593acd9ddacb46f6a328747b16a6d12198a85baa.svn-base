@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+	<script>
+	//<![CDATA[
+		//触发鼠标事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+				//IE
+				obj.fireEvent(eventname);
+			} else {
+				//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+			  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+			  	obj.dispatchEvent(evtObj);
+			}
+		}
+		
+		 //传递树的所有选中节点
+		function setCheckValue(){
+			var checkList = ModuleNavigationTree_tree.getAllCheckedBranches();
+			if(checkList.length < 1){
+				alert("${msgs['baf.imprxp.data.Description']}");
+				return false;
+			}else{
+				document.getElementById("expform:checked").value = checkList;
+				return true;
+			}
+		}
+		//]]>
+	</script>
+	
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }		   
+    </style>   
+        
+    <!--[if !IE]><!-->
+    <style>
+	    legend{
+	    	margin:5 5 5 5;
+	    }
+    </style>
+    <!--<![endif]-->
+</head>
+<body>    
+	    	
+	<regaltec:viewPort ctCls="panel-bdColor">	
+		<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+			contentEl="center"/>
+	</regaltec:viewPort>
+	
+	<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;" align="center">
+	<rich:tabPanel id="tabPanel" style="width:98%;height:97%;" switchType="client" >
+		<rich:tab id="export" label="#{msgs['baf.impexp.data.dataExport']}" switchType="client" style="text-align:center;">			 
+			<rich:spacer height="20px"/>
+			
+			<h:form id="expform" onsubmit="if(setCheckValue()==false) return false;">
+			<center>
+			<fieldset id="dataexport" style="height:425px;width:80%" >			
+            <legend><h:outputText value="#{msgs['baf.impexp.data.dataExport']}" /></legend>
+            <rich:spacer height="2px"/>
+           		<fieldset id="dataexport" style="height:85%;width:70%" >			
+	            	<legend><h:outputText value="#{msgs['baf.impexp.data.selectObjects']}" /></legend>
+					<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+						<tr>
+							<td id="modulenavigation_tree" width="100%" height="100%"></td>
+						</tr>
+					</table>
+	            	
+	            	<rich:spacer height="2px"/>
+	           		<regaltec:dhtmlXtree  id="ModuleNavigationTree" 
+					    imagePath="/baf/images/dhtmlxtree/" contentEl="modulenavigation_tree"
+		                loadXML="/baf/jsp/impexp/moduleNavigationXMLData.jsp"
+				        xmlAutoLoading="/baf/jsp/impexp/moduleNavigationXMLData.jsp">
+				          <regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+					</regaltec:dhtmlXtree> 	
+           		</fieldset>
+           		<br />
+           		<center>
+           			<h:commandButton id="download" styleClass="rich-button" value="#{msgs['baf.impexp.data.export']}" actionListener="#{exportBean.exportData}"/>
+            	</center>
+           		<h:inputHidden id="checked" value="#{exportBean.checked}"></h:inputHidden>
+            </fieldset>
+            </center>
+			<rich:spacer height="10px"/>
+			</h:form>
+		</rich:tab>
+	</rich:tabPanel>
+	</div>
+</body>
+	<script>
+	//<![CDATA[
+	  	   /*session超时显示错误信息*/
+		   A4J.AJAX.onExpired = function(loc,expiredMsg)
+		   {
+		      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+		   }
+		   /*显示数据提交到后台的错误信息*/
+		   A4J.AJAX.onError = function(req,status,message)
+		   {
+			   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+			   alert(report);
+		   }
+		   //]]>
+	  	</script>
+	</f:view>
+</html>
+
+ 

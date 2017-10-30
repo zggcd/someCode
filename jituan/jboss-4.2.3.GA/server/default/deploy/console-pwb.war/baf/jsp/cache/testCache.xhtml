@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+	    <a4j:include viewId="/baf/jsp/taskmange/commonq.xhtml" />	
+		<script type="text/javascript">
+		//<![CDATA[
+
+
+
+		//]]>          		
+		</script>
+		</head>
+		<body>
+			<f:loadBundle basename="messages" var="msgs" />
+			<a4j:form id="cacheForm">
+			<h3 style="color: red;">Hash缓存监控信息</h3>
+			<table width="90%" border="1">
+			<tr>
+			<th><h:outputText value="节点名称" /></th><th><h:outputText value="当前数量" /></th><th><h:outputText value="限制节点数量" /></th>
+			</tr>
+			<tr>
+			<td width="40%"><h:outputText value="滚动消息" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.msgsetSize}"/><rich:spacer width="2px"></rich:spacer></td><td>10000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="策略" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.tacticSize}" /><rich:spacer width="2px"></rich:spacer></td><td>4000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="个人消息配置" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.profilemsgSize}" /><rich:spacer width="2px"></rich:spacer></td><td>2000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="字典" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.dicSize}"/><rich:spacer width="2px"></rich:spacer></td><td>10000</td>
+			</tr>			
+			<tr>
+			<td><h:outputText value="业务" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.businessSize}"/><rich:spacer width="2px"></rich:spacer></td><td>1000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="元素" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.elementSize}"/><rich:spacer width="2px"></rich:spacer></td><td>1000</td>
+			</tr>			
+			<tr>
+			<td><h:outputText value="局向" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.bureauSize}"/><rich:spacer width="2px"></rich:spacer></td><td>6000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="用户" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.userSize}"/><rich:spacer width="2px"></rich:spacer></td><td>10000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="组织" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.orgSize}"/><rich:spacer width="2px"></rich:spacer></td><td>4000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="模块" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.moduleSize}"/><rich:spacer width="2px"></rich:spacer></td><td>250</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="回单代码" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.faultcauseSize}"/><rich:spacer width="2px"></rich:spacer></td><td>2000</td>
+			</tr>
+			<tr>
+			<td><h:outputText value="障碍现象" styleClass="rich-text-color-link-hover"/></td><td><h:outputText value="#{testMessageBean.complaintcauseSize}"/><rich:spacer width="2px"></rich:spacer></td><td>2000</td>
+			</tr>
+			</table>   
+			
+			<p>
+			<a4j:commandButton styleClass="rich-button" id="refresh" value="刷新"  action="#{testMessageBean.getCacheNodeInfo}"  reRender="cacheForm" />
+			</p>
+        	 <rich:dataTable value="#{testMessageBean.elementVOList}" var="cap" id="table">
+        	<rich:column width="150px">
+		        <f:facet name="header">
+		        	<h:outputText styleClass="headerText" value="元素ID" />
+		        </f:facet>
+	            <h:outputText value="#{cap.elementId}"/>
+	        </rich:column>					    
+	        <rich:column width="150px">
+		        <f:facet name="header">
+		        	<h:outputText styleClass="headerText" value="元素名称" />
+		        </f:facet>
+	            <h:outputText value="#{cap.elementName}"/>
+	        </rich:column>
+	        <rich:column width="150px">
+		        <f:facet name="header">
+		        	<h:outputText styleClass="headerText" value="元素编号" />
+		        </f:facet>
+	            <h:outputText value="#{cap.elementCode}"/>
+	        </rich:column> 	                    	 		 	
+          	</rich:dataTable>
+			</a4j:form>
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+</f:view>
+</html>

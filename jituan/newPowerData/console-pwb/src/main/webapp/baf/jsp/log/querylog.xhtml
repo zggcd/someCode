@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+ 
+<f:loadBundle basename="messages" var="msgs" />
+<f:view  contentType="text/html">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	    <script>
+		//<![CDATA[		
+			//操作日志查询按钮onSubmit事件.
+	    	function checkQueryInputValues(){
+	   	        var beginDay=document.getElementById("logForm:beginTimeInputDate").value;
+				var endDay=document.getElementById("logForm:endTimeInputDate").value;
+				var returnValue = false;
+				if(beginDay=="" || endDay==""){
+					returnValue = true;
+				}else{
+					returnValue = inputSeachTimeCheck(beginDay,endDay)
+				}
+				return returnValue;
+	    	}
+		    
+	        //查询日志日期验证.开始日期不能大于结束日期,如果大于则返回FALSE 
+			function inputSeachTimeCheck(beginDay,endDay){
+				var beginDate = beginDay.split(" ");
+				var arr1 = beginDate[0].split("-");
+				var begin = new Date(arr1[0],arr1[1],arr1[2]);
+				var beginDaytime = begin.getTime();
+				var hour1 = beginDate[1].split(":")[0];
+				var mini1 = beginDate[1].split(":")[1];
+	
+				var endDate = endDay.split(" ");
+				var arr2 = endDate[0].split("-");
+				var end = new Date(arr2[0],arr2[1],arr2[2]);
+				var endDayTime = end.getTime();
+				var hour2 = endDate[1].split(":")[0];
+				var mini2 = endDate[1].split(":")[1];
+	
+				if(beginDaytime >= endDayTime)
+				{
+					if(beginDaytime > endDayTime){
+						alert("${msgs['baf.dataImport.dateCompare']}");
+						return false;
+					}else{
+						if(hour1>hour2 || (hour1==hour2 && mini1>mini2)){
+							alert("${msgs['baf.dataImport.dateCompare']}");
+							return false;
+						}else{
+							return true;
+						}
+					}
+				}else{
+					return true;
+				}
+			}		
+			
+			//重置查询条件
+			function reset(){
+				document.getElementById("logForm:beginTime").value = "";
+				document.getElementById("logForm:endTime").value = "";
+			}
+			
+			//屏蔽退格键的事件监听
+			function forCheck(){
+				if(event.keyCode == 8){
+				    event.returnValue   =   false;
+				}
+			}
+			//点击查询按纽列表未渲染前置灰
+			function ondisabled(){
+				document.getElementById("logForm:itemForSearch").disabled = true;
+			}
+		//]]>
+		</script>
+		<style type="text/css">
+			.column1{
+				width:10%;
+				text-align:center;
+			}
+			.column2{
+				width:10%;
+				text-align:center;
+			}
+			.column3{
+				width:55%;
+				text-align:left;
+			}
+			.column4{
+				width:15%;
+				text-align:center;
+			}
+			.clearButton{
+				display:none;
+			}
+		</style>
+	</head>
+	<body> 
+	
+		<regaltec:viewPort ctCls="panel-bdColor">	
+			<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+				contentEl="center"/>
+		</regaltec:viewPort>
+	
+		<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;" align="center">
+			<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:97%;" switchType="client">
+				<!-- 操作日志查询tab -->
+				<rich:tab id="logTab" name="logTab" label="#{msgs['baf.log.tabTitle']}" style="height:100%;width:100%;">
+					<br/><br/>
+					<center>
+			        	<a4j:form id="logForm">
+			        		<!-- 查询Panel -->
+							<rich:panel style="width:95%;">				
+								<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	
+							        <h:panelGroup>
+										<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+										<rich:calendar id="beginTime"  value="#{logBean.logStartTime}" 
+											datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+											inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+										</rich:calendar>
+									</h:panelGroup>
+									
+									<rich:spacer width="10px"/>  
+									
+									<h:panelGroup>
+										<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+										<rich:calendar id="endTime"  value="#{logBean.logEndTime}" 
+											datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+											inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+										</rich:calendar>
+										
+										<rich:spacer width="20px"/> 
+										
+										<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.calendar.select']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues()==false) return false;ondisabled();" disabled="false" action="#{logBean.searchImpLogByTime}" limitToList="true" reRender="logLists,itemScroller,itemForSearch" requestDelay="100"/>
+										</a4j:commandButton>
+										<rich:spacer width="10px"/>
+										<!-- 重置按钮 -->
+										<a4j:commandButton styleClass="rich-button" id="itemForReset" value="#{msgs['buttonResetLable']}" onclick="reset()"/>
+									</h:panelGroup>	
+								</h:panelGrid>	
+							</rich:panel>		
+					    	 
+							<rich:spacer height="30px"/>
+							
+							<!-- 显示列表 -->
+							<rich:dataTable width="95%" id="logLists" rows="#{logBean.pageSize}" columnClasses="column1,column2,column3,column4"
+					            value="#{logBean.defaultDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+					            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+					            <h:column>
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.log.operateUser']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.operateUser}" />
+					            </h:column>
+					            <h:column>
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.log.operateType']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <h:outputText value="#{item.logDesc}" />
+					            </h:column>
+					            <h:column>
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.log.operateDesc']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.logData}" />
+					            </h:column>
+					            <h:column>
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.log.operateTime']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <center>
+						                <h:outputLabel value="#{item.logTime}">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+										</h:outputLabel>
+									</center>
+					            </h:column>
+					        </rich:dataTable>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="logLists" fastStep="1"  page="#{logBean.scrollerPage}" id="itemScroller"/>							
+									</td>
+								</tr>
+							</table>
+							<a4j:keepAlive beanName="logBean"/>
+							
+					    </a4j:form>	
+				    </center>	 	
+				</rich:tab>
+			</rich:tabPanel>		
+	    </div>
+	</body>
+	</f:view>
+</html>

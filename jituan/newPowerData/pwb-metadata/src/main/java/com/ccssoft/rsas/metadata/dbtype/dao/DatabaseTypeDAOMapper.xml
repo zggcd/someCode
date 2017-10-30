@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.dbtype.dao.DatabaseTypeDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.dbtype.model.DatabaseTypeVO">
+		<id column="FDUDBTYPEID" jdbcType="VARCHAR" property="ID" />
+		<result column="FDCDBTYPENAME" jdbcType="VARCHAR" property="name" />
+		<result column="FDCDBTYPELABLE" jdbcType="VARCHAR" property="lable" />
+		<result column="FDCDBSTYLE" jdbcType="CHAR" property="style" />
+		<result column="FDCDRIVER" jdbcType="VARCHAR" property="driver" />
+		<result column="FDCJDBCURL" jdbcType="VARCHAR" property="jdbcURL" />
+		<result column="FDIDISPLAYORDER" jdbcType="INTEGER" property="displayOrder" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addDbType" parameterType="com.ccssoft.rsas.metadata.dbtype.model.DatabaseTypeVO">
+		insert into TBDATABASETYPE (FDUDBTYPEID, FDCDBTYPENAME, FDCDBTYPELABLE, 
+		FDCDBSTYLE, FDCDRIVER, FDCJDBCURL, FDIDISPLAYORDER, FDCDESC)
+		values (#{ID,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+		#{lable,jdbcType=VARCHAR}, #{style,jdbcType=CHAR}, 
+		#{driver,jdbcType=VARCHAR}, #{jdbcURL,jdbcType=VARCHAR}, 
+		#{displayOrder,jdbcType=INTEGER}, #{desc,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateDbType" parameterType="com.ccssoft.rsas.metadata.dbtype.model.DatabaseTypeVO">
+		update TBDATABASETYPE
+		set FDCDBTYPENAME = #{name,jdbcType=VARCHAR},
+		FDCDBTYPELABLE = #{lable,jdbcType=VARCHAR},
+		FDCDBSTYLE = #{style,jdbcType=CHAR}, 
+		FDCDRIVER = #{driver,jdbcType=VARCHAR},
+		FDCJDBCURL = #{jdbcURL,jdbcType=VARCHAR},
+		FDIDISPLAYORDER = #{displayOrder,jdbcType=INTEGER},
+		FDCDESC = #{desc,jdbcType=VARCHAR}
+		where FDUDBTYPEID = #{ID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delDbType" parameterType="java.lang.String">
+		delete from TBDATABASETYPE
+		where FDUDBTYPEID = #{ID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getDbType" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUDBTYPEID, FDCDBTYPENAME, FDCDBTYPELABLE, 
+		FDCDBSTYLE, FDCDRIVER, FDCJDBCURL, FDIDISPLAYORDER, FDCDESC
+		from TBDATABASETYPE
+		where FDUDBTYPEID = #{ID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getDbTypes" resultMap="BaseResultMap">
+		select FDUDBTYPEID, FDCDBTYPENAME, FDCDBTYPELABLE, 
+		FDCDBSTYLE, FDCDRIVER, FDCJDBCURL, FDIDISPLAYORDER, FDCDESC
+		from TBDATABASETYPE
+		order by FDIDISPLAYORDER
+	</select>
+</mapper>

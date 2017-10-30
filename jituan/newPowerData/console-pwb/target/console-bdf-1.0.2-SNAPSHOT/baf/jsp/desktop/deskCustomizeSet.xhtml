@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+
+<head>
+<script>
+//<![CDATA[
+    //树形对象节点单击事件
+    function showDeskTemlateOptional(){  		
+      	var orgObjId = deskObjsTree_tree.getSelectedItemId();
+      	var orgObjType = deskObjsTree_tree.getUserData(orgObjId,"objectCategory");//获取对象的类型.O/P/E.
+      	var orgObjName = deskObjsTree_tree.getItemText(orgObjId);//获取对象的名称.
+      	getAllDeskTemplate(orgObjId,orgObjType,orgObjName);
+  	}  	
+  	//跳转回桌面定制的主页面,回传对象Id,type以及所选择的桌面模板Id.
+	function gotoMainPage(){
+	    var currLayoutId = "";
+	    var currObjId = "";
+	    var currObjType = "";
+	    var currObjName = "";
+	    var currTemplateName = "";
+	        
+      	currObjId = document.getElementById("desktopSetForm:currObjNodeId").value;
+	    currObjType = document.getElementById("desktopSetForm:currObjNodeType").value; 	    
+		currObjName = encodeURIComponent(document.getElementById("desktopSetForm:currObjNodeNameCopy").value);
+		currLayoutId = document.getElementById("desktopSetForm:layoutIdSelected").value;
+		currTemplateName = encodeURIComponent(document.getElementById("desktopSetForm:passTemplateName").value);//对中文进行转码
+      	if(currObjId != "" && currObjType != "" && currLayoutId != "" && currObjName != ""){
+      		document.location.href = "${request.contextPath}/baf/jsp/desktop/desktopCustomize.xhtml?objectId="+currObjId+"&objectType="+currObjType+"&templateId="+currLayoutId+"&templateName="+currTemplateName+"&objectName="+currObjName+"&setT="; 
+      	}else{
+      		alert("${msgs['baf.desktop.customize.noSelectDeskTemplate']}");
+      		return;
+      	}
+	}
+	//响应模版单选按钮的单击事件.
+	function selectedTemplate(deskTemplateId,deskTemplateName){
+		document.getElementById("desktopSetForm:layoutIdSelected").value = deskTemplateId;
+		document.getElementById("desktopSetForm:templateNameSet").value = deskTemplateName;
+		
+		var currLayoutId = deskTemplateId;
+		var currLayoutName = deskTemplateName;
+		changeValues(currLayoutId,currLayoutName);
+	}
+	//响应模版列表行双击事件.
+	function onDblClickLayoutId(setLayoutId,setLayoutName){
+		selectedTemplate(setLayoutId,setLayoutName);
+        togoLocation();
+	}
+	
+	//响应下一步按钮单击事件.
+	function togoLocation(){
+	    var changed = "";
+	    changed = isLayoutIdChanged();
+		if(changed != true){
+			gotoMainPage(); //没有改变原有桌面模板	
+		}else{
+			confirmLayoutIdChanged();	
+		}
+	}
+	
+	//判读用户对原有桌面模版是否做出了更改.
+	function isLayoutIdChanged(){
+		var existLayoutId = "";
+		var selectedLayoutId = "";
+		
+		existLayoutId = document.getElementById("desktopSetForm:existLayoutId").value;
+		selectedLayoutId = document.getElementById("desktopSetForm:layoutIdSelected").value;
+		if(existLayoutId != "" && existLayoutId != selectedLayoutId){
+			return true;  //已更改.
+		}else{
+			return false;
+		}
+	}
+	
+	//确认更改提示信息.
+	function confirmLayoutIdChanged() {
+    	var answer = confirm("${msgs['baf.desktop.customize.confirmLayoutTemplateChanged']}")
+    	if (answer){
+    		gotoMainPage(); //没有改变原有桌面模板
+		}
+		else{
+        	return;  
+		}
+	}
+	
+	//设置选中单选按钮的样式
+	function templateChked(){
+		var table = document.getElementById("desktopSetForm:dtableTemplate");
+		var rds = document.getElementsByName("rd");
+		var over = "";
+		var out = "";
+		for(var i=1;i<table.rows.length;i++){
+			if(table.rows[i+1].onmouseover!=""){
+				over = table.rows[i+1].onmouseover;
+				out = table.rows[i+1].onmouseout;
+				break;
+			}
+		}
+		for(var i=0;i<table.rows.length;i++){
+			if(rds[i].checked==true){
+				table.rows[i+1].style.backgroundColor="#CCCCCC";				
+				table.rows[i+1].onmouseover="";
+				table.rows[i+1].onmouseout="";
+			}else{
+				table.rows[i+1].style.backgroundColor="";
+				if(table.rows[i+1].onmouseover==""){
+					table.rows[i+1].onmouseover = over;
+					table.rows[i+1].onmouseout = out;
+				}
+			}
+		}		
+	}
+//]]>
+</script>
+</head>
+
+<body>
+	
+	<regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true" contentEl="center" />	
+	</regaltec:viewPort>
+	<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel"  style="margin-left:5px;margin-right:5px;margin-top:5px;"  width="98%" height="98%" switchType="client" >
+		<rich:tab id="deskTopSetInfo" label="#{msgs['baf.desktop.customize.objTemplateTitle']}" style="text-align:center;height:98%;width:100%;">		
+		<br />
+		<a4j:form id="desktopSetForm">		
+			<table id="deskTable" border="0" height="500px" width="100%" cellspacing="0" cellpadding="0">
+			<tr id="treeTr">
+				<td width="50%" align="center" id="treeTd">
+				 	<fieldset style="height:95%;width:95%" >
+				 	<legend><h:outputText value="#{msgs['baf.desktop.customize.objSeletion']}" /></legend>
+				 	<h:panelGrid id="major"    style="font-size:13px;width:100%;" styleClass=".rich-text-color-general"> 			
+						<div id="belongsObj_tree" style="width:100%;height:400;" align="left">
+							<regaltec:dhtmlXtree  id="deskObjsTree"
+							    imagePath="/baf/images/dhtmlxtree/" contentEl="belongsObj_tree"
+				                loadXML="/baf/jsp/desktop/deskObjTreeXMLData.jsp"
+						        xmlAutoLoading="/baf/jsp/desktop/deskObjTreeXMLData.jsp?lastSelectedId=#{desktopCustomizeBean.currObjNodeId}">
+						        <regaltec:setDxtEevntHandler eventName="onClick" handler="showDeskTemlateOptional" />	
+							</regaltec:dhtmlXtree> 		
+						</div>
+				 	</h:panelGrid>	
+				 	</fieldset>
+			 	</td>
+			
+			
+				<td width="50%" align="center" id="templateTd">
+				  	<fieldset id="deskpTempInfo" style="height:95%;width:95%" >		
+	              	<legend><h:outputText value="#{msgs['baf.desktop.customize.TemplateSeletion']}" /></legend>  
+	              	<div id="belongsObj_tree" style="width:100%;height:400;">	            	         
+					  	<h:panelGroup id="panelGroup" layout="block" styleClass="scrolls" style="width:98%;height:370">			
+							<rich:dataTable width="100%" id="dtableTemplate" rows="#{desktopCustomizeBean.pageSize}" columnClasses="col"  style="text-align:center;"
+					            value="#{desktopCustomizeBean.thirdDataModel}" var="currTemplate" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+					            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+					            title="#{msgs['baf.desktop.customize.dblClickTip']}" onRowDblClick="onDblClickLayoutId('#{currTemplate.layoutId}','#{currTemplate.layoutName}');">
+					            <rich:column id="optionalClum" width="10%" style="text-align:center;">
+							        <f:facet name="header">
+							        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.customize.selectTip']}" style="font-weight:normal;"/>
+							        </f:facet>
+					               	<h:outputLabel rendered="#{desktopCustomizeBean.layoutIdSelected==currTemplate.layoutId}" onclick="selectedTemplate('#{currTemplate.layoutId}','#{currTemplate.layoutName}');">
+				    					<input type="radio" id="rd" name="rd" value="${currTemplate.layoutId}" checked="checked"/><rich:spacer width="5px"/>
+				    				</h:outputLabel>    		
+				    				<h:outputLabel rendered="#{desktopCustomizeBean.layoutIdSelected!=currTemplate.layoutId}" onclick="selectedTemplate('#{currTemplate.layoutId}','#{currTemplate.layoutName}');">
+				    					<input type="radio" id="rd" name="rd" value="${currTemplate.layoutId}"/><rich:spacer width="5px"/>
+				    				</h:outputLabel>
+						        </rich:column>	  
+					            <h:column>
+					            	<f:facet name="header">
+							        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.customize.templateName']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{currTemplate.layoutName}" />
+					            </h:column>
+					            <h:column>
+					            	<f:facet name="header">
+							        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.customize.PanelNum']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <h:outputText value="#{currTemplate.panelAmount}" />
+					            </h:column>
+								<h:column>
+					            	<f:facet name="header">
+							        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutRate']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{currTemplate.panelScale}" >
+					                </h:outputText>
+					            </h:column>
+					        </rich:dataTable>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="dtableTemplate" fastStep="1"  page="#{desktopCustomizeBean.templateScrollerPage}" id="templateScroller" oncomplete="templateChked()"/>							
+									</td>
+								</tr>
+							</table>
+							
+					       <h:inputHidden id="layoutIdSelected" value="#{desktopCustomizeBean.layoutIdSelected}"/>
+			               <h:inputHidden id="currObjNodeId" value="#{desktopCustomizeBean.currObjNodeId}"/>
+			               <h:inputHidden id="currObjNodeType" value="#{desktopCustomizeBean.currObjNodeType}"/>
+			               <h:inputHidden id="existLayoutId" value="#{desktopCustomizeBean.existLayoutId}"/>
+			               <h:inputHidden id="currObjNodeNameCopy" value="#{desktopCustomizeBean.currObjNodeNameCopy}"/>
+			               <h:inputHidden id="passTemplateName" value="#{desktopCustomizeBean.templateNamePass}"/>
+		               </h:panelGroup>
+						
+		               <h:panelGroup id="templatePGroup" style="font-size:13px;color:black;width:98%;height:30;text-align:left;" styleClass=".rich-text-color-general"> 	   		
+				 	   	    <h:outputText escape="false" value="#{msgs['baf.desktop.customize.currSelectObjNodeName']}"/>
+				 	   		<b><h:outputLabel id="currObjNodeName" value="#{desktopCustomizeBean.currObjNodeName}" /></b>	
+				 	   		<br />
+				 	   		<h:outputText escape="false" value="#{msgs['baf.desktop.customize.currSelectDeskTemplate']}"/>
+				 	   		<b><h:outputLabel id="templateNameSet" value="#{desktopCustomizeBean.layoutNameSelected}" /></b>
+				       </h:panelGroup>
+			       
+			      </div>
+				  </fieldset>
+				  <a4j:keepAlive beanName="desktopCustomizeBean"/>			  
+				 </td>		 		
+		  	</tr>
+		</table>	
+		<h:panelGroup style="height:50px;vertical-align: middle;">
+			<a4j:commandButton  value="#{msgs['baf.desktop.customize.btnNext']}" styleClass="rich-button" id="btnSelectSubmit" type="button" onclick="togoLocation();"/>
+		</h:panelGroup>			
+	</a4j:form>	
+	</rich:tab>			
+	</rich:tabPanel>
+ 	<a4j:form>			         															         		
+        <a4j:jsFunction name="getAllDeskTemplate" action="#{desktopCustomizeBean.refreshThirdDataModel}" reRender="layoutIdSelected,templateScroller,templateNameSet,dtableTemplate,currObjNodeId,currObjNodeType,currObjNodeName,currObjNodeNameCopy,existLayoutId,passTemplateName" oncomplete="templateChked();">
+        	<a4j:actionparam name="orgObjId" value=""/>    
+        	<a4j:actionparam name="orgObjType" value=""/>          
+        	<a4j:actionparam name="orgObjName" value=""/>             
+        	<a4j:actionparam name="initTempScrollerPage" value="1"/>           
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="changeValues" action="#{desktopCustomizeBean.refreshTemplateIdName}" reRender="layoutIdSelected,templateNameSet,passTemplateName" oncomplete="templateChked();">
+        	<a4j:actionparam name="currLayoutId" value="" />    
+        	<a4j:actionparam name="currLayoutName" value="" />                        
+        </a4j:jsFunction>
+   </a4j:form>         
+ </div> 
+</body>
+	<script>
+	//<![CDATA[
+  	   /*session超时显示错误信息*/
+	   A4J.AJAX.onExpired = function(loc,expiredMsg)
+	   {
+	      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+	   }
+	   /*显示数据提交到后台的错误信息*/
+	   A4J.AJAX.onError = function(req,status,message)
+	   {
+		   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+		   alert(report);
+	   }
+	 //]]>
+  	</script>
+</f:view>
+</html>

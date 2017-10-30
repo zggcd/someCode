@@ -1,0 +1,40 @@
+/*���*/
+.pdD{padding:.3em .5em}
+.pd5{padding:0 5px;}
+.pd15{padding:0 15px;}
+
+/*����*/
+html{background-color:#fff;overflow-y:scroll;}
+body{font:12px/1.5 Arial; color:#333;background:#fff url(../images/top_bg.png) center top repeat-x;min-height:122px;}
+.wrap,#top{min-width:97%;margin:auto;}
+
+/*ȫ������*/
+a{text-decoration:none;color:#333333;}
+a:hover,.alink a,.link{text-decoration:underline;}
+
+
+
+/*ͷ��*/
+#head,.main-wrap,#footer,#searchA,#navA,#navB,.top{width:97%;margin:0 auto;max-width:1200px;}
+#top{height:26px;width:173px;border-bottom:0px solid #fff;background-image: url(../images/top.png) 0 bottom repeat-x;_background:#e9f1f4;line-height:26px;overflow:hidden;}
+.top li{float:left;margin-right:10px;}
+.top a{color:#666;}
+/*����*/
+	#navA{height:32px;background-color:#;}
+	.navA,.navAL,.navAR,.navA li,.navA li a,#td_mymenu{background: url(../images/button1_01.png) 999em 999em no-repeat;}
+	.navAL,.navAR{width:5px;height:32px;}
+	.navAL{ background-position:0 -80px;_margin-right:-3px;}
+	.navAR{ background-position:0 -150px;_margin-left:-3px;}
+	.navA{ background-position:0 -115px;height:32px;overflow:hidden; background-repeat:repeat-x;}
+	.navA ul{font-size:14px;overflow:hidden;}
+	.navA li{float:left;margin-left:-1px;}
+	.navA li a{float:left;color:#ffffff;padding:0 15px;height:32px;line-height:32px;outline:none;font-weight:700; background-position:0 -32px;}
+	.navA li a:hover{text-decoration:none;color:#ffea00;}
+	.navA .current a,.navA .current:hover a,.navA .current a:hover{background-position:center top;display:inline;text-decoration:none;text-shadow:none;}
+	
+#toplog {
+	background-image: url(../images/top.png);
+	height: 26px;
+	width: 172px;
+	line-height:22px;
+}

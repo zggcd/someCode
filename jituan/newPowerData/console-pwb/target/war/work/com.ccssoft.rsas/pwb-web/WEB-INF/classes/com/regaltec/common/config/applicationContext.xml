@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation=
+       		"http://www.springframework.org/schema/beans 
+       			http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			  http://www.springframework.org/schema/jee 
+			    http://www.springframework.org/schema/jee/spring-jee-2.5.xsd
+			    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+			    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+         <!-- <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">       
+           <property name="jndiName" value="AppDB"/>       
+         </bean>-->
+         
+         <jee:jndi-lookup id="dataSource" jndi-name="java:RegalBdpDB"/>
+         <jee:jndi-lookup id="dataSource2" jndi-name="java:oa"/> 
+         <jee:jndi-lookup id="dataSource3" jndi-name="java:tml"/> 
+         <!--  <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+             <property name="driverClassName">
+                             <value>oracle.jdbc.driver.OracleDriver</value>
+
+              </property>
+              <property name="url">
+                   <value>jdbc:oracle:thin:@199.3.6.157:1521:eoms</value>
+               </property>
+               <property name="username">
+                     <value>new_bdf</value>
+               </property>
+               <property name="password">
+                      <value>password</value>
+                </property>
+                <property name="maxActive">
+                      <value>10</value>
+                </property>
+                <property name="maxIdle">
+                      <value>2</value>
+                 </property>
+                 <property name="maxWait">
+                      <value>300</value>
+                </property>
+         </bean>		    -->
+        <bean id="nativeJdbcExtractor" class="org.springframework.jdbc.support.nativejdbc.CommonsDbcpNativeJdbcExtractor" lazy-init="true" />   
+		<bean id="oracleLobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler" lazy-init="true">   
+     		<property name="nativeJdbcExtractor">   
+         		<ref local="nativeJdbcExtractor" />   
+     		</property>   
+ 		</bean> 
+         <bean id="sqlMapClient"
+                      class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+                      <property name="configLocation">
+                          <value>classpath:com/regaltec/common/config/ibatis.xml</value>
+                      </property>
+                      <!-- 自动加载sql-mapping文件 -->  
+                     <property name="mappingLocations">  
+                        <value>classpath*:com/regaltec/**/*SqlMap.xml</value>  
+                      </property> 
+                      <property name="dataSource">
+                             <ref bean="dataSource" />
+                      </property>
+                      <property name="lobHandler">   
+         				<ref local="oracleLobHandler"/>   
+     				  </property>
+                      
+         </bean>
+         <bean id="sqlMapClient2"
+                      class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+                      <property name="configLocation">
+                          <value>classpath:com/regaltec/other/config/ibatis/oa_ibatis.xml</value>
+                      </property>
+                      <property name="dataSource">
+                             <ref bean="dataSource2" />
+                      </property>
+         </bean>
+         <bean id="sqlMapClient3"
+                      class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+                      <property name="configLocation">
+                          <value>classpath:com/regaltec/other/config/ibatis/tml_ibatis.xml</value>
+                      </property>
+                      <property name="dataSource">
+                             <ref bean="dataSource3" />
+                      </property>
+         </bean>
+         <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+                      <property name="dataSource"><ref local="dataSource" />
+                      </property>
+         </bean>
+         <bean id="transactionManager3" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+                      <property name="dataSource"><ref local="dataSource3" />
+                      </property>
+         </bean>
+         <tx:advice id="txAdvice" transaction-manager="transactionManager">
+           <tx:attributes>
+              <tx:method name="trans_*"  rollback-for="com.regaltec.bdf.framework.common.exception.BaseException"/>
+              <tx:method name="new_trans_*" propagation="REQUIRES_NEW" rollback-for="com.regaltec.bdf.framework.common.exception.BaseException"/>
+           </tx:attributes>
+         </tx:advice>
+		  <tx:advice id="txAdvice3" transaction-manager="transactionManager3">
+           <tx:attributes>
+              <tx:method name="trans_*"  rollback-for="com.regaltec.bdf.framework.common.exception.BaseException"/>
+              <tx:method name="new_trans_*" propagation="REQUIRES_NEW" rollback-for="com.regaltec.bdf.framework.common.exception.BaseException"/>
+           </tx:attributes>
+         </tx:advice>
+         <aop:config>
+            <aop:pointcut id="module"  expression="execution(* com.regaltec.baf.module.bi.IModuleBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="module"/>          
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="element"  expression="execution(* com.regaltec.baf.module.bi.IElementBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="element"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="organization"  expression="execution(* com.regaltec.baf.org.organization.bi.IOrganizationBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="organization"/>
+         </aop:config>
+          <aop:config>
+            <aop:pointcut id="user"  expression="execution(* com.regaltec.baf.org.user.bi.IUserBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="user"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="kbs"  expression="execution(* com.regaltec.kbs.kb.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="kbs"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="dictcategory"  expression="execution(* com.regaltec.baf.dict.category.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="dictcategory"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="dictionary"  expression="execution(* com.regaltec.baf.dict.dictionary.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="dictionary"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="desktop"  expression="execution(* com.regaltec.baf.profile.desktop.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="desktop"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="shortcut"  expression="execution(* com.regaltec.baf.profile.shortcut.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="shortcut"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="bureau"  expression="execution(* com.regaltec.baf.bureau.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="bureau"/>
+         </aop:config> 
+         <aop:config>
+            <aop:pointcut id="business"  expression="execution(* com.regaltec.baf.business.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="business"/>
+         </aop:config> 
+         <aop:config>
+            <aop:pointcut id="holiday"  expression="execution(* com.regaltec.baf.calendar.holiday.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="holiday"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="holidayadj"  expression="execution(* com.regaltec.baf.calendar.holidayadj.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="holidayadj"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="worktime"  expression="execution(* com.regaltec.baf.calendar.worktime.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="worktime"/>
+         </aop:config> 
+         <aop:config>
+            <aop:pointcut id="template"  expression="execution(* com.regaltec.baf.template.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="template"/>
+         </aop:config>  
+         <aop:config>
+            <aop:pointcut id="specialty"  expression="execution(* com.regaltec.baf.specialty.bi.*.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="specialty"/>
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="task"  expression="execution(* com.regaltec.baf.taskmanage.bi.ITaskManageBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="task"/>          
+         </aop:config>     
+         
+         <aop:config>
+            <aop:pointcut id="currencyTree"  expression="execution(* com.regaltec.baf.tree.bi.ICurrencyTreeBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="currencyTree"/>          
+         </aop:config>  
+         <aop:config>
+            <aop:pointcut id="sequenceRule"  expression="execution(* com.regaltec.baf.sequence.bi.ISequenceRuleBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="sequenceRule"/>          
+         </aop:config> 
+         <aop:config>
+            <aop:pointcut id="sequenceRuleItem"  expression="execution(* com.regaltec.baf.sequence.bi.ISequenceRuleItemBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="sequenceRuleItem"/>          
+         </aop:config>   
+        <aop:config>
+            <aop:pointcut id="sequence"  expression="execution(* com.regaltec.baf.external.sequence.bi.ISequenceRuleBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="sequence"/>          
+         </aop:config>                                                                                                 
+         <aop:config>
+            <aop:pointcut id="message"  expression="execution(* com.regaltec.baf.message.bi.IMessageBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="message"/>          
+         </aop:config>   
+         <aop:config>
+            <aop:pointcut id="userExt"  expression="execution(* com.regaltec.baf.org.user.bi.IUserExtBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="userExt"/>          
+         </aop:config> 
+         <aop:config>
+         <aop:pointcut id="interfaceExecuteBean"  expression="execution(* com.regaltec.baf.taskmanage.common.valueobj.InterfaceExecuteBean.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="interfaceExecuteBean"/>          
+         </aop:config>
+         <aop:config>
+         <aop:pointcut id="taskInterface"  expression="execution(* com.regaltec.baf.taskmanage.common.valueobj.CommonTaskInterface.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="taskInterface"/>          
+         </aop:config> 
+         <aop:config>
+         <aop:pointcut id="commonTask"  expression="execution(* com.regaltec.baf.taskmanage.common.valueobj.CommonTaskVO.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="commonTask"/>          
+         </aop:config>    
+          <aop:config>
+            <aop:pointcut id="orgExt"  expression="execution(* com.regaltec.baf.org.organization.bi.IOrganizationExtBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="orgExt"/>          
+         </aop:config>
+         <aop:config>
+            <aop:pointcut id="preFlowPackage"  expression="execution(* com.regaltec.preflow.editor.bi.IPackageBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="preFlowPackage"/>          
+         </aop:config>  
+         <aop:config>
+            <aop:pointcut id="dataProcess"  expression="execution(* com.regaltec.baf.dataprocess.bi.IDataProcessBI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="dataProcess"/>          
+         </aop:config> 
+         <aop:config>
+            <aop:pointcut id="oaBi"  expression="execution(* com.regaltec.other.data.bi.IIsOABI.*(..))" />
+            <aop:advisor advice-ref="txAdvice"  pointcut-ref="oaBi"/>          
+         </aop:config>
+         <!--事务控制代理抽象定义 --> 
+        <!--<bean id="baseTransactionProxy" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean" 
+        abstract="true"> 
+        <property name="transactionManager"> 
+            <ref bean="transactionManager"/> 
+        </property> 
+        <property name="transactionAttributes"> 
+            <props> 
+                <prop key="trans_*">PROPAGATION_REQUIRED,-com.regaltec.bdf.framework.common.exception.BaseException</prop> 
+                
+            </props> 
+        </property> 
+    </bean>-->
+    <!-- <import resource="classpath:com/regaltec/baf/common/config/spring/baf-bean.xml"/>-->
+    <import resource="classpath*:com/regaltec/**/*bean.xml"/>
+
+	<!--add interface spring setting file-->
+	<!--<import resource="classpath*:com/regaltec/baf/external/common/config/spring/*.xml"/>-->
+</beans>

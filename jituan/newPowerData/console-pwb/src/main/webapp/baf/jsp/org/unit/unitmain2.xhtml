@@ -1,0 +1,1781 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+       
+<f:view  contentType="text/html"> 
+<head>
+<script>
+//<![CDATA[
+
+	function openContextMenu(){
+   		try{
+ 	   		var newid = this.getSelectedItemId();
+ 	   		if( newid == "null" ) return;
+	   		this.selectItem(newid,false);
+	   		var objmenu = Ext.menu.MenuMgr.get("opmenu");
+	   		var postSwitch = document.getElementById("postSwitch").value;	//岗位配置开关(0：隐藏   1：显示)
+	   		var objectCategory = this.getUserData(newid,"objectCategory"); //对象分类  "O" 单位  "P" 岗位 "E" 人员 
+	   		if( objectCategory ==  "O") //当父节点对象为单位时，菜单中"添加单位"，"添加用户"，"添加岗位"都有可用
+	   		{
+	   			if("#{organizationBean.addOrgOperate}" == "true"){
+	      			Ext.getCmp("menuItemAddOrg").enable(); 
+	      		}else{
+	      			Ext.getCmp("menuItemAddOrg").disable(); 
+	      		}
+	      		if("#{organizationBean.addUserOperate}" == "true"){
+	       			Ext.getCmp("menuItemAddUser").enable(); 
+	       		}else{
+	       			Ext.getCmp("menuItemAddUser").disable(); 
+	       		}
+	       		if(postSwitch=='1'){
+	       			Ext.getCmp("menuItemAddPost").enable();
+	       		}else{
+	       			Ext.getCmp("menuItemAddPost").setVisible(false); 
+	       		}
+	       		if("#{organizationBean.deleteOrgOperate}" == "true"){
+	      			Ext.getCmp("menuItemDeleteObj").enable(); 
+	      		}else{
+	      			Ext.getCmp("menuItemDeleteObj").disable(); 
+	      		}
+	   		}else if( objectCategory ==  "P" )  //当父节点对象为岗位时，菜单中"添加岗位"、"添加单位"不可用，"添加用户"可用
+	   		{
+	       		Ext.getCmp("menuItemAddOrg").disable(); 
+	       		Ext.getCmp("menuItemAddUser").enable(); 
+	       		if(postSwitch=='1'){
+	       			Ext.getCmp("menuItemAddPost").disable(); 
+	       		}else{
+	       			Ext.getCmp("menuItemAddPost").setVisible(false); 
+	       		}	       
+	   		}else if( objectCategory ==  "E" )  //当父节点对象为人员时，菜单中"添加岗位"、添加用户、"添加单位"都不可用
+	   		{
+	       		Ext.getCmp("menuItemAddOrg").disable(); 
+	       		Ext.getCmp("menuItemAddUser").disable(); 
+	       		if(postSwitch=='1'){
+	       			Ext.getCmp("menuItemAddPost").disable(); 
+	       		}else{
+	       			Ext.getCmp("menuItemAddPost").setVisible(false); 
+	       		}	       
+	   		}	
+	   
+	   		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+				var e = new Array(window.event.clientX,window.event.clientY);
+				objmenu.showAt(e);
+			}else if( navigator.userAgent.indexOf("Firefox") > 0 ||　navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+				var e = new Array(arguments[1].clientX,arguments[1].clientY);
+				objmenu.showAt(e);
+ 			}
+   		}catch(e){
+     		alert(e.description);
+   		}
+  	}
+  	
+  	var org_userList_tdobj = null;
+  	
+  	/*打用户操作的左键菜单*/
+  	function openUserContextMenu(e){
+     	var objmenu = Ext.menu.MenuMgr.get("userManager");
+     	if("#{organizationBean.addUserOperate}" == "true"){
+   			Ext.getCmp("menuItemDUser").enable(); 
+   		}else{
+   			Ext.getCmp("menuItemDUser").disable(); 
+   		}
+   		if("#{organizationBean.deleteUserOperate}" == "true"){
+   			Ext.getCmp("menuItemDelUser").enable(); 
+   		}else{
+   			Ext.getCmp("menuItemDelUser").disable(); 
+   		}
+   		 
+   		if("#{organizationBean.unlockUserOperate}" == "true"){
+   			Ext.getCmp("menuItemUnLockUser").enable(); 
+   		}else{
+   			Ext.getCmp("menuItemUnLockUser").disable(); 
+   		}
+	 	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+	     	if( window.event.srcElement.tagName != "TD")
+	     	{
+	        	org_userList_tdobj = window.event.srcElement.parentNode;
+	     	}
+	     	else
+	     	{
+	     		org_userList_tdobj = window.event.srcElement;
+	     	}
+	     	var e = new Array(window.event.clientX,window.event.clientY);
+			objmenu.showAt(e);
+	 	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下或Chrome浏览器下
+		 	if( e.target.tagName != "TD")
+	     	{
+	        	org_userList_tdobj = e.target.parentNode;
+	     	}else
+	     	{
+	     		org_userList_tdobj = e.target;
+	     	}
+			var e = new Array(e.clientX,e.clientY);
+		 	objmenu.showAt(e);
+	 	}
+  	}
+  
+  	/********显示单位信息,如果尚未建立顶级单位,则显示添加页面*****/
+  	function showUnit(){
+  	  	curSelUserArray = new Array;//清除当前选中的用户
+  	  	curSelObjArray = new Array;//清空当前查询列表中选中的对象
+      	var origId = ORGModuleTree_tree.getSelectedItemId();
+      	var  objectCategory =  this.getUserData(origId,"objectCategory"); //对象分类  "O" 单位  "P" 岗位 "E" 人员
+     	//判断上次请求是否完成，要完成之后才能继续下次请求
+		/*
+		var requestStatus = document.getElementById("requestStatus").value;
+ 		if(requestStatus == "Y"){
+  	  		//上次请求尚未完成，请稍后再做操作！
+  	 		alert("#{msgs['baf.org.requestStatus']}");
+  	  	  	var comid = "";
+  	  	  	if(objectCategory == "O"){
+  	  	  	  	comid = "unitForm:orgID";
+  	  	  	}else{
+  	  	  	  	comid = "postForm:orgID";
+ 	  	  	}
+  	  	  	var porgid = orgworkarea.document.getElementById(comid).value;
+ 	  	  	ORGModuleTree_tree.selectItem(porgid,0);
+ 	  	  	return;
+  	  	}
+		*/
+      	var shref = orgworkarea.document.location.href;
+ 	  	if( origId!= "null" )
+      	{
+     		if( objectCategory  == "O" )
+     		{
+     	    	listOrgUser(origId);
+     	    	//listOrgPostUser(origId);
+     	    	if( shref != null && shref.indexOf("unitedit.") > 0 )
+            	{
+            		setRequestStatus("Y");
+                	orgworkarea.reflashUnit(origId);
+            	}else{
+                	setRequestStatus("N");
+     				orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=edit&orgId=" + origId;
+      			}
+      		}
+      		else if( objectCategory  == "P" )
+     		{
+     	    	listOrgUser(origId);
+     	    	//listPostUser(origId);
+     	    	if( shref != null && shref.indexOf("postedit.") > 0 )
+            	{
+            		setRequestStatus("Y");
+                	orgworkarea.reflashPost(origId);
+            	}else{
+                	setRequestStatus("N");
+     				orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org//post/postedit.xhtml?handleType=edit&orgId=" + origId;
+      			}
+      		}
+      		else if( objectCategory  == "E" )
+     		{
+            	setRequestStatus("N");
+     			orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/user/useredit.xhtml?handleType=edit&userID=" + userId;
+      		}
+      	}
+      	else  //树没有顶级节点特殊情况下
+      	{
+         	addOrg();
+      	}
+  	}
+  
+  	//设置请求完成状态
+  	function setRequestStatus(status){
+  		document.getElementById("requestStatus").value = status;
+  	}
+  
+  	//点击查询出来的部门、岗位时触发的事件
+  	function showSelectUnitPost(origId,category){
+  		/*
+  	  	var requestStatus = document.getElementById("requestStatus").value;
+  	  	if(requestStatus == "Y"){
+  	  	  	//上次请求尚未完成，请稍后再做操作！
+  	  	  	alert("#{msgs['baf.org.requestStatus']}");
+ 	  	  	return;
+  	  	}
+		*/
+  	  	var shref = orgworkarea.document.location.href; 	  
+      	if( category  == "O" )
+      	{     	    
+     	  	if( shref != null && shref.indexOf("unitedit.") > 0 )
+          	{
+  	  	      	setRequestStatus("Y");
+              	orgworkarea.reflashUnit(origId);
+          	}else{
+  	          	setRequestStatus("N");
+              	orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=edit&orgId=" + origId;
+      	  	} 
+      	}
+      	else if( category  == "P" )
+      	{
+     		if( shref != null && shref.indexOf("postedit.") > 0 )
+          	{
+  	  	 	  	setRequestStatus("Y");
+              	orgworkarea.reflashPost(origId);
+          	}else{
+  	      	  	setRequestStatus("N");
+              	orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/post/postedit.xhtml?handleType=edit&orgId=" + origId;
+      	  	}
+      	}
+  	}
+	
+	//显示用户详细信息
+  	function showUser(userId){	
+      	//判断上次请求是否完成，要完成之后才能继续下次请求
+      	/*
+ 	  	var requestStatus = document.getElementById("requestStatus").value;
+  	  	if(requestStatus == "Y"){
+  	  	  	//上次请求尚未完成，请稍后再做操作！
+  	  	  	alert("#{msgs['baf.org.requestStatus']}");
+  	  	  	return;
+  	  	}
+		*/
+      	var shref = orgworkarea.document.location.href;
+      	if( shref != null && shref.indexOf("useredit.") > 0 )
+      	{
+  	  	 	setRequestStatus("Y");
+         	orgworkarea.reflashUser(userId);
+      	}
+      	else
+      	{
+  	      	setRequestStatus("N");
+          	orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/user/useredit.xhtml?handleType=edit&userID=" + userId;
+      	}
+  	}
+  
+  	/***************新增单位*******/
+  	function addOrg()
+  	{
+      	/*此处需加入判断节点是什么类型*/
+      	var handleType = "add";
+      	var parentOrgID = ORGModuleTree_tree.getSelectedItemId();
+      	if(parentOrgID == "" || parentOrgID == null  || parentOrgID == undefined)
+      	{
+          	alert("${msgs['baf.org.unit.javascript.alert.waringMsg']}");
+          	return;
+      	}
+      	var parentOrgName = encodeURIComponent(ORGModuleTree_tree.getSelectedItemText());//对中文进行转码
+      	var objectTypeID  =  ORGModuleTree_tree.getUserData(parentOrgID,"objectTypeID");
+     
+      	if( parentOrgID != null && parentOrgID != "" &&  parentOrgID!= "null")
+     	{
+      		orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=add&parentOrgName=" + parentOrgName+"&parentOrgID="+parentOrgID+"&objectTypeId="+objectTypeID;
+      	}
+  	}
+  
+   	/***************新增岗位*******/
+  	function addPost()
+  	{
+      	/*此处需加入判断节点是什么类型*/
+      	var handleType = "add";
+      	var parentOrgID = ORGModuleTree_tree.getSelectedItemId();
+      	if(parentOrgID == "" || parentOrgID == null  || parentOrgID == undefined)
+      	{
+         	alert("${msgs['baf.org.javascript.alert.waringMsg']}");
+          	return;
+      	}
+      	var parentOrgName = encodeURIComponent(ORGModuleTree_tree.getSelectedItemText());//对中文进行转码
+      	var objectTypeID  =  ORGModuleTree_tree.getUserData(parentOrgID,"objectTypeID");
+     
+      	if( parentOrgID != null && parentOrgID != "" &&  parentOrgID!= "null")
+      	{
+      		orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/post/postedit.xhtml?handleType=add&parentOrgName=" + parentOrgName+"&parentOrgID="+parentOrgID+"&objectTypeId="+objectTypeID;
+      	}
+  	}
+  
+    /***************新增用户*******/
+   
+  	function addUser()
+  	{
+      	/*此处需加入判断节点是什么类型*/
+      	var handleType = "add";
+      	var parentOrgID = ORGModuleTree_tree.getSelectedItemId();
+      	var objectCategory =  ORGModuleTree_tree.getUserData(parentOrgID,"objectCategory");
+      	if(parentOrgID == "" || parentOrgID == null  || parentOrgID == undefined)
+      	{
+          	alert("${msgs['baf.org.javascript.alert.waringMsg']}");
+          	return;
+      	}
+      	/*此处为上海平台加入判断是否人员人数超出限制，别的地区没有设置限制人数这里不会起作用*/
+      	isAbleAdd(parentOrgID);    	
+  	}
+  	
+  	function reFlag(data){
+  	     
+  	     if(data!="Y"){
+  	       alert(data);
+  	       return;
+  	     }else{
+  	         var parentOrgID = ORGModuleTree_tree.getSelectedItemId();
+	      	 var objectCategory =  ORGModuleTree_tree.getUserData(parentOrgID,"objectCategory");
+	      	 var parentOrgName = encodeURIComponent(ORGModuleTree_tree.getSelectedItemText());//对中文进行转码
+	      	 var objectTypeID  =  ORGModuleTree_tree.getUserData(parentOrgID,"objectTypeID");
+	         var  cform = document.getElementById('changeForm');
+	      	 cform.parentOrgName.value = parentOrgName;
+	      	 cform.parentOrgID.value  = parentOrgID;
+	      	 cform.objectCategory.value = objectCategory;
+	      	 cform.objectTypeId.value =objectTypeID; 
+	      	 orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/user/useredit.xhtml?handleType=add&parentOrgName=" + parentOrgName+"&parentOrgID="+parentOrgID+"&objectTypeId="+objectTypeID+"&objectCategory="+objectCategory;
+      	 
+  	     } 
+  	}
+  	
+  	//被删除节点及父节点ID
+  	var temp_del_node_id = null;
+  	var temp_del_node_parentId = null;
+  
+  
+  	/**刷新树指定结点
+  	*@parm  itemId 节点ID
+  	*/
+  	function  refreshTreeItem(itemId)
+  	{
+  	  	//if(window.sys_error== true) return;
+      	if( itemId =="" || itemId == undefined || itemId == null )
+      	{
+          	if( temp_del_node_id  != null && temp_del_node_id != "" || temp_del_node_id != undefined )
+          	{
+              	//ORGModuleTree_tree.refreshItem(temp_del_node_parentId);
+              	ORGModuleTree_tree.deleteItem(temp_del_node_id,true);
+              	temp_del_node_parentId = null;
+              	temp_del_node_id = null;
+          	}
+      	}
+      	else
+      	{
+      		ORGModuleTree_tree.refreshItem(itemId);
+      	}
+  	}
+  
+  	//在组织树上删除部门和岗位完成事件
+  	function onDelOrgComplete(data){
+  		if(data == "Y"){
+  	  	  	refreshTreeItem();
+  	  	}
+	  	//操作结果提示
+  	  	var timeout = setTimeout("a4jcomplete()",400);
+  	}
+  
+  	//在人员列表中删除人员完成事件
+  	function onDelUserComplete(data){
+  	  	if(data == "Y"||data=="N"){
+  	  	    if(data == "Y"){
+		  	    showOrgMes();
+		  	 }
+		  	//操作结果提示
+  	     	var timeout = setTimeout("a4jcomplete()",400);
+  	  	}else{
+  	  	    alert(data);
+  	  	}
+	  	
+  	}
+  	
+  function onUnlockUserComplete(data){
+  	  var timeout = setTimeout("a4jcomplete()",400);	
+  	}
+  
+  	//选中树的某个节点，并触发单击节点事件
+  	function setselectitem(id){
+ 	  	ORGModuleTree_tree.selectItem(id,1);
+  	}
+  
+  	//选中树的某个节点，但不触发单击节点事件
+  	function selectItem(id){
+  	  	ORGModuleTree_tree.selectItem(id,0);
+  	}
+  
+  	var delType = "";	//删除部门时的类型，tree：从树上删除    list：从查询列表中删除
+  
+  	/*删除单位*/
+  	function deleteOrganization()
+  	{
+      	var orgID = ORGModuleTree_tree.getSelectedItemId();
+      	if(orgID == "" || orgID == null  || orgID == undefined){
+          	alert("${msgs['baf.org.unit.javascript.alert.waringMsg']}");
+          	return;
+      	}
+      	var orgName = ORGModuleTree_tree.getSelectedItemText();
+      	var  objectCategory =  ORGModuleTree_tree.getUserData(orgID,"objectCategory");
+      	//删除组织时，是否进行判断
+      	var sysDelOrg = "#{organizationBean.deleteOrg}";
+      	//当值为2时，删除的组织下含有子节点时不能删除该组织，无子节点但是有人要提示
+      	if(sysDelOrg == "2"){
+      	  	/*var isLeaf = ORGModuleTree_tree.getUserData(orgID,"isLeaf");
+      	  	if(isLeaf == "N"){
+      	  	  	var postSwitch = document.getElementById("postSwitch").value;
+	      	  	//该部门下含有子节点，不能将其删除！
+      	  	  	if(postSwitch == "0"){
+	      	  	  	alert("#{msgs['baf.org.sysDelMessage1']}");
+      	  	  	}else{
+      	  	  	  	alert("#{msgs['baf.org.sysDelMessage2']}");
+      	  	  	}
+      	  	  	return;
+      	  	}else{*/
+      	  	  	//标识是在组织树上做删除操作
+      	  	  	delType = "tree";		
+      	  	  	//查询选择的组织是否有子节点，以及包含的人员个数，进而进行删除控制
+      	  	  	isExistChild(orgID,orgName,objectCategory);	
+      	  	//}
+      	}else{
+      	  	temp_del_node_id = orgID;
+	      	var text = ORGModuleTree_tree.getSelectedItemText();
+      	  	var objectCategory =  ORGModuleTree_tree.getUserData(orgID,"objectCategory");
+	      	temp_del_node_parentId = ORGModuleTree_tree.getParentId(orgID);
+	      	var mess = "";  //删除提示信息
+		  	if(objectCategory == "E"){
+	          	mess = "#{msgs['baf.org.user.deleteUserMessage']}";
+      	  	}else if(objectCategory == "O"){
+      		  	mess = "#{msgs['baf.org.unit.deleteUnitMessage']}";	
+      	  	}else if(objectCategory == "P"){
+      		  	mess = "#{msgs['baf.org.post.deletePostMessage']}";
+      	  	}
+	      	if(window.confirm(mess + "'"+ text +"'?") ){
+		      	if( objectCategory != "E"){
+		      	  	deleteOrg(orgID,objectCategory);
+		      	}else{
+	  	          	deleteUser(orgID);
+	  	      	}
+  	      	}
+      	}
+  	}
+  
+  	/*删除用户*/
+  	function delUser(){
+	   	var orgID = ORGModuleTree_tree.getSelectedItemId();
+	   	//curSelUserArray
+	   	if(curSelUserArray.length==0){
+	   		//请选择用户
+	   		alert('#{msgs['baf.org.user.noselectuser']}');
+	   		return;
+	   	}
+	   	var userNameArray = new Array;
+		var userIdArray = new Array;
+		for(var i=0;i<curSelUserArray.length;i++){
+			var v = curSelUserArray[i].split(';');
+			if(v[1] !='sa'){
+				userNameArray.push(v[1]);
+				userIdArray.push(v[0]);
+			}
+		}
+		if(userIdArray.length==0){
+			//不能删除超级管理员账号(sa)\!
+			alert("#{msgs['baf.org.user.deleteSaMessage']}");
+			return;
+		}
+		if(window.confirm("#{msgs['baf.org.user.deleteUserMessage']}'"+userNameArray.join(',')+"'?")){
+			var userIds = userIdArray.join(',');
+			curSelUserArray = new Array;//清除当前选择的用户ID
+	     	deleteUser(userIds,orgID);
+	    }
+		/* if(org_userList_tdobj != null && org_userList_tdobj.tagName == "TD")
+		 {
+		      var trobj = org_userList_tdobj.parentNode ;
+		      
+		      
+		      
+		      var  innerText0 = "", innerText1 = "";
+		      if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		      		innerText0 = trobj.cells[0].innerText;
+		      		innerText1 = trobj.cells[1].innerText;
+			  }else if( navigator.userAgent.indexOf("Firefox") > 0  || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+			  		innerText0 = trobj.cells[0].textContent;
+		      		innerText1 = trobj.cells[1].textContent;
+			  }
+			  
+		      if("sa" == innerText1)
+		      {
+		      	  //不能删除超级管理员账号(sa)!
+		          alert("#{msgs['baf.org.user.deleteSaMessage']}");
+		      	  return;
+		      }
+		      
+		      if(trobj != null &&  trobj.tagName == "TR" )
+		      {
+		      	//是否删除用户
+		      	if(window.confirm("#{msgs['baf.org.user.deleteUserMessage']}'"+innerText0.trim()+"'?"))
+		      	{
+		      	   deleteUser(trobj.cells[0].children[0].value,orgID);
+		      	}
+		      }
+		 }  */
+  	}
+  
+  	/*节点重新加载*/
+  	function reload()
+  	{
+      	var objectId = ORGModuleTree_tree.getSelectedItemId();
+      	ORGModuleTree_tree.refreshItem(objectId);
+  	}  	
+  	/*显示部门岗位用户*/
+  	function showUnitUser()
+  	{
+  	  	//if(window.sys_error==true) return;
+	  	var objectId = ORGModuleTree_tree.getSelectedItemId();
+	  	var  objectCategory =  ORGModuleTree_tree.getUserData(objectId,"objectCategory");
+	  	if(  objectCategory == "O" || objectCategory == "P" )
+	  	{
+	      	listOrgUser(objectId);
+	  	}
+  	}	
+  	
+  	function unLockUser(){
+  	  	//var orgID = ORGModuleTree_tree.getSelectedItemId();
+	   	//curSelUserArray
+	   	if(curSelUserArray.length==0){
+	   		//请选择用户
+	   		alert('#{msgs['baf.org.user.noselectuser']}');
+	   		return;
+	   	}
+	   	var userNameArray = new Array;
+		var userIdArray = new Array;
+		for(var i=0;i<curSelUserArray.length;i++){
+			var v = curSelUserArray[i].split(';');
+			
+			userNameArray.push(v[1]);
+			userIdArray.push(v[0]);
+			
+		}
+
+		if(window.confirm("您确定要解锁以下人员："+userNameArray.join(',')+"?")){
+			var userIds = userIdArray.join(',');
+
+			curSelUserArray = new Array;//清除当前选择的用户ID
+	     	unlockUser(userIds);
+	    }
+  	}
+
+  	//变换查询条件
+  	function changeCondition(radios){
+  	  	var value = radios.value;
+  	  	var ostyle = document.getElementById("conform:unit").style;
+  	  	var pstyle = document.getElementById("conform:post").style;
+  	  	var ustyle = document.getElementById("conform:user").style;
+  	  	if(value=="P"){
+  	  	  	pstyle.display = "block";
+  	  	  	ostyle.display = "none";
+  	  	  	ustyle.display = "none";
+  	  	  	document.getElementById("conform:postName").value = "";
+  	  	}else if(value=="O"){
+  	  	  	ostyle.display = "block";
+  	  	  	pstyle.display = "none";
+  	  	  	ustyle.display = "none";
+  	  	  	document.getElementById("conform:unitName").value = "";
+  	  	}else if(value=="E"){
+  	  	  	ustyle.display = "block";
+  	  	  	ostyle.display = "none";
+  	  	  	pstyle.display = "none";
+  	  	  	document.getElementById("conform:loginName").value = "";
+  	  	  	document.getElementById("conform:userName").value = "";
+  	  	  	document.getElementById("conform:isValid:0").checked = "checked";
+  	  	}
+  	}
+
+  	//按回车调用查询按钮的单击事件
+  	function forSelect(){
+		if(event.keyCode==13){
+			document.getElementById('conform:selectBtn').onclick();
+		}
+	}
+	
+    //切换到查询tab页时，设置按回车进行查询
+	function toSelectPage(){
+		document.body.onkeyup = forSelect;
+	}
+	
+	//切换到组织树tab页时，设置回车事件为空
+	function toTreePage(){
+		document.body.onkeyup = "";
+	}	
+	
+	//删除用户之后，如果中间区域显示的是用户信息，则选中用户组织
+	function showOrgMes(){
+		var objectId = ORGModuleTree_tree.getSelectedItemId();
+		var objectCategory = ORGModuleTree_tree.getUserData(objectId,'objectCategory');	
+	  	var shref = orgworkarea.document.location.href;
+	  	if(shref.indexOf("useredit.")>0){
+	  		if(objectCategory == "O"){
+	  			orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=edit&orgId=" + objectId;
+	  		}else if(objectCategory == "P"){
+	  			orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/post/postedit.xhtml?handleType=edit&orgId=" + objectId;
+	  		}
+	  	}else{
+	  		if(shref.indexOf("unitedit.") > 0){
+	  			//此时不重新渲染部门信息，但是要刷新人员列表
+	  			orgworkarea.listOrgPostUser(objectId);
+	  		}else{
+	  			//此时不重新渲染岗位信息，但是要刷新岗位列表
+     	    	orgworkarea.listPostUser(objectId);
+	  		}
+	  	}
+  		//刷新部门或岗位人员列表
+  		listOrgUser(objectId);
+	}
+	
+	var srcTreeID = "";
+	var destTreeID = "";
+	var parentOrgId = "";
+	
+	//组织树拖拽事件
+	function onDrag(srcID, destID) {
+		var typeDescs = ['集团','省中心','本地网','区域','片区','营业区','分局','营业厅/所','部门','班组','代维公司','代维队'];
+		var srctype = ORGModuleTree_tree.getUserData(srcID,'objectCategory');	
+		var desttype = ORGModuleTree_tree.getUserData(destID,'objectCategory');
+		var parentID = ORGModuleTree_tree.getParentId(srcID);	//要拖动节点的父节点
+		var srcobjecttype = ORGModuleTree_tree.getUserData(srcID,'objectTypeId');	//拖动节点类型
+		var destobjecttype = ORGModuleTree_tree.getUserData(destID,'objectTypeId');	//目标节点类型
+		var srctext = ORGModuleTree_tree.getItemText(srcID);
+		var desttext = ORGModuleTree_tree.getItemText(destID);
+		//不允许将节点拖到顶级
+		if(srctext != "" && desttext == ""){
+			alert("#{msgs['baf.org.dragMessage']}");
+			return;
+		}
+		//部门拖动
+		if (srctype == "O") {
+			if (desttype == "P") {
+				//部门不能拖到岗位下面		
+				alert(typeDescs[srcobjecttype-1] + "#{msgs['baf.org.moveMsg1']}");
+				return false;
+			}	
+			//目标与父节点相同，或者是自己，不拖动
+			if (destID == parentID) {
+				return false;		
+			}			
+			//if(srcobjecttype < 9){
+				//不建议拖动，由用户确定是否拖动
+				if(!confirm("#{msgs['baf.org.moveMsg2']}" + typeDescs[srcobjecttype-1] + "#{msgs['baf.org.moveMsg3']}" + typeDescs[srcobjecttype-1] + "#{msgs['baf.org.moveMsg4']}\r\n#{msgs['baf.org.moveMsg9']}" + srctext + "#{msgs['baf.org.moveMsg10']}" + desttext + "#{msgs['baf.org.moveMsg11']}")){
+					return false;
+				}				
+			//}			
+			if (desttype == "O") {
+				if(parseInt(srcobjecttype) < parseInt(destobjecttype)){
+					//不能将大的部门拖到小的部门下面
+					//alert(typeDescs[srcobjecttype-1] + "#{msgs['baf.org.moveMsg5']}"+typeDescs[destobjecttype-1] + "#{msgs['baf.org.moveMsg6']}");
+					//return false;
+				}				
+			}	
+			//0为顶级节点
+			if (destID == "0"){
+				destID = "";
+			}
+			moveOrgTree(srcID, destID);
+		}
+	
+		//岗位拖动
+		if (srctype == "P") {
+			//岗位拖动
+			if (desttype == "P") {
+				//岗位之间不能拖动
+				alert("#{msgs['baf.org.moveMsg7']}");
+				return false;
+			}
+			//目标与父节点相同，不拖动
+			if (parentID == destID) {
+				return false;
+			}			
+			if (destID == "0") {
+				//岗位不能拖动到顶级!			
+				alert("#{msgs['baf.org.moveMsg8']}");
+				return false;
+			}
+			moveOrgTree(srcID, destID);	
+		}
+		
+		srcTreeID = srcID;
+		destTreeID = destID;
+		parentOrgId = parentID;
+		
+		return true;
+	}
+	
+	//拖动完成事件
+	function onMoveComplete(data){
+	 	if(data == null || data == "undefinde"){
+	 		//拖动处理失败!
+			alert("${msgs['baf.module.WarningMoveFailure']}");
+			if (destTreeID != "") {
+				//如果目标是顶级，则不用刷新整个树，直接删除，这样就可以选中原始拖动模块。
+				if (destTreeID == "" || destTreeID == "0") {
+					if (srcTreeID != null && srcTreeID != "" && srcTreeID != "0"){
+						ORGModuleTree_tree.deleteItem(srcTreeID,false);
+					}
+				} else {
+					ORGModuleTree_tree.refreshItem(destTreeID);
+				}
+				if (parentOrgId != null) {
+					if (parentOrgId == ""){
+						parentOrgId = "0";
+					}
+					var timeout = setTimeout("ORGModuleTree_tree.refreshItem('" + parentOrgId + "')", 200);
+				}					
+			}
+			if (srcTreeID != null) {	
+				var timeout = setTimeout("setselectitem('"+srcTreeID+"')", 400);
+			}
+	 	}else{
+	 		if(data=="Y"){
+	 			if (destTreeID != null) {
+		 			if (destTreeID == ""){
+		 				destTreeID = "0";
+		 			}
+	 				//拖动成功之后刷新目标节点，便于组织排序
+					var timeout = setTimeout("ORGModuleTree_tree.refreshItem('" + destTreeID + "')", 200);
+				}
+		 		if (srcTreeID != null) {	
+		 			//选中拖动节点
+					var timeout = setTimeout("setselectitem('"+srcTreeID+"')", 400);
+				}
+	 		}
+	 	}
+	}
+	
+	//获取组织树选中的节点ID
+	function getSelectItemId(){
+		curSelObjArray = new Array;//清空当前查询结果中选中的对象
+		document.getElementById("conform:selectItemId").value = ORGModuleTree_tree.getSelectedItemId();
+	}
+	
+	//点击查询按纽人员列表未渲染前置灰
+	function ondisabled(){
+	  	document.getElementById("conform:selectBtn").disabled = true;
+	}
+	
+	//点击查询按钮验证文本框内容
+	function validate()
+	{
+	   	var radio_unit = "", radio_post = "", radio_user = "";
+	   	radio_unit = document.getElementById("conform:selectType:0");
+	   	//获取岗位配置开关(0：隐藏   1：显示)  
+   		var postSwitch = document.getElementById("postSwitch").value;	
+	   	//根据岗位配置开关来获取人员和岗位单选按钮的索引
+	   	if(postSwitch == "0"){
+	   	   	radio_user = document.getElementById("conform:selectType:1");
+	   	}else{
+	   		radio_post = document.getElementById("conform:selectType:1");
+	   	   	radio_user = document.getElementById("conform:selectType:2");
+	   	}
+	   	var sunitname = document.getElementById("conform:unitName").value;
+	   	var spostname = document.getElementById("conform:postName").value;
+	   	var sloginname = document.getElementById("conform:loginName").value;
+	   	var susername = document.getElementById("conform:userName").value;
+	   	
+	   	if( (radio_user.checked && sloginname == "" && susername == "") || (radio_unit.checked && sunitname == "")
+	   			 || (radio_post.checked && spostname == "") )
+	   	{
+	       	//你必需输入一个查询条件！
+		   	alert("#{msgs['baf.org.conditionsMessage']}");
+		   	if(radio_user.checked){
+		   		document.getElementById("conform:userName").focus();
+		   	}else if(radio_unit.checked){
+		   		document.getElementById("conform:unitName").focus();
+		   	}else{
+		   		document.getElementById("conform:postName").focus();
+		   	}
+		   	document.getElementById("conform:selectBtn").disabled = false;
+		   	return false;
+	   	}
+		return true;
+	}
+
+	//--------批量处理-------------------------------------
+	var curSelUserArray = new Array;//批量选中的用户列表
+	
+	var userListType = "";	//标识人员列表是点击组织树查询出来的，还是在组织查询中查出来的
+	
+	function selAll(checked,domName) {
+		userListType = "orgUserList";
+		$A(document.getElementsByName(domName)).each(function(ch){
+			ch.checked = checked;
+			var v = ch.value;
+			if(checked && curSelUserArray.indexOf(v)==-1){
+				curSelUserArray.push(v);
+			}else if(!checked && curSelUserArray.indexOf(v)>-1){
+				curSelUserArray.remove(v);
+			}
+		});
+		setCurBtnFlag();
+	}
+	
+	function sel(user){
+		userListType = "orgUserList";
+		var v = user.value;
+		if(user.checked && curSelUserArray.indexOf(v)==-1){
+			curSelUserArray.push(v);
+		}else if(!user.checked && curSelUserArray.indexOf(v)>-1){
+			curSelUserArray.remove(v);
+		}
+		setCurBtnFlag();
+	}
+	
+	//在每次分页的时候，记忆选中的用户
+	function saveSelledUser(domName){
+		userListType = "orgUserList";
+		$A(document.getElementsByName(domName)).each(function(ch){
+			if(curSelUserArray.indexOf(ch.value)>-1){
+				ch.checked = true;
+			}
+		});
+		setCurBtnFlag();
+	}
+	
+	function reflashUserList(){
+	  	curSelUserArray = new Array;//清除当前选中的用户
+	  	var origId = ORGModuleTree_tree.getSelectedItemId();
+	  	setselectitem(origId);
+	  	listOrgUser(origId);
+	}
+	
+	//得到当前选中的用户数量
+	function getCurSelCount(){
+		if(userListType == "orgUserList"){
+			return curSelUserArray.length;
+		}else{
+			return curSelObjArray.length;
+		}
+	}
+	
+	//设置用户页面四个按钮的状态
+	function setCurBtnFlag(userListType){
+	    if(window.frames['orgworkarea'].disabledOrEnabledBtn == undefined) return;
+		var count = getCurSelCount();
+		var loginName = "#{sessionScope.currentUser.loginName}";
+		var editUserOperate = "#{organizationBean.editUserOperate}";
+		if(count <=1){//btnsave,passchange			
+			window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:batchAddBtn',true);
+			window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:batchEditBtn',true);
+			if(loginName == "sa" || editUserOperate == "true"){
+				window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:btnsave',false);
+				window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:passchange',false);
+			}
+		}else {
+			if(loginName == "sa" || editUserOperate == "true"){
+				window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:batchAddBtn',false);
+				window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:batchEditBtn',false);
+			}
+			window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:btnsave',true);
+			window.frames['orgworkarea'].disabledOrEnabledBtn('userForm:passchange',true);
+		}
+	}
+	
+	//打开查询结果列表的菜单
+  	function openDelObjContextMenu(e){
+     	var objmenu = Ext.menu.MenuMgr.get("deleteObj");
+     	Ext.getCmp("menuItemUnLockObj").disable();
+     	//查询结果对象类型
+		var listObjType = document.getElementById("sc2form:listObjType").value;
+		if(listObjType == "O"){
+		    
+	     	if("#{organizationBean.deleteOrgOperate}" == "true"){
+	   			Ext.getCmp("menuItemDelObj").enable(); 
+	   		}else{
+	   			Ext.getCmp("menuItemDelObj").disable(); 
+	   		}
+   		}
+   		if(listObjType == "E"){
+	   		if("#{organizationBean.deleteUserOperate}" == "true"){
+	   			Ext.getCmp("menuItemDelObj").enable(); 
+	   		}else{
+	   			Ext.getCmp("menuItemDelObj").disable(); 
+	   		}
+	   		if("#{organizationBean.unlockUserOperate}" == "true"){
+   			Ext.getCmp("menuItemUnLockObj").enable(); 
+	   		}else{
+	   			Ext.getCmp("menuItemUnLockObj").disable(); 
+	   		}
+   		}
+	 	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+	     	if( window.event.srcElement.tagName != "TD"){
+	        	org_userList_tdobj = window.event.srcElement.parentNode;
+	     	}else{
+	     		org_userList_tdobj = window.event.srcElement;
+	     	}
+	     	var e = new Array(window.event.clientX,window.event.clientY);
+		 	objmenu.showAt(e);
+	 	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下或Chrome浏览器下
+		 	if( e.target.tagName != "TD"){
+	        	org_userList_tdobj = e.target.parentNode;
+	     	}else{
+	     		org_userList_tdobj = e.target;
+	     	}
+		 	var e = new Array(e.clientX,e.clientY);
+		 	objmenu.showAt(e);
+	 	}
+  	}
+  	
+  	//批量选中的对象列表
+	var curSelObjArray = new Array;
+	
+	//往对象数组中加减数据
+	function selObj(obj){
+		userListType = "orgList";
+		var v = obj.value;
+		if(obj.checked && curSelObjArray.indexOf(v)==-1){
+			curSelObjArray.push(v);
+		}else if(!obj.checked && curSelObjArray.indexOf(v)>-1){
+			curSelObjArray.remove(v);
+		}
+		setCurBtnFlag();
+	}
+	
+	//全选复选框
+	function selObjAll(checked,domName) {
+		userListType = "orgList";
+		$A(document.getElementsByName(domName)).each(function(ch){
+			ch.checked = checked;
+			var v = ch.value;
+			if(checked && curSelObjArray.indexOf(v)==-1){
+				curSelObjArray.push(v);
+			}else if(!checked && curSelObjArray.indexOf(v)>-1){
+				curSelObjArray.remove(v);
+			}
+		});
+		setCurBtnFlag();
+	}
+    
+	var objIdArray = new Array;	     	//对象ID集合
+	var objNameArray = new Array;	 	//对象Name集合
+	var objParentIdArray = new Array;	//对象父ID集合
+	
+	 function unLockObj(){
+  	  	//var orgID = ORGModuleTree_tree.getSelectedItemId();
+	   	//curSelUserArray
+	   	
+	   	if(curSelObjArray.length==0){
+	   		//请选择用户
+	   		alert('#{msgs['baf.org.user.noselectuser']}');
+	   		return;
+	   	}
+	   	var userNameArray = new Array;
+		var userIdArray = new Array;
+		for(var i=0;i<curSelObjArray.length;i++){
+			var v = curSelObjArray[i].split(';');
+			
+			userNameArray.push(v[1]);
+			userIdArray.push(v[0]);
+			
+		}
+
+		if(window.confirm("您确定要解锁以下人员："+userNameArray.join(',')+"?")){
+			var userIds = userIdArray.join(',');
+
+			curSelObjArray = new Array;//清除当前选择的用户ID
+	     	unlockUser(userIds);
+	    }
+  	}
+	
+	//在组织查询结果列表中删除数据
+	function deleteObj(){
+		//查询结果对象类型
+		var listObjType = document.getElementById("sc2form:listObjType").value;
+		if(curSelObjArray.length == 0){
+			if(listObjType == "E"){
+				alert("#{msgs['baf.org.user.deleteMessage']}");
+			}else if(listObjType == "O"){
+				alert("#{msgs['baf.org.unit.deleteMessage']}");
+			}else{
+				alert("#{msgs['baf.org.post.deleteMessage']}");
+			}
+			return;
+		}		
+		//当查询人员时，存放除sa以外的其他选中人员
+		var userIdArray = new Array;
+		var userNameArray = new Array;
+		var userParentNameArray = new Array;
+		
+		objIdArray = new Array;	     	//对象ID集合
+		objNameArray = new Array;	 	//对象Name集合
+		objParentIdArray = new Array;	//对象父ID集合		
+		for(var i = 0;i < curSelObjArray.length;i++){
+			var v = curSelObjArray[i].split(";");
+			objIdArray.push(v[0]);
+			objNameArray.push(v[1]);
+			objParentIdArray.push(v[2]);
+			if(listObjType == "E" && v[1] !='sa'){
+				userIdArray.push(v[0]);
+				userNameArray.push(v[1]);
+				userParentNameArray.push(v[2]);
+			}
+		}
+		
+  		var mess = "";   //弹出提示文本内容
+	    if(listObjType == "E"){
+	      	mess = "#{msgs['baf.org.user.deleteUserMessage']}";	     
+      	}else if(listObjType == "O"){
+      		mess = "#{msgs['baf.org.unit.deleteUnitMessage']}";	
+      	}else{
+      		mess = "#{msgs['baf.org.post.deletePostMessage']}";
+      	}
+		if(listObjType == "E"){
+			if(userIdArray.length==0){
+				//不能删除超级管理员账号(sa)\!
+				alert("#{msgs['baf.org.user.deleteSaMessage']}");
+				return;
+			}else{
+				objIdArray = userIdArray;
+				objNameArray = userNameArray;
+			}
+			//是否删除对象
+	   		if(window.confirm(mess + "'" + objNameArray.join("、") + "'?")){
+	   		  	
+	   	   		deleteSelectUser(objIdArray.join(","),objParentIdArray.join(","));
+	   	   	}
+		}else{
+			//删除组织时，是否进行判断
+	      	var sysDelOrg = "#{organizationBean.deleteOrg}";
+	      	//当值为2时，删除的组织下含有子节点时不能删除该组织
+	      	if(sysDelOrg == "2"){
+      	  	  	delType = "list";
+				isExistChild(objIdArray.join(","),"","");
+	   		}else{
+				//是否删除对象
+		   		if(window.confirm(mess + "'" + objNameArray.join("、") + "'?")){
+		   		  	//清除当前选择的对象集合
+		   			curSelObjArray = new Array;
+	   	   			deleteSelectOrg(objIdArray.join(","),listObjType);
+	      	   		temp_del_node_id = objIdArray.join(",");
+	      	   		temp_del_node_parentId = objParentIdArray.join(",");
+		   		}
+	   		}
+		}
+	}
+	
+	//在组织查询结果列表中删除用户之后，如果中间区域显示的是用户信息，则跳转到树上选中的节点信息页面
+	function showOrgPage(){
+		var objectId = ORGModuleTree_tree.getSelectedItemId();
+		var objectCategory = ORGModuleTree_tree.getUserData(objectId,"objectCategory");
+	  	var shref = orgworkarea.document.location.href;
+	  	if(shref.indexOf("useredit.")>0){
+	  		if(objectCategory == "O"){
+	  			orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=edit&orgId=" + objectId;
+	  		}else if(objectCategory == "P"){
+	  			orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/post/postedit.xhtml?handleType=edit&orgId=" + objectId;
+	  		}
+	  	}else{
+	  		//当从组织查询列表中删除人员时，若删除有树当前选中节点下的人员，则刷新当前选中节点的人员列表和领导信息；否则，则不刷新。
+	  		if(objParentIdArray.indexOf(objectId) != -1){
+		  		if(shref.indexOf("unitedit.") > 0){
+		  			//此时不重新渲染部门信息，但是要刷新人员列表
+		  			orgworkarea.listOrgPostUser(objectId);
+		  		}else{
+		  			//此时不重新渲染岗位信息，但是要刷新岗位列表
+	     	    	orgworkarea.listPostUser(objectId);
+		  		}
+	  		}
+	  	}
+	}
+	
+	//在组织查询结果列表中删除组织之后，刷新删除组织的父节点，中间页面显示删除组织的父节点信息
+	function showParentOrgPage(){
+		var objectId = ORGModuleTree_tree.getSelectedItemId();
+		var objectParentId = ORGModuleTree_tree.getParentId(objectId);
+		var tempId = "";
+		//当删除的组织和树上当前选中的节点相同时，则定位选中节点的父节点，否则定位当前选中节点
+		if(temp_del_node_id.indexOf(objectId) >= 0){
+			tempId = objectParentId;
+		}else{
+			tempId = objectId;
+		}
+		ORGModuleTree_tree.selectItem(tempId,0);
+		var shref = orgworkarea.document.location.href;
+	  	if(shref.indexOf("unitedit.")>0){
+	  		//获取当前中间区域显示的部门信息ID
+	  		var unitId = orgworkarea.document.getElementById("unitForm:orgID").value;
+	  		//若部门页面当前显示的部门已被删除，再重新渲染部门页面
+	  		if(temp_del_node_id.indexOf(unitId) >= 0){
+	  			orgworkarea.reflashUnit(tempId);
+	  		}
+	  	}else{
+	  		orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/org/unit/unitedit.xhtml?handleType=edit&orgId=" + tempId;
+	  	}
+		ORGModuleTree_tree.refreshItem(tempId);
+	}
+	
+	
+    //人员查询列表中删除人员完成事件
+    function onDeleteSUserComplete(data){
+    	if(data == "Y"||data=="N"){
+  	  	    if(data == "Y"){
+  	  	        //清除当前选择的对象集合
+	   			curSelObjArray = new Array;
+		  	    refreshList();
+		       showOrgPage();
+		  	 }
+		  	//操作结果提示
+  	     	var timeout = setTimeout("a4jcomplete()",400);
+  	  	}else{
+  	  	    alert(data);
+  	  	}
+    	
+    }
+    
+    //组织查询列表中删除部门和岗位完成事件
+    function onDeleteSOrgComplete(data){
+    	if(data == "Y"){
+		    showParentOrgPage();
+		    refreshList();
+    	}
+	    //操作结果提示
+  	    var timeout = setTimeout("a4jcomplete()",400);
+    }
+    
+    //查询部门是否有子节点以及人员个数完成事件
+    function onSelectComplete(data){
+    	var strs = data.split(",");
+    	var existChild = strs[0], usernum = strs[1], orgID = strs[2], orgName = strs[3], objCategory = strs[4];
+   		var hasChildIdArray = new Array;	//批量删除时，存放含有子节点的部门ID
+   		var hasChildNameArray = new Array;	//批量删除时，存放含有子节点的部门名称
+   		var userNumberIdArray = new Array;	//批量删除时，存放无子节点部门但有人员的部门ID
+   		var userNumberNameArray = new Array;//批量删除时，存放无子节点部门但有人员的部门名称
+		//组织查询结果类型
+		var listObjType = document.getElementById("sc2form:listObjType").value;
+		if(objCategory == ""){
+   			objCategory = listObjType;
+   		}
+   		var mess = "";  //删除提示信息
+   		var type = "#{msgs['baf.object']}";	//组织类型，默认为“对象”
+    	if(objCategory == "E"){
+	      	mess = "#{msgs['baf.org.user.deleteUserMessage']}";
+	      	type = "#{msgs['baf.org.user']}";	     
+      	}else if(objCategory == "O"){
+      		mess = "#{msgs['baf.org.unit.deleteUnitMessage']}";	
+      		type = "#{msgs['baf.org.unit']}";	     
+      	}else if(objCategory == "P"){
+      		mess = "#{msgs['baf.org.post.deletePostMessage']}";
+      		type = "#{msgs['baf.org.Post']}";	     
+      	}
+    	var strs = existChild.split("#");
+    	//通过strs的长度来判断是选择了一个还是多个
+    	if(strs.length == 1){
+    		//判断组织下是否有子节点
+	    	if(existChild == "true"){
+	    		//获取岗位配置开关(0：隐藏   1：显示)  
+   				var postSwitch = document.getElementById("postSwitch").value;	
+	    		if(postSwitch == "0"){
+	    			alert("#{msgs['baf.org.sysDelMessage1']}");
+	    		}else{
+	    			alert("#{msgs['baf.org.sysDelMessage2']}");
+	    		}
+	    		return;
+	    	}else{
+    			var text = orgName;
+    			if(text == ""){
+    				text = objNameArray[0];
+    			}
+    			//判断组织下面是否有人员
+	    		if(usernum > 0){
+	    			//叶子节点部门下有人员时，需要提示部门下的人员会随部门一起删除
+	    			if(!confirm(mess + " '"+ text +"'" + "#{msgs['baf.questionMark']}" + "\r\n#{msgs['baf.leftBracket']}#{msgs['baf.org.delMessage1']}" + type + "#{msgs['baf.org.delMessage2']} " + usernum + " #{msgs['baf.org.delMessage3']}" + type + "#{msgs['baf.org.delMessage4']}#{msgs['baf.rightBracket']}")){
+	    				return;
+	    			}else{
+	    				if(delType == "tree"){	//在组织树上删除
+	    					deleteOrg(orgID,objCategory);
+			      	   		temp_del_node_id = orgID;
+	    				}else{	    				
+		    				//清除当前选择的对象集合
+				   			curSelObjArray = new Array;
+			   	   			deleteSelectOrg(objIdArray.join(","),listObjType);
+			      	   		temp_del_node_id = objIdArray.join(",");
+		      	   		}
+		      	   		return;
+	    			}
+	    		}else{
+	    			//当只选择了一个组织时，若没子孙又没人，则选择确定后直接删除，然后结束
+	    			if(!window.confirm(mess + "'"+ text +"' ? ") ){
+	    				return;
+	    			}else{
+	    				if(delType == "tree"){	//在组织树上删除
+	    					deleteOrg(orgID,objCategory);
+			      	   		temp_del_node_id = orgID;
+	    				}else{
+		    				//清除当前选择的对象集合
+				   			curSelObjArray = new Array;
+			   	   			deleteSelectOrg(objIdArray.join(","),listObjType);
+			      	   		temp_del_node_id = objIdArray.join(",");
+	    				}
+			      	   	return;
+		    		}
+	    		}
+	    	}
+    	}else{
+    		//将有子孙的组织和无子孙但有人员的组织，进行分类存储
+	    	for(var i=0;i<strs.length;i++){
+		    	if(strs[i] == "true"){	//存在子节点
+		    		hasChildIdArray.push(objIdArray[i]);
+		    		hasChildNameArray.push(objNameArray[i]);
+		    	}else{
+		    		//无子节点时判断有无人员
+		    		if(usernum.split("#")[i] > 0){
+		    			userNumberIdArray.push(objIdArray[i]);
+		    			userNumberNameArray.push(objNameArray[i]);
+		    		}
+		    	}
+	    	}
+    	}
+    	
+    	if(delType == "tree"){	//在组织树上删除
+	        temp_del_node_id = orgID;
+	      	var text = ORGModuleTree_tree.getSelectedItemText();
+      		var objectCategory =  ORGModuleTree_tree.getUserData(orgID,"objectCategory");
+	      	temp_del_node_parentId = ORGModuleTree_tree.getParentId(orgID);
+	      	if( objectCategory != "E"){
+	      	  	deleteOrg(orgID,objectCategory);
+	      	}else{
+  	          	deleteUser(orgID);
+  	      	}
+    	}else{	//在查询结果中删除
+    		//若存在有子节点的组织，则直接提示不能删除，然后将id从数组中移除
+    		if(hasChildNameArray.length > 0){
+    			alert(type + "'" + hasChildNameArray.join("、") + "'#{msgs['baf.org.delMessage5']}");
+    			var tempArr = createNewArray(objIdArray);
+    			objIdArray = removeArray(hasChildIdArray, objIdArray, "", "");
+    			objNameArray = removeArray(hasChildNameArray, objNameArray, hasChildIdArray, tempArr);
+    		}
+    		//保存最终要删除的组织ID
+    		var delObjIdArray = new Array;
+    		if(userNumberNameArray.length > 0){
+    			if(!confirm(type + "'" + userNumberNameArray.join("、") + "'#{msgs['baf.org.delMessage6']}" + type + "#{msgs['baf.org.delMessage4']}" + mess + "'" + userNumberNameArray.join("、") + "'#{msgs['baf.questionMark']}")){
+    				var tempArr = createNewArray(objIdArray);
+	    			objIdArray = removeArray(userNumberIdArray, objIdArray, "", "");
+	    			objNameArray = removeArray(userNumberNameArray, objNameArray, userNumberIdArray, tempArr);
+    				delObjIdArray = objIdArray;
+    			}else{
+    				//这里需要保存剔除有人员部门之前的数据，作为最后要删除的数据
+    				delObjIdArray = createNewArray(objIdArray);
+	    			objIdArray = removeArray(userNumberIdArray, objIdArray, "", "");
+	    			objNameArray = removeArray(userNumberNameArray, objNameArray, userNumberIdArray, delObjIdArray);
+    			}
+    		}else{
+    			//当不存在无子节点且无人员的节点时，也要将delObjIdArray初始化为objIdArray，保证delObjIdArray为最后要删除的数据
+    			delObjIdArray = objIdArray;
+    		}
+    		//若选择的组织中包含有人员的部门，在最后不需要提示，只需要提示没子孙且没人员的部门
+	      	if(objIdArray.length > 0){
+		      	if(confirm(mess + "'" + objNameArray.join("、") + "'#{msgs['baf.questionMark']}")){
+		      		//清除当前选择的对象集合
+		   			curSelObjArray = new Array;
+	   	   			deleteSelectOrg(delObjIdArray.join(","),listObjType);
+	      	   		temp_del_node_id = delObjIdArray.join(",");
+		      	}else{		      	    		
+		     		delObjIdArray = removeArray(objIdArray, delObjIdArray, "", "");
+		      		//当选择的部门组织中，不包含没子孙且没人员的部门时，需要删除有人员的部门
+		      		if(delObjIdArray.length > 0){
+		      			//清除当前选择的对象集合
+			   			curSelObjArray = new Array;
+		   	   			deleteSelectOrg(delObjIdArray.join(","),listObjType);
+		      	   		temp_del_node_id = delObjIdArray.join(",");
+		      		}
+		      	}
+	      	}else{
+	      		//当选择的部门组织中，不包含没子孙且没人员的部门时，需要删除有人员的部门
+	      		if(delObjIdArray.length > 0){
+	      			//清除当前选择的对象集合
+		   			curSelObjArray = new Array;
+	   	   			deleteSelectOrg(delObjIdArray.join(","),listObjType);
+	      	   		temp_del_node_id = delObjIdArray.join(",");
+	      		}
+	      	}
+    	}
+    }
+    
+    //根据索引删除数组中的元素，然后返回一个新的数组
+    function removeArray(a1, a2, a3, a4){
+    	var tempArr = createNewArray(a2);
+    	if(a3 == ""){
+    		for(var i=0;i<a1.length;i++){
+    			var idx = a2.indexOf(a1[i]);
+    			a2.splice(idx, 1, "");
+    		}
+    	}else{
+    		for(var i=0;i<a3.length;i++){
+    			var idx = a4.indexOf(a3[i]);
+    			a2.splice(idx, 1);
+    		}
+    	}
+    	a2 = createNewArray1(a2);
+    	return a2;
+    }
+    
+    //通过现有数组创建一个新数组
+    function createNewArray(arr){
+    	var newArr = new Array;
+    	if(arr.length > 0){
+    		for(var i=0;i<arr.length;i++){
+    			newArr.push(arr[i]);
+    		}
+    	}
+    	return newArr;
+    }    
+    
+    //通过现有数组创建一个新数组
+    function createNewArray1(arr){
+    	var newArr = new Array;
+    	if(arr.length > 0){
+    		for(var i=0;i<arr.length;i++){
+    			if(arr[i] != ""){
+    				newArr.push(arr[i]);
+    			}
+    		}
+    	}
+    	return newArr;
+    }
+    
+    //点击用户名出发前面的复选框单击事件
+    function setChecked(event,chkname){
+    	var parentNodeId = "";
+    	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+    		parentNodeId = event.srcElement.parentNode.id;
+    	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下或Chrome浏览器下
+    		parentNodeId = event.target.parentNode.id;
+    	}
+    	var index = parentNodeId.substring(parentNodeId.indexOf(":")+1,parentNodeId.lastIndexOf(":"));
+    	var checkboxs = document.getElementsByName(chkname);
+    	
+    	var orgListDisplay = document.getElementById("orgList").style.display;
+    	var orgUserListDisplay = document.getElementById("orgUserList").style.display;
+    	var pageSize = 0;
+    	var scrollerPage = 0;
+    	if(orgListDisplay == "block"){
+    		pageSize = document.getElementById("orgListPagesize").value;
+    		scrollerPage = document.getElementById("orgListScrollerPage").value;
+    	}else{
+    		pageSize = document.getElementById("orgUserListPagesize").value;
+    		scrollerPage = document.getElementById("orgUserListScrollerPage").value;
+    	}
+    	//获取当前点击的行索引，翻页之后复选框的索引重新计数
+    	index = parseInt(index) - parseInt((scrollerPage - 1)*pageSize);
+    	//触发复选框的单击事件
+    	checkboxs[index].click();
+    }
+    
+	//在每次分页的时候，记忆查询结果列表中选中的对象
+	function saveSelledObj(){
+		//组织查询结果类型
+		var listObjType = document.getElementById("sc2form:listObjType").value;
+		var domName = "";	//复选框name
+		if(listObjType == "O"){
+			domName = "org";
+		}else if(listObjType == "P"){
+			domName = "post";
+		}else{
+			domName = "suser";
+			userListType = "orgUserList";
+			//修改批量新增和批量调整按钮状态
+			setCurBtnFlag();
+		}
+		
+		$A(document.getElementsByName(domName)).each(function(ch){
+			if(curSelObjArray.indexOf(ch.value)>-1){
+				ch.checked = true;
+			}
+		});
+	}
+	
+	//初始化选择复选框的数组
+	function initArray(){
+		curSelUserArray = new Array();
+		curSelObjArray = new Array();
+	}
+//]]>
+</script>
+ <style type="text/css">
+ .column1{
+ 	width:30%;
+ }
+ .column2{
+ 	width:70%;
+ }
+ </style> 
+</head>
+<body >
+  <f:loadBundle basename="messages" var="msgs" />
+     <regaltec:extPanel 
+	id="topregion"
+    region="north"
+    collapseMode="mini"
+    split="true"
+    height="250"
+    contentEl="laytop"
+   />
+   
+    <regaltec:extPanel 
+      id="bottomregion" 
+      region="center"
+      split="true"
+      contentEl="laybottom" 
+      autoScroll="true"
+    />
+	<regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel 
+		region="east" 
+		id="eastpanel" 
+		autoScroll="false"  
+		items="topregion_panel,bottomregion_panel"   
+		split="true" width="230"   
+		minSize="230" 
+		maxSize="600" 
+		border="false"
+		collapsible="true" 
+		margins="0 0 0 0" 
+		layout="border" />
+		<regaltec:viewPortPanel region="center" id="center-panel" contentEl="center" />
+	</regaltec:viewPort>    
+    
+     <regaltec:dhtmlXtree id="ORGModuleTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="tree-div"
+		loadXML="/baf/jsp/org/unit/orgtree.jsp"
+		xmlAutoLoading="/baf/jsp/org/unit/orgtree.jsp"
+		>
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="showUnit" />	
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />	
+		<regaltec:setDxtEnable enableFunction="enableDragAndDrop" parameter="1"/>
+		<regaltec:setDxtEevntHandler eventName="Drag" handler="onDrag"/>
+	</regaltec:dhtmlXtree>   
+	
+  <div id="laytop">   
+	<table width="100%"  CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+		<tr><td height="16" align="right" class="rich-gradient-tab" ><h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" ></h:graphicImage></td></tr>		
+	    <tr id="efg">
+	    	<td valign="top"> 
+	    		<rich:tabPanel id="tabPanel" height="100%" width="99%" switchType="client">
+		  			<rich:tab id="orgtree" label="#{msgs['baf.org.orgtree']}" onlabelclick="toTreePage();">
+						<div id="tree-div" style="width:100%;height:100%;overflow-x:auto;overflow-y:auto;position:absolute;"></div>
+		  			</rich:tab>
+		  			<rich:tab id="select" label="#{msgs['baf.org.orgselect']}" onlabelclick="toSelectPage();">
+		  				<h:form id="conform" onsubmit="return validate();" >
+  						<h:selectOneRadio id="selectType" style="font-size:13px;" value="#{organizationBean.selectType}" onclick="changeCondition(this);">   
+  							<f:selectItem itemLabel="#{msgs['baf.org.unit']}" itemValue="O"/>
+  							<c:if test="#{organizationBean.postSwitch==1}">
+  								<f:selectItem itemLabel="#{msgs['baf.org.post']}" itemValue="P" />
+  							</c:if>
+  							<f:selectItem itemLabel="#{msgs['baf.org.user']}" itemValue="E"/>
+  						</h:selectOneRadio>    						
+  						
+  						<h:panelGroup id="condition">
+	  					<h:panelGrid id="unit" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;display:none" styleClass=".rich-text-color-general">
+	  						<ui:remove>
+	  						<h:outputText value="#{msgs['baf.org.unit.orgCode']}:"/>
+	  						<h:inputText id="unitCode" value="#{organizationBean.selectUnitCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+	  						</ui:remove>
+	  						<h:outputText value="#{msgs['baf.org.unit.orgName']}:"/>
+	  						<h:inputText id="unitName" value="#{organizationBean.selectUnitName}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+	  					</h:panelGrid>
+	  					
+	  					<h:panelGrid id="post" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;display:none;" styleClass=".rich-text-color-general">
+	  						<h:outputText value="#{msgs['baf.org.post.postName']}:"/>
+	  						<h:inputText id="postName" value="#{organizationBean.selectPostName}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+	  					</h:panelGrid>
+	  					
+	  					<h:panelGrid id="user" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;display:block;" styleClass=".rich-text-color-general">
+	  						<h:outputText value="#{msgs['baf.org.user.loginName']}:"/>
+	  						<h:inputText id="loginName" value="#{organizationBean.selectLoginName}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+	  						
+	  						<h:outputText value="#{msgs['baf.org.user.userName']}:"/>
+	  						<h:inputText id="userName" value="#{organizationBean.selectUserName}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+	  						
+	  						<h:outputText value="#{msgs['baf.org.user.workState']}:"/>
+	  						<h:selectOneRadio id="isValid" value="#{organizationBean.selectIsValid}" style="font-size:13px;">
+	  							<f:selectItem itemLabel="#{msgs['baf.org.user.onthejob']}" itemValue="Y"/>
+	  							<f:selectItem itemLabel="#{msgs['baf.org.user.dimission']}" itemValue="N"/>
+	  						</h:selectOneRadio>
+	  					</h:panelGrid>	
+	  					</h:panelGroup>
+	  					
+	  					<!-- 组织树选中的节点ID -->
+	  					<h:inputHidden id="selectItemId" value="#{organizationBean.selectItemId}"/>
+	  					
+	  					<rich:spacer height="5px"/>	  		
+	  					<center>
+	  						<a4j:commandButton id="selectBtn" value="#{msgs['baf.Select']}"  styleClass="rich-button" limitToList="true" onclick="getSelectItemId();ondisabled();" disabled="false" action="#{organizationBean.selectObjectByConditions}" reRender="orgUserList,sc1form,orgList,sc2form,selectBtn,orgListPagesize,orgListScrollerPage"/>
+	  					</center>	
+	  					</h:form>	
+		  			</rich:tab>
+		  		</rich:tabPanel> 
+			</td>
+		</tr>
+		</table>
+	</div>
+	
+	<div id="laybottom">
+		<!-- 组织下的人员列表 -->
+		<rich:dataTable width="100%" id="orgUserList" style="display:#{organizationBean.tableStyle1};" rows="#{userBean.pageSize}" columnClasses="col" 
+            value="#{userBean.defaultDataModel}" var="user" rendered="true"  onRowContextMenu="openUserContextMenu(event);return false;"
+             headerClass="rich-gradient-tab">
+            <rich:column style="width:5px;">
+	            <f:facet name="header">
+					<input type="checkbox" onclick="selAll(this.checked,'user');"/>
+				</f:facet>
+				<input type="checkbox" name="user" value="#{user.userId};#{user.userName};#{user.fullCode};#{user.shortCode}" onclick="sel(this);"/>
+            </rich:column>
+            <rich:column >
+	            <f:facet name="header">
+					<h:outputText  value="#{msgs['baf.org.user.name']}" />
+				</f:facet>
+				<h:inputHidden value="#{user.userId}"></h:inputHidden>
+	            <a href="#" onclick="setChecked(event,'user');showUser('${user.userId}')"><h:outputText value="#{user.userName}" /></a>
+            </rich:column>
+            <rich:column>
+	            <f:facet name="header">
+					<h:outputText value="#{msgs['baf.org.user.loginName']}" />
+				</f:facet>
+	            <h:outputText value="#{user.loginName}" />
+            </rich:column>
+            <rich:column>
+	            <f:facet name="header">
+					<h:outputText  value="#{msgs['baf.org.post.parentUnit']}" />
+				</f:facet>
+	            <a href="#" onclick="showSelectUnitPost('${user.unitId}','#{user.parentObjectCategory}')"><h:outputText value="#{user.unitName}" escape="false"/></a>
+            </rich:column>
+        </rich:dataTable>
+
+        <h:form id="sc1form" style="display:#{organizationBean.tableStyle1};">
+			<rich:datascroller align="right" style="display:#{organizationBean.tableStyle1};"  
+			for="orgUserList" fastStep="0"  page="#{userBean.scrollerPage}" id="sc1" 
+			oncomplete="saveSelledUser('user');" reRender="orgUserListPagesize,orgUserListScrollerPage"/>
+		</h:form>
+		<a4j:keepAlive beanName="userBean"/>
+		
+		<!-- 组织查询结果列表 -->
+		<rich:dataTable width="100%" id="orgList" style="display:#{organizationBean.tableStyle2}" rows="#{organizationBean.pageSize}" columnClasses="col" 
+            value="#{organizationBean.thirdDataModel}" var="org" rendered="true" headerClass="rich-gradient-tab" onRowContextMenu="openDelObjContextMenu(event);return false;">
+            <c:if test="${organizationBean.selectType=='O'}">
+	            <rich:column style="width:5px;">
+		            <f:facet name="header">
+						<input type="checkbox" onclick="selObjAll(this.checked,'org');"/>
+					</f:facet>
+					<input type="checkbox" name="org" value="#{org.orgid};#{org.orgname};#{org.parentorgid}" onclick="selObj(this);"/>
+	            </rich:column>
+            
+            	<h:column>
+		            <f:facet name="header">
+						<h:outputText value="#{msgs['baf.org.unit.orgName']}"/>
+					</f:facet>
+					<h:inputHidden value="#{org.orgid}"/>
+		            <a href="#" onClick="showSelectUnitPost('${org.orgid}','O');" ><h:outputText value="#{org.orgname}" /></a>
+					<h:inputHidden value="#{org.parentorgid}"/>
+            	</h:column>
+           
+	            <h:column>
+		            <f:facet name="header">
+						<h:outputText value="#{msgs['baf.org.unit.orgCode']}" />
+					</f:facet>
+		            <h:outputText value="#{org.orgcode}" />
+	            </h:column>
+	            <h:column>
+		            <f:facet name="header">
+						<h:outputText  value="#{msgs['baf.org.unit.parentOrgName']}"/>
+					</f:facet>
+		            <a href="#" onclick="showSelectUnitPost('#{org.parentorgid}','O')"><h:outputText value="#{org.parentorgname}" /></a>
+	            </h:column>
+            </c:if>
+            <c:if test="${organizationBean.selectType=='P'}">
+	            <rich:column style="width:5px;">
+		            <f:facet name="header">
+						<input type="checkbox" onclick="selObjAll(this.checked,'post');"/>
+					</f:facet>
+					<input type="checkbox" name="post" value="#{org.orgid};#{org.orgname};#{org.parentorgid}" onclick="selObj(this);"/>
+	            </rich:column>
+	            
+            	<h:column rendered="#{organizationBean.selectType!='E'}">
+		            <f:facet name="header">
+						<h:outputText value="#{msgs['baf.org.post.postName']}"/>
+					</f:facet>
+					<h:inputHidden value="#{org.orgid}"/>
+		            <a href="#" onClick="showSelectUnitPost('${org.orgid}','P');" ><h:outputText value="#{org.orgname}" /></a>
+					<h:inputHidden value="#{org.parentorgid}"/>
+	            </h:column>
+	           
+	            <h:column rendered="#{organizationBean.selectType!='E'}">
+		            <f:facet name="header">
+						<h:outputText  value="#{msgs['baf.org.post.parentUnit']}"/>
+					</f:facet>
+		            <a href="#" onclick="showSelectUnitPost('#{org.parentorgid}','O')"><h:outputText value="#{org.parentorgname}" /></a>
+	            </h:column>
+            </c:if>
+            <c:if test="${organizationBean.selectType=='E'}">
+	            <rich:column style="width:5px;">
+		            <f:facet name="header">
+						<input type="checkbox" onclick="selObjAll(this.checked,'suser');"/>
+					</f:facet>
+					<input type="checkbox" name="suser" value="#{org.userId};#{org.userName};#{org.unitId}" onclick="selObj(this);"/>
+	            </rich:column>
+            	<h:column>
+		            <f:facet name="header">
+						<h:outputText  value="#{msgs['baf.org.user.name']}"/>
+					</f:facet>
+					<h:inputHidden value="#{org.userId}"/>
+		            <a href="#" onClick="setChecked(event,'suser');showUser('${org.userId}')" ><h:outputText value="#{org.userName}" /></a>
+		            <h:inputHidden value="#{org.unitId}"/>
+	            </h:column>
+	            <h:column>
+		            <f:facet name="header">
+						<h:outputText value="#{msgs['baf.org.user.loginName']}" />
+					</f:facet>
+		            <h:outputText value="#{org.loginName}" />
+	            </h:column>
+	            <h:column>
+		            <f:facet name="header">
+						<h:outputText  value="#{msgs['baf.org.post.parentUnit']}" />
+					</f:facet>
+		            <a href="#" onclick="showSelectUnitPost('${org.unitId}','#{org.parentObjectCategory}')"><h:outputText value="#{org.unitName}" escape="false"/></a>
+	            </h:column>
+            </c:if>            
+            
+        </rich:dataTable>
+        <h:form id="sc2form" style="display:#{organizationBean.tableStyle2};">
+			<rich:datascroller style="display:#{organizationBean.tableStyle2};" align="right"  for="orgList" fastStep="0"  page="#{organizationBean.scrollerPage}" id="sc2" 
+				oncomplete="saveSelledObj();" reRender="orgListPagesize,orgListScrollerPage"/>
+			<h:outputText value="查询结果为空！" rendered="#{organizationBean.queryResult}" />
+			<h:inputHidden id="listObjType" value="#{organizationBean.selectType}"/>
+		</h:form>
+		<a4j:keepAlive beanName="organizationBean"/>
+          
+  </div>
+
+  <div id="center">
+  <iframe  name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+  </div>
+  	<form  id="changeForm" target="orgworkarea" method="post">
+       <input type="hidden" name="handleType"  />
+       <input type="hidden" name="parentOrgName" />
+       <input type="hidden" name="parentOrgID"/>  
+       <input type="hidden" name="objectTypeId"/>
+       <input type="hidden" name="orgId"/>
+       <input type="hidden" name="userID"/>
+       <input type="hidden" name="objectCategory"/>               
+    </form>
+ 
+    <regaltec:extContextMenu id="opmenu">
+    	<regaltec:extContextMenuItem  id="menuItemAddOrg"  text="#{msgs['baf.org.unit.operationMenuItem.addOrg']}" handler="addOrg"/>
+    	<regaltec:extContextMenuItem  id="menuItemAddUser" text="#{msgs['baf.org.unit.operationMenuItem.addUser']}" handler="addUser" />
+    	<regaltec:extContextMenuItem  id="menuItemAddPost" text="#{msgs['baf.org.unit.operationMenuItem.addPost']}" handler="addPost" />
+    	<regaltec:extContextMenuItem  id="menuItemDeleteObj"  text="#{msgs['baf.org.unit.operationMenuItem.deleteObj']}" handler="deleteOrganization" />
+    	<regaltec:extContextMenuItem  id="menuReload" text="#{msgs['baf.operRightGroup.refresh']}" handler="reload" />
+    </regaltec:extContextMenu>
+    
+    <regaltec:extContextMenu id="userManager">
+    	<regaltec:extContextMenuItem  id="menuItemDUser"  text="#{msgs['baf.org.unit.operationMenuItem.addUser']}" handler="addUser"/>
+    	<regaltec:extContextMenuItem  id="menuItemDelUser" text="#{msgs['baf.org.btnDelete']}#{msgs['baf.org.userE']}" handler="delUser" />
+    	<regaltec:extContextMenuItem  id="menuItemUnLockUser" text="用户解锁" handler="unLockUser" />
+    	<regaltec:extContextMenuItem  id="menuItemRefreshUserList" text="#{msgs['baf.operRightGroup.refresh']}" handler="showUnitUser" />	
+    </regaltec:extContextMenu>
+    
+    <!-- 组织查询结果列表操作菜单 -->
+    <regaltec:extContextMenu id="deleteObj">
+    	<regaltec:extContextMenuItem  id="menuItemDelObj" text="#{msgs['baf.org.unit.operationMenuItem.deleteObj']}" handler="deleteObj" />
+    	<regaltec:extContextMenuItem  id="menuItemUnLockObj" text="用户解锁" handler="unLockObj" />
+    </regaltec:extContextMenu>
+    
+	<h:form id="a4jform">
+		<!-- 在组织树上删除组织 -->
+        <a4j:jsFunction name="deleteOrg" oncomplete="onDelOrgComplete(data);" action="#{organizationBean.delete}" data="#{organizationBean.dealFlag}">
+            <a4j:actionparam name="orgID" assignTo="#{organizationBean.orgID}"/>                
+            <a4j:actionparam name="objectCategory" assignTo="#{organizationBean.objectCategory}"/>                
+        </a4j:jsFunction>
+        
+        <!-- 在组织查询结果列表中删除组织 -->
+        <a4j:jsFunction name="deleteSelectOrg" oncomplete="onDeleteSOrgComplete(data);" action="#{organizationBean.delete}" data="#{organizationBean.dealFlag}">
+            <a4j:actionparam name="orgID" assignTo="#{organizationBean.orgID}"/>
+            <a4j:actionparam name="objectCategory" assignTo="#{organizationBean.objectCategory}"/>                
+        </a4j:jsFunction>
+        
+        <!-- 刷新查询结果列表 -->
+        <a4j:jsFunction name="refreshList" action="#{organizationBean.selectObjectByConditions}" oncomplete="initArray();" reRender="orgList,sc2form,orgListPagesize,orgListScrollerPage"/>
+        
+        <!-- 在点击组织树查询出来的人员列表中删除人员 -->
+        <a4j:jsFunction name="deleteUser"   oncomplete="onDelUserComplete(data);" action="#{userBean.delete}" data="#{userBean.dealFlag}">
+            <a4j:actionparam name="userId" assignTo="#{userBean.userId}"/> 
+            <a4j:actionparam name="unitId" assignTo="#{userBean.unitId}"/>               
+        </a4j:jsFunction>
+        
+          <!-- 在点击组织树查询出来的人员列表中解锁人员 -->
+        <a4j:jsFunction name="unlockUser"   oncomplete="onUnlockUserComplete(data);" action="#{userBean.unlock}" data="#{userBean.dealFlag}">
+            <a4j:actionparam name="userId" assignTo="#{userBean.userId}"/>              
+        </a4j:jsFunction>
+        
+        <!-- 在组织查询结果列表中删除人员 -->
+        <a4j:jsFunction name="deleteSelectUser" oncomplete="onDeleteSUserComplete(data);" action="#{userBean.delete}" data="#{userBean.dealFlag}">
+            <a4j:actionparam name="userId" assignTo="#{userBean.userId}"/> 
+            <a4j:actionparam name="unitId" assignTo="#{userBean.unitId}"/>               
+        </a4j:jsFunction>
+        
+        <!-- 在树上点击部门和岗位时，刷新右下角的人员列表 -->
+        <a4j:jsFunction name="listOrgUser" limitToList="true" oncomplete="initArray();" action="#{userBean.reflash}" reRender="orgUserList,sc1form,orgList,sc2form,orgUserListPagesize,orgUserListScrollerPage" >
+            <a4j:actionparam name="unitId" assignTo="#{userBean.unitId}"  />
+            <a4j:actionparam name="tableStyle1" value="block" assignTo="#{organizationBean.tableStyle1}"/>
+            <a4j:actionparam name="tableStyle2" value="none" assignTo="#{organizationBean.tableStyle2}"/>
+            <a4j:actionparam name="scrollerPage"  value="1" assignTo="#{userBean.scrollerPage}"  />                  
+        </a4j:jsFunction>
+        
+        <!-- 组织树拖动 -->
+        <a4j:jsFunction name="moveOrgTree" action="#{organizationBean.moveOrgTree}" data="#{organizationBean.dealFlag}" oncomplete="onMoveComplete(data)">
+            <a4j:actionparam name="srcID" value=""/>
+            <a4j:actionparam name="destID" value=""/>
+        </a4j:jsFunction>
+        
+        <!-- 查询部门是否含有子节点以及部门下的人员个数 -->
+        <a4j:jsFunction name="isExistChild" action="#{organizationBean.isExistChild}" oncomplete="onSelectComplete(data)" data="#{organizationBean.existChild},#{organizationBean.usernum},#{organizationBean.delOrgId},#{organizationBean.delOrgName},#{organizationBean.delObjCategory}">
+            <a4j:actionparam name="orgId" value=""/>
+            <a4j:actionparam name="orgName" value=""/>
+            <a4j:actionparam name="category" value=""/>
+        </a4j:jsFunction>
+        
+           <!-- 查询部门是否可以新增人员-->
+        <a4j:jsFunction name="isAbleAdd" action="#{organizationBean.isAbleAdd}"  oncomplete="reFlag(data);" data="#{organizationBean.dealFlag}">
+            <a4j:actionparam name="objectId" value=""/>
+        </a4j:jsFunction>
+                
+    </h:form>
+    
+    <!-- 岗位配置开关 -->
+    <h:inputHidden id="postSwitch" value="#{organizationBean.postSwitch}"/>
+    <!-- 页面请求状态，Y：当前还有请求在处理  N：当前没有请求 -->
+    <h:inputHidden id="requestStatus" value=""/>
+    
+    <!-- 缓存人员列表的当前页和每页显示条数 -->
+    <h:inputHidden id="orgListPagesize" value="#{organizationBean.pageSize}"/>
+    <h:inputHidden id="orgListScrollerPage" value="#{organizationBean.scrollerPage}"/>
+    <h:inputHidden id="orgUserListPagesize" value="#{userBean.pageSize}"/>
+    <h:inputHidden id="orgUserListScrollerPage" value="#{userBean.scrollerPage}"/>
+    
+    <rich:toolTip for="helpicon" >
+    <div style="width:300;">
+	    <h:outputText value="#{msgs['baf.dataRightFactor.helpMessage1']}"/><br />
+      	1、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage2']}"/><br />
+      	2、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage3']}"/>
+      	<ui:remove>
+      	<!-- 目前不显示批量新增和存为模板功能，在这里屏蔽该部分说明 -->
+      	<br />
+     	3、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage6']}"/>
+     	4、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage7']}"/>
+     	</ui:remove>
+    </div>
+    </rich:toolTip>
+	<script>
+	//<![CDATA[
+	   /*session超时显示错误信息*/
+	   A4J.AJAX.onExpired = function(loc,expiredMsg)
+	   {
+	      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+	   }
+	   /*显示数据提交到后台的错误信息*/
+	   A4J.AJAX.onError = function(req,status,message)
+	   {
+		   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+		   alert(report);
+		   window.sys_error = true;
+	   }
+	//]]>
+	</script>
+	
+   	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>	
+</f:view>
+</html>

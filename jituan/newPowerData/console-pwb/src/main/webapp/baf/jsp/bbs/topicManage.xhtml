@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+		<title>装维技术论坛</title>
+		<link rel="stylesheet"
+				href="${request.contextPath}/baf/jsp/bbs/css/pw_core.css" />
+			<link rel="stylesheet"
+				href="${request.contextPath}/baf/jsp/bbs/css/mian.css" />
+			<script type="text/javascript">
+			//<![CDATA[
+			 function onSaveTop(){
+			    
+			      window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId=#{topicManageBean.topicId}";
+	
+			 }
+			 
+			 function deleTopic(){
+			    if(confirm("${msgs['baf.bbs.delTopic']}")){
+			       return false;
+			    }
+			    return true;
+			 }
+			 
+			 function deleBack(){
+			   window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=#{topicManageBean.boardId}";
+			 }
+			 	//回首页
+			function go_index(){
+				window.location.href='bbscategory.xhtml';
+			}
+		
+			function onSetComplete(data){
+	            if(data == "N"){
+	            	alert("${msgs['baf.Failure']}");
+	            	return ;
+	            }		
+				if(a4jcomplete()==false){
+			 		return;
+ 				}	
+			}
+			
+			function onChangeComplete(){
+			   if(a4jcomplete()==false){
+			 		return;
+ 				}
+ 				
+			}
+			
+			function changeBefore(){
+			   var c_id=document.getElementById("manageForm:sel_boardId");
+			   var c_name=document.getElementById("manageForm:change_boardName");
+			   var text=c_id.options[c_id.selectedIndex].text;
+		
+			   if(c_id.value==""){
+			      alert("请选择变更版块！");
+			      return false;
+			   }
+			   if(text.indexOf("----")==-1){
+			      alert("请选择该版块下的子版块！");
+			       return false;
+			   }
+			   
+			   c_name.value=text.substr(4);
+			   return true;
+			}
+			 //]]>
+			</script>
+		</head>
+		
+
+		<body >
+		<f:loadBundle basename="messages" var="msgs" />
+		<center>
+			<ui:include src="/baf/jsp/bbs/top.xhtml"/>
+			<div class="tac mb5"></div>
+
+				<!-- 新建贴子 -->
+ <a4j:form id="manageForm">
+				<div class="main-wrap">
+					<div id="main">
+					 <div class="f_tree cc" align="left">
+					 <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/home.gif" 	style="vertical-align:middle"></h:graphicImage>
+              <h:outputLink onclick="window.location.href='${request.contextPath}/bbsIndex.do?method=index';" value="#" style="vertical-align: middle">
+							<h:outputText value="论坛" style="font-size:13px;"/>
+						</h:outputLink>
+               <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/related_li.gif" 	style="vertical-align:middle;width:16px"></h:graphicImage> 
+               <h:outputLink onclick="window.location.href='${request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=${topicManageBean.boardId}&amp;boardName=${topicManageBean.boardName}';" value="#" style="vertical-align: middle">
+							<h:outputText value="#{topicManageBean.boardName}" style="font-size:13px;"/>
+						</h:outputLink>
+						
+				<h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/related_li.gif" 	style="vertical-align:middle;width:16px"></h:graphicImage> 
+               <h:outputLink onclick=" window.location.href='#{request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId=#{topicManageBean.topicId}';" value="#" style="vertical-align: middle">
+							<h:outputText value="#{topicManageBean.title}" style="font-size:13px;"/>
+						</h:outputLink>		
+						 </div>
+						
+						 <div class="tac mb5"></div>
+						<div id="pw_content" class="mb10">
+		
+			
+			<h:inputHidden id="topicId" value="#{topicManageBean.topicId}"></h:inputHidden>
+			<h:inputHidden id="boardId" value="#{topicManageBean.boardId}"></h:inputHidden>
+			<h:inputHidden id="change_boardName" value="#{topicManageBean.change_boardName}"></h:inputHidden>
+	
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td valign="middle" height="50" align="right"> 
+          <h:selectOneMenu id="sel_boardId" value="#{topicManageBean.change_boardId}"
+									style="width200px;height:30px;" rendered="#{topicManageBean.newReport}">
+			<f:selectItems value="#{topicManageBean.boardList}" />
+		</h:selectOneMenu>
+		 <rich:spacer width="5px"/> 
+      	 <a4j:commandButton style="background: url(/baf/jsp/bbs/images/post.png);height:30px;overflow:hidden;width:74px; text-align:center; font-weight:700; font-size:14px; line-height:30px;margin-right:10px;border: none; "  styleClass="post" type="submit" id="change" value="变更版块" onclick="if(!changeBefore()) return false;" action="#{topicManageBean.changerBoard}"  reRender="manageForm"  oncomplete="onChangeComplete();" rendered="#{topicManageBean.newReport}"/>   	  
+      	 <rich:spacer width="10px"/> 
+          <a4j:commandButton style="background: url(/baf/jsp/bbs/images/post.png) no-repeat;height:30px;overflow:hidden;width:74px; text-align:center; font-weight:700; font-size:14px; line-height:30px; border: none; " styleClass="post" type="submit" id="dele" value="#{msgs['baf.Delete']}" onclick="if(deleTopic()) return false;" action="#{topicManageBean.deleteTopic}" oncomplete="deleBack();"/> 
+           <rich:spacer width="10px"/>          
+		  
+              <a4j:commandButton style="background: url(/baf/jsp/bbs/images/post.png);height:30px;overflow:hidden;width:74px; text-align:center; font-weight:700; font-size:14px; line-height:30px;border: none; " styleClass="post" type="submit" id="excellence1" value="#{topicManageBean.ename}" action="#{topicManageBean.setExcellence}" reRender="manageForm" data="#{topicManageBean.dealFlag}" oncomplete="onSetComplete(data)"/>  
+            
+               <rich:spacer width="10px"/>
+                <a4j:commandButton style="background: url(/baf/jsp/bbs/images/post.png);height:30px;overflow:hidden;width:74px; text-align:center; font-weight:700; font-size:14px; line-height:30px;border: none; "  styleClass="post" type="submit" id="top1" value="#{topicManageBean.tname}" action="#{topicManageBean.setTop}"  reRender="manageForm" data="#{topicManageBean.dealFlag}" oncomplete="onSetComplete(data)"/>
+                    
+			  <rich:spacer width="10px"/>
+		 <a4j:commandButton style="background: url(/baf/jsp/bbs/images/post.png);height:30px;overflow:hidden;width:74px; text-align:center; font-weight:700; font-size:14px; line-height:30px;margin-right:10px;border: none; "  styleClass="post" type="submit" id="lock1" value="#{topicManageBean.lname}" action="#{topicManageBean.setLock}"  reRender="manageForm" data="#{topicManageBean.dealFlag}" oncomplete="onSetComplete(data)"/>   
+		 	
+		 	 <rich:spacer width="10px"/>
+		
+           </td>
+        </tr>
+      </table>
+				<table align="center" width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+             <tr> 
+                <td > 
+      <table width="100%"  bordercolordark="#aabbaa" bordercolorlight="#aabbaa" cellspacing="0" cellpadding="0" align="center" border="1" style="border-collapse:collapse ">
+  
+        <tr > 
+          <td bgcolor="#f0f5f0" colspan="2" > 
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" height="25">
+              <tr> 
+                <td valign="middle">[<b><h:outputText value="#{msgs['baf.bbs.topicTager']}"  style="font-size:13;color:#CC6633"/></b>]  
+		 <h:outputText value="#{msgs['baf.bbs.topicCreatTm']}:"  style="font-size:13"/> <h:outputText value="#{topicManageBean.createTime}"  style="font-size:13">
+			 <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/></h:outputText><rich:spacer width="10px"/>
+                <h:outputText value="#{msgs['baf.bbs.point']}:#{topicManageBean.point}"  style="font-size:13"/></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr > 
+          <td align="center" bgcolor="#FFFFFF" width="145" rowspan="3" valign="top"> 
+            <table width="145" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                  <td align="center" height="30">
+                     
+                      <b> <h:outputText value="#{topicManageBean.userName}" style="size:30;"/></b>
+                  
+                      </td>
+              </tr>
+              <tr> 
+                <td align="center"><h:graphicImage url="#{request.contextPath}#{topicManageBean.photo}"></h:graphicImage> </td>    
+              </tr>
+              
+              <tr>
+				<td align="center" width="150">
+					<h:outputText value="#{msgs['baf.bbs.dept']}：#{topicManageBean.unitName}"
+						style="font-size:13"/>
+				</td>
+			</tr>
+			<tr>
+				<td align="center" width="150">
+					<h:outputText value="积分：#{topicManageBean.userPoint}"
+						style="font-size:13"/>
+				</td>
+			</tr>
+              
+              <tr> 
+                <td align="center"></td>
+              </tr>
+              <tr> 
+                <td align="center"></td>
+              </tr>
+              <tr> 
+                <td align="center"></td>
+              </tr>
+            </table>
+           
+          </td>
+          <td bgcolor="#FFFFFF">
+            <table border="0" cellspacing="0" cellpadding="0" height="20">
+              <tr> 
+               
+                <td colspan="5" align="right" valign="middle">
+                <h:graphicImage id="reply" url="#{request.contextPath}/baf/images/bbs/reply.gif" rendered="${topicManageBean.isLock=='N'}"/>
+ 
+<h:outputLink value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=1&amp;topicId=#{topicManageBean.topicId}" >
+                
+										<h:outputText value="#{msgs['baf.bbs.reply']}" rendered="${topicManageBean.isLock=='N'}" />
+										</h:outputLink><rich:spacer width="20px"/>
+             
+				 <h:graphicImage id="replynow" url="#{request.contextPath}/baf/images/bbs/replynow.gif" rendered="${topicManageBean.isLock=='N'}" />
+				 <h:outputLink value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=2&amp;topicId=#{topicManageBean.topicId}" >
+                
+										<h:outputText value="#{msgs['baf.bbs.nowReply']}" rendered="${topicManageBean.isLock=='N'}" />
+										</h:outputLink>
+				 <rich:spacer width="20px"/>
+               
+			   </td>
+				
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr bgcolor="#f0f5f0" > 
+          
+          <td height="24" bgcolor="#FFFFFF" width="545"> <h:outputText value="#{msgs['baf.bbs.title']}:" style="font-size:13"/><h:outputText value="#{topicManageBean.title} " style="color:#ff0000;font-size:13"/>
+          </td>
+        </tr>
+        <tr bgcolor="#f0f5f0" > 
+          <td height="154" bgcolor="#FFFFFF" align="center" valign="top"> 
+            <table height="220" width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td rowspan="2" width="20" height="20"></td>
+                <td height="20" colspan="2"></td>
+              </tr>
+              <tr> 
+                <td valign="top"><h:outputText value="#{topicManageBean.content}" escape="false"></h:outputText></td>
+                <td width="20"></td>
+              </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td valign="bottom" align="left" height="32" colspan="2">
+				<font color="#999999"></font>
+			
+				</td>
+              </tr>
+              <tr> 
+                <td align="left" height="24"></td>
+                <td align="right" width="10%"></td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+</td>
+</tr>
+ 
+</table>
+	
+
+	</div>
+			</div></div>
+			</a4j:form>
+			</center>
+			     <a4j:keepAlive beanName="topicManageBean"/>
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    	
+	    </rich:modalPanel>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

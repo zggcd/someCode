@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+			<script type="text/javascript">
+			//<![CDATA[
+			//触发事件
+			function onObjectFireMouseEvent(obj, eventname) { 					
+				if (document.all) {
+				//IE
+					obj.fireEvent(eventname);
+				} else {
+				//firefox						
+					var name = eventname.replace("on", "");
+					var evtObj = document.createEvent('MouseEvents');     
+					evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+					obj.dispatchEvent(evtObj);
+				}
+			}
+
+			//业务树单击事件
+			function doOnClick(){
+				var itemId = this.getSelectedItemId();
+				Refresh(itemId);
+				
+				//定位到第一个tab页
+				RichFaces.switchTab('orgViewForm:tabPanel','orgViewForm:burBaseinfo','burBaseinfo');	
+			}
+			
+			//传递树的所有选中节点和所有展开的节点
+			function setCheckValue(){
+				var checkList = organizationTree_tree.getAllChecked();	//所有全选的，不包含半选
+				if(checkList !== ""){
+					var allCheckeds = checkList.split(",");			
+					for(var i = 0; i < allCheckeds.length; i++){
+						var selectitemid = allCheckeds[i];
+						//树对于重复的id自动在id后加下划线及13位数字，根据此特性进行截取，保证能返回所需真实id
+			  			if(selectitemid.indexOf("_") > 0)
+			  			{
+			  				if(selectitemid.substr(selectitemid.indexOf("_")).length == 14)
+			  				{
+			  					selectitemid = selectitemid.substr(0,selectitemid.indexOf("_"));
+			  				}
+			  			}
+			  			if (i == 0) {
+			  				checkList = selectitemid;
+			  			} else {
+			  				checkList += ',' + selectitemid;
+			  			}			  			
+					}
+				}
+				var uncheckList = organizationTree_tree.getAllUnchecked();	//所有未选的
+				if(uncheckList != ""){
+					var allUnchecks = uncheckList.split(",");
+					for(var i = 0; i < allUnchecks.length; i++){
+						var uncheckitemid = allUnchecks[i];
+						if(uncheckitemid.indexOf("_") > 0){
+							if(uncheckitemid.substr(uncheckitemid.indexOf("_")).length == 14)
+			  				{
+			  					uncheckitemid = uncheckitemid.substr(0,uncheckitemid.indexOf("_"));
+			  				}
+						}
+						if (i == 0) {
+							uncheckList = uncheckitemid;
+						} else {
+							uncheckList += ',' + uncheckitemid;
+						}
+					}
+				}
+				document.getElementById("orgViewForm:checked").value = checkList;
+				document.getElementById("orgViewForm:unchecked").value = uncheckList;
+				var thredStateCheckList = organizationTree_tree.getAllPartiallyChecked();	//所有半选的
+				document.getElementById("orgViewForm:thirdstatechecked").value = thredStateCheckList;
+				document.getElementById("orgViewForm:orgviewRendered").value = false;
+				document.getElementById("orgViewForm:userviewRendered").value = false;
+				return true;
+			}
+			
+			//进入页面时刷新树
+			function refreshTree(){
+				organizationTree_tree.deleteChildItems("0");
+				
+			  	var str=document.getElementById("orgViewForm:businessId").value;
+			  	var url="${request.contextPath}/baf/jsp/orgview/orgtree.jsp?businessid="+str;
+			  	organizationTree_tree.setXMLAutoLoading(url);
+			  	
+			  	organizationTree_tree.refreshItem("0"); 
+			}
+			
+			//保存完触发事件
+		    function onAddComplete(data) {
+			    if(a4jcomplete()==false){
+			    	document.getElementById("orgViewForm:saveBtn").disabled = false;
+			   	 	Richfaces.hideModalPanel("panel");
+	 				return;
+		 		}
+		 		//刷新组织视图
+		 		refreshTree();
+			    Richfaces.hideModalPanel("panel");
+			    //定位到第一个tab页
+				RichFaces.switchTab('orgViewForm:tabPanel','orgViewForm:burBaseinfo','burBaseinfo');			    
+			}
+			
+			//点击查询按纽人员列表未渲染前置灰
+			function ondisabled(){
+			  	document.getElementById("orgViewForm:saveBtn").disabled = true;
+			  	Richfaces.showModalPanel("panel");
+			}
+			
+			//重置查询条件
+			function resetConditions(type){
+				if(type == "org"){
+					document.getElementById("orgViewForm:unitName").value = "";
+				}else{
+					document.getElementById("orgViewForm:userName").value = "";
+					document.getElementById("orgViewForm:loginName").value = "";
+				}
+			}
+			
+			//设置是否重新渲染tab页
+			function setTabRendered(tabId){
+				if(tabId == "user" && document.getElementById("orgViewForm:userviewRendered").value == "false"){
+					setTabContentRendered("user","userviewpg");
+					Richfaces.showModalPanel("panel");
+					
+				}
+				if(tabId == "org" && document.getElementById("orgViewForm:orgviewRendered").value == "false"){
+					setTabContentRendered("org","orgviewpg");
+					Richfaces.showModalPanel("panel");
+				}
+			}
+			//点击查询按纽业务组织列表未渲染前置灰
+			function ondisableds(){
+			  	document.getElementById("orgViewForm:searchOrg").disabled = true;
+			}
+			//点击查询按纽业务人员列表未渲染前置灰
+			function userondisabled(){
+				document.getElementById("orgViewForm:searchUser").disabled = true;
+			}
+			 //]]>
+			</script>
+			<style>
+		       .scrolls{
+		           width:400px;
+		           height:300px;
+		           overflow:auto;
+		       }
+			   td.column1{
+			   width:30%;
+			   }	
+			   td.column2{
+			   width:70%;
+			   }	
+		    </style>     
+		    
+		    <!--[if !IE]><!-->
+		    <style>
+			    legend{
+			    	margin:5 5 5 5;
+			    }
+		    </style>
+		    <!--<![endif]-->
+		    
+		</head>
+		<body>
+		<f:loadBundle basename="messages" var="msgs" />
+		<regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="east" id="eastpanel"
+				autoScroll="true" contentEl="east" split="true" width="200"
+				collapsible="true" margins="0 0 0 0" layout="accordion"/>
+			<regaltec:viewPortPanel region="center" id="center-panel"
+				contentEl="center" autoScroll="true"/>		
+		</regaltec:viewPort>
+			
+		<div id="east" style="height:100%;width:100%">
+			<table width="100%" height="100%" CELLSPACING="0" CELLPADDING="0">
+				<tr>
+					<td height="16" align="right" class="rich-gradient-tab" >
+						<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" />
+					</td>
+				</tr>		
+				<tr>
+					<td id="east-panel" width="100%" height="100%"></td>
+				</tr>
+			</table>
+			<regaltec:dhtmlXtree id="businessTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="east-panel"
+				loadXML="/baf/jsp/orgview/businessTreeXMLData.jsp"
+				xmlAutoLoading="/baf/jsp/orgview/businessTreeXMLData.jsp">
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+			</regaltec:dhtmlXtree>			
+		</div>
+		
+		<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+			<a4j:form id="orgViewForm">
+				<rich:tabPanel id="tabPanel"  style="margin-left:5px;margin-right:5px;margin-top:5px;" width="98%" height="90%" switchType="client" >
+					<!-- 组织视图 -->
+					<rich:tab id="burBaseinfo" label="#{msgs['baf.orgview.organizationView']}">
+						<rich:spacer height="20px"/>
+						<center>
+							<table border="0" height="390px" width="98%" cellspacing="0" cellpadding="0" >
+								<tr>
+									<td width="59%" align="center">
+										<fieldset style="height:100%;" >			
+								            <legend><h:outputText value="#{msgs['baf.orgview.businessInformation']}" /></legend>
+								            
+											<h:panelGrid id="org" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;text-align:center;table-layout:fixed " styleClass=".rich-text-color-general">
+												 
+												<h:outputText value="#{msgs['baf.orgview.higherLlevel']}:" />
+												<h:inputText id="parentBusinessName"  value="#{orgviewBean.parentBusinessName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" disabled="true"/>
+																		
+												<h:outputText value="#{msgs['baf.orgview.businessName']}:" />
+												<h:inputText id="businessName"  value="#{orgviewBean.businessName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" disabled="true"/>
+																		
+												<h:outputText value="#{msgs['baf.orgview.businessNumber']}:" />
+												<h:inputText id="businessCode" value="#{orgviewBean.businessCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input" disabled="true"/>
+												
+												<h:outputText value="#{msgs['baf.orgview.businessDescription']}:" />
+												<h:inputTextarea id="businessDesc" value="#{orgviewBean.businessDesc}" style="width:95%;" rows="3" styleClass="rich-gradient-input" disabled="true"/>				
+													
+												<h:inputHidden id="businessId" value="#{orgviewBean.businessId}"/>	
+											</h:panelGrid>
+											<rich:spacer height="30px"/>	
+												
+										 </fieldset>
+									</td>
+									
+									<td width="1%"></td>
+									
+									<td width="40%" align="center">
+										 <fieldset style="height:100%;" >
+											<legend><h:outputText value="#{msgs['baf.orgview.organizationView']}" /></legend>
+											<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+												<tr>
+													<td id="orgtree" width="100%" height="100%"></td>
+												</tr>
+											</table>
+										 	
+									 		<regaltec:dhtmlXtree id="organizationTree"
+											    imagePath="/baf/images/dhtmlxtree/" contentEl="orgtree"
+									            loadXML="/baf/jsp/orgview/orgtree.jsp"
+									            xmlAutoLoading="/baf/jsp/orgview/orgtree.jsp">
+									             	<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+									      		<regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>
+									      		<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"/>
+											</regaltec:dhtmlXtree>		
+										</fieldset>
+									</td>
+								</tr>
+							</table>
+					 	</center>
+					 	<h:inputHidden id="checked" value="#{orgviewBean.checked}"/>	<!-- 所有全选的，不包含半选 -->
+					 	<h:inputHidden id="thirdstatechecked" value="#{orgviewBean.thirdstatechecked}"/>	<!-- 所有半选的 -->
+						<h:inputHidden id="unchecked" value="#{orgviewBean.unchecked}"/>	<!-- 所有未选的 -->
+						
+						<h:panelGroup id="tabRendered">
+							<!-- tab页内容是否渲染 -->
+							<h:inputHidden id="userviewRendered" value="#{orgviewBean.userViewTabRendered}"/>
+							<h:inputHidden id="orgviewRendered" value="#{orgviewBean.orgViewTabRendered}"/>
+						</h:panelGroup>
+					</rich:tab>
+					
+					<!-- 业务组织预览 -->
+					<rich:tab label="#{msgs['baf.orgview.orgviewlabel']}" onlabelclick="setTabRendered('org');">
+						<br/>
+						<center>
+							<h:panelGroup id="orgviewpg">
+				        		<h:panelGroup rendered="#{orgviewBean.orgViewTabRendered}">
+					        		<!-- 查询Panel -->
+									<rich:panel style="width:95%;">				
+										<h:panelGrid id="orgpg" columns="5" style="font-size:13px;" styleClass=".rich-text-color-general">	
+									        <h:panelGroup>
+									        	<h:outputText value="#{msgs['baf.org.unit.orgName']}："/>
+			  									<h:inputText id="unitName" value="#{orgviewBean.unitName}" style="width:200px;;height:23px;" styleClass="rich-gradient-input"/>
+											</h:panelGroup>
+											
+											<rich:spacer width="20px"/>  
+											
+											<h:panelGroup>
+												<!-- 查询按钮 -->
+												<a4j:commandButton styleClass="rich-button" type="submit" id="searchOrg" value="#{msgs['baf.calendar.select']}">
+													<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('panel');if (1==2) return false;ondisableds();" disabled="false" action="#{orgviewBean.loadOrg}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="orgList,orgScroller,searchOrg" requestDelay="100"/>
+												</a4j:commandButton>
+												<rich:spacer width="5px"/>
+												<!-- 重置按钮 -->
+												<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+													<a4j:support event="onclick" onsubmit="resetConditions('org');return false;"/>
+												</a4j:commandButton>
+											</h:panelGroup>	
+										</h:panelGrid>	
+									</rich:panel>	
+										
+									<br/><br/>
+									
+									<!-- 显示列表 -->
+									<rich:dataTable width="95%" id="orgList" rows="#{orgviewBean.pageSize}"
+							            value="#{orgviewBean.defaultDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+							            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+							            <rich:column style="width:20%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.orgName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{item.orgname}" />
+							            </rich:column>
+							            <rich:column style="width:80%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.parentOrgName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{item.all_parent_name}"/>
+							            </rich:column>	
+							        </rich:dataTable>
+							        <table width="95%">
+							            <tr>
+								            <td>
+												<rich:datascroller align="right"  for="orgList" fastStep="1"  page="#{orgviewBean.orgScrollerPage}" id="orgScroller" oncomplete="saveSelledObj('org');"/>							
+											</td>
+										</tr>
+									</table>
+								</h:panelGroup>
+							</h:panelGroup>
+					    </center>
+					</rich:tab>
+					
+					<!-- 业务人员预览 -->
+					<rich:tab label="#{msgs['baf.orgview.userviewlabel']}" onlabelclick="setTabRendered('user');">
+						<br/>
+						<center>
+							<h:panelGroup id="userviewpg">
+				        		<h:panelGroup rendered="#{orgviewBean.userViewTabRendered}">
+					        		<!-- 查询Panel -->
+									<rich:panel style="width:95%;">	
+										<h:panelGrid id="userpg" columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">	
+						  					<h:panelGroup>
+						  						<h:outputText value="#{msgs['baf.org.user.userName']}："/>
+						  						<h:inputText id="userName" value="#{orgviewBean.userName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+											</h:panelGroup>
+												
+											<rich:spacer width="5px"/>  
+											
+											<h:panelGroup>
+												<h:outputText value="#{msgs['baf.org.user.loginName']}："/>
+						  						<h:inputText id="loginName" value="#{orgviewBean.loginName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+						  					</h:panelGroup>
+											
+											<rich:spacer width="20px"/>  
+											
+											<h:panelGroup>
+												
+												<!-- 查询按钮 -->
+												<a4j:commandButton styleClass="rich-button" type="submit" id="searchUser" value="#{msgs['baf.calendar.select']}">
+													<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('panel');if (1==2) return false;userondisabled();" disabled="false" action="#{orgviewBean.loadUser}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="userList,userScroller,searchUser" requestDelay="100"/>
+												</a4j:commandButton>
+												<rich:spacer width="5px"/>
+												<!-- 重置按钮 -->
+												<a4j:commandButton styleClass="rich-button" id="resetUser" value="#{msgs['buttonResetLable']}">
+													<a4j:support event="onclick" onsubmit="resetConditions('user'); return false;"/>
+												</a4j:commandButton>
+												
+											</h:panelGroup>	
+										</h:panelGrid>	
+									</rich:panel>
+									
+									<br/><br/>
+									
+									<!-- 显示列表 -->
+									<rich:dataTable width="95%" id="userList" rows="#{orgviewBean.pageSize}"
+							            value="#{orgviewBean.firstDataModel}" var="orguser" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+							            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+							            <rich:column style="width:15%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.userName}"/>
+							            </rich:column>
+							            <rich:column style="width:15%;">
+							            	<f:facet name="header">
+							                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.loginName}" />
+							            </rich:column>
+							            <rich:column style="width:70%;">
+							            	<f:facet name="header">
+							                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.post.parentUnit']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.fullUnitNames}"/>
+							            </rich:column>
+							        </rich:dataTable>
+							        <table width="95%">
+							            <tr>
+								            <td>
+												<rich:datascroller align="right" for="userList" fastStep="1" page="#{orgviewBean.userScrollerPage}" id="userScroller" oncomplete="saveSelledObj('user');"/>							
+											</td>
+										</tr>
+									</table>
+								</h:panelGroup>
+							</h:panelGroup>
+					    </center>
+					</rich:tab>
+				</rich:tabPanel>
+				<br/>
+				<center>
+					<!-- 保存按钮 -->
+			 		<a4j:commandButton id="saveBtn" value="#{msgs['baf.orgview.save']}" styleClass="rich-button">
+						<a4j:support event="onclick" onsubmit="if(setCheckValue()==false) return false;ondisabled();" disabled="false" 
+							action="#{orgviewBean.saveOrgView}" data="#{orgviewBean.dealFlag}" oncomplete="onAddComplete(data);" reRender="saveBtn,orgviewpg,userviewpg,tabRendered"/>
+					</a4j:commandButton>
+				</center>
+			</a4j:form>
+				
+			<a4j:form>
+				<a4j:jsFunction name="Refresh" actionListener="#{orgviewBean.refresh}" oncomplete="refreshTree()" reRender="org,orgviewpg,userviewpg,tabRendered">
+					<a4j:actionparam name="businessId" value="#{orgviewBean.businessId}" />
+					<a4j:actionparam name="orgViewRendered" value="false" assignTo="#{orgviewBean.orgViewTabRendered}"/>
+					<a4j:actionparam name="userViewRendered" value="false" assignTo="#{orgviewBean.userViewTabRendered}"/>
+				</a4j:jsFunction>	
+				
+				<!-- 设置tab页内容渲染状态 -->
+		        <a4j:jsFunction name="setTabContentRendered" action="#{orgviewBean.setTabContentRendered}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="#{orgviewBean.reRenderIds},tabRendered">
+		        	<a4j:actionparam name="tabId" value="" />
+		        	<a4j:actionparam name="reRenderIds" assignTo="#{orgviewBean.reRenderIds}"/>
+		        </a4j:jsFunction> 
+		        
+			</a4j:form>			
+		</div>
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+		<a4j:keepAlive beanName="orgviewBean"/>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

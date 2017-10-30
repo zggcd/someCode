@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+
+function remove_onclick(index){
+	target.deleteRow(index);
+}
+function addParamRow(form,target) {
+    var input = document.createElement('input');
+    input.setAttribute('type', 'text');
+	var tr = target.insertRow(target.rows.length);
+	var td = tr.insertCell(0);
+	td.appendChild(input);
+
+	var option1 = document.createElement('option');
+	    //mxUtils.writeln(option, label);
+    option1.setAttribute('value', "1");
+    //option1.setAttribute('name', "月-日");
+    var node1 = document.createTextNode("${msgs['baf.dialoutstrategy.month.date']}");
+    option1.appendChild(node1);
+    
+    var option2 = document.createElement('option');
+    option2.setAttribute('value', "2");
+   // option2.setAttribute('name', "年-月-日");
+   var node2 = document.createTextNode("${msgs['baf.dialoutstrategy.year.month.date']}");
+    option2.appendChild(node2);
+     option1.setAttribute('selected', true);
+     
+    var selectObj1 = document.createElement('select');
+    selectObj1.appendChild(option1);
+    selectObj1.appendChild(option2);
+	
+    
+	td = tr.insertCell(1);
+	td.appendChild(selectObj1);
+  
+    
+	td = tr.insertCell(2);
+	td.innerHTML = '<rich:calendar datePattern="yyyy-MM-dd" weekDayLabelsShort="${msgs['baf.dialoutstrategy.weeknumber']}" inputStyle="height:22px;width:135px;" name="dateTime" id="endTime"/>';
+	
+	var buttonRemove = document.createElement('button');
+	buttonRemove.value= '${msge['baf.dialoutstrategy.delete']} '; 
+	buttonRemove.setAttribute('styleClass', 'rich-button');
+	buttonRemove.onclick= function   clk(){target.deleteRow(tr.rowIndex)};
+	td = tr.insertCell(3);
+	
+    try{
+    	document.getElementById("propertyBtnOK").focus();
+    }catch(e){
+    }
+    input.focus();
+	
+}
+function onDateTypeChange(){
+	changeDataPattern(document.getElementById('addForm:dateType').value);
+}
+function insertDate(){
+	var dateType = document.getElementById('addForm:dateType').value;
+	var beginDate = document.getElementById('addForm:tempDate').value;
+	insertItem(dateType, beginDate);
+}
+function save(){
+	var dateName = document.getElementById('addForm:dateName').value;
+	if(typeof(dateName)=="undefined" || dateName == ''){
+		alert("${msgs['baf.dialoutstrategy.policyname.non-empty']}");
+		return false;
+	}
+
+	var table = document.getElementById('addForm:itemLists');
+	var rows = table.rows.length ;
+	if(rows <= 1){
+		alert("${msgs['baf.dialoutstrategy.add.holidaypolicy']}");
+		return false;
+	}
+
+	return true;
+}
+function afterInsert(){
+	var msg = document.getElementById('addForm:msg').value;
+	if(msg.indexOf("Y") == -1){
+		alert(msg);
+	}
+}
+function afterSave(){
+	if(a4jcomplete()==false) return false;
+	window.parent.frames.refreshTree();
+}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+           text-align:left;
+       }
+	   .column1{
+			width:15%;
+			text-align:left;
+		}
+		.column2{
+			width:85%;
+			text-align:left;
+		}
+		.col{
+			text-align:center;
+		}
+    </style> 
+</head>
+
+<body >
+<!-- 日期策略列表 -->
+<a4j:form  id="addForm">
+<fieldset id="queryinstance" style="margin:5px 5px 5px 5px; padding:10px 10px 10px 10px;" >			
+    <legend><h:outputText value="#{msgs['baf.dialoutstrategy.add.datepolicy']}" /></legend>
+    <rich:spacer height="10px;"></rich:spacer>
+    <h:panelGrid columns="1"     style="font-size:13px;width:100%;text-align:left;table-layout:fixed " styleClass=".rich-text-color-general">
+	<h:panelGroup id="addTab1"  styleClass="scrolls" style="width:98%;height:98%;">				
+		<h:outputText value="#{msgs['baf.dialoutstrategy.nowarea']}："></h:outputText>
+		<h:outputText id="areaName" size="20" value="#{addDateStrategyBean.areaName}" styleClass="rich-gradient-input"  >
+		</h:outputText>		
+	</h:panelGroup>
+	<h:panelGroup id="addTab2"  styleClass="scrolls" style="width:98%;height:98%;">		
+		<h:outputText value="#{msgs['baf.dialoutstrategy.holidaypolicy.name']}："></h:outputText>
+		<h:inputText id="dateName" size="20" maxlength="20" value="#{addDateStrategyBean.validDateName}" styleClass="rich-gradient-input"  >
+		</h:inputText>		
+	</h:panelGroup>
+    
+	<h:panelGroup id="tabGroup"  styleClass="scrolls" style="width:98%;height:98%; ">	
+   <rich:dataTable width="95%" id="itemLists"  columnClasses="col"  rowKeyVar="row"
+       value="#{addDateStrategyBean.dataList}" var="currItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+       title="#{msgs['baf.dict.dataTable.ItemEditTip']}" onRowDblClick="editItem(#{row});">       	      
+       <h:column>
+       		<f:facet name="header">
+     		<h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.form']}" style="font-weight:normal;"/>
+     		</f:facet>
+     		<h:outputText value="#{msgs['baf.dialoutstrategy.date']}"  rendered="#{currItem.dateType=='1'}"/>
+           <h:outputText value="#{msgs['baf.dialoutstrategy.month.date']}"  rendered="#{currItem.dateType=='2'}"/>
+           <h:outputText value="#{msgs['baf.dialoutstrategy.year.month.date']}"  rendered="#{currItem.dateType=='3'}"/>
+       </h:column>
+       	<h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.startdate']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.beginDate}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.enddate']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.endDate}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.success.times']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.successNum}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.success.interval']}" style="font-weight:normal;"/>
+	        </f:facet>	        
+	        <h:outputText value="#{currItem.successSpan}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.fail.times']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.failNum}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.fail.interval']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.failSpan}" />
+           </h:column>
+      
+       <h:column>
+       		<f:facet name="header">
+     		<h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.operate']}" style="font-weight:normal;"/>
+     		</f:facet>
+     		<center>
+           	<a4j:commandButton value="#{msgs['baf.dialoutstrategy.delete']}" type="button" onclick="deleteItem(#{row});" styleClass="rich-button">
+	 		</a4j:commandButton>
+	 		<rich:spacer width="5px;"></rich:spacer>
+	 		<a4j:commandButton value="#{msgs['baf.dialoutstrategy.edit']}" type="button" onclick="editItem(#{row});" styleClass="rich-button" >
+	 		</a4j:commandButton>
+	 		</center>
+       </h:column>        
+   	 </rich:dataTable>   
+   	</h:panelGroup>
+   	
+   	</h:panelGrid>		 
+</fieldset>
+<rich:spacer width="10px;"></rich:spacer> 
+<fieldset id="newPan" style="margin:5px 5px 5px 5px; padding:10px 10px 10px 10px;" >
+	<h:panelGrid id="addGrid" columns="4" width="100%" style="font-size:13px;" styleClass=".rich-text-color-general">
+		<h:outputText value="#{msgs['baf.dialoutstrategy.datetype']}："></h:outputText>
+		<h:selectOneMenu id="dateType" value="#{addDateStrategyBean.dateType}" onchange="onDateTypeChange();"  style="width:80px;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">			
+			<f:selectItems value="#{addDateStrategyBean.dateTypes}"/>
+		</h:selectOneMenu>
+		<h:outputText value="#{msgs['baf.dialoutstrategy.startdate']}："></h:outputText>
+		<rich:calendar id="beginDate"  value="#{addDateStrategyBean.tempBeginDate}" 
+		datePattern="#{addDateStrategyBean.dataPattern}"  weekDayLabelsShort="#{msgs['baf.dialoutstrategy.weeknumber']}" showApplyButton="true" 
+		oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" 
+		styleClass="rich-gradient-input" >
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.startdate']}"   server="false" client="true"/>
+		</rich:calendar>
+		<h:outputText value="#{msgs['baf.dialoutstrategy.enddate']}："></h:outputText>
+		<rich:calendar id="endDate"  value="#{addDateStrategyBean.tempEndDate}" 
+		datePattern="#{addDateStrategyBean.dataPattern}"  weekDayLabelsShort="#{msgs['baf.dialoutstrategy.weeknumber']}" showApplyButton="true" 
+		oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" 
+		styleClass="rich-gradient-input" >
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.enddate']}"   server="false" client="true"/>
+		</rich:calendar>
+		<h:outputText value="#{msgs['baf.dialoutstrategy.success.times']}："></h:outputText>
+		<h:inputText id="successNum" size="20" maxlength="3" value="#{addDateStrategyBean.successNum}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.success.times']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.success.times']}"   server="false" client="true"/>
+		</h:inputText>	
+		<h:outputText value="#{msgs['baf.dialoutstrategy.success.interval']}："></h:outputText>
+		<h:inputText id="successSpan" size="20" maxlength="4" value="#{addDateStrategyBean.successSpan}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.success.interval']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.success.interval']}"   server="false" client="true"/>
+		</h:inputText>	
+		<h:outputText value="#{msgs['baf.dialoutstrategy.fail.times']}："></h:outputText>
+		<h:inputText id="failNum" size="20" maxlength="3" value="#{addDateStrategyBean.failNum}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.fail.times']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.fail.times']}"   server="false" client="true"/>
+		</h:inputText>
+		<h:outputText value="#{msgs['baf.dialoutstrategy.fail.interval']}："></h:outputText>
+		<h:inputText id="failSpan" size="20" maxlength="4" value="#{addDateStrategyBean.failSpan}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.fail.interval']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.fail.interval']}"   server="false" client="true"/>
+		</h:inputText>
+	</h:panelGrid>
+	<center>
+	 <a4j:commandButton value="#{msgs['baf.desktop.addPanel']}" type="button" onclick="if (validateForm(document.getElementById('addForm'))==false) return false;" action="#{addDateStrategyBean.insertItem}" reRender="addForm:itemLists, addForm:isEdit, addForm:msg" styleClass="rich-button" oncomplete="afterInsert();">
+	 </a4j:commandButton>
+	 <rich:spacer width="10px;"></rich:spacer>
+	 <a4j:commandButton value="#{msgs['baf.dialoutstrategy.reset']}" type="reset"  styleClass="rich-button" >
+	 </a4j:commandButton>
+	</center>
+</fieldset>
+<h:inputHidden id="isEdit" value="#{addDateStrategyBean.isEdit}"/>
+<h:inputHidden id="msg" value="#{addDateStrategyBean.msg}"/>
+<a4j:keepAlive  beanName= "addDateStrategyBean" />
+<rich:spacer width="10px;"></rich:spacer> 
+<h:panelGrid id="buttonGrid" columns="1" width="100%" style="font-size:13px;" styleClass=".rich-text-color-general">
+<h:panelGroup>
+<center>
+<a4j:commandButton value="#{msgs['baf.dialoutstrategy.save']}" type="submit" onclick="if(save()==false) return false;" action="#{addDateStrategyBean.saveDate}" reRender="addForm:itemLists, addForm:isEdit" styleClass="rich-button" oncomplete="afterSave();">
+ </a4j:commandButton>
+ <rich:spacer width="10px;"></rich:spacer>
+ <a4j:commandButton value="#{msgs['baf.dialoutstrategy.return']}" type="button" onclick="history.back();" styleClass="rich-button" >
+ </a4j:commandButton>
+ </center>
+ </h:panelGroup>
+</h:panelGrid>
+<s:validatorScript functionName="validateForm"/> 
+</a4j:form>
+
+    <a4j:form>
+    <a4j:jsFunction name="changeDataPattern"  action="#{addDateStrategyBean.changeDataPattern}" reRender="addForm:beginDate, addForm:endDate, addForm:itemLists">
+       <a4j:actionparam name="dateType"  assignTo="#{addDateStrategyBean.dateType}"/> 
+    </a4j:jsFunction> 
+    
+    <a4j:jsFunction name="deleteItem"  action="#{addDateStrategyBean.deleteItem}" reRender="addForm:itemLists,addForm:isEdit">
+       <a4j:actionparam name="row"  /> 
+    </a4j:jsFunction> 
+    
+    <a4j:jsFunction name="editItem"  action="#{addDateStrategyBean.editItem}" reRender="addForm:addGrid,addForm:isEdit"  >
+       <a4j:actionparam name="row"  />  
+    </a4j:jsFunction> 
+    
+    <a4j:jsFunction name="insertItem"  action="#{addDateStrategyBean.insertItem}"  reRender="addForm:itemLists,addForm:isEdit,addForm:msg" >
+      
+    </a4j:jsFunction> 
+    </a4j:form>
+    
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+    <ui:include src="/baf/jsp/taskmange/commonq.xhtml" />
+</body>
+  	</f:view>
+</html>

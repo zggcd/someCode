@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <title>Document</title>
+ </head>
+ <body>
+
+    页面B
+	<form method="post" action="">
+		
+	
+	<table>
+	<tr>
+		<td>传入参数：</td>
+		<td><input type="text" id="paraik"></td>
+	</tr>
+	<tr>
+		<td>windowname</td>
+		<td><input type="text" id="winname"></td>
+	</tr>
+	<tr>
+		<td>parentwinname</td>
+		<td><input type="text" id="winparent"></td>
+	</tr>
+	<tr>
+		<td></td>
+		<td></td>
+	</tr>
+	</table>
+	</form>
+  <script>
+      document.getElementById("paraik").value = window.dialogArguments;
+	  document.getElementById("winname").value = window.name;
+	  document.getElementById("winparent").value = window.parent.name;
+       window.returnValue  = "iframe窗口";
+  </script>
+ </body>
+</html>

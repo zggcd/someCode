@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<head>
+		<script>
+		//<![CDATA[
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		
+		 //响应check点击事件
+		function checkBoxClick(object, value) {	
+		   var itemIdsArr = document.getElementById("queryForm:gotItemIdValues").value;
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 			
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index > 0){
+							str = "#"+value;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+							} else {
+								str = value;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("queryForm:gotItemIdValues").value = itemIdsArr;
+		}
+		
+		 //编辑,判断是否选择了一行
+	    function checkSelectOneRow() {		
+		  var oTable = document.getElementById("queryForm:dataList");
+		  //获取当前页码数
+		  var pageNum = document.getElementById("queryForm:pageNo").value;
+		  if (pageNum <= 0) pageNum = 1;
+		  //获取每页数据个数
+		  var pageSize = document.getElementById("queryForm:pageSize").value;
+		  var size = oTable.rows.length - 1; //去除列头一行
+		  var selectCount = 0;
+		  if (size != null) {
+		  	for (var i=0; i < size; i++) {
+		   	    var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");						
+				if (e != null && e.checked) {
+			    	selectCount ++;
+				}
+		  	}
+		  	if (selectCount != 1) {
+		   		 //请勾选一行需要编辑的数据
+				alert("${msgs['baf.bbs.chkOneData']}");
+				return false;
+		  	}
+		  }
+		  return true;
+		}	
+		
+		//判断是否选择单行或者多行
+		function checkSelectRow() {		
+			var oTable = document.getElementById("queryForm:dataList");
+			//获取当前页码数
+			var pageNum = document.getElementById("queryForm:pageNo").value;
+			if (pageNum <= 0) {
+				pageNum = 1;
+			}
+			//获取每页数据个数
+			var pageSize = document.getElementById("queryForm:pageSize").value;					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+		    	for (var i=0; i < size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+					//请勾选需要删除的数据
+					alert("${msgs['baf.org.WarningDeleteRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+	//全选select操作表所有项
+	function onSelectALlItems() {
+		var oTable = document.getElementById("queryForm:dataList");
+		var oChkAll = document.getElementById("queryForm:dataList:selectAll"); 
+		//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+	    if (!oChkAll.checked){
+	      document.getElementById("queryForm:gotItemIdValues").value = "";
+	    }
+		//获取当前页码数
+		var pageNum = document.getElementById("queryForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value; 
+		if (oTable != null && oChkAll != null) {
+			for (j = 0; j < oTable.rows.length -1; j++) {
+				var realNum = (pageNum-1)*pageSize + j;
+				//取得当前页中的第几行
+				var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");
+				if(e==null||e=="undefined")
+				{
+				   continue;
+				}
+				if (e.id.indexOf("selectedItem") >= 0) {   
+					//触发CheckBox onclick事件，用来设置itemid
+					if (document.all) {
+						//IE
+						var oldValue= e.checked;
+						e.checked = oChkAll.checked;
+						if (!oldValue && e.checked) {
+							onObjectFireMouseEvent(e, "onclick");
+						}
+					} else {
+						//firefox
+						if (oChkAll.checked) {
+							var oldValue= e.checked;
+							if (!oldValue)
+								onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+				}
+		 	}
+		}		
+		//翻页时全选框撤销掉勾选
+		function checkChkAll(){
+			var oChkAll = document.getElementById("queryForm:dataList:selectAll"); 
+			if (oChkAll.checked)
+			oChkAll.checked = !oChkAll.checked;
+		}
+		
+		//新增分区
+		function addboa(){
+		 var oTable = document.getElementById("queryForm:dataList");
+		  //获取当前页码数
+		  var pageNum = document.getElementById("queryForm:pageNo").value;
+		  if (pageNum <= 0) pageNum = 1;
+		  //获取每页数据个数
+		  var pageSize = document.getElementById("queryForm:pageSize").value;
+		  var size = oTable.rows.length - 1; //去除列头一行
+		  var selectCount = 0;
+		  if (size != null) {
+			  	for (var i=0; i < size; i++) {
+			   	    var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");						
+					if (e != null && e.checked) {
+				    	selectCount ++;
+					}
+			  	}
+			  	if (selectCount != 1) {
+					alert("${msgs['baf.bbs.selectBBSBoard']}");
+					return false;
+			  	}
+		  }
+		  var items = document.getElementById("queryForm:gotItemIdValues").value;
+		  addForBoa(items);
+		}
+		
+		//保存/禁用/启用完成触发事件
+		function onSaveBoard(data){
+			document.getElementById("queryForm:gotItemIdValues").value = "";
+			if(data=="N"){
+	   			//保存失败
+	   			alert("${msgs['baf.org.WarningHandleFailure']}");
+	   			return false;
+	   		}
+	   		if(a4jcomplete()==false){
+	 			return;
+	 		}  
+		}
+		
+		//删除完成
+		function onDicItemsDelComplete(data) {
+			if(data == "S"){
+				alert("所选分区下含有子分区，不能将其删除！若要删除，请先删除该分区下的子分区！");
+				document.getElementById("queryForm:gotItemIdValues").value = "";
+				return;
+			}
+		
+			if(a4jcomplete()==false){
+			 	return;
+		 	}
+			if (data == "N") {
+				//处理失败
+				alert("${msgs['baf.org.WarningHandleFailure']}");
+				
+		    }else{    
+		    	document.getElementById("queryForm:gotItemIdValues").value = "";
+		    	//rereshItemScroller();
+		    }
+		    
+			//如果全选框已经选中，则撤销掉勾选
+			var oChkAll = document.getElementById("queryForm:dataList:selectAll");  
+			if (oChkAll.checked)
+				oChkAll.checked = !oChkAll.checked;
+		}
+		
+		//表单校验扩展
+		function validateAll(formobj)
+		{
+		   var returnvalue = true;	   
+		   returnvalue = validateForm(formobj);
+		   return returnvalue;
+		}
+		
+		function beforeSave(){
+			var name = document.getElementById("addForm:boardName").value;
+			if(name == null || name == ""){
+				alert("${msgs['baf.bbs.checkBoardName']}");
+				return false;
+			}
+			return true;
+		}
+		
+		//]]>
+		</script>
+		<style type="text/css">
+			.rich-datascr-button, .rich-datascr-ctrls-separator {border-style: solid;border-width: 1px;cursor: pointer;text-align: center;width: 80px;}
+		</style>
+</head>
+<body >
+<f:loadBundle basename="messages" var="msgs" />
+
+	<ui:include src="#{pageContext.contextPath}/baf/jsp/common/getTreeData.xhtml">
+		<ui:param name="modalName" value="bbsSelectOrgUser" />
+		<ui:param name="dataSource" value="IDT_BBS_USERTREE" />
+		<ui:param name="label" value="#{msgs['baf.bbs.orguser']}" />
+		<ui:param name="selectNum" value="0" />		
+		<ui:param name="inputId" value="addForm:managerIds" />
+		<ui:param name="inputName" value="addForm:managerNames" />
+	</ui:include>	
+
+<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+	<rich:tabPanel id="tabPanel"  selectedTab="#{boardBean.selectTab}" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:98%;" switchType="client" >
+	<!-- 分区列表  -->
+		<rich:tab id="tab_selectboa" label="#{msgs['baf.bbs.boardlist']}" switchType="client"  style="display:block;" >		
+		<a4j:form id="queryForm">
+			<rich:spacer height="2px"/>
+			<rich:panel>	
+				<center>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="boaAdd" value="#{msgs['baf.bbs.addboard']}" onclick="addboa(); return false;"/> 
+				<rich:spacer width="40px"/>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="boaEdit" value="#{msgs['baf.Edit']}" onclick="if (checkSelectOneRow()==false) return false;" action="#{boardBean.showEditBoard}"  oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';" reRender="tabPanel,addForm,queryForm" /> 
+				<rich:spacer width="40px"/>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="boaStop" value="#{msgs['baf.bbs.stop']}" onclick="if (checkSelectOneRow()==false) return false;" action="#{boardBean.stopBoard}" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';;onSaveBoard(data);" data="#{boardBean.dealFlag}" reRender="tabPanel,addForm,queryForm" /> 
+				<rich:spacer width="40px"/>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="boaOpen" value="#{msgs['baf.bbs.open']}" onclick="if (checkSelectOneRow()==false) return false;" action="#{boardBean.openBoard}" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';onSaveBoard(data);" data="#{boardBean.dealFlag}" reRender="tabPanel,addForm.queryForm" /> 
+				<rich:spacer width="40px"/>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="boaDel" value="#{msgs['baf.Delete']}" onclick="if (checkSelectRow()==true) {#{rich:component('delItemPanel')}.show();} return false;" /> 
+				<rich:spacer width="40px"/>
+				</center>
+			</rich:panel>
+			<rich:spacer height="10px"/>
+			<h:panelGroup id="panelGroupItem" style="width:100%;">
+				<rich:dataTable width="100%" id="dataList" rows="#{boardBean.pageSize}" columnClasses="col"
+		            value="#{boardBean.defaultDataModel}" var="boaitem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+		             <rich:column width="5%" style="text-align:center;">
+				        <f:facet name="header">
+				        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+				        </f:facet>
+			            <h:selectBooleanCheckbox id="selectedItem"  onclick="checkBoxClick(this, '#{boaitem.boardId}');"/>
+			        </rich:column>	  
+		            <rich:column  width="10%">
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.boardname']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center><h:outputText value="#{boaitem.boardName}" /></center>
+		            </rich:column>
+		            <rich:column>
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.manager']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center><h:outputText value="#{boaitem.managerNames}" /></center>
+		            </rich:column>
+		             <rich:column width="10%">
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.parentname']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center><h:outputText value="#{boaitem.parentName}" /></center>
+		            </rich:column>
+		            <rich:column width="8%">
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.islock']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center><regaltec:dictionary type="dictionaryItem" itemValue="#{boaitem.isLock}" dicCode="IDD_BBS" /></center>
+		            </rich:column>
+		            <rich:column  width="10%">
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.createDate']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center>
+		                 <h:outputLabel value="#{boaitem.createDate}">
+							<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+						</h:outputLabel>
+						</center>
+		            </rich:column>
+		            <rich:column  width="10%">
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.bbs.remark']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <center><h:outputText value="#{boaitem.remark}" /></center>
+		            </rich:column>
+		       </rich:dataTable>
+		         <table width="100%" border="0">
+		            <tr>
+			            <td>
+							<rich:datascroller align="right" for="dataList" fastControls="hide"
+							 fastStep="1" page="#{boardBean.scrollerPage}" id="itemScroller" reRender="pageNo" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';checkChkAll();">	
+								<f:facet name="first" >
+									<h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+								</f:facet>
+			                    <f:facet name="first_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+			                    </f:facet>
+								<f:facet name="last">
+									<h:outputText value="#{msgs['rf4.datascroller.last']}" />
+								</f:facet>
+								 <f:facet name="last_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.last']}" />
+			                    </f:facet>
+								<f:facet name="previous">
+									<h:outputText value="#{msgs['rf4.datascroller.previous']}" />
+								</f:facet>
+								 <f:facet name="previous_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.previous']}" />
+			                    </f:facet>
+								<f:facet name="next">
+									<h:outputText value="#{msgs['rf4.datascroller.next']}" />
+								</f:facet>
+								 <f:facet name="next_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.next']}" />
+			                    </f:facet>
+							</rich:datascroller>
+						</td>
+					</tr>
+				</table>
+			</h:panelGroup>
+			
+			<!-- 删除确认模态框 -->
+			 <rich:modalPanel id="delItemPanel" autosized="true" width="300">
+	    	     <f:facet name="header">
+					<h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}" style="padding-right:15px;" />
+		         	</f:facet> 
+					<!-- 关闭按钮 -->
+			    	<f:facet name="controls">
+						<h:panelGroup>
+				 			<h:graphicImage value="/baf/images/icons/close.png"
+				 				id="hidelinkDelete" styleClass="hidelink"/>
+							<rich:componentControl for="delItemPanel" attachTo="hidelinkDelete"
+								operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>	
+				<center>
+					<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+			                 	data="#{boardBean.dealFlag}"
+			                    action="#{boardBean.deleteBoard}"
+			                    oncomplete="#{rich:component('delItemPanel')}.hide();onDicItemsDelComplete(data);"
+			                    reRender="dataList,itemScroller,pageNo,pageSize" />
+					<rich:spacer width="40px"/>
+					<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button" onclick="#{rich:component('delItemPanel')}.hide();return false;" />
+				</center>
+			</rich:modalPanel>
+			
+			<h:inputHidden id="pageNo" value="#{boardBean.scrollerPage}"/>
+		    <h:inputHidden id="pageSize" value="#{boardBean.pageSize}"/>	
+		    <h:inputHidden id="gotItemIdValues" value="#{boardBean.selectedItemIds}" />
+		</a4j:form>
+        </rich:tab>
+        <a4j:keepAlive beanName="boardBean"/>
+        
+         
+        <!-- 新建子分区 -->
+        <rich:tab id="tab_addboard" label="#{msgs['baf.bbs.tab_addboard']}" switchType="client"  style="display:#{boardBean.tabDisplay};">	
+			<a4j:form id="addForm">
+				<fieldset style="height:60%;">
+					<legend><h:outputText value="#{msgs['baf.bbs.tab_addboard']}" /></legend>
+					<center>
+						<table width="90%" border="0">
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionName']}: "/></td>
+								<td width="40%">
+									<h:inputText id="boardName" maxlength="32" value="#{boardBean.boardName}" style="width:98%;height:23px;" styleClass="rich-gradient-input">
+									  <s:commonsValidator type="required" arg="#{msgs['baf.bbs.partitionName']}" server="false" client="true"/>
+									</h:inputText>
+								</td>
+							</tr>
+							<tr align="center">
+								<td width="10%"><h:outputText id="putParName" style="display:#{boardBean.parNameDisplay};font-size:13px;" value="#{msgs['baf.bbs.parentPartition']}: "/></td>
+								<td width="40%">
+									<h:inputText id="parentName" maxlength="32" value="#{boardBean.parentName}" disabled="true" style="display:#{boardBean.putParNameDisplay};width:98%;height:23px;" styleClass="rich-gradient-input" />
+								</td>
+							</tr>
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionManager']}: "/></td>
+								<td>
+									<h:inputText id="managerNames" maxlength="32" value="#{boardBean.managerNames}" onfocus="this.blur()" style="width:86%;height:23px;" styleClass="rich-gradient-input"/>
+									<h:inputHidden id="managerIds" maxlength="32" value="#{boardBean.managerIds}" style="width:86%;height:23px;" styleClass="rich-gradient-input"/>
+									<a4j:commandButton id="sel_board" type="button" styleClass="rich-button" value="#{msgs['baf.dataImport.assginCmd']}" onclick="showbbsSelectOrgUser(); return false;"/>
+								</td>															
+							</tr>
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionRemark']}: "/></td>
+									<td>
+									<h:inputTextarea  id="remark" rows="5" value="#{boardBean.remark}" style="width:98%;resize:none;" styleClass="rich-gradient-input" >
+									   <s:commonsValidator type="maxlength" arg="#{msgs['baf.bbs.partitionRemark']}" server="false" client="true" maxLength="64"/>
+									</h:inputTextarea>
+								</td>
+							</tr>
+							<tr align="center">
+								<td colspan="2" align="center">
+									<a4j:commandButton styleClass="rich-button" type="submit" id="sel_save" value="#{msgs['baf.Save']}" onclick="if(!beforeSave()){return false;}" action="#{boardBean.save}" oncomplete="onSaveBoard(data);" data="#{boardBean.dealFlag}" reRender="addForm,tabPanel,queryForm" />
+									<a4j:commandButton styleClass="rich-button" type="submit" id="sel_rel" value="#{msgs['baf.bbs.rel']}"  action="#{boardBean.reresh}" reRender="addForm,tabPanel,queryForm" />
+								</td>
+							</tr>
+						</table>
+					</center>
+				</fieldset>
+				<s:validatorScript functionName="validateForm"/> 
+				<h:inputHidden id="pName" value="#{boardBean.parentName}"/>
+			</a4j:form>
+			
+        </rich:tab>
+    </rich:tabPanel>
+    <a4j:form>
+		<a4j:jsFunction name="addForBoa" action="#{boardBean.initialization}" reRender="tabPanel,queryForm">
+			<a4j:actionparam name="selectedIds" assignTo="#{boardBean.selectedItemIds}"/>
+		</a4j:jsFunction>
+		<a4j:jsFunction name="rereshItemScroller" action="#{boardBean.selectAllBoardForPage}" reRender="pageNo,queryForm" />
+	</a4j:form>
+</div>
+   	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

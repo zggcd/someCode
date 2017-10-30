@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	
+		<head>
+			<script>
+			//<![CDATA[
+				//保存完触发事件
+			    function onAddComplete(data) {
+			   	   if (data == "N") {
+					  //处理失败
+					  alert("${msgs['baf.Failure']}"+"！"+"${msgs['baf.calendar.selectWorkdays']}");
+				   }
+				   else{
+				   	if(a4jcomplete()==false){
+			 			return;
+			 		}	
+				      //alert("${msgs['baf.Success']}");
+				   }
+				}
+				
+				//验证不能输入字母
+				function numberOnly() {
+				    if (! ((window.event.keyCode >= 48) && (window.event.keyCode <= 57))) {
+						window.event.keyCode = 0;
+					}
+				}
+				//检查输入字符是否为数字,如果有非数字就返回false
+				function checkIsInt(obj){
+					var num="0123456789.";
+					var str=obj.value;
+					//alert(str);
+					var ch;
+					for(i=0;i<str.length;i++){
+					ch=str.charAt(i);
+						if(num.indexOf(ch)==-1){
+							alert("${msgs['baf.bureau.WaringNotInt']}");
+							obj.value="";
+							obj.focus();
+							return false;
+						}
+					}
+					return true;
+				}
+				
+				//验证小时的输入只能是0-23之间的数值
+				function checkSize(obj){
+					var str=obj.value;
+					if(str < 0 || str > 23){
+						alert("${msgs['baf.calendar.hournumber']}");
+							//obj.value="00";
+							obj.focus();
+							return false;
+					}
+					return true;
+				}
+				
+				//验证分钟的输入只能是0-59之间的数值
+				function checkSizeMin(obj){
+					var str=obj.value;
+					if(str < 0 || str > 59){
+						alert("${msgs['baf.calendar.minutesnumber']}");
+							//obj.value="00";
+							obj.focus();
+							return false;
+					}
+					return true;
+				}
+				
+				//保存时,判断工作的上下班时间不能颠倒
+				function beforeSave(){
+					var onhour = document.getElementById("wtForm:onmorhourcomboboxValue").value;//上午上班小时
+					var offhour = document.getElementById("wtForm:offmorhourcomboboxValue").value;//上午下班小时
+					var onafthour = document.getElementById("wtForm:onafthourcomboboxValue").value;//下午上班小时
+					var offafthour = document.getElementById("wtForm:offafthourcomboboxValue").value;//下午下班小时
+					
+					var onmin = document.getElementById("wtForm:onmorminutecomboboxValue").value;//上午上班分钟
+					var offmin = document.getElementById("wtForm:offmorminutecomboboxValue").value;//上午下班分钟
+					var onaftmin = document.getElementById("wtForm:onaftminutecomboboxValue").value;//下午上班分钟
+					var offaftmin = document.getElementById("wtForm:offaftminutecomboboxValue").value;//下午下班分钟
+					
+					
+					if(onhour > offhour || onhour > onafthour || onhour > offafthour){
+						alert("${msgs['baf.calendar.timeCompare']}");
+						return false;      
+					}
+					if(onafthour > offafthour || onafthour < onhour || onafthour < offhour){
+						alert("${msgs['baf.calendar.timeCompare']}");
+						return false;         
+					}
+					if(offhour < onhour || offhour > onafthour || offhour > offafthour){
+						alert("${msgs['baf.calendar.timeCompare']}");
+						return false;        
+					}
+					if(offafthour < onhour || offafthour < offhour || offafthour < onafthour){
+						alert("${msgs['baf.calendar.timeCompare']}");
+						return false;
+					}
+					if(onhour >= offhour || offhour >= onafthour || onafthour >= offafthour){
+						if(onmin > offmin || onmin > onaftmin || onmin > offaftmin){
+							alert("${msgs['baf.calendar.timeCompare']}");
+							return false; 
+						}
+						if(onmin < offmin ||  offmin > onaftmin || offmin > offaftmin){
+							alert("${msgs['baf.calendar.timeCompare']}");
+							return false; 
+						}
+						if(onmin > onaftmin || offmin > onaftmin || onaftmin > offaftmin){
+							alert("${msgs['baf.calendar.timeCompare']}");
+							return false; 
+						}
+						if(onmin > offaftmin || offmin > offaftmin || offmin > offaftmin ){
+							alert("${msgs['baf.calendar.timeCompare']}");
+							return false; 
+						}
+						return true;
+					}
+					return true;
+				}
+				//]]>
+			</script>
+		</head>
+		<body>
+		<f:view  contentType="text/html">
+			<f:loadBundle basename="messages" var="msgs" />
+			
+			<regaltec:viewPort ctCls="panel-bdColor">	
+				<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+					contentEl="center"/>
+			</regaltec:viewPort>
+	
+			<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+				<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;height:98%;width:98%;" switchType="client">
+					<rich:tab id="worktimes" name="worktimes" label="#{msgs['baf.calendar.worktimes']}">
+						<center>
+						<a4j:form id="wtForm">
+						<table style="font-size:13px;font-weight:normal;" >
+							<tr>
+								<td align="center"><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.workdays']}: "/></td>
+								<td colspan="4">
+									<h:selectManyCheckbox id="workday" style="font-size:13px;"  layout="lineDirection" value="#{workTimeBean.weekMap}">
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.monday']}" itemValue="1" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.tuesday']}" itemValue="2" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.wednesday']} " itemValue="3" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.thursday']} " itemValue="4" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.friday']} " itemValue="5" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.saturday']} " itemValue="6" />
+									     <f:selectItem itemLabel="#{msgs['baf.calendar.sunday']} " itemValue="7" />
+									 </h:selectManyCheckbox>
+								</td>
+							</tr>
+							<tr>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.forenoonTime']}: "/></td>
+								<td align="center">
+									<rich:spacer height="2px"/><rich:spacer height="2px"/>
+									 <rich:comboBox id="onmorhour" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSize(this);" onkeypress="numberOnly()" value="#{workTimeBean.onmorhour}">
+								        <f:selectItems value="#{workTimeBean.hourMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.time']}" maxLength="2"  server="false" client="true"/>
+									 </rich:comboBox>
+								</td>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.time']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+								<td align="center" >
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+								 <rich:comboBox id="onmorminute" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSizeMin(this);" onkeypress="numberOnly()" value="#{workTimeBean.onmorminute}">
+								        <f:selectItems value="#{workTimeBean.minutMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.minute']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								  </td>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.minute']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.foernoonclosedTime']}: "/></td>
+								<td align="center">
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+									 <rich:comboBox id="offmorhour" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSize(this);" onkeypress="numberOnly()" value="#{workTimeBean.offmorhour}" >
+								        <f:selectItems value="#{workTimeBean.hourMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.time']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.time']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+								<td align="center">
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+								 <rich:comboBox id="offmorminute" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSizeMin(this);" onkeypress="numberOnly()" value="#{workTimeBean.offmorminute}">
+								        <f:selectItems value="#{workTimeBean.minutMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.minute']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.minute']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.afternoonDutyTime']}: "/></td>
+								<td align="center">
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+									 <rich:comboBox id="onafthour" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSize(this);" onkeypress="numberOnly()" value="#{workTimeBean.onafthour}">
+								        <f:selectItems value="#{workTimeBean.hourMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.time']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td>   
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.time']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+								<td align="center">
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+								 <rich:comboBox id="onaftminute" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSizeMin(this);" onkeypress="numberOnly()" value="#{workTimeBean.onaftminute}">
+								        <f:selectItems value="#{workTimeBean.minutMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.minute']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td>   
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.minute']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+							</tr>
+							<tr>
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.afternoonclosedTime']}: "/></td>
+								<td align="center">
+									<rich:spacer height="2px"/><rich:spacer height="2px"/>
+								     <rich:comboBox id="offafthour" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSize(this);" onkeypress="numberOnly()"  value="#{workTimeBean.offafthour}">
+								        <f:selectItems value="#{workTimeBean.hourMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.time']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td>    
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.time']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+								<td align="center">
+								<rich:spacer height="2px"/><rich:spacer height="2px"/>
+								 <rich:comboBox id="offaftminute" style="width:95%;height:23px;" selectFirstOnUpdate="false" defaultLabel="00" onblur="checkIsInt(this);checkSizeMin(this);" onkeypress="numberOnly()" value="#{workTimeBean.offaftminute}">
+								        <f:selectItems value="#{workTimeBean.minutMap}" />
+								        <s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.minute']}" maxLength="2"  server="false" client="true"/>
+								    </rich:comboBox>
+								</td> 
+								<td><h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.minute']}"/><rich:spacer height="2px"/><rich:spacer height="2px"/></td>
+							</tr>
+							
+							<tr >
+								<td colspan="5" align="center">
+								<a4j:commandButton styleClass="rich-button" type="submit" id="WorktimeAdd" value="#{msgs['baf.calendar.save']}">
+										<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('wtForm'))==false) {return false;} if(!beforeSave()){return false;}" action="#{workTimeBean.addWorkTime}" data="#{workTimeBean.dealFlag}" oncomplete=" onAddComplete(data); if(data=='Y' &amp;&amp; !e.checked) {#{rich:component('tabPanel')}.hide();}" reRender="wtForm" />
+										<rich:spacer width="40px"/>
+									</a4j:commandButton> 
+								
+								</td>
+							</tr>
+						</table>	   
+						<s:validatorScript functionName="validateForm"/>
+						</a4j:form>
+						</center>
+					</rich:tab>
+				</rich:tabPanel>
+			</div>
+		</f:view>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</html>

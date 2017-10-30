@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>人力分析</title>
+    <link rel="stylesheet" href="lib/css/style_manpower.css">
+</head>
+<body id="manpower">
+    <div class="top">
+        <p>装维人力分析</p><img class="img" src="lib/images/u561.png">
+        <select v-model="selectCity">
+            <option selected>省份</option>
+            <option v-for="city in citys">{{ city.name }}</option>
+        </select>
+        <p style="width:10px;"><span> > </span></p>
+        <input id="" type="date" value="2016-08-17" v-model="time"/>
+        <img id="search" src="lib/images/u32.png" @click="searchInfo">
+        <img class="img_bottom" src="lib/images/u201.png">
+    </div>
+    <div class="content">
+        <div class="charts">
+            <div class="efficiency">
+                <div class="efficiency_p"><p>装维人员工作效率分析</p></div>
+                <div id="efficiencyChart"></div>
+            </div>
+            <div class="morw">
+                <div class="morw_p"><p>装维人员男女构成比例分析</p></div>
+                <div id="morwChart"></div>
+            </div>
+            <div class="dayOrder">
+                <div class="dayOrder_p"><p>全国人均每日装维工单量总体分析</p></div>
+                <div id="dayOrderChart"></div>
+            </div>
+            <div class="monthOrder">
+                <div class="monthOrder_p"><p>月装维人均工单量排行分析</p></div>
+                <div id="monthOrderChart"></div>
+            </div>
+            <div class="orderTrend">
+                <div class="orderTrend_p"><p>装维月人均工单量趋势分析</p></div>
+                <div id="orderTrendChart"></div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="lib/script/echarts.min.js"></script>
+    <script type="text/javascript" src="lib/script/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src='lib/script/Polyfill.js'></script>
+    <script type="text/javascript" src="lib/maps/china.js"></script>
+    <script type="text/javascript" src='lib/script/vue.js'></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#manpower',
+            data : function(){
+                return {
+                    efficiencyChart : '',
+                    efficiencyData : {},
+                    morwChart : '',
+                    morwData : {},
+                    dayOrderChart : '',
+                    dayOrderData : {},
+                    monthOrderChart : '',
+                    monthOrderData : {},
+                    orderTrendChart : '',
+                    orderTrendData : {},
+                    selectCity : '',
+                    time : '',
+                    citys : [{name:"全国"},{name:"北京"},{name:"天津"},{name:"河北"},{name:"山西"},{name:"内蒙"},{name:"辽宁"},{name:"吉林"},{name:"黑龙"},{name:"上海"},{name:"江苏"},{name:"浙江"},{name:"安徽"},{name:"福建"},{name:"江西"},{name:"山东"},{name:"河南"},{name:"湖北"},{name:"湖南"},{name:"广东"},{name:"广西"},{name:"海南"},{name:"重庆"},{name:"四川"},{name:"贵州"},{name:"云南"},{name:"西藏"},{name:"陕西"},{name:"甘肃"},{name:"青海"},{name:"宁夏"},{name:"新疆"}]
+                }
+            },
+            ready : function(){
+                this.efficiencyChart = echarts.init(
+                    document.getElementById('efficiencyChart')
+                ),
+                this.morwChart = echarts.init(
+                    document.getElementById('morwChart')
+                ),
+                this.dayOrderChart = echarts.init(
+                    document.getElementById('dayOrderChart')
+                ),
+                this.monthOrderChart = echarts.init(
+                    document.getElementById('monthOrderChart')
+                ),
+                this.orderTrendChart = echarts.init(
+                    document.getElementById('orderTrendChart')
+                )
+            },
+            methods : {
+                searchInfo : function () {
+                    var selectCity = this.selectCity
+                    this.searchCity("manpower.json",{"city":this.selectCity,"time":this.time})
+                },
+                searchCity : function (url,param) {
+                    $.ajax({
+                        url: url,
+                        data : param,
+                        success : function(data){
+                            var data = JSON.parse(data)
+                            if(!data){
+                                alert("数据异常！");
+                                return false;
+                            }
+                            if(!data.efficiencyChart.length || !data.morwChart.length || !data.dayOrderChart.length || !data.monthOrderChart.length || !data.orderTrendChart.length){
+                                alert("数据异常！");
+                                return false;
+                            }
+                            this.efficiencyData = data.efficiencyChart;
+                            this.morwData = data.morwChart;
+                            this.dayOrderData = data.dayOrderChart; 
+                            this.monthOrderData = data.monthOrderChart;
+                            this.orderTrendData = data.orderTrendChart;
+                            this.effChart();
+                            this.mowChart();
+                            this.dayChart();
+                            this.monChart();
+                            this.ordChart();
+                        }.bind(this),
+                        error : function() {
+                            alert("数据加载错误！");
+                        }
+                    })
+                },
+                effChart : function(){
+                    this.efficiencyChart = echarts.init(
+                        document.getElementById('efficiencyChart')
+                    );
+                    this.efficiencyChart.showLoading({
+                        animation: false,
+                        text : '数据读取中...',
+                        textStyle : {
+                            fontSize : 20
+                        },
+                        zlevel: 1
+                    });
+                    this.efficiencyChart.setOption({
+                        textStyle:{
+                            color : 'black'
+                        },
+                        radar: {
+                            indicator: [
+                               { name: '工单量', max: 6500},
+                               { name: '及时率', max: 16000},
+                               { name: '合格率', max: 30000},
+                               { name: '出勤率', max: 38000}
+                            ]
+                        },
+                        series: [{
+                            type: 'radar',
+                            data : this.efficiencyData
+                        }]
+                    });
+                    this.efficiencyChart.hideLoading();
+                },
+                mowChart : function(){
+                    this.morwChart = echarts.init(
+                        document.getElementById('morwChart')
+                    );
+                    this.morwChart.showLoading({
+                        animation: false,
+                        text : '数据读取中...',
+                        textStyle : {
+                            fontSize : 20
+                        },
+                        zlevel: 1
+                    });
+                    this.morwChart.setOption({
+                        tooltip : {
+                            trigger: 'item',
+                            formatter: "{a} <br/>{b} : {c} ({d}%)"
+                        },
+                        legend: {
+                            orient: 'vertical',
+                            left: 'left',
+                            data: ['男','女']
+                        },
+                        color:['#ffad00','#3399ff'],
+                        series : [
+                            {
+                                name: '',
+                                type: 'pie',
+                                radius : '55%',
+                                center: ['50%', '60%'],
+                                data: this.morwData,
+                                itemStyle:{ 
+                                    normal:{ 
+                                        label:{ 
+                                            show: true, 
+                                            formatter: '{b} : {c} ({d}%)' 
+                                        }, 
+                                        labelLine :{show:true} 
+                                    } 
+                                } 
+                            }
+                        ]
+                    });
+                    this.morwChart.hideLoading();
+                },
+                dayChart : function(){
+                    this.dayOrderChart = echarts.init(
+                        document.getElementById('dayOrderChart')
+                    );
+                    this.dayOrderChart.showLoading({
+                        animation: false,
+                        text : '数据读取中...',
+                        textStyle : {
+                            fontSize : 20
+                        },
+                        zlevel: 1
+                    });
+                    this.dayOrderChart.setOption({
+                        title: {
+                            text: '日人均工单量',
+                            left: 'center'
+                        },
+                        tooltip: {
+                            trigger: 'item'
+                        },
+                        visualMap: {
+                            min: 0,
+                            max: 10,
+                            left: 'left',
+                            top: 'bottom',
+                            text: ['高','低'],
+                            calculable: true,
+                            color: ['#006AD5', '#60AEE8', '#E4FEFD'],
+                        },
+                        toolbox: {
+                            show: true,
+                            orient: 'vertical',
+                            left: 'right',
+                            top: 'center',
+                            feature: {
+                                dataView: {readOnly: false},
+                                restore: {},
+                                saveAsImage: {}
+                            }
+                        },
+                        series: [
+                            {
+                                name: '',
+                                type: 'map',
+                                mapType: 'china',
+                                roam: false,
+                                label: {
+                                    normal: {
+                                        show: true
+                                    },
+                                    emphasis: {
+                                        show: true
+                                    }
+                                },
+                                data: this.dayOrderData
+                            }
+                        ]
+                    });
+                    this.dayOrderChart.hideLoading();
+                },
+                monChart : function(){
+                    this.monthOrderChart = echarts.init(
+                        document.getElementById('monthOrderChart')
+                    );
+                    this.monthOrderChart.showLoading({
+                        animation: false,
+                        text : '数据读取中...',
+                        textStyle : {
+                            fontSize : 20
+                        },
+                        zlevel: 1
+                    });
+                    this.monthOrderChart.setOption({
+                        color: ['#3398DB'],
+                        tooltip : {
+                            trigger: 'axis',
+                            axisPointer : {
+                                type : 'shadow'
+                            }
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis : [
+                            {
+                                type : 'category',
+                                data : this.monthOrderData[1].name
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                type : 'value'
+                            }
+                        ],
+                        series : [
+                            {
+                                name:'',
+                                type:'bar',
+                                barWidth: '60%',
+                                data: this.monthOrderData[0].value
+                            }
+                        ]
+                    });
+                    this.monthOrderChart.hideLoading();
+                },
+                ordChart : function(){
+                    this.orderTrendChart = echarts.init(
+                        document.getElementById('orderTrendChart')
+                    );
+                    var series = [];
+                    for (var i = 0; i < this.orderTrendData.length; i++) {
+                        var item = {
+                            name : this.orderTrendData[i].name,
+                            type : 'line',
+                            hoverAnimation : false,
+                            data : this.orderTrendData[i].value
+                        }
+                        series.push(item);
+                    };
+                    this.orderTrendChart.showLoading({
+                        animation: false,
+                        text : '数据读取中...',
+                        textStyle : {
+                            fontSize : 20
+                        },
+                        zlevel: 1
+                    });
+                    this.orderTrendChart.setOption({
+                        title: {
+                            text: ''
+                        },
+                        legend: {
+                            data:['北京','天津','河北','山西','内蒙古','辽宁','吉林','黑龙江','上海','江苏','浙江','安徽','福建','江西','山东','河南','湖北','湖南','广东','广西','海南','重庆','四川','贵州','云南','西藏','陕西','甘肃','青海','宁夏','新疆']
+                        },
+                        grid: {
+                            left: '3%',
+                            right: '4%',
+                            bottom: '3%',
+                            containLabel: true
+                        },
+                        xAxis : [
+                            {
+                                type : 'category',
+                                boundaryGap : false,
+                                data : ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月']
+                            }
+                        ],
+                        yAxis : [
+                            {
+                                type : 'value'
+                            }
+                        ],
+                        series : series
+                    });
+                    this.orderTrendChart.hideLoading();
+                }
+            }
+        })
+    </script>
+</body>
+</html>

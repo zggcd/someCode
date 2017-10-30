@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+			<script type="text/javascript">
+			//<![CDATA[
+			//BBS树单击事件
+			function doOnClick(){
+				var itemId = this.getSelectedItemId();
+				var itemName = this.getSelectedItemText();
+				if( itemId != "" ){
+					var isLock = this.getUserData(itemId,'isLock');
+					if(isLock == "N"){
+     					orgworkarea.document.location.href = "${request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=" + itemId + "&boardName="+itemName;
+					}else{
+						alert("${msgs['baf.bbs.isLockBoard']}");
+					}      			
+      			}
+			}
+			
+			function init() {
+				var url = "/baf/jsp/bbs/bbscategory.xhtml";
+				orgworkarea.document.location.href = "${request.contextPath}" + url;				
+			}
+			 //]]>
+			</script>
+		</head>
+		<body onload="setTimeout('init()', 300);">
+		<f:loadBundle basename="messages" var="msgs" />
+		<regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="east" id="eastpanel"
+				autoScroll="true" contentEl="east" split="true" width="170"
+				collapsible="true" margins="0 0 0 0" layout="accordion"/>
+			<regaltec:viewPortPanel region="center" id="center-panel"
+				contentEl="center" autoScroll="true"/>		
+		</regaltec:viewPort>
+			
+		<div id="east" style="height:100%;width:100%;background: white;">
+			<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+			<tr>
+				<td height="16" align="right" class="rich-gradient-tab" >
+				</td>
+			</tr>
+				<tr>
+				<td height="100%" id="treebox_tree" >
+				</td>
+			</tr>
+  		</table>		
+		</div>
+		
+			<regaltec:dhtmlXtree id="bbsTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="treebox_tree"
+				loadXML="/baf/jsp/bbs/bbsTreeXMLData.jsp"
+				xmlAutoLoading="/baf/jsp/bbs/bbsTreeXMLData.jsp">
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+			</regaltec:dhtmlXtree>
+		
+		
+		<div id="center">
+	  		<iframe  name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+	  	</div>
+	  	<form  id="changeForm" target="orgworkarea" method="post">
+	       <input type="hidden" name="userId"/>
+	    </form>
+	    
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+function showStrategy()  //节点左键单击事件相应函数
+{
+	var itemId = this.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	var userData = this.getUserData(itemId,'USERDATA');
+	if(userData == 'date'){		
+		document.getElementById('dateStrategyArea').src = "${request.contextPath}/baf/jsp/dialoutStrategy/dateStrategy/dateStrategyIndex.xhtml?validDateId=" + itemId;
+	}
+}
+function openContextMenu(){
+  try
+  { 
+	
+  	var itemId = this.getSelectedItemId();
+  	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+  	var  type =  this.getUserData(itemId,"USERDATA"); 
+
+  	if(itemId == null || typeof(itemId)=="undefined" || itemId == "")
+  	  	return;
+	  	
+	var objmenu = Ext.menu.MenuMgr.get("opmenu");		
+
+	if(type == "bureau"){
+		Ext.getCmp("newStrategy").enable();		
+		Ext.getCmp("editStrategy").disable();
+		Ext.getCmp("deleteStrategy").disable();
+	}else{
+		if(itemId == '-1'){
+			Ext.getCmp("newStrategy").disable();
+			Ext.getCmp("deleteStrategy").disable();
+		}else{					
+			Ext.getCmp("newStrategy").enable();
+			Ext.getCmp("deleteStrategy").enable();
+		}
+		Ext.getCmp("editStrategy").enable();
+		
+	}		
+		
+	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		var e = new Array(window.event.clientX,window.event.clientY);
+		objmenu.showAt(e);
+	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+		var e = new Array(arguments[1].clientX,arguments[1].clientY);
+		objmenu.showAt(e);
+		
+	}
+  }
+  catch(e)
+  {
+    alert(e.description);
+  }
+}
+function addStrategy(){
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	var  type =  moduleTree_tree.getUserData(itemId,"USERDATA"); 
+	if(type == "bureau"){
+		var areaId = itemId;
+	}else{
+		var  areaId = moduleTree_tree.getUserData(itemId,"PARENTID");
+	} 
+	document.getElementById('dateStrategyArea').src = "${request.contextPath}/baf/jsp/dialoutStrategy/dateStrategy/addDateStrategy.xhtml?areaId=" + areaId;
+}
+function editStrategy(){
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	var  areaId;
+	if(itemId == "-1")
+		areaId = "0001";
+	else
+		areaId = moduleTree_tree.getUserData(itemId,"PARENTID");
+	var  validDateName = moduleTree_tree.getUserData(itemId,"OBJECTNAME");
+	var  validDateId = moduleTree_tree.getUserData(itemId,"OBJECTID");
+	validDateName = encodeURIComponent(validDateName);
+	document.getElementById('dateStrategyArea').src 
+	= "${request.contextPath}/baf/jsp/dialoutStrategy/dateStrategy/addDateStrategy.xhtml?areaId=" + areaId+ "&validDateName=" +validDateName + "&validDateId="+validDateId;
+}
+function deleteStrategy(){
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	if(itemId == '-1'){
+		alert("${msgs['baf.dialoutstrategy.nodelete.defaultpolicy']}");
+		return;
+	}
+	if(confirm("${msgs['baf.dialoutstrategy.affirm.delete']}"))
+		deleteDateStrategy(itemId);
+	
+}
+function refreshTree(){
+	window.location.reload();  
+}
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+	   td.column1{
+	   width:20%;
+	   }	
+	   td.column2{
+	   width:60%;
+	   }	
+    </style> 
+</head>
+
+<body>
+    <regaltec:dhtmlXtree id="moduleTree" imagePath="/baf/images/dhtmlxtree/"
+	 dataSource="TREE_DIALOUT_DATE" showFullPath="1" contentEl="treebox" >	
+	 <regaltec:setDxtEevntHandler eventName="onClick" handler="showStrategy" />
+	 <regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+	 <regaltec:dhtmlXtreeParam name="userId" value="#{dateStrategyBean.userId}" dataType="String"/>	
+	</regaltec:dhtmlXtree>
+	<regaltec:extContextMenu id="opmenu">
+		<regaltec:extContextMenuItem id="newStrategy" text="#{msgs['baf.dialoutstrategy.new.policy']}" handler="addStrategy" />
+		<regaltec:extContextMenuItem id="editStrategy" text="#{msgs['baf.dialoutstrategy.edit.policy']}" handler="editStrategy" />
+		<regaltec:extContextMenuItem id="deleteStrategy" text="#{msgs['baf.dialoutstrategy.delete.policy']}" handler="deleteStrategy" />
+	</regaltec:extContextMenu>
+	
+	<regaltec:viewPort>
+		<regaltec:viewPortPanel region="east" id="east-panel"
+			autoScroll="false" contentEl="east" split="true" width="200" minSize="200" maxSize="400"
+			collapsible="true" margins="0 0 0 0" layout="accordion"/>
+		<regaltec:viewPortPanel region="center" id="center-panel" contentEl="center"/>
+	</regaltec:viewPort>
+	
+	<div id="east">
+		<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+		<tr>
+			<td height="16" align="right" class="rich-gradient-tab">
+			<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand"/>
+			</td>
+		</tr>
+		<tr>
+			<td height="100%" id="treebox">
+			</td>
+		</tr>
+		</table>
+	</div>
+	<div id="center">
+	  <iframe  id="dateStrategyArea" src="dateStrategyIndex.xhtml" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+	</div>
+	
+	<a4j:form>
+	<a4j:jsFunction name="deleteDateStrategy"  action="#{dateStrategyBean.deleteDateStrategy}" oncomplete="refreshTree()"  >
+       <a4j:actionparam name="validDateId"  assignTo="#{dateStrategyBean.validDateId}"/> 
+    </a4j:jsFunction>
+    </a4j:form> 
+	
+</body>
+  	</f:view>
+</html>

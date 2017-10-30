@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.portal.dao.PdwPortalLayoutPanelMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanel" >
+    <id column="PANEL_ID" property="panelId" jdbcType="VARCHAR" />
+    <result column="LAYOUT_ID" property="layoutId" jdbcType="VARCHAR" />
+    <result column="PANEL_NAME" property="panelName" jdbcType="VARCHAR" />
+    <result column="PANEL_ROW" property="panelRow" jdbcType="DECIMAL" />
+    <result column="PANEL_COLSPNS" property="panelColspns" jdbcType="DECIMAL" />
+    <result column="PANEL_ROWSPNS" property="panelRowspns" jdbcType="DECIMAL" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="PANEL_INDEX" property="panelIndex" jdbcType="DECIMAL" />
+    <result column="PANEL_WIDTH" property="panelWidth" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    PANEL_ID, LAYOUT_ID, PANEL_NAME, PANEL_ROW, PANEL_COLSPNS, PANEL_ROWSPNS, REMARK, 
+    PANEL_INDEX, PANEL_WIDTH
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanelExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_LAYOUT_PANEL
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_LAYOUT_PANEL
+    where PANEL_ID = #{panelId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PDW_PORTAL_LAYOUT_PANEL
+    where PANEL_ID = #{panelId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanelExample" >
+    delete from PDW_PORTAL_LAYOUT_PANEL
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanel" >
+    insert into PDW_PORTAL_LAYOUT_PANEL (PANEL_ID, LAYOUT_ID, PANEL_NAME, 
+      PANEL_ROW, PANEL_COLSPNS, PANEL_ROWSPNS, 
+      REMARK, PANEL_INDEX, PANEL_WIDTH
+      )
+    values (#{panelId,jdbcType=VARCHAR}, #{layoutId,jdbcType=VARCHAR}, #{panelName,jdbcType=VARCHAR}, 
+      #{panelRow,jdbcType=DECIMAL}, #{panelColspns,jdbcType=DECIMAL}, #{panelRowspns,jdbcType=DECIMAL}, 
+      #{remark,jdbcType=VARCHAR}, #{panelIndex,jdbcType=DECIMAL}, #{panelWidth,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanel" >
+    insert into PDW_PORTAL_LAYOUT_PANEL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="panelId != null" >
+        PANEL_ID,
+      </if>
+      <if test="layoutId != null" >
+        LAYOUT_ID,
+      </if>
+      <if test="panelName != null" >
+        PANEL_NAME,
+      </if>
+      <if test="panelRow != null" >
+        PANEL_ROW,
+      </if>
+      <if test="panelColspns != null" >
+        PANEL_COLSPNS,
+      </if>
+      <if test="panelRowspns != null" >
+        PANEL_ROWSPNS,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+      <if test="panelIndex != null" >
+        PANEL_INDEX,
+      </if>
+      <if test="panelWidth != null" >
+        PANEL_WIDTH,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="panelId != null" >
+        #{panelId,jdbcType=VARCHAR},
+      </if>
+      <if test="layoutId != null" >
+        #{layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="panelName != null" >
+        #{panelName,jdbcType=VARCHAR},
+      </if>
+      <if test="panelRow != null" >
+        #{panelRow,jdbcType=DECIMAL},
+      </if>
+      <if test="panelColspns != null" >
+        #{panelColspns,jdbcType=DECIMAL},
+      </if>
+      <if test="panelRowspns != null" >
+        #{panelRowspns,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="panelIndex != null" >
+        #{panelIndex,jdbcType=DECIMAL},
+      </if>
+      <if test="panelWidth != null" >
+        #{panelWidth,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanelExample" resultType="java.lang.Integer" >
+    select count(*) from PDW_PORTAL_LAYOUT_PANEL
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update PDW_PORTAL_LAYOUT_PANEL
+    <set >
+      <if test="record.panelId != null" >
+        PANEL_ID = #{record.panelId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.layoutId != null" >
+        LAYOUT_ID = #{record.layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.panelName != null" >
+        PANEL_NAME = #{record.panelName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.panelRow != null" >
+        PANEL_ROW = #{record.panelRow,jdbcType=DECIMAL},
+      </if>
+      <if test="record.panelColspns != null" >
+        PANEL_COLSPNS = #{record.panelColspns,jdbcType=DECIMAL},
+      </if>
+      <if test="record.panelRowspns != null" >
+        PANEL_ROWSPNS = #{record.panelRowspns,jdbcType=DECIMAL},
+      </if>
+      <if test="record.remark != null" >
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.panelIndex != null" >
+        PANEL_INDEX = #{record.panelIndex,jdbcType=DECIMAL},
+      </if>
+      <if test="record.panelWidth != null" >
+        PANEL_WIDTH = #{record.panelWidth,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update PDW_PORTAL_LAYOUT_PANEL
+    set PANEL_ID = #{record.panelId,jdbcType=VARCHAR},
+      LAYOUT_ID = #{record.layoutId,jdbcType=VARCHAR},
+      PANEL_NAME = #{record.panelName,jdbcType=VARCHAR},
+      PANEL_ROW = #{record.panelRow,jdbcType=DECIMAL},
+      PANEL_COLSPNS = #{record.panelColspns,jdbcType=DECIMAL},
+      PANEL_ROWSPNS = #{record.panelRowspns,jdbcType=DECIMAL},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      PANEL_INDEX = #{record.panelIndex,jdbcType=DECIMAL},
+      PANEL_WIDTH = #{record.panelWidth,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanel" >
+    update PDW_PORTAL_LAYOUT_PANEL
+    <set >
+      <if test="layoutId != null" >
+        LAYOUT_ID = #{layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="panelName != null" >
+        PANEL_NAME = #{panelName,jdbcType=VARCHAR},
+      </if>
+      <if test="panelRow != null" >
+        PANEL_ROW = #{panelRow,jdbcType=DECIMAL},
+      </if>
+      <if test="panelColspns != null" >
+        PANEL_COLSPNS = #{panelColspns,jdbcType=DECIMAL},
+      </if>
+      <if test="panelRowspns != null" >
+        PANEL_ROWSPNS = #{panelRowspns,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="panelIndex != null" >
+        PANEL_INDEX = #{panelIndex,jdbcType=DECIMAL},
+      </if>
+      <if test="panelWidth != null" >
+        PANEL_WIDTH = #{panelWidth,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where PANEL_ID = #{panelId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalLayoutPanel" >
+    update PDW_PORTAL_LAYOUT_PANEL
+    set LAYOUT_ID = #{layoutId,jdbcType=VARCHAR},
+      PANEL_NAME = #{panelName,jdbcType=VARCHAR},
+      PANEL_ROW = #{panelRow,jdbcType=DECIMAL},
+      PANEL_COLSPNS = #{panelColspns,jdbcType=DECIMAL},
+      PANEL_ROWSPNS = #{panelRowspns,jdbcType=DECIMAL},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      PANEL_INDEX = #{panelIndex,jdbcType=DECIMAL},
+      PANEL_WIDTH = #{panelWidth,jdbcType=VARCHAR}
+    where PANEL_ID = #{panelId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

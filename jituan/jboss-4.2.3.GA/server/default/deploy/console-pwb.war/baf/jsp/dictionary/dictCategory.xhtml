@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script>	
+	    //<![CDATA[	
+	    	//新增类别
+	function onDictCategoryAdd(dictCategoryTree,type){
+		var itemId = dictCategoryTree.getSelectedItemId();
+		var itemText = dictCategoryTree.getSelectedItemText();
+		if(type=="cate"){   //新增类别
+			addDictCategory(itemId,itemText);
+		}else{   //新增顶级类别
+			addDictCategory("","");
+		}
+	}
+	
+	//表单校验扩展
+	function validateAll(formobj){
+		var returnvalue = true;	   
+		returnvalue = validateForm(formobj);
+		return returnvalue;
+	}
+	
+	//保存完成触发事件
+	function onSaveComplete(data){				
+   		if(data!=null && data!=""){
+   			if(data=="R"){
+   			    alert("${msgs['baf.dict.dictCategoryExist']}");
+   			    return;
+   			}
+   		}   
+		if(a4jcomplete()==false){
+		 	return;
+		}		
+   		refreshTreeItem();   
+   		parent.setUserdata("isLeaf","N"); //使得添加字典不可用   		
+   		var addOrEdit = document.getElementById("categoryForm:addOrEdit").value;
+   		var categoryId = "";  //要选中的节点ID
+   		if(addOrEdit=="add"){
+   			categoryId = data.split("#")[1];
+   		}else{
+   			categoryId = document.getElementById("categoryForm:categoryId").value;
+   		}
+        var isBatchAddNew = document.getElementById("categoryForm:isBatchAddSave");//是否批量新增
+ 	    if(isBatchAddNew.checked==false){
+ 	        document.getElementById("categoryForm:isBatchAddCate").style.visibility = "hidden";
+ 	        var pcateId = document.getElementById("categoryForm:parentCateId").value;
+ 	        if(pcateId=="" || pcateId==null){
+ 	        	var timeout = setTimeout("parent.setselectitem('"+categoryId+"')", 800);
+ 	        }else{
+ 	        	var timeout = setTimeout("parent.selectitem('"+categoryId+"')", 800);
+ 	        } 		    
+ 	    }
+ 	    //设置焦点
+ 	    setFocus("categoryForm:categoryName");
+	}  
+	
+   	/*刷新父窗口树某一个节点*/
+   	function refreshTreeItem(){
+		var parentObjId = document.getElementById("categoryForm:parentCateId").value; //parentCateId 当前新增节点的父节点ID
+		if( parentObjId == "" || parentObjId == null)
+		{
+		   parentObjId = "0";
+		}
+		parent.refreshTreeItem(parentObjId);     	  
+   	}
+   	
+   	//将编号转换为大写
+	function toUpper(code){
+		code.value = code.value.toUpperCase();
+	}
+	
+	//点击树节点事件，根据是否连续新增绝点是否渲染表单
+	function isRenderForm(itemId,ev){
+    	var addOrEdit = document.getElementById("categoryForm:addOrEdit").value;
+    	var isBatchAddNew = document.getElementById("categoryForm:isBatchAddSave");//是否批量新增
+    	var cateId = document.getElementById("categoryForm:categoryId").value; 
+    	var isAdd = document.getElementById("categoryForm:isAdd").value;	
+    	var parentCateId = document.getElementById("categoryForm:parentCateId").value;
+    	if(ev!=null){
+    		refresh(itemId);
+    	}else{
+    		if(addOrEdit=="add"){
+    			if(isAdd=="Y"){
+    				if(isBatchAddNew.checked==false){
+		    			var timeout = setTimeout("parent.setselectitem('"+cateId+"')", 400);
+		    		}else{
+		    			if(parentCateId==""){
+		    				
+		    			}else{
+			 	    		parent.refreshTreeItem(itemId);
+			 	    	}
+			 	    }
+    			}else{    				
+    				refresh(itemId);
+    			}	    		
+			}else{	
+				if(isAdd=="N"){
+					refresh(itemId);
+				}    		
+	    	}
+    	}
+	}
+	//点击查询按纽列表未渲染前置灰
+	function ondisabled(){
+	  	document.getElementById("categoryForm:dictsave").disabled = true;
+	}
+	    //]]>
+		</script>
+			<style type="text/css">
+	.column1{
+		width:30%;
+		text-align:right;
+	}
+	.column2{
+		width:70%;
+		text-align:right;
+	}
+	</style>
+	</head>
+	<body onload="setFocus('categoryForm:categoryName')">
+	  <f:loadBundle basename="messages" var="msgs" />
+	  <f:view  contentType="text/html">
+	  <rich:tabPanel id="tabPanel" style="width:100%;height:97%;" switchType="client" >		
+		<!-- 字典类别信息 -->
+		<rich:tab id="category" label="#{msgs['baf.dict.dictCategory']}">			
+			<rich:spacer height="10px"/>
+           	<h:form id="categoryForm">
+	           	<center>
+					<h:panelGrid id="cate" columns="2" columnClasses="column1,column2" style="font-size:13px;width:60%;text-align:center;word-break:break-all;" styleClass=".rich-text-color-general">
+						<h:outputText value="#{msgs['baf.dict.pcategoryName']}:"/>
+						<h:inputText id="parentCategoryName" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()" value="#{dictCategoryBean.parentDictCategoryName}"/>
+						
+						<h:outputText value="#{msgs['baf.dict.categoryName']}:" />
+						<h:inputText id="categoryName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictCategoryBean.dictCategoryName}">
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.categoryName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.categoryName']}" maxLength="64"  server="false" client="true"/>				 
+						</h:inputText>
+					
+						<h:outputText value="#{msgs['baf.dict.categoryLevel']}:" />
+						<h:selectOneRadio style="width:95%;height:23px;font-size:13px;" id="objectTypeID"	value="#{dictCategoryBean.dictCategoryLevel}">
+							<f:selectItem itemLabel="#{msgs['baf.dict.sysdict']}" itemValue="0"/>
+							<f:selectItem itemLabel="#{msgs['baf.dict.operdict']}" itemValue="1"/>
+						</h:selectOneRadio>
+						
+						<h:outputText value="#{msgs['baf.dict.categoryDes']}:" />
+						<h:inputTextarea id="categoryDes" style="width:95%;height:50px;word-break:break-all;" styleClass="rich-gradient-input" value="#{dictCategoryBean.dictCategoryDesc}">				
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.categoryDes']}" maxLength="128"  server="false" client="true"/>
+						</h:inputTextarea>			
+						
+					</h:panelGrid>
+				</center>
+				<h:inputHidden id="categoryId" value="#{dictCategoryBean.dictCategoryId}" />
+				<h:inputHidden id="parentCateId" value="#{dictCategoryBean.parentDictCategoryId}" />
+				<h:inputHidden id="addOrEdit" value="#{dictCategoryBean.addOrEdit}"/>
+				<h:inputHidden id="isAdd" value="#{dictCategoryBean.isAdd}"/>
+				<h:inputHidden id="categoryCode" value="#{dictCategoryBean.dictCategoryCode}"/>
+				
+				<rich:spacer width="5px"/>	
+				<center>
+				<h:panelGroup id="isBatchAddCate" style="visibility:#{dictCategoryBean.batchAddShow};">		
+					<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+					<h:selectBooleanCheckbox id="isBatchAddSave" />	
+				</h:panelGroup>												
+				<rich:toolTip for="isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>	
+				<rich:spacer width="5px"/>
+				
+				<a4j:commandButton id="dictsave" value="#{msgs['baf.org.unit.save']}" styleClass="rich-button" >
+					<a4j:support event="onclick" onsubmit="if(validateAll(document.getElementById('categoryForm'))==false) return false;ondisabled();" disabled="false" action="#{dictCategoryBean.addOrEdit}" data="#{dictCategoryBean.dealFlag}" oncomplete="onSaveComplete(data);" reRender="categoryForm,dictsave"/>
+				</a4j:commandButton>
+				</center>
+				
+				<s:validatorScript functionName="validateForm"/>
+				<a4j:keepAlive beanName="dictCategoryBean"/>
+			</h:form>
+		</rich:tab>		
+	</rich:tabPanel>
+	<a4j:form>
+		<a4j:jsFunction name="addDictCategory" action="#{dictCategoryBean.addDictCategoryListener}" oncomplete="setFocus('categoryForm:categoryName')" reRender="categoryForm">
+			<a4j:actionparam name="pcateId" value=""/>
+			<a4j:actionparam name="pcateName" value=""/>
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction name="refresh" action="#{dictCategoryBean.refresh}" oncomplete="setFocus('categoryForm:categoryName')" reRender="categoryForm">
+			<a4j:actionparam name="cateId" assignTo="#{dictCategoryBean.dictCategoryId}"/>
+		</a4j:jsFunction>
+		
+	</a4j:form>
+	  </f:view>
+	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+	
+</html>

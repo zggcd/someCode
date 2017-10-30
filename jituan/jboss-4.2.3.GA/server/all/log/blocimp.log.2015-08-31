@@ -1,0 +1,126 @@
+17:52:18,515 INFO  [ContextLoader] Root WebApplicationContext: initialization started
+17:52:18,645 INFO  [XmlWebApplicationContext] Refreshing org.springframework.web.context.support.XmlWebApplicationContext@1f78357: display name [Root WebApplicationContext]; startup date [Mon Aug 31 17:52:18 CST 2015]; root of context hierarchy
+17:52:18,749 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from file [D:\jee-app-server\jboss-4.2.3.GA\server\all\deploy\blocimp_normal.war\WEB-INF\classes\applicationContext-cxf.xml]
+17:52:19,135 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from class path resource [META-INF/cxf/cxf.xml]
+17:52:19,180 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from class path resource [META-INF/cxf/cxf-extension-soap.xml]
+17:52:19,193 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from class path resource [META-INF/cxf/cxf-servlet.xml]
+17:52:19,337 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from file [D:\jee-app-server\jboss-4.2.3.GA\server\all\deploy\blocimp_normal.war\WEB-INF\classes\applicationContext-dao.xml]
+17:52:19,363 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from file [D:\jee-app-server\jboss-4.2.3.GA\server\all\deploy\blocimp_normal.war\WEB-INF\classes\applicationContext-jms.xml]
+17:52:19,381 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from file [D:\jee-app-server\jboss-4.2.3.GA\server\all\deploy\blocimp_normal.war\WEB-INF\classes\applicationContext.xml]
+17:52:20,359 INFO  [XmlWebApplicationContext] Bean factory for application context [org.springframework.web.context.support.XmlWebApplicationContext@1f78357]: org.springframework.beans.factory.support.DefaultListableBeanFactory@1f246b5
+17:52:21,594 INFO  [PropertyPlaceholderConfigurer] Loading properties file from class path resource [jdbc.properties]
+17:52:22,339 INFO  [DefaultListableBeanFactory] Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@1f246b5: defining beans [cxf,org.apache.cxf.bus.spring.BusApplicationListener,org.apache.cxf.bus.spring.BusWiringBeanFactoryPostProcessor,org.apache.cxf.bus.spring.Jsr250BeanPostProcessor,org.apache.cxf.bus.spring.BusExtensionPostProcessor,org.apache.cxf.resource.ResourceManager,org.apache.cxf.configuration.Configurer,org.apache.cxf.binding.BindingFactoryManager,org.apache.cxf.transport.DestinationFactoryManager,org.apache.cxf.transport.ConduitInitiatorManager,org.apache.cxf.wsdl.WSDLManager,org.apache.cxf.phase.PhaseManager,org.apache.cxf.workqueue.WorkQueueManager,org.apache.cxf.buslifecycle.BusLifeCycleManager,org.apache.cxf.endpoint.ServerRegistry,org.apache.cxf.endpoint.ServerLifeCycleManager,org.apache.cxf.endpoint.ClientLifeCycleManager,org.apache.cxf.transports.http.QueryHandlerRegistry,org.apache.cxf.endpoint.EndpointResolverRegistry,org.apache.cxf.headers.HeaderManager,org.apache.cxf.catalog.OASISCatalogManager,org.apache.cxf.endpoint.ServiceContractResolverRegistry,org.apache.cxf.binding.soap.SoapBindingFactory,org.apache.cxf.binding.soap.SoapTransportFactory,org.apache.cxf.binding.soap.customEditorConfigurer,org.apache.cxf.transport.servlet.ServletTransportFactory,org.apache.cxf.jaxws.EndpointImpl---1272762710,wxProxy.proxyFactory,wxProxy,ifaceConfigDeclareDAO,ifaceConfigInstanceDAO,ifaceConfigMappingDAO,ifaceConfCacheDAO,ifaceConfigSystemDAO,ifaceConfigProtocolDAO,ifaceLogListenerDAO,ifaceDaemonDocumentDAO,ifaceDaemonAttachmentDAO,ifaceLogEventDAO,ifaceLogEventHisDAO,ifaceLogRepairDAO,ifaceLogRepositoryDAO,ifaceLogRepositoryHisDAO,ifaceLogStrategyDAO,suptCheckDAO,suptCheckOutDAO,suptFaceDAO,suptFaceTriggerDAO,sysAlarmDAO,sysAttachmentDAO,sysDicConfigDAO,sysDicItemDAO,sysModuleDAO,sysRoleDAO,sysRoleModuleDAO,sysServiceConfigDAO,sysUnitDAO,sysUnitRoleDAO,sysUserDAO,sysUserRoleDAO,sysUserUnitDAO,sysParameterConfDAO,genericDAO,suptTaticElementDAO,suptTaticGroupDAO,SuptTaticInstanceDAO,SuptTaticRelationDAO,SuptIfaceGroupRelationDAO,SuptFaceErrTackDAO,SuptValueListDAO,sysTipsDAO,suptReturnDAO,suptReturnValidDAO,suptSaveValueDAO,suptQueryItemValueDAOImpl,ifaceDaemonErrorDAO,weblogicJms,jmsConnectionFactory,jmsQueue,sendQueue,jmsReceiver,listenerContainer,jmsTemplate,blocJMSReceiveListenerTask,org.springframework.beans.factory.config.PropertyPlaceholderConfigurer#0,baseService,wxDeclareChangeCommand,externalInterfaceServiceImpl,ifaceAttachFacade,externalIfaceConfigService,ifaceConfigFacade,ifaceConfigSystem,ifaceDaemonErrorService,ifaceLogEventService,ifaceLogFacade,ifaceMonitorService,customerApplyService,checkFaceService,suptQueryItemValueService,suptValueListService,taticConfigService,sysDicService,sysLoginService,sysParameterConfService,sysRoleService,sysServiceConfig,sysTaskServiceImpl,sysTipServiceImpl,sysUnitService,org.springframework.context.annotation.internalPersistenceAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,org.springframework.aop.config.internalAutoProxyCreator,secrityAdvisor,org.springframework.aop.support.DefaultBeanFactoryPointcutAdvisor#0,txAdvice,org.springframework.transaction.annotation.AnnotationTransactionAttributeSource#0,org.springframework.transaction.interceptor.TransactionInterceptor#0,org.springframework.transaction.config.internalTransactionAdvisor,dataSource,transactionManager,jdbcTemplate,sqlMapClientTemplate,sysTask,scanDocumentTask,scanLexiconTask,scanAttachmentTask,scanJmsTask,scanStopJmsTask,scanJmsServiceTask,scanJmsReceiveTask,scanCheckBackgroundTask,scanWebservicesTask,rebowlTask,userIncrementer,javaMailSender,receiver,externalInterfaceWebservice]; root of factory hierarchy
+17:52:43,403 INFO  [Config] OSCache: Getting properties from URL file:/D:/jee-app-server/jboss-4.2.3.GA/server/all/deploy/blocimp_normal.war/WEB-INF/classes/oscache.properties for the default configuration
+17:52:43,404 INFO  [Config] OSCache: Properties read {cache.capacity=1000}
+17:52:43,406 INFO  [GeneralCacheAdministrator] Constructed GeneralCacheAdministrator()
+17:52:43,407 INFO  [GeneralCacheAdministrator] Creating new cache
+17:52:47,788 INFO  [ContextLoader] Root WebApplicationContext: initialization completed in 29268 ms
+17:52:48,604 INFO  [ContextLoaderPlugIn] ContextLoaderPlugIn for Struts ActionServlet 'action, module '': initialization started
+17:52:48,609 INFO  [XmlWebApplicationContext] Refreshing org.springframework.web.context.support.XmlWebApplicationContext@d5b4dd: display name [WebApplicationContext for namespace 'action-servlet']; startup date [Mon Aug 31 17:52:48 CST 2015]; parent: org.springframework.web.context.support.XmlWebApplicationContext@1f78357
+17:52:48,611 INFO  [XmlBeanDefinitionReader] Loading XML bean definitions from ServletContext resource [/WEB-INF/action-servlet.xml]
+17:52:49,147 INFO  [XmlWebApplicationContext] Bean factory for application context [org.springframework.web.context.support.XmlWebApplicationContext@d5b4dd]: org.springframework.beans.factory.support.DefaultListableBeanFactory@d5bd27
+17:52:49,222 INFO  [DefaultListableBeanFactory] Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@d5bd27: defining beans [baseAction,/iface/ifaceConfigCacheAction,/iface/ifaceConfigProtocolAction,/iface/ifaceConfigSystemAction,/iface/ifaceLoggerEventAction,/iface/ifaceLoggerFaultAction,/iface/ifaceLoggerTraceAction,/iface/ifaceMonitorAction,/supt/checkAction,/supt/taticConfigAction,/supt/triggerAction,/sys/alarmAction,/sys/loginAction,/sys/sysDicConfigAction,/sys/sysDicItemAction,/sys/sysModuleAction,/sys/sysParameterConfAction,/sys/sysRoleAction,/sys/sysRoleModuleAction,/sys/sysServiceConfigAction,/sys/sysTaskAction,/sys/sysTipAction,/sys/sysUnitAction,/sys/sysUserAction,/sys/sysUserUnitAction,org.springframework.context.annotation.internalPersistenceAnnotationProcessor,org.springframework.context.annotation.internalCommonAnnotationProcessor,org.springframework.context.annotation.internalAutowiredAnnotationProcessor,org.springframework.context.annotation.internalRequiredAnnotationProcessor,com.regaltec.blocimp.util.SpringContextUtil#0]; parent: org.springframework.beans.factory.support.DefaultListableBeanFactory@1f246b5
+17:52:49,464 INFO  [ContextLoaderPlugIn] Using context class 'org.springframework.web.context.support.XmlWebApplicationContext' for servlet 'action'
+17:52:49,464 INFO  [ContextLoaderPlugIn] ContextLoaderPlugIn for Struts ActionServlet 'action', module '': initialization completed in 860 ms
+17:52:52,090 INFO  [StartupUtil] DWR Version 2.0.4 starting.
+17:52:52,091 INFO  [StartupUtil] - Servlet Engine: JBossWeb/2.0.1.GA
+17:52:52,091 INFO  [StartupUtil] - Java Version:   1.6.0_45
+17:52:52,091 INFO  [StartupUtil] - Java Vendor:    Oracle Corporation
+17:52:52,364 INFO  [DefaultConverterManager] Probably not an issue: org.jdom.Document is not available so the jdom converter will not load. This is only an problem if you wanted to use it.
+17:52:52,365 INFO  [DefaultConverterManager] Probably not an issue: org.jdom.Element is not available so the jdom converter will not load. This is only an problem if you wanted to use it.
+17:53:12,826 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: method. For causes see debug level logs:
+17:53:12,841 INFO  [DefaultRemoter] Exec: loginAction.checkin()
+17:53:15,063 INFO  [DefaultRemoter] Exec: alarmAction.alarmList()
+17:53:38,796 INFO  [DefaultRemoter] Exec: sysParameterConfAction.getSysParameterConfList()
+17:53:41,864 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:53:41,864 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:53:41,880 INFO  [DefaultRemoter] Exec: sysServiceConfig.getSysTaskList()
+17:53:42,775 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:53:42,779 INFO  [DefaultRemoter] Exec: sysDicConfigAction.getSysDicConfigList()
+17:53:42,923 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:53:43,735 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:53:43,751 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:53:43,751 INFO  [DefaultRemoter] Exec: sysTipAction.selectByExample()
+17:53:43,917 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:53:44,708 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:53:44,708 INFO  [DefaultRemoter] Exec: sysDicConfigAction.getSysDicConfigList()
+17:53:44,799 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:54:14,965 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:55:14,979 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:55:31,180 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:31,180 INFO  [DefaultRemoter] Exec: sysDicConfigAction.getSysDicConfigList()
+17:55:31,299 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:55:33,411 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:33,411 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:55:33,411 INFO  [DefaultRemoter] Exec: sysServiceConfig.getSysTaskList()
+17:55:35,005 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:35,021 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:55:35,021 INFO  [DefaultRemoter] Exec: sysServiceConfig.getSysTaskList()
+17:55:35,862 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:35,862 INFO  [DefaultRemoter] Exec: sysDicConfigAction.getSysDicConfigList()
+17:55:35,936 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:55:36,644 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:36,644 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:55:36,644 INFO  [DefaultRemoter] Exec: sysTipAction.selectByExample()
+17:55:36,722 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:55:41,800 INFO  [DefaultRemoter] Exec: sysParameterConfAction.getSysParameterConfList()
+17:55:47,493 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:47,493 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:55:47,493 INFO  [DefaultRemoter] Exec: sysServiceConfig.getSysTaskList()
+17:55:48,462 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:48,477 INFO  [DefaultRemoter] Exec: sysDicConfigAction.getSysDicConfigList()
+17:55:48,550 ERROR [PageControl] request里没有Pager实例，请检查变量ajaxPage。
+17:55:55,382 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:55:55,404 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:55:55,405 INFO  [DefaultRemoter] Exec: ifaceConfigSystemAction.getIfaceConfigSystemList()
+17:56:07,515 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: dictionaryName. For causes see debug level logs:
+17:56:07,531 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: dictionaryCode. For causes see debug level logs:
+17:56:07,531 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:56:07,531 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:56:07,531 INFO  [DefaultRemoter] Exec: ifaceConfigSystemAction.getIfaceConfigSystemList()
+17:56:09,278 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:56:09,278 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:56:09,278 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.getIfaceConfigProtocolList()
+17:56:12,964 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.selectProtocolByPrimaryKey()
+17:56:14,571 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:56:14,571 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:56:14,571 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.getIfaceConfigProtocolList()
+17:56:14,977 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:56:25,305 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:56:25,305 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:56:25,305 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.getIfaceConfigProtocolList()
+17:56:44,903 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.selectProtocolByPrimaryKey()
+17:57:15,003 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:58:15,016 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:59:15,009 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+17:59:36,178 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+17:59:36,178 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+17:59:36,178 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.getIfaceConfigProtocolList()
+18:00:14,988 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:01:12,568 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.selectProtocolByPrimaryKey()
+18:01:14,999 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:01:46,975 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.updateIfaceConfigProtocolRecord()
+18:01:48,357 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+18:01:48,359 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+18:01:48,360 INFO  [DefaultRemoter] Exec: ifaceConfigProtocolAction.getIfaceConfigProtocolList()
+18:02:14,975 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:03:14,982 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:04:14,988 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:05:14,989 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:06:10,214 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: pageNumber. For causes see debug level logs:
+18:06:10,214 WARN  [BasicObjectConverter] Missing java bean property to match javascript property: orderByClause. For causes see debug level logs:
+18:06:10,214 INFO  [DefaultRemoter] Exec: sysServiceConfig.getSysTaskList()
+18:06:14,980 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:06:26,714 INFO  [DefaultRemoter] Exec: sysTaskAction.startTask()
+18:06:28,895 DEBUG [CombinedThrowsAdvice] 服务执行前，先执行这个测试拦截器:---------doornotdo----------------
+18:06:29,333 DEBUG [CombinedThrowsAdvice] 服务执行完毕==类：com.regaltec.blocimp.daemon.ScanAttachmentTask==方法：run，无异常发生
+18:06:58,896 DEBUG [CombinedThrowsAdvice] 服务执行前，先执行这个测试拦截器:---------doornotdo----------------
+18:06:59,227 DEBUG [CombinedThrowsAdvice] 服务执行完毕==类：com.regaltec.blocimp.daemon.ScanAttachmentTask==方法：run，无异常发生
+18:07:14,974 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:07:28,889 DEBUG [CombinedThrowsAdvice] 服务执行前，先执行这个测试拦截器:---------doornotdo----------------
+18:07:29,217 DEBUG [CombinedThrowsAdvice] 服务执行完毕==类：com.regaltec.blocimp.daemon.ScanAttachmentTask==方法：run，无异常发生
+18:07:58,907 DEBUG [CombinedThrowsAdvice] 服务执行前，先执行这个测试拦截器:---------doornotdo----------------
+18:07:59,266 DEBUG [CombinedThrowsAdvice] 服务执行完毕==类：com.regaltec.blocimp.daemon.ScanAttachmentTask==方法：run，无异常发生
+18:08:14,983 INFO  [DefaultRemoter] Exec: ifaceMonitorAction.checkIfaceLogEventCheck()
+18:08:28,910 DEBUG [CombinedThrowsAdvice] 服务执行前，先执行这个测试拦截器:---------doornotdo----------------
+18:08:29,238 DEBUG [CombinedThrowsAdvice] 服务执行完毕==类：com.regaltec.blocimp.daemon.ScanAttachmentTask==方法：run，无异常发生

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<workflow-app>
+
+  <context-param>
+    <param-name>PARSER_XML_VALIDATING</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  
+  <context-param>
+    <param-name>PARSER_XML_NAMESPACEAWARE</param-name>
+    <param-value>true</param-value>
+  </context-param>  
+
+  <context-param>
+    <param-name>PARSER_XPDL_VALIDATING</param-name>
+    <param-value>true</param-value>
+  </context-param>  
+ 
+  <selector>
+      <selector-name>javascript</selector-name>
+      <selector-class>org.regaltec.workflow.script.selector.ScriptSelector</selector-class>
+       <init-param>
+          <param-name>keepgenerated</param-name>
+          <param-value>true</param-value>
+        </init-param>
+        
+        <init-param>
+          <param-name>classdebuginfo</param-name>
+          <param-value>false</param-value>
+        </init-param>
+      
+        <init-param>
+          <param-name>reloading</param-name>
+          <param-value>true</param-value>
+        </init-param>
+      
+        <init-param>
+          <param-name>checkInterval</param-name>
+          <param-value>999999999999</param-value>
+        </init-param>
+          
+        <init-param>
+          <param-name>javaEncoding</param-name>
+          <param-value>gbk</param-value>
+        </init-param> 
+      <load-on-startup>1</load-on-startup>
+  </selector>
+
+  <selector-mapping>
+    <selector-name>javascript</selector-name>
+    <url-pattern>*.ws</url-pattern>
+  </selector-mapping>
+
+  <selector>
+      <selector-name>script</selector-name>
+      <selector-class>org.regaltec.workflow.script.selector.BeanshellSelector</selector-class>
+       <init-param>
+          <param-name>keepgenerated</param-name>
+          <param-value>true</param-value>
+       </init-param>
+       
+       <init-param>
+          <param-name>classdebuginfo</param-name>
+          <param-value>false</param-value>
+        </init-param>
+      
+        <init-param>
+          <param-name>reloading</param-name>
+          <param-value>true</param-value>
+        </init-param>
+      
+        <init-param>
+          <param-name>checkInterval</param-name>
+          <param-value>300</param-value>
+        </init-param>
+          
+        <init-param>
+          <param-name>javaEncoding</param-name>
+          <param-value>gbk</param-value>
+        </init-param> 
+      <load-on-startup>1</load-on-startup> 
+  </selector>  
+
+  <selector-mapping>
+    <selector-name>script</selector-name>
+    <url-pattern>*.bs</url-pattern>
+  </selector-mapping>  
+
+</workflow-app>

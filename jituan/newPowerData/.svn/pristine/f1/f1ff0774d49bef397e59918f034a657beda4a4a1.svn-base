@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+ 	//屏蔽退格键的事件监听
+	function forCheck(){
+		if(event.keyCode == 8){
+		    event.returnValue   =   false;
+		}
+	}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+       
+    </style> 
+</head>
+<body >
+<h:form id="viewForm">
+<a4j:keepAlive beanName="viewBulletinBean"/>
+<rich:panel>
+        <f:facet name="header">
+          	<h:outputText value="#{msgs['baf.bulletin.bulletinName']}"/>
+        </f:facet>	   	 									
+			<table cellspacing="0"  class="rich-table" cellpadding="0" border="0" width="90%" style="text-align:center;font-size:13px;background-color:${a4jSkin.tableBackgroundColor};table-layout:fixed;">
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell" width="20%"><h:outputText value="#{msgs['baf.bulletin.title']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.title}"></h:outputText></td>	
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.keyword']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.keyword}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.category']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.category}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.emergency']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.emergency}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.publisher.name']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.publisherName}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.immediatePublish']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="${viewBulletinBean.issentAtonce=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.yes']}"/>
+				</c:if>
+				<c:if test="${viewBulletinBean.issentAtonce!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.no']}"/>
+				</c:if>
+			</td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.publishTime']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.publishTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/></h:outputText></td>
+			</tr>	
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.receiver.name']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.receivers}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.validity']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.expiredate}"><f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/></h:outputText></td>
+			</tr>	
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.inscription']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.inscription}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.response.need']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="#{viewBulletinBean.needResponse=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.yes']}"/>
+				</c:if>
+				<c:if test="#{viewBulletinBean.needResponse!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.no']}"/>
+				</c:if>	
+			</td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.state']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{viewBulletinBean.status}"/></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.Attachment']}"></h:outputText></td>			
+			<td class="rich-table-cell">
+				<table width="97%">
+				<a4j:repeat value="#{viewBulletinBean.attachmentList}" var="vo">
+				<tr>
+				<td width="90%">
+				<h:commandLink value="#{vo.fileName}" actionListener="#{viewBulletinBean.openThisFile}">
+					<f:param value="#{vo.attachmentId}" name="attachmentId"/>
+					<f:param value="#{viewBulletinBean.bulletinId}" name="ownerId"/>
+				</h:commandLink>
+				</td>
+				</tr>
+				</a4j:repeat>
+				</table>
+			</td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.response']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="#{viewBulletinBean.isresponsed=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.have']}"></h:outputText>
+				</c:if>
+				<c:if test="#{viewBulletinBean.isresponsed!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.haveNot']}"/>
+				</c:if>	
+			</td>
+			</tr>	
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell">	
+			    <h:outputText value="#{msgs['baf.bulletin.bulletinName']}"></h:outputText>
+			</td>
+			<td class="rich-table-cell" align="left">
+			 <rich:editor  configuration="com/regaltec/baf/bulletin/ui/control/advanced" autoResize="true"
+					id="content" width="430" height="200" value="#{viewBulletinBean.content}"
+					viewMode="visual"  readonly="true">
+			</rich:editor>   
+			 </td>  
+			 </tr> 
+			</table>	
+			</rich:panel>
+			<rich:spacer height="20px"></rich:spacer>    
+    <fieldset>
+    <legend><h:outputText value="#{msgs['baf.bulletin.responseList']}"></h:outputText></legend>
+    <rich:dataTable width="100%" id="itemLists" rows="#{viewBulletinBean.pageSize}" columnClasses="col"  style="text-align:center;" 
+     value="#{viewBulletinBean.responseList}" var="insItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+
+    <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.readerName']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.receiverName}"></h:outputText>
+    </h:column>
+
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.response.time']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.responseTime}">
+    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+    </h:outputText>
+    </h:column>
+     <h:column>
+    <f:facet name="header">
+    <h:outputText styleClass="headerText" value="#{msgs['baf.bulletin.response.content']}" style="font-weight:normal;"/>
+    </f:facet>
+    <h:outputText value="#{insItem.responseContent}" />
+    </h:column>
+       
+    <f:facet name="footer">				
+			<rich:datascroller align="center" id="itemScroller" selectedStyle="background-color:#FFB93F;"  />
+	</f:facet>
+    </rich:dataTable>
+    </fieldset>  
+    <rich:spacer height="15px"></rich:spacer>
+    
+    <c:if test="${viewBulletinBean.needResponse!='N'}">
+    <rich:panel id="responsePanel" >
+        <f:facet name="header">
+          	<h:outputText value="#{msgs['baf.bulletin.quickResponse']}"/>
+        </f:facet>	
+    <rich:editor  configuration="com/regaltec/baf/bulletin/ui/control/advanced"
+	id="content" width="630" height="200" value="#{viewBulletinBean.responseContent}"
+	viewMode="visual"  >
+	</rich:editor>
+	<a4j:commandButton  style="margin:8 8 8 0;" styleClass="rich-button" id="save"  value="#{msgs['baf.bulletin.response']}" action="#{viewBulletinBean.saveResponse}" reRender="itemLists,responsePanel"></a4j:commandButton>
+    <h:inputHidden id="bulletinId" value="#{viewBulletinBean.bulletinId}"></h:inputHidden> 
+    <h:inputHidden id="readTime" value="#{viewBulletinBean.readTime}">
+    <f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+    </h:inputHidden>  
+    </rich:panel>
+     </c:if>
+     
+    <a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('status_panel').component.show()" onstop="document.getElementById('status_panel').component.hide()">
+	</a4j:status>
+    </h:form>
+    		<!-- 处理中模态框 -->
+	<rich:modalPanel id="status_panel" width="350" height="100" top="200">
+    	<h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="${msgs['baf.message.dealing']}" escape="false"/>
+    </rich:modalPanel>    
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+    
+</body>
+  	</f:view>
+</html>

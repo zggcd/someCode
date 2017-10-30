@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+
+<script>
+//<![CDATA[
+           //响应check点击事件
+function checkBoxClick(object, value) {			
+	var templateIDArray = document.getElementById("bulletinForm:tempId").value;
+	if (templateIDArray == null || templateIDArray == "") {
+		if (object.checked == true) {							
+			templateIDArray = value;
+		} 
+	} else {
+		if (object.checked == true) {
+			templateIDArray = templateIDArray + "#" + value;	 			
+		} else {
+			var index = templateIDArray.indexOf(value);
+			if (index >= 0) {																
+				var str = "";
+				if(index>0){
+					str = "#"+value;
+				} else {
+					if(index==0 && templateIDArray.indexOf("#")!=-1){
+						str = value + "#";
+						
+					} else {
+						str = value;
+					}
+				}
+				templateIDArray = templateIDArray.replace(str, "");
+			}
+		}
+	}
+	//保存勾选的模板ID值， 格式为 id~id~id
+	document.getElementById("bulletinForm:tempId").value = templateIDArray;
+}
+           
+           
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+     function setStatus(num){
+     document.getElementById("bulletinForm:statusFlag").value=num;
+     }
+      	//屏蔽退格键的事件监听
+	function forCheck(){
+		if(event.keyCode == 8){
+		    event.returnValue   =   false;
+		}
+	}
+	function  validateRequite(num){
+	if (validateForm(document.getElementById('bulletinForm'))==false)
+	{return false;}
+	setStatus(num);
+	var content = tinyMCE.getInstanceById("bulletinForm:contentTextArea").getBody().innerHTML;
+	if(typeof(content)=="undefined" || content == ""){
+		alert("${msgs['baf.bulletin.contentIsNeed']}！");
+		return false;
+	}else{
+		var contentPlain = content.replace("<P>", "");
+		contentPlain = contentPlain.replace("&nbsp;", "");
+		contentPlain = contentPlain.replace("</P>", "");
+
+		if(contentPlain.length == 0){
+			alert("${msgs['baf.bulletin.contentIsNeed']}！");
+			return false;
+		}
+	}
+	return true;
+	}
+
+	function sdeleteFile(fileName){
+		if(window.confirm("${msgs['baf.bulletin.confirmDelete']}？")){
+			dFileByName(fileName);
+		}
+	}
+	//点击查询按纽列表未渲染前置灰
+	function ondisabled(type){
+		if(type == "save"){
+			document.getElementById("bulletinForm:save").disabled = true;
+		}else if(type == "pub"){
+			document.getElementById("bulletinForm:publish").disabled = true;
+		}
+	}
+
+	//清空复选框
+	function clearCheckbox(){
+		var groupTab=document.getElementById("groupTab");
+		var es=groupTab.getElementsByTagName("input");
+		for(i=0;i<es.length;i++){
+             es[i].checked=false;
+		}
+	}
+	
+     //]]>
+</script>
+
+	<style>
+       .scrolls{
+           width:800px;
+           height:400px;
+           overflow:auto;
+       }
+	   td.column1{
+	   width:30%;
+	   }	
+	   td.column2{
+	   width:70%;
+	   }
+	   .tip{
+	   font-weight:normal;font-size:14;color:red;
+	   position:absolute;
+	   top:3px;
+	   right:30px;
+	   }	
+    </style> 
+</head>
+
+<!-- 解决模态框居左上角，且有脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg.ajax4jsf.javascript.PrototypeScript.xhtml" type="text/javascript"/>
+
+<!-- 解决重载PrototypeScript之后导致suggestionbox组件输完文本之后出现脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg/richfaces/renderkit/html/scripts/scriptaculous/effects.js.xhtml" type="text/javascript"/>
+
+<body >
+
+	
+    <h:form id="bulletinForm">
+    <center>
+    <h:outputText value="#{msgs['baf.bulletin.noData']}" style="color:red;font-weight:bold;font-size:27px;#{bulletinBean.bulletinDisplayStyle}"></h:outputText>
+    </center>
+    <span id="operateTip" class="tip">#{msgs['baf.OperationTips']}</span>
+    <rich:tabPanel id="tabPanel"  style="margin-left:5px;margin-right:5px;margin-top:5px;"  width="98%" height="98%" switchType="client">
+    <rich:tab id="postInfo" label="#{msgs['baf.bulletin.releaseBulletin']}" style="text-align:center;">
+    <table width="100%" CELLSPACING="2" CELLPADDING="2" border="0" style="font-size:13px;">
+    <tr>
+    <td width="20%" align="right">
+    <h:outputText value="#{msgs['baf.bulletin.titile']}:"></h:outputText><font color="red">*</font>
+    </td>
+    <td colspan="3">
+    <h:inputText id="title" value="#{bulletinBean.title}" size="100" styleClass="rich-gradient-input" maxlength="100" style="width:98%;height:23;">
+    <s:commonsValidator type="required" arg="#{msgs['baf.bulletin.titile']}" server="false" client="true"/>
+    <s:commonsValidator type="maxlength" arg="#{msgs['baf.bulletin.titile']}" server="false" client="true" maxLength="70"/>				 			
+    </h:inputText>
+    </td>
+    </tr>
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.keyword']}:"></h:outputText>
+    </td>
+    <td colspan="3">
+    <h:inputText id="keyword" value="#{bulletinBean.keyword}" size="100" styleClass="rich-gradient-input" maxlength="100" style="width:98%;height:23;">
+    <s:commonsValidator type="maxlength" arg="#{msgs['baf.bulletin.Keyword']}" server="false" client="true" maxLength="70"/>	
+    </h:inputText>
+    </td>
+    </tr>
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.receivers']}:"></h:outputText>
+    </td>
+    <td colspan="3">
+    <h:inputHidden id="hid" value="#{bulletinBean.hid}"></h:inputHidden>
+    <h:inputHidden id="receiverType" value="#{bulletinBean.receiverType}"></h:inputHidden>
+    <h:inputText onfocus="this.blur()" id="receivers" value="#{bulletinBean.receiverNames}" size="60" maxlength="500" style="width:86%;height:23;" styleClass="rich-gradient-input">
+    </h:inputText>
+    <rich:spacer width="5px"/>
+    <regaltec:selectObject id="selectObj"
+     dataSource="TREE_BULLETIN_RECEIVER"
+     userDataNames="TABLEROWID#KEYWORD#OBJECTCATEGORY" amount="0" formName="bulletinForm" 
+     fieldNames="hid#receivers#receiverType" enableSuggestionBox="true"
+     userItem="TABLEROWID" fieldItem="hid"  
+     showTextbox="false" suggestionAction="#{pinyinBean.autocomplete}" 
+     fetchValue="id#tableRowId#keyWord#parentName" 
+     expandLevel="10" oneOffLoad="false" listNum="15" alignMatch="center"> 
+	</regaltec:selectObject> 
+    </td>
+    </tr>
+    <tr>
+    <td align="right">#{msgs['baf.bulletin.receiveGroups']}:</td>
+    <td colspan="3">
+        <table id="groupTab">
+        <tr>
+        <td>
+	         <c:forEach items="#{groupBean.bulletinGroupList}" var="item" varStatus="stat">
+	            <input type="checkbox" id="${stat.index}_groupCheck" onclick="checkBoxClick(this, '#{item.groupId}')"/>
+	            <a href="javascript:getMembersByGroupId('${item.groupId}')" title="#{msgs['baf.bulletin.onclickBuletin']}">${item.groupName}</a>
+	            <rich:spacer width="5px" />
+	         </c:forEach>
+         </td>
+        </tr>
+        </table>
+        <h:inputHidden id="tempId" value="#{bulletinBean.tempId}"></h:inputHidden>
+    </td>
+    </tr>
+    <!-- 提示方式 -->
+	<tr>
+		<td align="right"><h:outputText value="#{msgs['baf.message.promptMode']}"  rendered="#{bulletinBean.isRendered}" /></td>
+	    <td>
+	        <h:selectOneRadio id="promtMode" style="font-size:13px" 
+	             value="#{bulletinBean.promptMode}"  rendered="#{bulletinBean.isRendered}"> 
+				<f:selectItem itemLabel="#{msgs['baf.message.promptMode.pop']}" itemValue="P" />
+				<f:selectItem itemLabel="#{msgs['baf.message.promptMode.roll']}" itemValue="M" />
+				<f:selectItem itemLabel="#{msgs['baf.message.promptMode.modal']}" itemValue="B" />
+			</h:selectOneRadio>
+        </td>
+	</tr>
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.category']}:"></h:outputText>
+    </td>
+    <td width="30%"> 
+    <h:selectOneMenu id="category"   value="#{bulletinBean.category}"  style="width:95%;height:23;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+		<f:selectItems value="#{bulletinBean.categoryTypes}"/>
+	</h:selectOneMenu>
+    </td>
+    <td width="20%" align="right">
+    <h:outputText value="#{msgs['baf.bulletin.emergency']}:"></h:outputText>
+    </td>
+    <td>
+    <h:selectOneMenu id="emergency" value="#{bulletinBean.emergency}" style="width:95%;height:23;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+       <f:selectItems value="#{bulletinBean.emergencyTypes}"/>
+    </h:selectOneMenu>
+    </td>
+    </tr>
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.range']}:"></h:outputText>
+    </td>
+    <td>
+	<h:selectOneRadio id="range" style="font-size:13px" 
+	value="#{bulletinBean.range}">
+	<f:selectItem itemLabel="#{msgs['baf.bulletin.onlyCurrent']}" itemValue="C" />
+	<f:selectItem itemLabel="#{msgs['baf.bulletin.containsSun']}" itemValue="S" />
+	</h:selectOneRadio>
+    </td>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.needResponse']}:"></h:outputText>
+    </td>
+    <td>
+    <h:selectOneRadio id="needResponse" style="font-size:13px" 
+	value="#{bulletinBean.needResponse}">
+	<f:selectItem itemLabel="#{msgs['baf.radioYes']}" itemValue="Y" />
+	<f:selectItem itemLabel="#{msgs['baf.radioNo']}" itemValue="N" />
+	</h:selectOneRadio>
+    </td>
+    </tr>
+    <tr>
+    <td align="right"><h:outputText value="#{msgs['baf.bulletin.author']}:"></h:outputText></td><td><h:inputText value="#{bulletinBean.publisherName}" style="height:23px" styleClass="rich-gradient-input" readonly="true" onfocus="this.blur()"></h:inputText></td> 
+    <td align="right"><h:outputText value="#{msgs['baf.bulletin.inscription']}:"></h:outputText></td><td><h:inputText value="#{bulletinBean.inscription}" style="height:23px" styleClass="rich-gradient-input" onfocus="this.blur()"></h:inputText></td>
+    </tr>
+    <tr>
+    <td align="right"><h:outputText value="#{msgs['baf.bulletin.publishTime']}:"></h:outputText></td>
+    <td><rich:calendar id="publishTime"  value="#{bulletinBean.publishTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="#{msgs['baf.org.unit.dateIllustrate']}" showApplyButton="true" oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"></rich:calendar></td>
+    <td align="right"><h:outputText value="#{msgs['baf.bulletin.expireDate']}:"></h:outputText></td><td><rich:calendar id="expiredate"  value="#{bulletinBean.expiredate}" datePattern="yyyy-MM-dd HH:mm" showApplyButton="true"  weekDayLabelsShort="#{msgs['baf.org.unit.dateIllustrate']}" oninputkeydown="forCheck();" inputStyle="width:128px;height:23;" inputClass="rich-gradient-input" styleClass="rich-gradient-input">
+    </rich:calendar></td>
+    </tr>  
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.content']}:"></h:outputText><font color="red">*</font>
+    </td>
+    <td colspan="3">
+            <rich:editor  configuration="com/regaltec/baf/bulletin/ui/control/advanced"
+					id="content" width="630" height="200" value="#{bulletinBean.content}"
+					viewMode="visual"  >
+			</rich:editor>   
+    </td>
+    </tr>
+    <tr>
+    <td align="right">
+    <h:outputText value="#{msgs['baf.bulletin.attachment']}:"></h:outputText>
+    </td>
+    <td colspan="3" >
+    <fieldset style="width:630;">
+		<legend><h:outputText value="#{msgs['baf.bulletin.addLimitAttachment']}"></h:outputText></legend>
+		<rich:tabPanel id="fileList">
+		<rich:tab label="#{msgs['baf.bulletin.attachmentList']}" >
+		<table width="97%" style="font-size:13px;">
+			<a4j:repeat value="#{bulletinBean.uploadFileList}" var="vo">
+				<tr>
+					<td width="90%" style="overflow: hidden;">
+						<h:outputLabel value="#{vo.fileName}"></h:outputLabel>
+					</td>
+					<td width="10%" align="right">
+						<h:graphicImage url="/baf/images/delete.gif" title="#{msgs['baf.bulletin.delete']}" 
+						onclick="sdeleteFile('#{vo.fileName}')" style="cursor:hand;"/>
+					</td>
+				</tr>
+			</a4j:repeat>
+		</table>
+		 <a4j:jsFunction name="getMembersByGroupId" action="#{groupBean.getMembersByGroupId}" reRender="groupModal" oncomplete="#{rich:component('groupModal')}.show();">
+             <a4j:actionparam name="groupId" assignTo="#{groupBean.groupId}"/> 
+        </a4j:jsFunction>
+		<a4j:jsFunction action="#{bulletinBean.deleteFile}"  name="dFileByName" reRender="fileList">
+			<a4j:actionparam name="fileName"/>
+		</a4j:jsFunction>
+		</rich:tab>
+		</rich:tabPanel>
+		<a4j:keepAlive beanName="bulletinBean"/>
+		<rich:fileUpload 
+			listWidth="100%"
+			listHeight="65"
+			maxFilesQuantity="10"
+			immediateUpload="true"
+			progressLabel="#{msgs['baf.bulletin.waitWhenUpdating']}"
+			addControlLabel="#{msgs['baf.bulletin.addAttachment']}"
+			clearControlLabel="#{msgs['baf.bulletin.cancelUpdate']}"
+			stopEntryControlLabel="#{msgs['baf.bulletin.stopUpdate']}"
+			autoclear="true"
+			noDuplicate="true"
+			doneLabel="#{msgs['baf.bulletin.done']}"
+			stopControlLabel="#{msgs['baf.bulletin.stopUpdate']}"
+			sizeErrorLabel="#{msgs['baf.bulletin.outOfLimit']}"
+			fileUploadListener="#{bulletinBean.uploadFileForAdd}" id="fileUpload">
+				<a4j:support event="onfileuploadcomplete" reRender="fileList"/>
+		</rich:fileUpload>
+	</fieldset>
+	</td>
+    </tr>
+
+    <tr><td colspan="4" height="20px"><rich:spacer  height="10px"></rich:spacer></td></tr>
+    <tr>
+    <td colspan="4" align="center">
+    <a4j:commandButton id="save" action="#{bulletinBean.save}" styleClass="rich-button" value="#{msgs['baf.bulletin.saveDraft']}"  reRender="bulletinForm" oncomplete="a4jcomplete();clearCheckbox();">
+    <a4j:support onsubmit="if(!validateRequite('0'))return false;ondisabled('save');" disabled="false" event="onclick"></a4j:support>
+    </a4j:commandButton>
+    <rich:spacer width="14px"></rich:spacer>
+    <a4j:commandButton id="publish" action="#{bulletinBean.save}" styleClass="rich-button" value="#{msgs['baf.bulletin.publish']}"  reRender="publish,title,keyword,category,emergency,content,hid,receiverType,receivers,range,needResponse,publishTime,expiredate,statusFlag,fileList,fileUpload" oncomplete="a4jcomplete();clearCheckbox();">
+    <a4j:support onsubmit="if(!validateRequite('2'))return false;ondisabled('pub');" disabled="false" event="onclick"></a4j:support>
+    </a4j:commandButton>
+    </td>
+    </tr>
+    </table>
+    </rich:tab>
+    </rich:tabPanel>
+    <h:inputHidden id="statusFlag" value=""></h:inputHidden>
+    </h:form>
+    
+    <s:validatorScript functionName="validateForm"/> 
+               	
+    
+    <rich:modalPanel id="groupModal" autosized="true" width="800">
+	        <f:facet name="header">
+	        	<h:outputText value="#{msgs['baf.bulletin.groupMembersINFO']}" style="padding-right:15px;" />
+	        </f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+					<h:graphicImage value="/baf/images/icons/close.png" id="groupModalhidelink" styleClass="hidelink"/>
+					<rich:componentControl for="groupModal" attachTo="groupModalhidelink"	operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>
+			<h:form id="impForm">	
+	        	<center>
+	        	<div class="scrolls">	
+	        	<rich:dataTable width="100%" id="userinfo"  columnClasses="col"  style="text-align:center;"   
+		            value="#{groupBean.membersList}" var="userItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+		            <h:column style="text-align:left; float:left;" >
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.objectName']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{userItem.objectName}" />
+		            </h:column> 
+		            <h:column style="text-align:left; float:left;" >
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.superOrg']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{userItem.objectFullName}" />
+		            </h:column> 
+		        </rich:dataTable>	
+		        </div>        	      	
+		            <a4j:commandButton value="关闭" type="button" styleClass="rich-button"  onclick="#{rich:component('groupModal')}.hide();return false;" />
+				</center>
+			</h:form>
+		</rich:modalPanel>
+		
+		    <rich:toolTip for="operateTip" >
+    <div style="width:300;">
+     1)#{msgs['baf.bulletin.WarningDrag1']}<br/>
+	 2)#{msgs['baf.bulletin.WarningDrag2']}<br/>
+	 3)#{msgs['baf.bulletin.WarningDrag3']}<br/>
+	 4)#{msgs['baf.bulletin.WarningDrag4']}
+    </div>
+    </rich:toolTip>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

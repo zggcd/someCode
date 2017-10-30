@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='gbk'?>
+<tree id="0">
+	<item text="广东省电信公司" id="dfsafdsafdsaf" open="1" call="0" select="1" tooltip="书刊号">
+		<item text="广州电信公司" id="fdsafdsafdsaf"  tooltip ="广州电信公司">
+			<item text="天河电信局" id="ccaaaaaadf" tooltip="天河电信局">
+			<userdata name="orgtype"><![CDATA[U]]></userdata>
+			</item>
+			<item text="越秀电信局" id="越秀电信局" >
+			<userdata name="orgtype"><![CDATA[U]]></userdata>
+				<item text="管理岗" id="qqcdfdafddsa" >
+				<userdata name="orgtype"><![CDATA[P]]></userdata>
+				</item>
+			</item>
+		</item>
+	</item>
+</tree> 

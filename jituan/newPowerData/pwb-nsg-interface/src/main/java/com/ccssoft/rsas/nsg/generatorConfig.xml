@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+ <classPathEntry location="D:/sc_soft/jboss-4.2.3.GA/server/default/lib/ojdbc6.jar" />
+  <context id="context1" >
+    <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"/>
+    <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+    <plugin type="com.ccssoft.mybatis.generater.plugin.OraclePaginationPlugin" />
+    <commentGenerator type="com.ccssoft.mybatis.generater.plugin.CcssoftCommentGenerator" />
+    <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@172.1.1.169:1521:orcl" userId="baf" password="SCccssoft028" />
+     <javaTypeResolver>  
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->  
+            <property name="forceBigDecimals" value="true"/>  
+        </javaTypeResolver>  
+    <javaModelGenerator  targetPackage="com.ccssoft.rsas.nsg.model" targetProject="pwb-nsg-interface" />
+    <sqlMapGenerator     targetPackage="com.ccssoft.rsas.nsg.dao" targetProject="pwb-nsg-interface" />
+    <javaClientGenerator targetPackage="com.ccssoft.rsas.nsg.dao" targetProject="pwb-nsg-interface" type="XMLMAPPER" />
+  
+  
+   <table schema="" tableName="NSG_SERVICE_CALL_RECORD" >  </table>
+   
+  </context>
+</generatorConfiguration>

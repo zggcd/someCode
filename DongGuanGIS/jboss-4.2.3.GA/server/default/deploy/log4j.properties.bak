@@ -1,0 +1,37 @@
+log4j.rootCategory=INFO, RFile, Console
+
+# output to file
+log4j.appender.RFile=org.apache.log4j.RollingFileAppender
+
+log4j.appender.RFile.File=c\:log.txt
+
+log4j.appender.RFile.MaxFileSize=1024KB
+
+log4j.appender.RFile.MaxBackupIndex=1
+
+log4j.appender.RFile.layout=org.apache.log4j.PatternLayout
+
+log4j.appender.RFile.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c %x %m %n
+
+# output to console
+log4j.appender.Console=org.apache.log4j.ConsoleAppender
+
+log4j.appender.Console.layout=org.apache.log4j.PatternLayout
+
+log4j.appender.Console.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c %x %m %n
+
+
+
+# ibais Log
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d %p [%c] - %m%n
+
+log4j.logger.com.ibatis=ERROR
+log4j.logger.com.ibatis.common.jdbc.SimpleDataSource=debug
+log4j.logger.com.ibatis.common.jdbc.ScriptRunner=debug
+log4j.logger.com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate=debug
+log4j.logger.java.sql.Connection=ERROR
+log4j.logger.java.sql.Statement=ERROR
+log4j.logger.java.sql.PreparedStatement=ERROR,stdout
+log4j.logger.com.regaltec.common.jsf.phaseListener.JsfPhaseListener = info

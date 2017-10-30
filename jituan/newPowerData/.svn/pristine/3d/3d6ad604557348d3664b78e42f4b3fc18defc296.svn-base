@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+	//<![CDATA[
+	function numberOnly() {
+	    if (! ( ( (window.event.keyCode >= 48) && (window.event.keyCode <= 57)) || (window.event.keyCode == 13) || (window.event.keyCode == 46))) {
+			window.event.keyCode = 0;
+		}
+	}
+	////检查输入字符是否为数字,如果有非数字就返回false
+	function checkIsInt(obj){
+			var num="0123456789.";
+			var str=obj.value;
+			var ch;
+			for(i=0;i<str.length;i++){
+			ch=str.charAt(i);
+			if(num.indexOf(ch)==-1){
+				alert("${msgs['baf.bureau.WaringNotInt']}");
+				obj.value="";
+				obj.focus();
+				return false;
+			}
+			}
+			return true;
+	}
+	//检查输入字符，只能为数字,也不能输入小数点符号
+		function intOnly(obj){
+			var num="0123456789";
+			var str=obj.value;
+			var ch;
+			for(i=0;i<str.length;i++){
+			ch=str.charAt(i);
+			if(num.indexOf(ch)==-1){
+				alert("${msgs['baf.bureau.WaringIntOnly']}");
+				obj.value="";
+				obj.focus();
+				return false;
+			}
+			}
+			return true;
+	}
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+     	//清除空格
+		String.prototype.Trim = function() 
+		{ 
+		return this.replace(/(^\s*)|(\s*$)/g, ""); 
+		}
+     //]]>
+     </script>
+     </head>
+       	</f:view>
+</html>

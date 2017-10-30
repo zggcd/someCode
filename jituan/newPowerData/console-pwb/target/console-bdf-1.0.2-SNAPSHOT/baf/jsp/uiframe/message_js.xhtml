@@ -1,0 +1,1022 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+	//<![CDATA[
+
+	  //判断用户浏览器是否是IE      
+
+	    var isIE = navigator.userAgent.search("MSIE") > -1; 
+	    var isSafari = navigator.userAgent.search("Safari") > -1;//Google瀏覽器是用這核心 
+
+	     var quickMimetype = navigator.mimeTypes["video/quicktime"];//判断当前google浏览器是否已经安装quicktime插件
+
+	           
+	    //是否播放声音标志
+var sound_on=false;
+    /*设置cookie*/
+function SetCookie(sName, sValue)
+{
+  document.cookie = sName + "=" + escape(sValue)+"; expires=Mon, 31 Dec 2028 23:59:59 UTC;";
+}
+
+/*读取cookie*/
+function GetCookie(sName)
+{
+  var aCookie = document.cookie.split("; ");
+  for (var i=0; i < aCookie.length; i++)
+  {
+    var aCrumb = aCookie[i].split("=");
+    if (sName == aCrumb[0]) 
+      return unescape(aCrumb[1]);
+  }
+  //查找不到指定的cookie值,返回一个空值
+  return null;
+}
+   /*页面装载完毕，开发判断是否需要播放背景音*/
+    function initsoundset(){
+    var soundstyle = GetCookie("soundstyle");
+	if( soundstyle == "ture"){
+       sound_on = false;
+       soundimg.src = "${request.contextPath}/baf/images/message/sound_off.gif";
+       soundimg.title = "打开消息声音提示";
+    }else{
+       sound_on = true;
+       soundimg.src = "${request.contextPath}/baf/images/message/sound_on.gif";
+       soundimg.title = "关闭消息声音提示";
+    }
+}
+
+function showQuickTip(){
+     //滚动
+	var t1= document.getElementById("msg_source");
+	var objs=t1.getElementsByTagName("a");
+//弹出
+	
+	   var oTable = document.getElementById("itemLists");
+	   var title_=document.getElementById("itemLists:"+0+":msg_title");
+
+  	if(sound_on&&((objs!=null&&objs.length>0)||(title_!=null&&title_!=undefined))){
+  		showQuickTimeTip();
+  	}
+}
+    
+	function showQuickTimeTip(){
+		 if(isSafari&&!quickMimetype){
+			 var obj=document.getElementById("tipbox");
+			 obj.style.display="";
+			 setTimeout(hideQuickTimeTip,6000);
+		  }
+	}
+	function hideQuickTimeTip(){
+		var obj=document.getElementById("tipbox");
+		 obj.style.display="none";
+	}
+
+	
+Ext.onReady(
+  function(){
+  initsoundset();
+  getUserDutty();
+  //showModal();
+  
+  setTimeout(showQuickTip,4000);
+  
+  }
+ );
+ 
+ 	
+
+    function openTimer(data){
+     if(data=='Y'){
+    	  setTimeout(refreshMsg,2000); 
+    	  //设置定时刷新，刷新时间为1分钟
+    	  setInterval(refreshMsg,60000);
+    	   
+    	  runPopUpTimer();
+     }
+     //非值班人员屏蔽主页上消息的相关组件和图标
+     else{
+         var msgPanel=document.getElementById("msgtable");
+         msgPanel.style.visibility ="hidden"; 
+         var clBox=document.getElementById("clBox");
+         clBox.style.visibility ="hidden"; 
+       //  var north = Ext.getCmp('north');
+        // north.setHeight(40);
+     }
+    }
+
+    /*消息滚动*/
+    var arrayIndex=0;
+    var timer1;
+    var timer2;
+    var direction_;
+    var spe;
+    function myMessage(id,speed,direction){
+  	  direction_=direction;
+  	  spe=speed;
+  	  var father=document.getElementById(id); 
+  	  var t1= document.getElementById(id+"_source");
+  	  var t2=document.getElementById(id+"_target");
+  	  var objs=t1.getElementsByTagName("a");
+     //上下滚动
+    if("up"==direction){
+    var up=function(){
+    try{
+    if(father.scrollTop>=t2.offsetTop){
+       father.scrollTop=0;
+       arrayIndex=0;
+    }
+    else{
+       father.scrollTop++;
+    }
+    if(father.scrollTop%36==0&&sound_on){
+        var msg_startTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime1");
+        var msg_endTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime1");
+        var msg_startTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime2");
+        var msg_endTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime2");
+        var msg_startTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime3");
+        var msg_endTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime3");
+        //获取系统时间
+        var myDate = new Date();
+        //当前系统时间转换为分
+        totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+        if(msg_startTime1_.innerText==""||msg_endTime1_.innerTex==""||msg_startTime2_.innerText==""||msg_endTime2_.innerText==""||msg_startTime3_.innerText==""||msg_endTime3_.innerText==""){
+      	//播放声音
+      	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+      	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+      	  document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+           }
+        else{
+            //转换为分钟
+            arr=msg_startTime1_.innerText.split(":");
+            startTime1sec=arr[0]*60+arr[1]*1;
+            arr=msg_endTime1_.innerText.split(":");
+            endTime1sec=arr[0]*60+arr[1]*1;
+            arr=msg_startTime2_.innerText.split(":");
+            startTime2sec=arr[0]*60+arr[1]*1;
+            arr=msg_endTime2_.innerText.split(":");
+            endTime2sec=arr[0]*60+arr[1]*1;
+            arr=msg_startTime3_.innerText.split(":");
+            startTime3sec=arr[0]*60+arr[1]*1;
+            arr=msg_endTime3_.innerText.split(":");
+            endTime3sec=arr[0]*60+arr[1]*1;
+            //当前时间在时间段1里边
+            if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+                //播放声音
+          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+          	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+          	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+            }
+            //当前时间在时间段2里边
+            else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+          	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+          //	document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+            }
+            //当前时间在时间段3里边
+            else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+          	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+          	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+            }
+        }
+        //objs=t1.getElementsByTagName("a");
+        if(objs!=null&&objs.length>0){
+        arrayIndex++;
+       if(arrayIndex>=objs.length){
+         arrayIndex=0;
+       }
+       }
+        
+    }
+    }catch(e){}
+    }
+    
+     timer1=setInterval(up,speed); 
+    
+    //鼠标移上时清除定时器达到滚动停止的目的
+  	father.onmouseover=function() {clearInterval(timer1);};
+
+  	//鼠标移开时重设定时器
+  	father.onmouseout=function(){timer1=setInterval(up,speed);};
+  	  }
+
+
+
+  	  //左右滚动
+  	  else{
+
+  		  //var speed=20;//速度数值越大速度越慢
+  		  speed=20;
+  		  var father=document.getElementById("msg");
+  		  var t1=document.getElementById("msg_source");
+  		  var t2=document.getElementById("msg_target");
+  		  t2.innerHTML=t1.innerHTML;
+  		  //向右边移动
+  		  function left(){
+  		  	if(objs!=null&&objs.length>0){
+  		  //	sound_on=false;
+  				  //播放声音
+  				  if(father.scrollLeft%800==0&&sound_on){
+  				      var msg_startTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime1");
+  				      var msg_endTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime1");
+  				      var msg_startTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime2");
+  				      var msg_endTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime2");
+  				      var msg_startTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime3");
+  				      var msg_endTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime3");
+  				      //获取系统时间
+  				      var myDate = new Date();
+  				      //当前系统时间转换为分
+  				      totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+  				      if(msg_startTime1_.innerText==""||msg_endTime1_.innerTex==""||msg_startTime2_.innerText==""||msg_endTime2_.innerText==""||msg_startTime3_.innerText==""||msg_endTime3_.innerText==""){
+  				    	//播放声音
+  				    	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+  				    	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+  				    	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+  				      }
+  				      else{
+  				          //转换为分钟
+  				          arr=msg_startTime1_.innerText.split(":");
+  				          startTime1sec=arr[0]*60+arr[1]*1;
+  				          arr=msg_endTime1_.innerText.split(":");
+  				          endTime1sec=arr[0]*60+arr[1]*1;
+  				          arr=msg_startTime2_.innerText.split(":");
+  				          startTime2sec=arr[0]*60+arr[1]*1;
+  				          arr=msg_endTime2_.innerText.split(":");
+  				          endTime2sec=arr[0]*60+arr[1]*1;
+  				          arr=msg_startTime3_.innerText.split(":");
+  				          startTime3sec=arr[0]*60+arr[1]*1;
+  				          arr=msg_endTime3_.innerText.split(":");
+  				          endTime3sec=arr[0]*60+arr[1]*1;
+  				          //当前时间在时间段1里边
+  				          if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+  				              //播放声音
+  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+  				        	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+  				        	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' height='0' width='0'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+  				          }
+  				          //当前时间在时间段2里边
+  				          else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+  				        	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+  				        	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+  				          }
+  				          //当前时间在时间段3里边
+  				          else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+  				        	  document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+  				        	//document.getElementById("playsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+  				          }
+  				      }
+  				      //objs=t1.getElementsByTagName("a");
+  				      if(objs!=null&&objs.length>0){
+  				      arrayIndex++;
+  				     if(arrayIndex>=objs.length){
+  				       arrayIndex=0;
+  				     }
+  				     }	     
+  				  }
+  			  	
+  		  if(t2.offsetWidth-father.scrollLeft<=0){
+  		  father.scrollLeft=father.scrollLeft-t1.offsetWidth;
+  		  arrayIndex=0;
+  		  }else{
+  		  father.scrollLeft++;
+  		  }
+
+  		  }
+    
+  		  }
+  		  timer2=setInterval(left,speed);
+  		  //鼠标移上时清除定时器达到滚动停止的目的
+  		  father.onmouseover=function() {clearInterval(timer2);};
+
+  		  //鼠标移开时重设定时器
+  		  father.onmouseout=function(){timer2=setInterval(left,speed);};
+  			 
+  	  }
+
+    }
+
+    function gMessage(id,speed,direction){
+    	  	  direction_=direction;
+    	  	  spe=speed;
+    	  	  var father=document.getElementById(id); 
+    	  	  var t1= document.getElementById(id+"_source");
+    	  	  var t2=document.getElementById(id+"_target");
+    	  	  var objs=t1.getElementsByTagName("a");
+    	     //上下滚动
+    	    if("up"==direction){
+    	    var gup=function(){
+    	    try{
+    	    if(father.scrollTop>=t2.offsetTop){
+    	       father.scrollTop=0;
+    	       arrayIndex=0;
+    	    }
+    	    else{
+    	       father.scrollTop++;
+    	    }
+    	    if(father.scrollTop%36==0&&sound_on){
+    	        var msg_startTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime1");
+    	        var msg_endTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime1");
+    	        var msg_startTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime2");
+    	        var msg_endTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime2");
+    	        var msg_startTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime3");
+    	        var msg_endTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime3");
+    	        //获取系统时间
+    	        var myDate = new Date();
+    	        //当前系统时间转换为分
+    	        totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+    	        if(msg_startTime1_.innerText==""||msg_endTime1_.innerTex==""||msg_startTime2_.innerText==""||msg_endTime2_.innerText==""||msg_startTime3_.innerText==""||msg_endTime3_.innerText==""){
+    	      	//播放声音
+    	      	  //var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	      	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	      	  document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	           }
+    	        else{
+    	            //转换为分钟
+    	            arr=msg_startTime1_.innerText.split(":");
+    	            startTime1sec=arr[0]*60+arr[1]*1;
+    	            arr=msg_endTime1_.innerText.split(":");
+    	            endTime1sec=arr[0]*60+arr[1]*1;
+    	            arr=msg_startTime2_.innerText.split(":");
+    	            startTime2sec=arr[0]*60+arr[1]*1;
+    	            arr=msg_endTime2_.innerText.split(":");
+    	            endTime2sec=arr[0]*60+arr[1]*1;
+    	            arr=msg_startTime3_.innerText.split(":");
+    	            startTime3sec=arr[0]*60+arr[1]*1;
+    	            arr=msg_endTime3_.innerText.split(":");
+    	            endTime3sec=arr[0]*60+arr[1]*1;
+    	            //当前时间在时间段1里边
+    	            if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+    	                //播放声音
+    	          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	          	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	          	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	            }
+    	            //当前时间在时间段2里边
+    	            else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+    	          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	          	  //document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	          	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	            }
+    	            //当前时间在时间段3里边
+    	            else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+    	          	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	          	  //document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	          	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	            }
+    	        }
+    	        //objs=t1.getElementsByTagName("a");
+    	        if(objs!=null&&objs.length>0){
+    	        arrayIndex++;
+    	       if(arrayIndex>=objs.length){
+    	         arrayIndex=0;
+    	       }
+    	       }
+    	        
+    	    }
+    	    }catch(e){}
+    	    }
+    	    
+    	     timer1=setInterval(gup,speed); 
+    	    
+    	    //鼠标移上时清除定时器达到滚动停止的目的
+    	  	father.onmouseover=function() {clearInterval(timer1);};
+
+    	  	//鼠标移开时重设定时器
+    	  	father.onmouseout=function(){timer1=setInterval(up,speed);};
+    	  	  }
+
+
+
+    	  	  //左右滚动
+    	  	  else{
+
+    	  		  //var speed=20;//速度数值越大速度越慢
+    	  		  speed=20;
+    	  		  var father=document.getElementById("msg");
+    	  		  var t1=document.getElementById("msg_source");
+    	  		  var t2=document.getElementById("msg_target");
+    	  		  t2.innerHTML=t1.innerHTML;
+    	  		  //向右边移动
+    	  		  function gleft(){
+    	  		  	if(objs!=null&&objs.length>0){
+    	  		  //	sound_on=false;
+    	  				  //播放声音
+    	  				  if(father.scrollLeft%800==0&&sound_on&&quickMimetype){
+    	  				      var msg_startTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime1");
+    	  				      var msg_endTime1_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime1");
+    	  				      var msg_startTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime2");
+    	  				      var msg_endTime2_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime2");
+    	  				      var msg_startTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_startTime3");
+    	  				      var msg_endTime3_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_endTime3");
+    	  				      //获取系统时间
+    	  				      var myDate = new Date();
+    	  				      //当前系统时间转换为分
+    	  				      totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+    	  				      if(msg_startTime1_.innerText==""||msg_endTime1_.innerTex==""||msg_startTime2_.innerText==""||msg_endTime2_.innerText==""||msg_startTime3_.innerText==""||msg_endTime3_.innerText==""){
+    	  				    	//播放声音
+    	  				    	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	  				    	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	  				    	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	  				      }
+    	  				      else{
+    	  				          //转换为分钟
+    	  				          arr=msg_startTime1_.innerText.split(":");
+    	  				          startTime1sec=arr[0]*60+arr[1]*1;
+    	  				          arr=msg_endTime1_.innerText.split(":");
+    	  				          endTime1sec=arr[0]*60+arr[1]*1;
+    	  				          arr=msg_startTime2_.innerText.split(":");
+    	  				          startTime2sec=arr[0]*60+arr[1]*1;
+    	  				          arr=msg_endTime2_.innerText.split(":");
+    	  				          endTime2sec=arr[0]*60+arr[1]*1;
+    	  				          arr=msg_startTime3_.innerText.split(":");
+    	  				          startTime3sec=arr[0]*60+arr[1]*1;
+    	  				          arr=msg_endTime3_.innerText.split(":");
+    	  				          endTime3sec=arr[0]*60+arr[1]*1;
+    	  				          //当前时间在时间段1里边
+    	  				          if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+    	  				              //播放声音
+    	  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	  				        	  //document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	  				        	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' height='0' width='0'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	  				          }
+    	  				          //当前时间在时间段2里边
+    	  				          else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+    	  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	  				        	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	  				        	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	  				          }
+    	  				          //当前时间在时间段3里边
+    	  				          else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+    	  				        	  var msg_voice_=document.getElementById("moveMsgTab:"+arrayIndex+":msg_voiceCode");
+    	  				        	 // document.getElementById("playsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+    	  				        	document.getElementById("googlesound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+    	  				          }
+    	  				      }
+    	  				      //objs=t1.getElementsByTagName("a");
+    	  				      if(objs!=null&&objs.length>0){
+    	  				      arrayIndex++;
+    	  				     if(arrayIndex>=objs.length){
+    	  				       arrayIndex=0;
+    	  				     }
+    	  				     }	     
+    	  				  }
+    	  			  	
+    	  		  if(t2.offsetWidth-father.scrollLeft<=0){
+    	  		  father.scrollLeft=father.scrollLeft-t1.offsetWidth;
+    	  		  arrayIndex=0;
+    	  		  }else{
+    	  		  father.scrollLeft++;
+    	  		  }
+
+    	  		  }
+    	    
+    	  		  }
+    	  		  timer2=setInterval(gleft,speed);
+    	  		  //鼠标移上时清除定时器达到滚动停止的目的
+    	  		  father.onmouseover=function() {clearInterval(timer2);};
+
+    	  		  //鼠标移开时重设定时器
+    	  		  father.onmouseout=function(){timer2=setInterval(gleft,speed);};
+    	  			 
+    	  	  }
+    }
+
+
+  function resetMsg(){
+
+  	arrayIndex=0;
+  	clearInterval(timer2);
+  	clearInterval(timer1);
+  	if(isIE){
+  	myMessage("msg",spe,direction_);
+  	}
+  	else{
+    gMessage("msg",spe,direction_);
+  	}
+  	/*
+  	clearInterval(popTimer1);
+  	popTimer1=setInterval(showBox2,6000); 
+  	*/
+  }
+
+ function sound_onoff(){
+    var obj = window.event.srcElement;
+    if(obj.src.indexOf("_on.gif") > 0){
+       sound_on = false;
+       obj.src = "${request.contextPath}/baf/images/message/sound_off.gif";
+       obj.title = "打开消息声音提示";
+       SetCookie("soundstyle","ture");
+       document.getElementById("playsound").src="";
+    }else{
+       sound_on = true;
+       obj.src = "${request.contextPath}/baf/images/message/sound_on.gif";
+       obj.title = "关闭消息声音提示";
+       SetCookie("soundstyle","false");
+    }
+} 
+  	
+ 
+	function hideTip(){
+	  	addTab('abc123notReadMsg','未读消息','/baf/jsp/message/notReadMessage.xhtml');
+	  	document.getElementById("msgtip").style.display="none";
+  	}
+	
+	
+	
+	
+	//弹出消息的定时器
+ 	 var popTimer1;
+ 	 var modalTimer;
+ 	// var refreshTimer1;
+ 	function runPopUpTimer(){
+ 		if(isIE){
+ 		   popTimer1=setInterval(showBox2,12000);  //两分钟  IE 右下角弹出框
+ 		   modalTimer=setInterval(showModal_IE,25000);//模态框
+ 		}else
+ 		   popTimer1=setInterval(gshowBox,12000);  //两分钟  谷歌浏览器 右下角弹出框	
+ 		   		//setTimeout(showModal,8000);
+ 		   modalTimer=setInterval(showModal,25000);//模态框
+ 		}
+ 	/*
+ 	 Ext.onReady(
+    function(){
+        if(isIE)
+   	popTimer1=setInterval(showBox2,12000);  //两分钟
+   	else
+   		popTimer1=setInterval(gshowBox,12000);  //两分钟	
+    }
+    );
+     */
+
+
+var count=0;
+function showBox2(){ 
+	//给弹出框更换内容
+   var oTable = document.getElementById("itemLists");
+   var title_=document.getElementById("itemLists:"+0+":msg_title");
+   var box_content=document.getElementById("box_content");
+   if(title_!=null&&title_!=undefined){
+   var rowsnum=oTable.rows.length;
+   var str="";
+   for(i=0;i<rowsnum;i++){
+	   title_=document.getElementById("itemLists:"+i+":msg_title");
+	   url_=document.getElementById("itemLists:"+i+":msg_url");
+	   id_=document.getElementById("itemLists:"+i+":msg_msgId");
+	   imageCode_=document.getElementById("itemLists:"+i+":msg_imageCode");
+       receiverType_=document.getElementById("itemLists:"+i+":msg_receiverType");
+	   str+="<a  href=\"javascript:addPopUpTab('"+id_.innerText+"','"+url_.innerText+"','"+title_.innerText+"','"+receiverType_.innerText+"')\" title='"+title_.innerText+"'><img src='${request.contextPath}/baf/images/message/"+imageCode_.innerText+".gif'/>"+title_.innerText+" </a><br/>";
+   }
+   box_content.innerHTML=str;
+   //播放声音
+   if(sound_on){
+
+   	   var msg_startTime1_=document.getElementById("itemLists:"+0+":msg_startTime1");
+       var msg_endTime1_=document.getElementById("itemLists:"+0+":msg_endTime1");
+       var msg_startTime2_=document.getElementById("itemLists:"+0+":msg_startTime2");
+       var msg_endTime2_=document.getElementById("itemLists:"+0+":msg_endTime2");
+       var msg_startTime3_=document.getElementById("itemLists:"+0+":msg_startTime3");
+       var msg_endTime3_=document.getElementById("itemLists:"+0+":msg_endTime3");
+
+       //获取系统时间
+       var myDate = new Date();
+       //当前系统时间转换为分
+       totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+       if((msg_startTime1_==null&&msg_endTime1_==null&&msg_startTime2_==null&&msg_endTime2_==null&&msg_startTime3_==null&&msg_endTime3_==null)||
+    	      ( msg_startTime1_.innerText==""&&msg_endTime1_.innerTex==""&&msg_startTime2_.innerText==""&&msg_endTime2_.innerText==""&&msg_startTime3_.innerText==""&&msg_endTime3_.innerText=="")){
+       	//播放声音
+       	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+       	  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+        //	document.getElementById("popsound").innerHTML="<embed id='empop' src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+             }
+         else{
+             //转换为分钟
+             arr=msg_startTime1_.innerText.split(":");
+             startTime1sec=arr[0]*60+arr[1]*1;
+             arr=msg_endTime1_.innerText.split(":");
+             endTime1sec=arr[0]*60+arr[1]*1;
+             arr=msg_startTime2_.innerText.split(":");
+             startTime2sec=arr[0]*60+arr[1]*1;
+             arr=msg_endTime2_.innerText.split(":");
+             endTime2sec=arr[0]*60+arr[1]*1;
+             arr=msg_startTime3_.innerText.split(":");
+             startTime3sec=arr[0]*60+arr[1]*1;
+             arr=msg_endTime3_.innerText.split(":");
+             endTime3sec=arr[0]*60+arr[1]*1;
+             //当前时间在时间段1里边
+             if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+                 //播放声音
+           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+           	  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+           	//document.getElementById("popsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' type='audio/mpeg' loop='false' autostart='true' />"; 
+              }
+             //当前时间在时间段2里边
+             else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+           	  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+           	//document.getElementById("popsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+               }
+             //当前时间在时间段3里边
+             else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+           	  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+           	//document.getElementById("popsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+              }
+         }
+   }
+   var o=document.getElementById("rbbox"); 
+   o.style.display="block"; 
+   }
+   else{
+	   box_content.innerHTML="";
+		 var rbbox=document.getElementById("rbbox");
+		 rbbox.style.display="none";
+   }
+}
+
+function gshowBox(){
+	//给弹出框更换内容
+	   var oTable = document.getElementById("itemLists");
+	   var title_=document.getElementById("itemLists:"+0+":msg_title");
+	 console.log(title_);
+	   var box_content=document.getElementById("box_content");
+	   if(title_!=null&&title_!=undefined){
+	   var rowsnum=oTable.rows.length;
+	   var str="";
+	   for(i=0;i<rowsnum;i++){
+		   title_=document.getElementById("itemLists:"+i+":msg_title");
+		   url_=document.getElementById("itemLists:"+i+":msg_url");
+		   id_=document.getElementById("itemLists:"+i+":msg_msgId");
+		   imageCode_=document.getElementById("itemLists:"+i+":msg_imageCode");
+	       receiverType_=document.getElementById("itemLists:"+i+":msg_receiverType");
+		   str+="<a style='color:red' href=\"javascript:addPopUpTab('"+id_.innerText+"','"+url_.innerText+"','"+title_.innerText+"','"+receiverType_.innerText+"')\" title='"+title_.innerText+"'><img src='${request.contextPath}/baf/images/message/"+imageCode_.innerText+".gif'/>"+title_.innerText+"</a><br/>";
+	   }
+	   box_content.innerHTML=str;
+	   //播放声音
+	   if(sound_on&&quickMimetype){
+	   	   var msg_startTime1_=document.getElementById("itemLists:"+0+":msg_startTime1");
+	       var msg_endTime1_=document.getElementById("itemLists:"+0+":msg_endTime1");
+	       var msg_startTime2_=document.getElementById("itemLists:"+0+":msg_startTime2");
+	       var msg_endTime2_=document.getElementById("itemLists:"+0+":msg_endTime2");
+	       var msg_startTime3_=document.getElementById("itemLists:"+0+":msg_startTime3");
+	       var msg_endTime3_=document.getElementById("itemLists:"+0+":msg_endTime3");
+
+	       //获取系统时间
+	       var myDate = new Date();
+	       //当前系统时间转换为分
+	       totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+	       if((msg_startTime1_==null&&msg_endTime1_==null&&msg_startTime2_==null&&msg_endTime2_==null&&msg_startTime3_==null&&msg_endTime3_==null)||
+	    	      ( msg_startTime1_.innerText==""&&msg_endTime1_.innerTex==""&&msg_startTime2_.innerText==""&&msg_endTime2_.innerText==""&&msg_startTime3_.innerText==""&&msg_endTime3_.innerText=="")){
+	       	//播放声音
+	       	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+	       	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	        	document.getElementById("googlepopsound").innerHTML="<embed id='empop' src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	             }
+	         else{
+	             //转换为分钟
+	             arr=msg_startTime1_.innerText.split(":");
+	             startTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime1_.innerText.split(":");
+	             endTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime2_.innerText.split(":");
+	             startTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime2_.innerText.split(":");
+	             endTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime3_.innerText.split(":");
+	             startTime3sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime3_.innerText.split(":");
+	             endTime3sec=arr[0]*60+arr[1]*1;
+	             //当前时间在时间段1里边
+	             if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+	                 //播放声音
+	           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+	           	//  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' type='audio/mpeg' loop='false' autostart='true' />"; 
+	              }
+	             //当前时间在时间段2里边
+	             else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+	           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	               }
+	             //当前时间在时间段3里边
+	             else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+	           	  var msg_voice_=document.getElementById("itemLists:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	              }
+	         }
+	   }
+	   var o=document.getElementById("rbbox"); 
+	   o.style.display="block"; 
+	   }
+	   else{
+		   box_content.innerHTML="";
+			 var rbbox=document.getElementById("rbbox");
+			 rbbox.style.display="none";
+	   }
+}
+
+//谷歌浏览器
+function showModal(){
+ 		//给弹出框更换内容
+ 		
+	   var oTable = document.getElementById("modalMsgTab");
+	   var title_=document.getElementById("modalMsgTab:"+0+":msg_title");
+	   console.log(title_);
+	   var box_content=document.getElementById("box_content_modal");
+	   if(title_!=null&&title_!=undefined){
+	   var rowsnum=oTable.rows.length;
+	   var str="";
+	   for(i=0;i<rowsnum;i++){
+		   title_=document.getElementById("modalMsgTab:"+i+":msg_title");
+		   url_=document.getElementById("modalMsgTab:"+i+":msg_url");
+		   id_=document.getElementById("modalMsgTab:"+i+":msg_msgId");
+		   imageCode_=document.getElementById("modalMsgTab:"+i+":msg_imageCode");
+	       receiverType_=document.getElementById("modalMsgTab:"+i+":msg_receiverType");
+	       var url=url_.innerText;
+	       //if(rowsnum>1)url="/baf/jsp/message/messageIndex.xhtml";
+		   str+="<a style='color:red' href=\"javascript:addPopUpTab('"+id_.innerText+"','"+url+"','"+title_.innerText+"','"+receiverType_.innerText+"');ev_close();\" title='"+title_.innerText+"'><img src='${request.contextPath}/baf/images/message/"+imageCode_.innerText+".gif'/>"+title_.innerText+"</a><br/>";
+	   }
+	   box_content.innerHTML=str;
+	   
+	   //播放声音
+	   if(sound_on&&quickMimetype){
+	   	   var msg_startTime1_=document.getElementById("modalMsgTab:"+0+":msg_startTime1");
+	       var msg_endTime1_=document.getElementById("modalMsgTab:"+0+":msg_endTime1");
+	       var msg_startTime2_=document.getElementById("modalMsgTab:"+0+":msg_startTime2");
+	       var msg_endTime2_=document.getElementById("modalMsgTab:"+0+":msg_endTime2");
+	       var msg_startTime3_=document.getElementById("modalMsgTab:"+0+":msg_startTime3");
+	       var msg_endTime3_=document.getElementById("modalMsgTab:"+0+":msg_endTime3");
+
+	       //获取系统时间
+	       var myDate = new Date();
+	       //当前系统时间转换为分
+	       totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+	       if((msg_startTime1_==null&&msg_endTime1_==null&&msg_startTime2_==null&&msg_endTime2_==null&&msg_startTime3_==null&&msg_endTime3_==null)||
+	    	      ( msg_startTime1_.innerText==""&&msg_endTime1_.innerTex==""&&msg_startTime2_.innerText==""&&msg_endTime2_.innerText==""&&msg_startTime3_.innerText==""&&msg_endTime3_.innerText=="")){
+	       	//播放声音
+	       	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	       	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	        	document.getElementById("googlepopsound").innerHTML="<embed id='empop' src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	             }
+	         else{
+	             //转换为分钟
+	             arr=msg_startTime1_.innerText.split(":");
+	             startTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime1_.innerText.split(":");
+	             endTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime2_.innerText.split(":");
+	             startTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime2_.innerText.split(":");
+	             endTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime3_.innerText.split(":");
+	             startTime3sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime3_.innerText.split(":");
+	             endTime3sec=arr[0]*60+arr[1]*1;
+	             //当前时间在时间段1里边
+	             if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+	                 //播放声音
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	//  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' type='audio/mpeg' loop='false' autostart='true' />"; 
+	              }
+	             //当前时间在时间段2里边
+	             else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	               }
+	             //当前时间在时间段3里边
+	             else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	              }
+	         }
+	   }
+	   document.getElementById('templateModalPanel').component.show(); 
+	   }
+	   else{
+		   box_content.innerHTML="";
+			 document.getElementById('templateModalPanel').component.hide();
+	   }			   
+ 	}
+ 	
+ 	//ie浏览器
+ 	function showModal_IE(){
+ 		//给弹出框更换内容
+ 		
+	   var oTable = document.getElementById("modalMsgTab");
+	   var title_=document.getElementById("modalMsgTab:"+0+":msg_title");
+	   //console.log(title_);
+	   var box_content=document.getElementById("box_content_modal");
+	   if(title_!=null&&title_!=undefined){
+	   var rowsnum=oTable.rows.length;
+	   var str="";
+	   for(i=0;i<rowsnum;i++){
+		   title_=document.getElementById("modalMsgTab:"+i+":msg_title");
+		   url_=document.getElementById("modalMsgTab:"+i+":msg_url");
+		   id_=document.getElementById("modalMsgTab:"+i+":msg_msgId");
+		   imageCode_=document.getElementById("modalMsgTab:"+i+":msg_imageCode");
+	       receiverType_=document.getElementById("modalMsgTab:"+i+":msg_receiverType");
+	       var url=url_.innerText;
+	       //if(rowsnum>1)url="/baf/jsp/message/messageIndex.xhtml";
+		   str+="<a style='color:red' href=\"javascript:addPopUpTab('"+id_.innerText+"','"+url+"','"+title_.innerText+"','"+receiverType_.innerText+"');ev_close();\" title='"+title_.innerText+"'><img src='${request.contextPath}/baf/images/message/"+imageCode_.innerText+".gif'/>"+title_.innerText+"</a><br/>";
+	   }
+	   box_content.innerHTML=str;
+	   
+	   //播放声音
+	   if(sound_on){
+	   	   var msg_startTime1_=document.getElementById("modalMsgTab:"+0+":msg_startTime1");
+	       var msg_endTime1_=document.getElementById("modalMsgTab:"+0+":msg_endTime1");
+	       var msg_startTime2_=document.getElementById("modalMsgTab:"+0+":msg_startTime2");
+	       var msg_endTime2_=document.getElementById("modalMsgTab:"+0+":msg_endTime2");
+	       var msg_startTime3_=document.getElementById("modalMsgTab:"+0+":msg_startTime3");
+	       var msg_endTime3_=document.getElementById("modalMsgTab:"+0+":msg_endTime3");
+
+	       //获取系统时间
+	       var myDate = new Date();
+	       //当前系统时间转换为分
+	       totalSeconds=myDate.getHours()*60+myDate.getMinutes();
+	       if((msg_startTime1_==null&&msg_endTime1_==null&&msg_startTime2_==null&&msg_endTime2_==null&&msg_startTime3_==null&&msg_endTime3_==null)||
+	    	      ( msg_startTime1_.innerText==""&&msg_endTime1_.innerTex==""&&msg_startTime2_.innerText==""&&msg_endTime2_.innerText==""&&msg_startTime3_.innerText==""&&msg_endTime3_.innerText=="")){
+	       	//播放声音
+	       	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	       	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	        	document.getElementById("googlepopsound").innerHTML="<embed id='empop' src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	             }
+	         else{
+	             //转换为分钟
+	             arr=msg_startTime1_.innerText.split(":");
+	             startTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime1_.innerText.split(":");
+	             endTime1sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime2_.innerText.split(":");
+	             startTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime2_.innerText.split(":");
+	             endTime2sec=arr[0]*60+arr[1]*1;
+	             arr=msg_startTime3_.innerText.split(":");
+	             startTime3sec=arr[0]*60+arr[1]*1;
+	             arr=msg_endTime3_.innerText.split(":");
+	             endTime3sec=arr[0]*60+arr[1]*1;
+	             //当前时间在时间段1里边
+	             if(totalSeconds>=startTime1sec&&totalSeconds<=endTime1sec){
+	                 //播放声音
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	//  document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true' type='audio/mpeg' loop='false' autostart='true' />"; 
+	              }
+	             //当前时间在时间段2里边
+	             else if(totalSeconds>=startTime2sec&&totalSeconds<=endTime2sec){
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	               }
+	             //当前时间在时间段3里边
+	             else if(totalSeconds>=startTime3sec&&totalSeconds<=endTime3sec){
+	           	  var msg_voice_=document.getElementById("modalMsgTab:"+0+":msg_voiceCode");
+	           	 // document.getElementById("popsound").src="${request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV";
+	           	document.getElementById("googlepopsound").innerHTML="<embed src='#{request.contextPath}/baf/wav/"+msg_voice_.innerText+".WAV' hidden='true'  type='audio/mpeg' loop='false' autostart='true' />  "; 
+	              }
+	         }
+	   }
+	   document.getElementById('templateModalPanel').component.show(); 
+	   }
+	   else{
+		   box_content.innerHTML="";
+			 document.getElementById('templateModalPanel').component.hide();
+	   }			   
+ 	}
+ 	
+ 	function ev_close(){
+	  	document.getElementById('templateModalPanel').component.hide();
+	} 
+	function ev_getContent(messageId){
+		getContentByMassageId(messageId);
+	}
+
+//屏蔽弹出窗口
+function closeBox(){ 
+    document.getElementById("rbbox").style.display="none"; 
+    clearInterval(popTimer1);
+    clearInterval(modalTimer);
+    document.getElementById("clBox").style.display="none"; 
+    document.getElementById("opBox").style.display=""; 
+}  
+//打开弹出窗口，对应“屏蔽弹出窗口函数”
+function enableBox(){
+	if(isIE){
+		popTimer1=setInterval(showBox2,6000);
+		modalTimer=setInterval(showBox2,12000);
+	}else{
+		popTimer1=setInterval(gshowBox,6000);
+		modalTimer=setInterval(showModal,12000);
+	}
+   document.getElementById("clBox").style.display=""; 
+   document.getElementById("opBox").style.display="none"; 
+}
+
+
+function no_show(){
+     var obj=document.getElementById("noshow");
+     if(obj.checked){
+    	 var exdate=new Date()
+    	 //7天内不做提示
+    	// exdate.setDate(exdate.getDate()+7*24*60*60*1000);
+    	 exdate.setTime(exdate.getTime()+7*24*60*60*1000);
+    	 
+    	 document.cookie="noshow=true; expires="+exdate.toGMTString();
+     }
+}
+//tab页添加标签页 
+/** 参数说明
+* @itemId  tab页唯一标识
+* @title   tab页唯一标题
+* @url     tab页的视图url
+* @subUrl  tab页中子视图URL，多个URL使用“,”分隔
+*/
+	function addRetMsgTab(itemId,title,url,subUrl)
+{
+	surl = url;
+	if( url == null  || url == "" || url.length == 0) return;
+	if( surl.indexOf("http") < 0 && surl.indexOf("HTTP") < 0  )
+	{
+		surl =  "${request.contextPath}"+ surl;
+		if(url.indexOf("?")>0){
+			surl = surl + "&tabId=tab_" + itemId;
+		}else{
+			surl = surl + "?tabId=tab_" + itemId;
+		}
+	}
+	var tab = Ext.getCmp("tab_"+itemId);
+	var tabpanel = Ext.getCmp('center-tabpanel');
+	if(  tab )
+	{
+	    tabpanel.setActiveTab(tab);
+	}
+	else
+	{
+		var openModuleNum = 10;
+		//获取系统参数中设置的最多可以打开模块的个数
+		if(isNaN("#{loginFrameBean.openModuleNum}") == false){
+			openModuleNum = parseInt("#{loginFrameBean.openModuleNum}");
+		}
+		//由于JSF默认最多只能缓存15个视图，所以在这里对打开模块的个数进行限制，最多只能打开系统参数中设定的个数
+	    if(tabpanel.items.length == openModuleNum + 1){
+			alert("#{msgs['baf.frame.openViewNumMessage1']}" + openModuleNum + "#{msgs['baf.frame.openViewNumMessage2']}");
+			return;
+		}
+	    var tip = "";
+	    //当标题长度超过16时，才显示提示内容
+	    if(getLen(title)>14){
+	   		tip = title;
+	    }
+	    Ext.QuickTips.init();  //在鼠标移动上去需要出现提示的功能的初始化
+        var tab = tabpanel.add({
+	        id:"tab_"+itemId,
+            title: title,
+            iconCls: 'tabs',
+            tabTip: tip,
+            html:'<iframe width="100%" style=overflow-x:auto;overflow-y:auto; height="100%" src="'+surl+'" + name="iframe_'+ itemId + '" ></iframe>',
+            closable:true,
+            margins:'0 0 0 0',
+            url:surl,
+            suburl:subUrl,
+            //listeners:{close:test },
+            autoScroll:false
+        });
+        tab.show();
+        //这里存入tabId
+        var iframe = tab.body.dom.firstChild.contentWindow;
+        iframe.tabId = "tab_" + itemId;	        
+        	
+    }
+}
+//初始化iframe的高度
+/*
+function initMsgFrame(iframe){
+	iframe.height=iframe.contentWindow.document.body.scrollHeight;
+	//iframe.style.overflowX = 'scroll';
+}
+*/
+
+     //]]>
+     </script>
+     </head>
+       	</f:view>
+</html>

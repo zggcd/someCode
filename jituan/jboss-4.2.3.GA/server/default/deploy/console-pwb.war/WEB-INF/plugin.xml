@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<workflow-plugin>
+
+<!--  WORKFLOW TEMPLATE FACTORY -->      
+  <namingtemplate name="RELFLOW-JDBC"   className="org.regaltec.workflow.coreImpl.store.WorkflowTemplateFactoryImpl"/> 
+
+  <namingstore name="WORKFLOW_CASEDATABASE_STORE"
+         type="DriverManager" URL="jdbc:oracle:thin:@199.3.6.157:1521:eoms" 
+         driverClass="oracle.jdbc.driver.OracleDriver" userName="test" password="test"/>
+  
+  <namingstore name="WORKFLOW_USERDATABASE_STORE"
+         type="DriverManager" URL="jdbc:oracle:thin:@199.3.6.157:1521:eoms" 
+         driverClass="oracle.jdbc.driver.OracleDriver" userName="test" password="test"/>
+ 
+   <!--        
+   <namingstore name="WORKFLOW_CASEDATABASE_STORE"
+         type="DriverManager" URL="jdbc:oracle:thin:@199.3.8.252:1521:ORA92" 
+         driverClass="oracle.jdbc.driver.OracleDriver" userName="bas_ccatsupt" password="regalsupt"/>
+  
+  <namingstore name="WORKFLOW_USERDATABASE_STORE"
+         type="DriverManager" URL="jdbc:oracle:thin:@199.3.8.252:1521:ORA92" 
+         driverClass="oracle.jdbc.driver.OracleDriver" userName="bas_ccatsupt" password="regalsupt"/>  
+   -->             
+</workflow-plugin>

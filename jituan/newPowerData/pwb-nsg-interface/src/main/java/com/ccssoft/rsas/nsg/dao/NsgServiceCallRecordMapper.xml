@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.nsg.dao.NsgServiceCallRecordMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.nsg.model.NsgServiceCallRecord" >
+    <id column="RECORD_ID" property="recordId" jdbcType="VARCHAR" />
+    <result column="SERIAL_NO" property="serialNo" jdbcType="VARCHAR" />
+    <result column="EXEC_METHOD" property="execMethod" jdbcType="VARCHAR" />
+    <result column="EXEC_METHOD_NAME" property="execMethodName" jdbcType="VARCHAR" />
+    <result column="EXEC_PARAM" property="execParam" jdbcType="VARCHAR" />
+    <result column="EXEC_ERRCODE" property="execErrcode" jdbcType="VARCHAR" />
+    <result column="EXEC_ERRCODE_DESC" property="execErrcodeDesc" jdbcType="VARCHAR" />
+    <result column="EXEC_RESULT" property="execResult" jdbcType="VARCHAR" />
+    <result column="START_TIME" property="startTime" jdbcType="TIMESTAMP" />
+    <result column="END_TIME" property="endTime" jdbcType="TIMESTAMP" />
+    <result column="CLIENT_IP" property="clientIp" jdbcType="VARCHAR" />
+    <result column="SERVER_IP" property="serverIp" jdbcType="VARCHAR" />
+    <result column="CLIENT_PORT" property="clientPort" jdbcType="VARCHAR" />
+    <result column="SERVER_PORT" property="serverPort" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="RESERVE1" property="reserve1" jdbcType="VARCHAR" />
+    <result column="RESERVE2" property="reserve2" jdbcType="VARCHAR" />
+    <result column="RESERVE3" property="reserve3" jdbcType="VARCHAR" />
+    <result column="RESERVE4" property="reserve4" jdbcType="VARCHAR" />
+    <result column="RESERVE5" property="reserve5" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    RECORD_ID, SERIAL_NO, EXEC_METHOD, EXEC_METHOD_NAME, EXEC_PARAM, EXEC_ERRCODE, EXEC_ERRCODE_DESC, 
+    EXEC_RESULT, START_TIME, END_TIME, CLIENT_IP, SERVER_IP, CLIENT_PORT, SERVER_PORT, 
+    REMARK, RESERVE1, RESERVE2, RESERVE3, RESERVE4, RESERVE5
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecordExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from NSG_SERVICE_CALL_RECORD
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from NSG_SERVICE_CALL_RECORD
+    where RECORD_ID = #{recordId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from NSG_SERVICE_CALL_RECORD
+    where RECORD_ID = #{recordId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecordExample" >
+    delete from NSG_SERVICE_CALL_RECORD
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecord" >
+    insert into NSG_SERVICE_CALL_RECORD (RECORD_ID, SERIAL_NO, EXEC_METHOD, 
+      EXEC_METHOD_NAME, EXEC_PARAM, EXEC_ERRCODE, 
+      EXEC_ERRCODE_DESC, EXEC_RESULT, START_TIME, 
+      END_TIME, CLIENT_IP, SERVER_IP, 
+      CLIENT_PORT, SERVER_PORT, REMARK, 
+      RESERVE1, RESERVE2, RESERVE3, 
+      RESERVE4, RESERVE5)
+    values (#{recordId,jdbcType=VARCHAR}, #{serialNo,jdbcType=VARCHAR}, #{execMethod,jdbcType=VARCHAR}, 
+      #{execMethodName,jdbcType=VARCHAR}, #{execParam,jdbcType=VARCHAR}, #{execErrcode,jdbcType=VARCHAR}, 
+      #{execErrcodeDesc,jdbcType=VARCHAR}, #{execResult,jdbcType=VARCHAR}, #{startTime,jdbcType=TIMESTAMP}, 
+      #{endTime,jdbcType=TIMESTAMP}, #{clientIp,jdbcType=VARCHAR}, #{serverIp,jdbcType=VARCHAR}, 
+      #{clientPort,jdbcType=VARCHAR}, #{serverPort,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{reserve1,jdbcType=VARCHAR}, #{reserve2,jdbcType=VARCHAR}, #{reserve3,jdbcType=VARCHAR}, 
+      #{reserve4,jdbcType=VARCHAR}, #{reserve5,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecord" >
+    insert into NSG_SERVICE_CALL_RECORD
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="recordId != null" >
+        RECORD_ID,
+      </if>
+      <if test="serialNo != null" >
+        SERIAL_NO,
+      </if>
+      <if test="execMethod != null" >
+        EXEC_METHOD,
+      </if>
+      <if test="execMethodName != null" >
+        EXEC_METHOD_NAME,
+      </if>
+      <if test="execParam != null" >
+        EXEC_PARAM,
+      </if>
+      <if test="execErrcode != null" >
+        EXEC_ERRCODE,
+      </if>
+      <if test="execErrcodeDesc != null" >
+        EXEC_ERRCODE_DESC,
+      </if>
+      <if test="execResult != null" >
+        EXEC_RESULT,
+      </if>
+      <if test="startTime != null" >
+        START_TIME,
+      </if>
+      <if test="endTime != null" >
+        END_TIME,
+      </if>
+      <if test="clientIp != null" >
+        CLIENT_IP,
+      </if>
+      <if test="serverIp != null" >
+        SERVER_IP,
+      </if>
+      <if test="clientPort != null" >
+        CLIENT_PORT,
+      </if>
+      <if test="serverPort != null" >
+        SERVER_PORT,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1,
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2,
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3,
+      </if>
+      <if test="reserve4 != null" >
+        RESERVE4,
+      </if>
+      <if test="reserve5 != null" >
+        RESERVE5,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="recordId != null" >
+        #{recordId,jdbcType=VARCHAR},
+      </if>
+      <if test="serialNo != null" >
+        #{serialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="execMethod != null" >
+        #{execMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="execMethodName != null" >
+        #{execMethodName,jdbcType=VARCHAR},
+      </if>
+      <if test="execParam != null" >
+        #{execParam,jdbcType=VARCHAR},
+      </if>
+      <if test="execErrcode != null" >
+        #{execErrcode,jdbcType=VARCHAR},
+      </if>
+      <if test="execErrcodeDesc != null" >
+        #{execErrcodeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="execResult != null" >
+        #{execResult,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null" >
+        #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clientIp != null" >
+        #{clientIp,jdbcType=VARCHAR},
+      </if>
+      <if test="serverIp != null" >
+        #{serverIp,jdbcType=VARCHAR},
+      </if>
+      <if test="clientPort != null" >
+        #{clientPort,jdbcType=VARCHAR},
+      </if>
+      <if test="serverPort != null" >
+        #{serverPort,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        #{reserve3,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve4 != null" >
+        #{reserve4,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve5 != null" >
+        #{reserve5,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecordExample" resultType="java.lang.Integer" >
+    select count(*) from NSG_SERVICE_CALL_RECORD
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update NSG_SERVICE_CALL_RECORD
+    <set >
+      <if test="record.recordId != null" >
+        RECORD_ID = #{record.recordId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.serialNo != null" >
+        SERIAL_NO = #{record.serialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execMethod != null" >
+        EXEC_METHOD = #{record.execMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execMethodName != null" >
+        EXEC_METHOD_NAME = #{record.execMethodName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execParam != null" >
+        EXEC_PARAM = #{record.execParam,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execErrcode != null" >
+        EXEC_ERRCODE = #{record.execErrcode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execErrcodeDesc != null" >
+        EXEC_ERRCODE_DESC = #{record.execErrcodeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.execResult != null" >
+        EXEC_RESULT = #{record.execResult,jdbcType=VARCHAR},
+      </if>
+      <if test="record.startTime != null" >
+        START_TIME = #{record.startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.endTime != null" >
+        END_TIME = #{record.endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.clientIp != null" >
+        CLIENT_IP = #{record.clientIp,jdbcType=VARCHAR},
+      </if>
+      <if test="record.serverIp != null" >
+        SERVER_IP = #{record.serverIp,jdbcType=VARCHAR},
+      </if>
+      <if test="record.clientPort != null" >
+        CLIENT_PORT = #{record.clientPort,jdbcType=VARCHAR},
+      </if>
+      <if test="record.serverPort != null" >
+        SERVER_PORT = #{record.serverPort,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null" >
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reserve1 != null" >
+        RESERVE1 = #{record.reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reserve2 != null" >
+        RESERVE2 = #{record.reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reserve3 != null" >
+        RESERVE3 = #{record.reserve3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reserve4 != null" >
+        RESERVE4 = #{record.reserve4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.reserve5 != null" >
+        RESERVE5 = #{record.reserve5,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update NSG_SERVICE_CALL_RECORD
+    set RECORD_ID = #{record.recordId,jdbcType=VARCHAR},
+      SERIAL_NO = #{record.serialNo,jdbcType=VARCHAR},
+      EXEC_METHOD = #{record.execMethod,jdbcType=VARCHAR},
+      EXEC_METHOD_NAME = #{record.execMethodName,jdbcType=VARCHAR},
+      EXEC_PARAM = #{record.execParam,jdbcType=VARCHAR},
+      EXEC_ERRCODE = #{record.execErrcode,jdbcType=VARCHAR},
+      EXEC_ERRCODE_DESC = #{record.execErrcodeDesc,jdbcType=VARCHAR},
+      EXEC_RESULT = #{record.execResult,jdbcType=VARCHAR},
+      START_TIME = #{record.startTime,jdbcType=TIMESTAMP},
+      END_TIME = #{record.endTime,jdbcType=TIMESTAMP},
+      CLIENT_IP = #{record.clientIp,jdbcType=VARCHAR},
+      SERVER_IP = #{record.serverIp,jdbcType=VARCHAR},
+      CLIENT_PORT = #{record.clientPort,jdbcType=VARCHAR},
+      SERVER_PORT = #{record.serverPort,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      RESERVE1 = #{record.reserve1,jdbcType=VARCHAR},
+      RESERVE2 = #{record.reserve2,jdbcType=VARCHAR},
+      RESERVE3 = #{record.reserve3,jdbcType=VARCHAR},
+      RESERVE4 = #{record.reserve4,jdbcType=VARCHAR},
+      RESERVE5 = #{record.reserve5,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecord" >
+    update NSG_SERVICE_CALL_RECORD
+    <set >
+      <if test="serialNo != null" >
+        SERIAL_NO = #{serialNo,jdbcType=VARCHAR},
+      </if>
+      <if test="execMethod != null" >
+        EXEC_METHOD = #{execMethod,jdbcType=VARCHAR},
+      </if>
+      <if test="execMethodName != null" >
+        EXEC_METHOD_NAME = #{execMethodName,jdbcType=VARCHAR},
+      </if>
+      <if test="execParam != null" >
+        EXEC_PARAM = #{execParam,jdbcType=VARCHAR},
+      </if>
+      <if test="execErrcode != null" >
+        EXEC_ERRCODE = #{execErrcode,jdbcType=VARCHAR},
+      </if>
+      <if test="execErrcodeDesc != null" >
+        EXEC_ERRCODE_DESC = #{execErrcodeDesc,jdbcType=VARCHAR},
+      </if>
+      <if test="execResult != null" >
+        EXEC_RESULT = #{execResult,jdbcType=VARCHAR},
+      </if>
+      <if test="startTime != null" >
+        START_TIME = #{startTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="endTime != null" >
+        END_TIME = #{endTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="clientIp != null" >
+        CLIENT_IP = #{clientIp,jdbcType=VARCHAR},
+      </if>
+      <if test="serverIp != null" >
+        SERVER_IP = #{serverIp,jdbcType=VARCHAR},
+      </if>
+      <if test="clientPort != null" >
+        CLIENT_PORT = #{clientPort,jdbcType=VARCHAR},
+      </if>
+      <if test="serverPort != null" >
+        SERVER_PORT = #{serverPort,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve1 != null" >
+        RESERVE1 = #{reserve1,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve2 != null" >
+        RESERVE2 = #{reserve2,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve3 != null" >
+        RESERVE3 = #{reserve3,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve4 != null" >
+        RESERVE4 = #{reserve4,jdbcType=VARCHAR},
+      </if>
+      <if test="reserve5 != null" >
+        RESERVE5 = #{reserve5,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where RECORD_ID = #{recordId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.nsg.model.NsgServiceCallRecord" >
+    update NSG_SERVICE_CALL_RECORD
+    set SERIAL_NO = #{serialNo,jdbcType=VARCHAR},
+      EXEC_METHOD = #{execMethod,jdbcType=VARCHAR},
+      EXEC_METHOD_NAME = #{execMethodName,jdbcType=VARCHAR},
+      EXEC_PARAM = #{execParam,jdbcType=VARCHAR},
+      EXEC_ERRCODE = #{execErrcode,jdbcType=VARCHAR},
+      EXEC_ERRCODE_DESC = #{execErrcodeDesc,jdbcType=VARCHAR},
+      EXEC_RESULT = #{execResult,jdbcType=VARCHAR},
+      START_TIME = #{startTime,jdbcType=TIMESTAMP},
+      END_TIME = #{endTime,jdbcType=TIMESTAMP},
+      CLIENT_IP = #{clientIp,jdbcType=VARCHAR},
+      SERVER_IP = #{serverIp,jdbcType=VARCHAR},
+      CLIENT_PORT = #{clientPort,jdbcType=VARCHAR},
+      SERVER_PORT = #{serverPort,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      RESERVE1 = #{reserve1,jdbcType=VARCHAR},
+      RESERVE2 = #{reserve2,jdbcType=VARCHAR},
+      RESERVE3 = #{reserve3,jdbcType=VARCHAR},
+      RESERVE4 = #{reserve4,jdbcType=VARCHAR},
+      RESERVE5 = #{reserve5,jdbcType=VARCHAR}
+    where RECORD_ID = #{recordId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

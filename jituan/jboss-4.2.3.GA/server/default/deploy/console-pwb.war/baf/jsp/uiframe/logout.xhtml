@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<f:loadBundle basename="messages" var="msgs"/>
+	<head>
+    <title><h:outputText value="#{msgs['logoutTitle']}"/></title>   
+     	<script>
+ 	//<![CDATA[
+ 	   function loginOut(){
+ 	     var flag="#{loginFrameBean.isSHLogin}";
+ 	     var customUrl="#{loginFrameBean.customUrl}";
+ 	     if(flag=='Y'){
+ 	       window.close();
+ 	     }else{
+ 	        if(""==customUrl||"Y"==customUrl){
+ 	          top.location ="${request.contextPath}/baf/jsp/uiframe/login.xhtml";
+ 	        }else{
+ 	           top.location ="${request.contextPath}"+customUrl;
+ 	        } 
+ 	     }
+ 	   }
+ 	   
+ 	/////////////////////////////////////////////声音提示//////////////////////////////////////////////
+	var isIE = navigator.userAgent.search("MSIE") > -1; // IE浏览器
+	var isSafari = navigator.userAgent.search("Safari") > -1;//Google瀏覽器是用這核心
+
+	var soundFlag = true; // 是否播放声音
+	var audioFiles = new Object(); // 各种声音文件地址
+	audioFiles.WT_RELOGIN = "${request.contextPath}/baf/wav/KBTIMEOUT.wav";  //请重新登陆
+	var audioArray = new Array(); // 本次播放声音文件数组
+	var audioIndex = 0; // 当前播放位置
+
+	/**
+	 * 初始化音频播放对象
+	 */
+	function initSoundObj() {
+		if(document.getElementById("playSounder") != null && document.getElementById("playSounder") != 'undefined') {
+			if(isIE) {
+				document.getElementById("playSounder").innerHTML="<object height='0' width='0' classid='CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6' id='soundObj'><param name='uiMode' value='invisible'></object> ";
+				playAudio();
+				setInterval("nextAudio4IE()",3000);
+			}
+			if(isSafari) {
+				document.getElementById("playSounder").innerHTML="<audio id='soundObj' src='' autoplay onended='setTimeout(nextAudio,3000);' >你的浏览器不支持audio标签，不能播放音频文件！</audio> ";
+				playAudio();
+			}
+		}
+	}
+
+	/**
+	 * 播放音频文件
+	 */
+	function playAudio(){
+		if(isIE) {
+			getAudio();
+		}
+		if(isSafari) {
+			getAudio();
+			nextAudio();
+		}
+	}
+
+	/**
+	 * 获取音频文件
+	 */
+	function getAudio(){
+		if(soundFlag) {
+			audioArray = new Array(); // 清空数组
+			audioIndex = 0; // 当前播放位置
+		   	audioArray[audioArray.length] = audioFiles["WT_RELOGIN"];
+		} else {
+			audioArray = new Array(); // 清空数组
+			audioIndex = 0; // 当前播放位置
+		}
+	}
+
+	/**
+	 * 播放下一个音频文件
+	 */
+	function nextAudio(){
+		if(audioIndex < audioArray.length){
+			var musobj = document.getElementById('soundObj');
+			musobj.src =audioArray[audioIndex];
+			//audioIndex++;
+		} else {
+			var musobj = document.getElementById('soundObj');
+			musobj.pause();
+		}
+	}
+
+	/**
+	 * IE需要定期检测文件是否播放完毕
+	 */
+	function nextAudio4IE() {
+		var musobj = document.getElementById('soundObj');
+		if( musobj.playState == 0 ||  musobj.playState == 1 ){
+			if(audioIndex < audioArray.length){
+				musobj.url =audioArray[audioIndex];
+				//audioIndex++;
+			}
+		}
+	}
+/////////////////////////////////////声音提示结束////////////////////////////////////////////////////
+	
+ 	
+ 	
+ 		//]]>
+ 	</script>       	
+    </head>
+     
+	<body style="align:center" onload="initSoundObj()">
+		<table width="100%" height="100%">		
+			<tr>
+				<td valign="middle" align="center">
+					<h:outputText value="#{msgs['logoutMessage1']}"/>
+					<a href="#" onclick="loginOut();" style="font-size:16px;">
+						<h:outputText value="#{msgs['logoutMessage2']}"/>
+					</a>
+					<h:outputText value="!"/>
+				</td>
+			</tr>
+		</table>
+		<span id="playSounder"></span>
+	</body>
+</f:view>
+</html>
+
+
+

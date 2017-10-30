@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+	<head>
+		<script>
+		//<![CDATA[
+		
+		function beforeLoad(){
+			checkBoard();
+		}
+		
+		function dRefresh(data){
+			if(data=="Y"){
+				window.location.href="${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1";
+	   			alert("${msgs['baf.bbs.isLockBoard']}");
+	   		}
+		}
+		
+		//新增帖子
+		function addTopic(){
+			   window.location.href='topicInfo.xhtml?boardId=#{topicBean.board_id}';
+			}
+		
+		//保存完成触发事件
+		function onSaveBoard(data){
+			//document.getElementById("queryForm:gotItemIdValues").value = "";
+			if(data=="N"){
+	   			//保存失败
+	   			alert("${msgs['baf.org.WarningHandleFailure']}");
+	   			return false;
+	   		}
+	   		if(a4jcomplete()==false){
+	 			return;
+	 		}  
+		}
+		
+		function beforeSave(){
+			var name = document.getElementById("addForm:title").value;
+			var content = tinyMCE.getInstanceById("addForm:contentTextArea").getBody().innerHTML;
+			if(name == null || name == ""){
+				alert("${msgs['baf.bbs.mustTopicTitle']}");
+				return false;
+			}
+			if(typeof(content)=="undefined" || content == "" || content == null){
+				alert("${msgs['baf.bulletin.mustContent']}");
+				return false;
+			}else{
+				var contentPlain = content.replace("<P>", "");
+				contentPlain = contentPlain.replace("&nbsp;", "");
+				contentPlain = contentPlain.replace("<br />", "");
+				contentPlain = contentPlain.replace("</P>", "");
+		
+				if(contentPlain.length == 0){
+					alert("${msgs['baf.bulletin.mustContent']}");
+					return false;
+				}
+				if(contentPlain.length > 50000){
+					alert("${msgs['baf.bbs.longTopicContent']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		//按回车调用查询按钮的单击事件
+		function forSelect(){
+			if(event.keyCode==13){
+				document.getElementById('queryForm:itemForSearch').onclick();
+			}
+		}
+		//回首页
+		function go_index(){
+			window.location.href="${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1";
+		}
+		//重置按钮
+		function resetCondition(){
+			document.getElementById('queryForm:search_title').value = "";
+			document.getElementById('queryForm:search_name').value = "";
+		}
+		function init() {
+		var urlInfo=window.location.href;  
+			   var len=urlInfo.length;
+			   var offset=urlInfo.indexOf("?");
+			   var paramsInfo=urlInfo.substr(offset+1,len)
+			   var params=paramsInfo.split("&")
+			   for(var i = 0; i < params.length; i++ ) {
+			   		if(params[i].split("=")[0] == 'navId') {
+			   			var id = params[i].split("=")[1];
+			   			document.getElementById(id).className = "current";
+			   		}
+			   }
+	}
+		//]]>
+		</script>
+		<link rel="stylesheet" href="${request.contextPath}/baf/jsp/bbs/css/pw_core.css" />
+        <link rel="stylesheet" href="${request.contextPath}/baf/jsp/bbs/css/mian.css" />
+		
+		<style>
+		.rich-datascr-button, .rich-datascr-ctrls-separator {border-style: solid;border-width: 1px;cursor: pointer;text-align: center;width: 80px;}
+	  </style>
+	  <title>装维技术论坛</title>
+</head>
+<body onload="beforeLoad();init();">
+<f:loadBundle basename="messages" var="msgs" />
+<center>
+<ui:include src="/baf/jsp/bbs/top.xhtml"/>
+ <div class="tac mb5"></div>
+
+
+	<div class="main-wrap">
+		<div id="main">
+		<div class="f_tree cc" align="left">
+					 <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/home.gif" 	style="vertical-align:middle"></h:graphicImage>
+              <h:outputLink onclick="window.location.href='${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1';" value="#" style="vertical-align: middle">
+							<h:outputText value="论坛" style="font-size:13px;"/>
+						</h:outputLink>
+               <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/related_li.gif" 	style="vertical-align:middle;width:16px"></h:graphicImage> 
+               <h:outputLink onclick="window.location.href='${request.contextPath}/baf/jsp/bbs/myTopic.xhtml?boardName=我的帖子&amp;navId=nav_index_3';" value="#" style="vertical-align: middle">
+							<h:outputText value="我的帖子" style="font-size:13px;"/>
+						</h:outputLink> </div>
+						
+						 <div class="tac mb5"></div>
+			<div id="pw_content" class="mb10">		
+		<a4j:form id="queryForm">
+		<rich:spacer height="25px;" />
+			<table width="87%" align="center" border="0" >
+				<tr>
+					<td >
+						<h:panelGroup>
+							<h:outputText value="#{msgs['baf.bbs.S_title']}: "  style="font-size:13px;" />
+							<h:inputText id="search_title" value="#{topicBean.search_title}" style="width:130px;height:23px;" styleClass="rich-gradient-input"/>
+							<rich:hotKey key="return" handler="forSelect();"/>
+						</h:panelGroup>
+					<rich:spacer width="10px"/>
+						
+					<rich:spacer width="10px"/>
+					<h:commandLink id="itemForSearch" value="#{msgs['baf.bbs.selectLink']}" action="#{topicBean.selectMyTopicForPage}"/>
+					<rich:spacer width="10px"/>
+					<h:commandLink id="reset" value="#{msgs['baf.calendar.reset']}" onclick="resetCondition();" action="#{topicBean.selectMyTopicForPage}"/>
+					</td>
+					<td width="10%" align="right">
+					</td>
+				</tr>
+			</table>
+			<h:inputHidden id="board_id" value="#{topicBean.board_id}"/>
+			<h:inputHidden id="pageNo" value="#{topicBean.scrollerPage}"/>
+       		<h:inputHidden id="pageSize" value="#{topicBean.pageSize}"/>	
+       		
+		    <rich:spacer height="10px"/>
+			<center>
+				<table style="width: 85%;" border="0" >
+					<tr>
+						<td width="10%" align="left"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.totalCountNum']}: #{topicBean.title_totalCount}"/></td>
+						<td width="70%" align="right">
+							<h:outputLabel value="#{msgs['baf.bbs.Legend']}：" style="font-size:13px;">
+								<h:graphicImage url="/baf/images/bbs/store_excel.gif" />
+								<h:outputText value="#{msgs['baf.bbs.postsPaste']}" style="font-size:13px;"/>
+								<h:graphicImage url="/baf/images/bbs/store_fixtop.gif" />
+								<h:outputText value="#{msgs['baf.bbs.topPosts']}" style="font-size:13px;"/>
+								<h:graphicImage url="/baf/images/bbs/lock.gif" />
+								<h:outputText value="#{msgs['baf.bbs.lockPosts']}" style="font-size:13px;"/>
+								<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" />
+								<h:outputText value="#{msgs['baf.bbs.anAttachment']}" style="font-size:13px;"/>
+							</h:outputLabel>
+						</td>
+					</tr>
+				
+				</table>
+			</center>
+			<rich:spacer height="10px"/>
+			<center>
+			
+				<rich:dataTable width="88%" align="center" id="dataList" rows="#{topicBean.pageSize}"  style="border: 0px ;"
+		            value="#{topicBean.defaultDataModel}" var="vo" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+		        	
+		        	<rich:column style="BORDER-RIGHT: 1px ; BORDER-TOP: 1px ; BORDER-LEFT:  1px ; BORDER-BOTTOM: 1px dashed#cccccc;height:40;text-align:left;">
+		        		<f:facet name="header">
+							<h:outputText styleClass="headerText " value="主题" style="font-weight:normal;text-align:left;"/>
+						</f:facet>
+							<rich:spacer width="15px;"/>
+							<h:outputText value="[随意]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='1'}"/>
+							<h:outputText value="[原创]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='2'}"/>
+							<h:outputText value="[灌水]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='3'}"/>
+							<h:outputText value="[讨论]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='4'}"/>
+							<h:outputText value="[建议]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='5'}"/>
+							<h:outputText value="[转贴]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='6'}"/>
+							<h:outputText value="[翻译]" style="color:#000000;font-size:18px;" rendered="#{vo.type=='7'}"/>
+							<h:outputLabel style="cursor: hand;" rendered="#{vo.isExcellence eq 'Y'}">
+								<h:graphicImage url="/baf/images/bbs/store_excel.gif" />
+							</h:outputLabel>
+							<h:outputLabel style="cursor: hand;" rendered="#{vo.isTop eq 'Y'}">
+								<h:graphicImage url="/baf/images/bbs/store_fixtop.gif" />
+							</h:outputLabel>
+							<h:outputLabel style="cursor: hand;" rendered="#{vo.isLock eq 'Y'}">
+								<h:graphicImage url="/baf/images/bbs/lock.gif" />
+							</h:outputLabel>
+								<h:outputLabel style="cursor: hand;" rendered="#{vo.isAttachment eq 'Y'}">
+								<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" />
+							</h:outputLabel>
+							<h:outputLink value="#{request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId=#{vo.topicId}&amp;type=visi" style="font-weight:normal;font-size: 15px;">
+								<strong><h:outputText value="#{vo.title}" style="color:red;" rendered="#{vo.isExcellence eq 'Y'}"/>
+								</strong>
+								<h:outputText value="#{vo.title}" style="color:#000000;" rendered="#{vo.isExcellence != 'Y'}"/>
+							</h:outputLink>		
+							
+		        	</rich:column>
+		        	<rich:column style="BORDER-RIGHT: 1px ; BORDER-TOP: 1px ; BORDER-LEFT:  1px ; BORDER-BOTTOM: 1px dashed#cccccc;">
+		        		<f:facet name="header" >
+							<h:outputText styleClass="headerText " value="作者" style="font-weight:normal;"/>
+						</f:facet>
+						<center>
+						<h:outputLabel value="#{vo.userName}"  style="font-weight:normal;"  rendered="${vo.isAnonymous=='N'}"/>
+						<h:outputLabel value="****"  style="font-weight:normal;"  rendered="${vo.isAnonymous=='Y'}"/><br/>
+						<h:outputLabel value="#{vo.createTime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+							</h:outputLabel>
+						</center>
+		        	</rich:column>
+		        	
+		        	<rich:column style="BORDER-RIGHT: 1px ; BORDER-TOP: 1px ; BORDER-LEFT:  1px ; BORDER-BOTTOM: 1px dashed#cccccc;">
+		        		<f:facet name="header">
+							<h:outputText styleClass="headerText " value="回复" style="font-weight:normal;"/>
+						</f:facet>
+						<center><h:outputLabel value="#{vo.revertTotal}" style="font-weight:normal;"/></center>
+		        	</rich:column>
+		        	<rich:column style="BORDER-RIGHT: 1px ; BORDER-TOP: 1px ; BORDER-LEFT:  1px ; BORDER-BOTTOM: 1px dashed#cccccc;">
+		        		<f:facet name="header">
+							<h:outputText styleClass="headerText " value="最后发表" style="font-weight:normal;"/>
+						</f:facet>
+						<center><h:outputLabel value="#{vo.lastReverter}" style="font-weight:normal;"/><br/>
+							<h:outputLabel value="#{vo.lastRetime}">
+							<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+							</h:outputLabel>
+						</center>
+		        	</rich:column>
+		        	
+		        	<div class="listItem"></div><hr/>
+		        </rich:dataTable>
+		         <rich:spacer height="25px;" />
+		        <table width="85%" border="0">
+		            <tr>
+			            <td >
+							<rich:datascroller align="right" for="dataList" fastControls="hide"
+							 fastStep="1" page="#{topicBean.scrollerPage}" id="itemScroller" reRender="pageNo" >	
+								<f:facet name="first" >
+									<h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+								</f:facet>
+			                    <f:facet name="first_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+			                    </f:facet>
+								<f:facet name="last">
+									<h:outputText value="#{msgs['rf4.datascroller.last']}" />
+								</f:facet>
+								 <f:facet name="last_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.last']}" />
+			                    </f:facet>
+								<f:facet name="previous">
+									<h:outputText value="#{msgs['rf4.datascroller.previous']}" />
+								</f:facet>
+								 <f:facet name="previous_disabled">
+			                        <h:outputText  value="#{msgs['rf4.datascroller.previous']}" />
+			                    </f:facet>
+								<f:facet name="next">
+									<h:outputText value="#{msgs['rf4.datascroller.next']}" />
+								</f:facet>
+								 <f:facet name="next_disabled">
+			                        <h:outputText value="#{msgs['rf4.datascroller.next']}" />
+			                    </f:facet>
+							</rich:datascroller>
+						</td>
+					</tr>
+				</table>
+			
+			</center>
+		</a4j:form>
+        <a4j:keepAlive beanName="topicBean"/>
+        </div>
+       </div>
+     </div>
+        
+    <a4j:form>
+			<a4j:jsFunction name="checkBoard" action="#{topicBean.checkLockBoard}"  reRender="queryForm" data="#{topicBean.isLock}" oncomplete="dRefresh(data)" />
+			<a4j:jsFunction name="addForTopic" action="#{topicBean.initialization}" reRender="tabPanel,queryForm" />
+		</a4j:form>
+
+</center>
+   	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+   	
+</body>
+</f:view>
+</html>

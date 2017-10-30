@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+ <classPathEntry location="D:/jee-app-server/jboss-4.2.3.GA/server/default/lib/ojdbc6.jar" />
+  <context id="context1" >
+    <jdbcConnection driverClass="oracle.jdbc.driver.OracleDriver" connectionURL="jdbc:oracle:thin:@199.3.11.28:1521/baf" userId="baf" password="password" />
+     <javaTypeResolver>  
+            <!-- 是否使用bigDecimal， false可自动转化以下类型（Long, Integer, Short, etc.） -->  
+            <property name="forceBigDecimals" value="true"/>  
+        </javaTypeResolver>  
+    <javaModelGenerator  targetPackage="com.ccssoft.rsas.pwb.user.model" targetProject="pwb-business" />
+    <sqlMapGenerator     targetPackage="com.ccssoft.rsas.pwb.user.dao" targetProject="pwb-business" />
+    <javaClientGenerator targetPackage="com.ccssoft.rsas.pwb.user.dao" targetProject="pwb-business" type="XMLMAPPER" />
+  
+  
+  <table schema="" tableName="BAF_ORG_USER" >  </table>
+
+ 
+   
+  </context>
+</generatorConfiguration>

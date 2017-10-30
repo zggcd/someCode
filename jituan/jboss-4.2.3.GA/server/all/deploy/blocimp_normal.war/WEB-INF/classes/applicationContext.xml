@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+            http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.5.xsd">
+
+	<context:property-placeholder location="classpath:jdbc.properties" />
+
+	<context:component-scan base-package="com.regaltec.blocimp.service">
+		<context:include-filter type="regex"
+			expression=".*ServiceImpl" />
+	</context:component-scan>
+
+	<!-- 支持 @AspectJ 标记-->
+	<aop:aspectj-autoproxy />
+
+
+	<bean id="secrityAdvisor"
+		class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="pattern" value=".*run.*" />
+		<property name="advice">
+			<bean class="com.regaltec.blocimp.framework.CombinedThrowsAdvice" />
+		</property>
+	</bean>
+	<!-- 以AspectJ方式 定义 AOP -->
+	<aop:config proxy-target-class="true">
+		<aop:advisor
+			pointcut="execution(* com.regaltec.blocimp.service.*Service*.*(..))"
+			advice-ref="txAdvice" />
+	</aop:config>
+
+	<!--
+		基本事务定义,使用transactionManager作事务管理,默认get*方法的事务为readonly,其余方法按默认设置.
+		默认的设置请参考Spring文档事务一章.
+	-->
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="select*" read-only="true" />
+			<tx:method name="load*" read-only="true" />
+			<tx:method name="*" rollback-for="BOException,Exception" />
+		</tx:attributes>
+	</tx:advice>
+
+	<tx:annotation-driven />
+
+	<jee:jndi-lookup id="dataSource" jndi-name="jdbc/blocimp"
+		resource-ref="true" />
+
+	<!--
+		bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" /> <property name="username"
+		value="${jdbc.username}" /> <property name="password"
+		value="${jdbc.password}" /> </bean
+	-->
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.simple.SimpleJdbcTemplate">
+		<constructor-arg ref="dataSource" />
+	</bean>
+
+	<bean id="sqlMapClientTemplate" class="org.springframework.orm.ibatis.SqlMapClientTemplate">
+		<property name="sqlMapClient">
+			<bean class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+				<property name="dataSource" ref="dataSource" />
+				<property name="configLocation" value="classpath:sql-map-config.xml" />
+			</bean>
+		</property>
+	</bean>
+	<!-- 后台服务配置 -->
+	<bean id="sysTask" class="com.regaltec.blocimp.framework.SysTask"
+		scope="prototype" />
+	<bean id="scanDocumentTask" class="com.regaltec.blocimp.daemon.ScanDocumentTask"
+		scope="prototype" />
+	<bean id="scanLexiconTask" class="com.regaltec.blocimp.daemon.ScanLexiconTask"
+		scope="prototype" />
+	<bean id="scanAttachmentTask" class="com.regaltec.blocimp.daemon.ScanAttachmentTask"
+		scope="prototype" />
+	<bean id="scanJmsTask" class="com.regaltec.blocimp.daemon.ScanJmsTask"
+		scope="prototype">
+	</bean>
+	<bean id="scanStopJmsTask" class="com.regaltec.blocimp.daemon.ScanStopJmsTask"
+		scope="prototype">
+	</bean>
+	<bean id="scanJmsServiceTask" class="com.regaltec.blocimp.daemon.ScanJmsServiceTask"
+		scope="prototype">
+	</bean>
+	<bean id="scanJmsReceiveTask" class="com.regaltec.blocimp.daemon.ScanJmsReceiveTask"
+		scope="prototype">
+	</bean>
+	<bean id="scanCheckBackgroundTask" class="com.regaltec.blocimp.daemon.ScanCheckBackgroundTask"
+		scope="prototype">
+	</bean>
+	<bean id="scanWebservicesTask" class="com.regaltec.blocimp.daemon.ScanWebservicesTask"
+		scope="prototype">
+	</bean>
+	<bean id="rebowlTask" class="com.regaltec.blocimp.daemon.RebowlTask"
+		scope="prototype">
+        </bean>
+	<!-- 后台服务配置 -->
+
+	<bean id="userIncrementer" class="${maxValueIncrementer}">
+		<property name="dataSource" ref="dataSource" />
+		<property name="incrementerName" value="t_sys_sequence" />
+		<property name="columnName" value="value" />
+	</bean>
+
+	<bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="session">
+			<jee:jndi-lookup jndi-name="mail/warn" />
+		</property>
+	</bean>
+
+	<!-- 配置JMS
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+		<property name="environment">
+			<props>
+				<prop key="java.naming.factory.initial">
+					${jms.factory}
+				</prop>
+				<prop key="java.naming.provider.url">${jms.url}</prop>
+				<prop key="java.naming.factory.url.pkgs">
+					${jms.pkgs}
+				</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="jmsConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate">
+			<ref bean="jndiTemplate" />
+		</property>
+		<property name="jndiName">
+			<value>${jms.factory.jndiName}</value>
+		</property>
+	</bean>
+	<bean id="jmsDestination" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiTemplate">
+			<ref bean="jndiTemplate" />
+		</property>
+		<property name="jndiName">
+			<value>${jms.des.jndiName}</value>
+		</property>
+	</bean>
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="defaultDestination" ref="jmsDestination" />
+		<property name="pubSubDomain">
+			<value>false</value>
+		</property>
+		<property name="receiveTimeout">
+			<value>10000</value>
+		</property>
+	</bean>
+	<bean id="buildMsg" class="test.jms.BuildMessage">
+		<property name="jmsTemplate" ref="jmsTemplate" />
+	</bean>
+	<bean id="messageListener"
+		class="org.springframework.jms.listener.DefaultMessageListenerContainer" lazy-init="false">
+		<property name="connectionFactory" ref="jmsConnectionFactory" />
+		<property name="destination" ref="jmsDestination" />
+		<property name="messageListener" ref="receiver" />
+		<property name="concurrentConsumers" value="10" />
+		<property name="autoStartup" value="false" />
+		<property name="sessionTransacted" value="true" />
+	</bean>
+	 -->
+	<bean id="receiver" class="com.regaltec.blocimp.service.common.ReceiverBlocMessage">
+		<property name="externalInterfaceWebservice" ref="externalInterfaceWebservice" />
+	</bean>
+	<bean id="externalInterfaceWebservice"
+		class="com.regaltec.blocimp.service.common.ExternalInterfaceServiceImpl">
+	</bean>
+
+</beans>

@@ -1,0 +1,729 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+   
+<f:view  contentType="text/html"> 
+<head>
+<script>
+//<![CDATA[
+
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+    //刷新给定ID节点的内容
+    function refreshTreeItem(setId){
+      DictCategoryTree_tree.refreshItem(setId)
+    }
+    
+	//字典类别树右键菜单
+	function openContextMenu(){
+		try{
+		 	var itemId = this.getSelectedItemId();
+		 	var objmenu = Ext.menu.MenuMgr.get("opmenu");
+			var isLeaf = DictCategoryTree_tree.getUserData(itemId,"isLeaf");
+			var isExistDict = DictCategoryTree_tree.getUserData(itemId,"isExistDict");
+			Ext.getCmp("menuItemAddTopCategory").enable(); 
+		 	if( itemId == "null" ){
+		 		Ext.getCmp("menuItemAddCategory").disable(); 
+		 		Ext.getCmp("menuItemAddDictionary").disable(); 
+		    	Ext.getCmp("menuItemDeleteObj").disable();  
+		 	}else{
+		 		if(isLeaf=="Y"){
+					if(isExistDict=="Y"){
+						Ext.getCmp("menuItemAddCategory").disable(); 
+			    		Ext.getCmp("menuItemAddDictionary").enable(); 
+					}else{
+						Ext.getCmp("menuItemAddCategory").enable(); 
+			    		Ext.getCmp("menuItemAddDictionary").enable(); 
+					}
+				}else{
+				    Ext.getCmp("menuItemAddCategory").enable(); 
+				    Ext.getCmp("menuItemAddDictionary").disable(); 
+				}
+				Ext.getCmp("menuItemDeleteObj").enable();  
+		 	}
+		   	
+		   	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+				var e = new Array(window.event.clientX,window.event.clientY);
+				objmenu.showAt(e);
+			}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+				var e = new Array(arguments[1].clientX,arguments[1].clientY);
+				objmenu.showAt(e);
+	 		}
+	   	}catch(e){
+	   		alert(e.description);
+	   	}
+	}
+	
+  	var org_dictList_tdobj = null;
+  	//显示字典操作的右键菜单
+  	function openDictContextMenu(e){
+  		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		    if( window.event.srcElement.tagName != "TD"){
+		       	org_dictList_tdobj = window.event.srcElement.parentNode;
+		    }else{
+		    	org_dictList_tdobj = window.event.srcElement;
+		    }
+		}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+			if( e.target.tagName != "TD"){
+		       	org_dictList_tdobj = e.target.parentNode;
+		    }else{
+		    	org_dictList_tdobj = e.target;
+		    }
+		}
+	    var objmenu = Ext.menu.MenuMgr.get("dictmenu");
+		var itemId = DictCategoryTree_tree.getSelectedItemId();
+	    var isLeaf = DictCategoryTree_tree.getUserData(itemId,"isLeaf");
+	    var stype = document.getElementById("selectForm:stype").value;
+	    if(stype=="select"){
+	    	Ext.getCmp("menuItemAddDict").disable(); 
+	    }else{
+	    	if(isLeaf=="Y"){
+		    	Ext.getCmp("menuItemAddDict").enable(); 
+		    }else{
+		    	Ext.getCmp("menuItemAddDict").disable(); 
+		    }
+	    }	    
+	    if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			var e = new Array(window.event.clientX,window.event.clientY);
+			objmenu.showAt(e);
+		}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+			var e = new Array(e.clientX,e.clientY);
+			objmenu.showAt(e);
+ 		}
+  	}
+  
+  	//显示字典类别信息,如果尚未建立顶级类别,则显示添加页面
+  	function showDictCategory(){  		
+      	var cateId = DictCategoryTree_tree.getSelectedItemId();
+      	var shref = orgworkarea.document.location.href;
+      	var stype = ""; //Modified,Jan.18th,2010.
+ 	  	if( cateId!= "null" ){    
+     	    listDict(cateId,stype);
+    	    if( shref != null && shref.indexOf("dictCategory.") > 0 ){
+                orgworkarea.isRenderForm(cateId,window.event);
+            }else{
+     			changeForm.action = "${request.contextPath}/baf/jsp/dictionary/dictCategory.xhtml";
+     			var pcateId = DictCategoryTree_tree.getParentId(cateId);
+     			var pcateName = DictCategoryTree_tree.getItemText(pcateId);
+      			changeForm.handleType.value = "edit";
+      			changeForm.pcateId.value = pcateId;
+      			changeForm.pcateName.value = pcateName;
+        		changeForm.cateId.value = cateId;
+      			changeForm.submit();
+      		}
+	    }else{  //树没有顶级节点特殊情况下
+	         //addOrg();
+	       addTopCategory();
+	    }
+  	}
+  
+	//显示字典详细信息
+	function showDict(dictId){
+	    var shref = orgworkarea.document.location.href;
+	    var dictId1;
+	    var dictId2;
+	    var searchSymbol = "N";
+	    if( shref != null && shref.indexOf("dictionary.") > 0 ){
+	        dictId1 = dictId;
+	        dictId2 = dictId;
+	        orgworkarea.refresh(dictId1,dictId2,searchSymbol);
+	    }else{
+	        changeForm.action = "${request.contextPath}/baf/jsp/dictionary/dictionary.xhtml";
+	    	changeForm.handleType.value = "edit";
+	        changeForm.dictId.value = dictId;
+	    	changeForm.submit();
+	    }
+	}
+	
+	//新增顶级类别
+	function addTopCategory(){
+		addCate("topCate");
+	}	
+  	
+  	//新增类别
+  	function addCategory(){
+  		addCate("cate");
+  	}
+  	
+  	//新增类别或顶级类别
+  	function addCate(type){
+  		var shref = orgworkarea.document.location.href;
+  		if(shref != null && shref.indexOf("dictCategory.") > 0){
+			orgworkarea.onDictCategoryAdd(DictCategoryTree_tree,type);
+		}else{
+			var handleType = "add";
+			var pcateId = DictCategoryTree_tree.getSelectedItemId();
+			if(pcateId == "" || pcateId == null  || pcateId == undefined)
+			{
+			    alert("${msgs['baf.org.javascript.alert.waringMsg']}");
+			    return;
+			}
+			var pcateName = DictCategoryTree_tree.getSelectedItemText();
+			changeForm.action = "${request.contextPath}/baf/jsp/dictionary/dictCategory.xhtml";
+			changeForm.handleType.value = "add";
+			if( pcateId != null && pcateId != "" && pcateId!= "null")
+			{
+				if(type=="cate"){
+					changeForm.pcateId.value = pcateId;
+					changeForm.pcateName.value  = pcateName;
+				}else{
+					changeForm.pcateId.value = "";
+					changeForm.pcateName.value  = "";
+				}				
+			}
+			changeForm.submit();
+		}
+  	}
+  	
+  	//新增字典
+  	function addDictionary(){
+  		var shref = orgworkarea.document.location.href;
+  		if(shref != null && shref.indexOf("dictionary.") > 0){
+			orgworkarea.onDictionaryAdd(DictCategoryTree_tree);
+		}else{
+			var handleType = "add";
+			var cateId = DictCategoryTree_tree.getSelectedItemId();
+			if(cateId == "" || cateId == null  || cateId == undefined){
+			    alert("${msgs['baf.org.javascript.alert.waringMsg']}");
+			    return;
+			}
+			var cateName = DictCategoryTree_tree.getSelectedItemText();
+			changeForm.action = "${request.contextPath}/baf/jsp/dictionary/dictionary.xhtml";
+			changeForm.handleType.value = "add";
+			if( cateId != null && cateId != "" && cateId!= "null"){
+				changeForm.cateId.value = cateId;
+				changeForm.cateName.value  = cateName;
+			}	
+			changeForm.submit();
+		}
+  	}
+  	
+  	//删除字典
+  	function delDictionary(){
+  		if(org_dictList_tdobj != null && org_dictList_tdobj.tagName == "TD"){
+		     var trobj = org_dictList_tdobj.parentNode ;
+		     if(trobj != null && trobj.tagName == "TR" ){
+		    	 isExistSubItem(trobj.cells[1].children[0].value);
+			
+		     }
+		}  
+  	}
+  	
+  	//删除字典完成事件
+  	function onDeleteDictComplete(data){
+  		if(data==undefined) return;	
+  		if(data!=null && data!=""){
+			if(data=="N"){
+				alert("${msgs['baf.dataRightFactor.AlertMessage1']}");
+				return;
+			}
+		}			
+		var cateId = DictCategoryTree_tree.getSelectedItemId();
+		var pcateId = DictCategoryTree_tree.getParentId(cateId);
+		var scateId = document.getElementById("selectForm:dictCategory").value;   //当前查询的类别ID
+		var stype = document.getElementById("selectForm:stype").value;   //判断是否是查询之后的删除
+		if(stype=="select"){
+			showDictList();
+		}else{
+			DictCategoryTree_tree.refreshItem(pcateId);
+			var timeout = setTimeout("setselectitem('"+cateId+"')",800);
+		}
+  	}
+  	
+  	//被删除节点及父节点ID
+	var temp_del_node_id = null;
+	var temp_del_node_parentId = null;  	
+  	
+  	//删除类别
+  	function deleteCategory(){
+  		var itemId = DictCategoryTree_tree.getSelectedItemId();
+  		var parentId = DictCategoryTree_tree.getParentId(itemId);
+  		temp_del_node_id = itemId;
+  		temp_del_node_parentId = parentId;
+  		/*
+  		if(confirm("${msgs['baf.dataRightFactor.DelConfirm']}")){
+  			deleteDictCategory(itemId);
+  		}*/
+  		isExistChild(itemId);
+  	}
+  	showTip=function(existSubCategory,existDict,categoryId){
+        if(existSubCategory=='Y'){
+          alert("该树节点下有子节点，不能删除！若要删除，先把子字典类别先删除.");
+          return;
+        }
+        else if(existDict=='Y'){
+          alert("该字典类别下面有字典，不能删除！若要删除，请先把对应的字典删除.");
+          return;
+        }
+        else{
+          if(window.confirm("确认删除该字典类别?")){
+        	  deleteDictCategory(categoryId);
+          }
+        }
+  	}
+  	showDictionaryTip=function(existItem,dictionaryId){
+        if(existItem=='Y'){
+           alert("该字典下面有字典条目，不能删除！若要删除，请先把对应的字典条目删除.");
+           return;
+        }
+        else{
+        	if(confirm("${msgs['baf.dataRightFactor.DelConfirm']}")){
+          		 if(org_dictList_tdobj != null && org_dictList_tdobj.tagName == "TD"){
+       		     var trobj = org_dictList_tdobj.parentNode ;
+       		     if(trobj != null && trobj.tagName == "TR" ){
+				   deleteDict(trobj.cells[1].children[0].value);
+       		     }
+       		     }
+			}
+        }
+  	}
+  	//删除类别完成事件
+	function onDeleteDictCategoryComplete(data){
+		if(data==undefined) return;	
+		if(data!=null && data!=""){
+			if(data=="N"){
+				alert("${msgs['baf.dataRightFactor.AlertMessage1']}");
+				return;
+			}
+		}
+		DictCategoryTree_tree.refreshItem(temp_del_node_parentId);
+		var timeout = setTimeout("setselectitem('"+temp_del_node_parentId+"')", 800);
+	}
+	
+	//选中树的某个节点，不触发单击事件
+	function selectitem(id){
+	  	DictCategoryTree_tree.selectItem(id,0);
+	}
+		
+	//选中树的某个节点,触发单击节点事件
+	function setselectitem(id){
+	  	DictCategoryTree_tree.selectItem(id,1);
+	}	
+	
+	//刷新节点
+	function reload(){
+	    var cateId = DictCategoryTree_tree.getSelectedItemId();
+	    DictCategoryTree_tree.refreshItem(cateId);
+	}  	
+	
+	//设置userdata
+	function setUserdata(name,value){
+		var itemId = DictCategoryTree_tree.getSelectedItemId();
+		DictCategoryTree_tree.setUserData(itemId,name,value);
+	}
+	
+	//刷新字典列表
+	function showDictList(){
+		var cateId = DictCategoryTree_tree.getSelectedItemId();    //树上选择的类别ID
+		var scateId = document.getElementById("selectForm:dictCategory").value;   //当前查询的类别ID
+		var stype = document.getElementById("selectForm:stype").value;   //判断是否是查询之后的刷新
+		if(stype=="select"){
+			listDict(scateId,stype);//Modified,Jan.18th,2010.
+		}else{
+			listDict(cateId,stype);
+		}
+	}	
+	
+	//标识当前是点击查询按钮执行的查询
+	function setSelectType(){
+		document.getElementById("selectForm:stype").value = "select";
+		return true;
+	}
+	
+	//将编号转换为大写
+	function toUpper(code){
+		code.value = code.value.toUpperCase();
+	}
+	
+	//按回车调用查询按钮的单击事件
+	function forSelect(){
+		if(event.keyCode==13){
+			document.getElementById('selectForm:selectBtn').onclick();
+		}
+	}
+	
+	//切换到查询tab页时，设置按回车进行查询
+	function toSelectPage(){
+		document.body.onkeyup = forSelect;
+		var itemId = DictCategoryTree_tree.getSelectedItemId();
+		document.getElementById("selectForm:dictCategory").value = itemId;
+		document.getElementById("selectForm:stype").value = "select";
+	}
+	
+	//切换到类别树tab页时，设置回车事件为空
+	function toTreePage(){
+		document.body.onkeyup = "";
+		document.getElementById("selectForm:stype").value = "";
+	}
+	
+	//字典类别导出
+	function treeExport(){
+	var categoryChecked=DictCategoryTree_tree.getAllCheckedBranches();
+	if(categoryChecked==""){
+	alert("请勾选需要导出的字典类别");
+	return;
+	}
+	document.getElementById("expForm:categoryChecked").value=categoryChecked;
+	document.getElementById("expForm:category").click();
+	
+	}
+	//字典导出
+	function dictExport(){
+	var dictionaryChecked=document.getElementById("expForm:dictionaryChecked").value;
+	if(dictionaryChecked==""){
+		alert("请勾选需要导出的字典");
+		return;
+	}
+	document.getElementById("expForm:dictionary").click();
+	}
+	
+	 //全选select操作表所有项
+		function onSelectALlItems() {
+			var oTable = document.getElementById("dictList");
+			var oChkAll = document.getElementById("dictList:selectAll"); 
+			//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+		    if (!oChkAll.checked){
+		      document.getElementById("expForm:dictionaryChecked").value = "";
+		    }
+		    
+			//获取当前页码数
+			var pageNum = document.getElementById("expForm:scrollerPage").value;
+			if (pageNum <= 0) pageNum = 1;
+			
+			//获取每页数据个数
+			var pageSize = document.getElementById("expForm:pageSize").value;             	
+			if (oTable != null && oChkAll != null) {
+				for (j = 0; j < oTable.rows.length -1; j++) {
+					var realNum = (pageNum-1)*pageSize + j;
+					var e = document.getElementById("dictList:"+realNum+":selectFlag");
+					if (e.id.indexOf("selectFlag") >= 0) {   
+						//触发CheckBox onclick事件，用来设置itemid
+						if (document.all) {
+							//IE
+							var oldValue= e.checked;
+							e.checked = oChkAll.checked;
+							if (!oldValue && e.checked) {
+								onObjectFireMouseEvent(e, "onclick");
+							}
+						} else {
+							//firefox
+							if (oChkAll.checked) {
+								var oldValue= e.checked;
+								if (!oldValue)
+									onObjectFireMouseEvent(e, "onclick");
+								} else {
+									e.checked = oChkAll.checked;
+								}
+							}
+						}
+					}
+			 	}
+			}
+			/*
+					   //响应check点击事件
+		function checkBoxClick(object, value) {	
+		   var itemIdsArr = document.getElementById("expForm:dictionaryChecked").value;
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 			
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index>0){
+							str = "#"+value;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+							} else {
+								str = value;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("expForm:dictionaryChecked").value = itemIdsArr;
+		}
+		*/
+		//响应check点击事件
+				function checkBoxClick(object, value) {					
+					var templateIDArray = document.getElementById("expForm:dictionaryChecked").value;
+					if (templateIDArray == null || templateIDArray == "") {
+						if (object.checked == true) {							
+							templateIDArray = value;
+						} 
+					} else {
+						if (object.checked == true) {
+							templateIDArray = templateIDArray + "#" + value;	 			
+						} else {
+							var index = templateIDArray.indexOf(value);
+							if (index >= 0) {																
+								var str = "";
+								if(index>0){
+									str = "#"+value;
+								} else {
+									if(index==0 && templateIDArray.indexOf("#")!=-1){
+										str = value + "#";
+									} else {
+										str = value;
+									}
+								}
+								templateIDArray = templateIDArray.replace(str, "");
+							}
+						}
+					}
+					//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+					document.getElementById("expForm:dictionaryChecked").value = templateIDArray;
+				}
+	//点击查询按纽列表未渲染前置灰
+	function ondisabled(){
+	  	document.getElementById("selectForm:selectBtn").disabled = true;
+	}
+//]]>
+</script>
+ <style type="text/css">
+ .column1{
+ 	width:30%;
+ }
+ .column2{
+ 	width:70%;
+ }
+ </style>
+</head>
+<body>
+  <f:loadBundle basename="messages" var="msgs" />
+       <h:form id="expForm">
+       <h:inputHidden id="scrollerPage" value="#{dictionaryBean.scrollerPage}"></h:inputHidden>
+       <h:inputHidden id="pageSize" value="#{dictionaryBean.pageSize}"></h:inputHidden>
+       <h:inputHidden id="categoryChecked" value="#{dictionaryExpBean.categoryChecked}"></h:inputHidden> 
+       <h:inputHidden id="dictionaryChecked" value="#{dictionaryExpBean.dictionaryChecked}"></h:inputHidden>
+       <h:commandButton id="category" style="display:none;"  styleClass="rich-button" value="#{msgs['baf.impexp.data.export']}" action="#{dictionaryExpBean.exportCategory}"/>
+       <h:commandButton id="dictionary" style="display:none;"  styleClass="rich-button" value="#{msgs['baf.impexp.data.export']}" action="#{dictionaryExpBean.exportDictionary}"/>
+       </h:form>
+     <regaltec:extPanel id="topregion" region="north" collapseMode="mini" split="true" height="250" contentEl="laytop"/>
+     <regaltec:extPanel id="bottomregion" region="center" split="true" contentEl="laybottom" autoScroll="true"/>
+	 <regaltec:viewPort ctCls="panel-bdColor">
+		 <regaltec:viewPortPanel 
+			region="east" 
+			id="eastpanel" 
+			autoScroll="false"  
+			items="topregion_panel,bottomregion_panel"   
+			split="true" width="230"   
+			minSize="230" 
+			maxSize="600" 
+			border="false"
+			collapsible="true" 
+			margins="0 0 0 0" 
+			layout="border"/>
+		 <regaltec:viewPortPanel region="center" id="center-panel" contentEl="center" />
+	 </regaltec:viewPort>
+    
+  	<div id="laytop">  
+  		<table width="100%"  cellspacing="0" cellpadding="0" height="100%" style="font-size:13px;">
+			<tr><td height="16" align="right" class="rich-gradient-tab" ><h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" ></h:graphicImage></td></tr>
+			<tr id="efg">
+				<td valign="top"> 		
+			  		<rich:tabPanel id="tabPanel" height="100%" width="99%" switchType="client">
+			  			<rich:tab id="category" label="#{msgs['baf.dict.tabCate']}" onlabelclick="toTreePage();">
+			  				<div id="tree-div" style="width:100%;height:100%;overflow-x:auto; overflow-y:auto;"></div>
+			  			</rich:tab>
+			  			<rich:tab id="select" label="#{msgs['baf.dict.tabSelect']}" onlabelclick="toSelectPage();">
+			  				<rich:spacer height="5px"/>
+			  				<h:form id="selectForm">
+		  					<h:panelGrid columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;" styleClass=".rich-text-color-general">
+		  						<h:outputText value="#{msgs['baf.dict.dictCate']}"/>
+		  						<h:selectOneMenu id="dictCategory" value="#{dictionaryBean.selectCate}" style="width:95%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+		  							<f:selectItems value="#{dictionaryBean.categorySelectItems}"/>
+		  						</h:selectOneMenu>
+		  						
+		  						<h:outputText value="#{msgs['baf.dict.dictName']}"/>
+		  						<h:inputText id="dictName" value="#{dictionaryBean.selectDictName}" style="width:95%;height:23px;" styleClass="rich-gradient-input"/>
+		  						
+		  						<h:outputText value="#{msgs['baf.dict.dictCode']}"/>
+		  						<h:inputText id="dictCode" value="#{dictionaryBean.selectDictCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input" onblur="toUpper(this);"/>
+		  					</h:panelGrid>		
+		  					
+       						<h:inputHidden id="stype" value="#{dictionaryBean.stype}"/>  
+		  					<rich:spacer height="5px"/>	  		
+		  					<center>
+		  						<a4j:commandButton type="button" id="selectBtn" value="#{msgs['baf.Select']}" styleClass="rich-button" onclick="ondisabled();" disabled="false" action="#{dictionaryBean.reflash}" limitToList="true" reRender="dictList,sc1,selectBtn"/>
+		  					</center>	
+		  					</h:form>	
+			  			</rich:tab>
+			  		</rich:tabPanel> 
+	  			</td>
+			</tr>		
+  		</table>
+	</div>
+	
+	<div id="laybottom">
+		<rich:dataTable width="100%" id="dictList" rows="#{dictionaryBean.pageSize}" columnClasses="col" 
+            value="#{dictionaryBean.defaultDataModel}" var="dict" rendered="true"  onRowContextMenu="openDictContextMenu(event);return false;" headerClass="rich-gradient-tab">
+          	<rich:column width="5%" style="text-align:center;">
+		        <f:facet name="header">
+		        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+		        </f:facet>
+	            <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{dict.dictionaryId}');"/>
+	        </rich:column>
+            
+            <h:column>
+	            <f:facet name="header">
+					<h:outputText  value="#{msgs['baf.dict.dictName']}" />
+				</f:facet>
+				<h:inputHidden value="#{dict.dictionaryId}"></h:inputHidden>
+             	<a href="#" onclick="showDict('${dict.dictionaryId}')" ><h:outputText value="#{dict.dictionaryName}" /></a>
+            </h:column>
+            <h:column>
+            	<f:facet name="header">
+			        <h:outputText value="#{msgs['baf.dict.dictCode']}" />
+			 	</f:facet>
+             	<h:outputText value="#{dict.dictionaryCode}" />
+            </h:column>
+            <h:column>
+            	<f:facet name="header">
+			        <h:outputText  value="#{msgs['baf.dict.dictCate']}" />
+			 	</f:facet>
+                <h:outputText value="#{dict.dictionaryCategoryName}" />
+            </h:column>
+        </rich:dataTable>
+
+        <h:form>
+			<rich:datascroller align="right"  for="dictList" fastStep="0"  page="#{dictionaryBean.scrollerPage}" id="sc1" reRender="scrollerPage" />
+		</h:form>
+		<a4j:keepAlive beanName="dictionaryBean"/>
+
+  </div>
+
+  <div id="center">
+  <iframe  name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO"  style="border-style:none;"></iframe>
+  </div>
+  	<form  id="changeForm" target="orgworkarea" method="post">
+       <input type="hidden" name="handleType"  />
+       <input type="hidden" name="pcateId" />
+       <input type="hidden" name="pcateName"/>  
+       <input type="hidden" name="cateId"/>
+       <input type="hidden" name="cateName"/>
+       <input type="hidden" name="dictId"/>  
+    </form>
+        
+    <regaltec:extContextMenu id="opmenu">
+    	<regaltec:extContextMenuItem  id="menuItemAddTopCategory"  text="#{msgs['baf.dict.addTopCategory']}" handler="addTopCategory"/>
+    	<regaltec:extContextMenuItem  id="menuItemAddCategory"  text="#{msgs['baf.dict.addCategory']}" handler="addCategory"/>
+    	<regaltec:extContextMenuItem  id="menuItemAddDictionary" text="#{msgs['baf.dict.addDict']}" handler="addDictionary" />
+    	<regaltec:extContextMenuItem  id="menuItemDeleteObj" text="#{msgs['baf.dict.deleteObj']}" handler="deleteCategory" />
+    	<regaltec:extContextMenuItem  id="menuItemExport" text="#{msgs['baf.dict.exportSql']}" handler="treeExport" />
+    </regaltec:extContextMenu>
+    
+    <regaltec:extContextMenu id="dictmenu">
+    	<regaltec:extContextMenuItem  id="menuItemAddDict"  text="#{msgs['baf.dict.addDict']}" handler="addDictionary"/>
+    	<regaltec:extContextMenuItem  id="menuItemDelDict" text="#{msgs['baf.dict.delDict']}" handler="delDictionary" />
+    	<regaltec:extContextMenuItem  id="dictExport" text="#{msgs['baf.dict.exportSql']}" handler="dictExport" />
+    </regaltec:extContextMenu>
+    
+    <regaltec:dhtmlXtree id="DictCategoryTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="tree-div"
+		loadXML="/baf/jsp/dictionary/dictCategoryXMLData.jsp"
+		xmlAutoLoading="/baf/jsp/dictionary/dictCategoryXMLData.jsp">
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="showDictCategory" />	
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+		<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+	</regaltec:dhtmlXtree>   
+	<h:form id="a4jform">
+		<a4j:jsFunction name="deleteDictCategory" action="#{dictCategoryBean.deleteDictCategory}" data="#{dictCategoryBean.dealFlag}" oncomplete="onDeleteDictCategoryComplete(data);">
+			<a4j:actionparam name="cateId" value=""/>
+		</a4j:jsFunction>
+	
+        <a4j:jsFunction name="deleteDict" action="#{dictionaryBean.deleteDictionary}" data="#{dictionaryBean.dealFlag}" oncomplete="onDeleteDictComplete(data);" reRender="dictList,scrollerPage">
+            <a4j:actionparam name="dictId" assignTo="#{dictionaryBean.dictionaryId}"   />                
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="listDict" limitToList="true"  action="#{dictionaryBean.reflash}" reRender="dictList,sc1,expForm">
+            <a4j:actionparam name="cateId" assignTo="#{dictionaryBean.dictionaryCategoryId}"  />
+            <a4j:actionparam name="stype" assignTo="#{dictionaryBean.stype}"  /><!-- //Modified,Jan.18th,2010. --> 
+            <a4j:actionparam name="scrollerPage"  value="1" assignTo="#{dictionaryBean.scrollerPage}"  />                
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="exportDict" actionListener="#{dictionaryExpBean.exportDictionary}" data="#{dictionaryBean.dealFlag}" >
+            <a4j:actionparam name="categoryChecked" assignTo="#{dictionaryExpBean.categoryChecked}"   />
+            <a4j:actionparam name="dictionaryChecked" assignTo="#{dictionaryExpBean.dictionaryChecked}"   />
+            <a4j:actionparam name="itemChecked" assignTo="#{dictionaryExpBean.itemChecked}"   />                
+        </a4j:jsFunction>
+        <a4j:jsFunction name="isExistChild" action="#{dictCategoryBean.isExistChild}" oncomplete="showTip('#{dictCategoryBean.isExistSubCategory}','#{dictCategoryBean.isExistDictionary}','#{dictCategoryBean.dictCategoryId}')" >
+            <a4j:actionparam name="dictCategoryId" assignTo="#{dictCategoryBean.dictCategoryId}"   />               
+        </a4j:jsFunction>
+        <a4j:jsFunction name="isExistSubItem" action="#{dictionaryBean.isExistSubItem}" oncomplete="showDictionaryTip('#{dictionaryBean.existItemFlag}','#{dictionaryBean.dictionaryId}')" >
+            <a4j:actionparam name="dictionaryId" assignTo="#{dictionaryBean.dictionaryId}"   />               
+        </a4j:jsFunction>
+    </h:form>
+    
+
+    <rich:toolTip for="helpicon" >
+    <div style="width:300;">
+	    <h:outputText value="#{msgs['baf.dataRightFactor.helpMessage1']}"/><br />
+      	1、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage5']}"/><br />
+	    2、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage2']}"/><br />
+	    3、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage3']}"/><br />
+	    4、<h:outputText value="#{msgs['baf.dataRightFactor.helpMessage4']}"/>
+    </div>
+    </rich:toolTip>
+    
+    <script>
+    //<![CDATA[
+	   /*session超时显示错误信息*/
+	   A4J.AJAX.onExpired = function(loc,expiredMsg)
+	   {
+	      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+	   }
+	   /*显示数据提交到后台的错误信息*/
+	   A4J.AJAX.onError = function(req,status,message)
+	   {
+		   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+		   alert(report);
+		   window.sys_error = true;
+	   }
+	//]]>
+	</script>
+</body>	
+</f:view>
+</html>

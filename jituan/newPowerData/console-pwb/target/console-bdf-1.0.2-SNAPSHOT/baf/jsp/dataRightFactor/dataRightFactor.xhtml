@@ -1,0 +1,763 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script>	
+	    //<![CDATA[	
+	       //单击树形节点触发事件
+	function doOnClick(){
+		var temp = document.getElementById("rightFactorTypeForm:temp").value;
+		var itemId = this.getSelectedItemId();
+		var type = this.getUserData(itemId,'type');	
+		if(type=="R"){
+			r_Refresh(itemId,"rightFactor");
+		}
+		if(type=="T"){
+			var parentFactorType = document.getElementById("rightFactorTypeForm:parentFactorType").value;
+			//当新增顶级权限因子 类型的时候，保存之后刷新树，但不重新渲染表单
+			if(parentFactorType==""){
+				var saveType = document.getElementById("rightFactorTypeForm:addOrEdit").value;
+				if(saveType=="add"){
+					if((temp!="" && temp!=itemId) || window.event!=null){
+						t_Refresh(itemId,"rightFactorType");
+					}
+					//当单次新增时，新增的节点位于第一个节点的位置时也要渲染表单,
+					var itemIndex = this.getIndexById(itemId);
+					var batchSave = document.getElementById("rightFactorTypeForm:t_isBatchAddSave");
+					if(temp!="" && temp==itemId && itemIndex==0){
+						if(batchSave.checked==false){   //是批量新增时不重新渲染表单
+							t_Refresh(itemId,"rightFactorType");
+						}
+					}
+				}else{
+					t_Refresh(itemId,"rightFactorType");
+				}
+			}else{
+				t_Refresh(itemId,"rightFactorType");
+			}			
+		}
+		if(itemId=="null"){
+			addTopType();
+		}
+		/*if(type==undefined){
+			t_Refresh(itemId,"rightFactorType");
+		}*/
+		//保存临时所选节点，和下次点击时做比较，用来判断是否渲染表单 
+		document.getElementById("rightFactorTypeForm:temp").value = itemId;	
+	}
+	
+	////-------权限因子按钮事件------------------////
+	
+	//新增按钮事件
+	function onRightFactorAdd() {
+		var itemId = rightFactorTree_tree.getSelectedItemId();
+		var isLeaf = rightFactorTree_tree.getUserData(itemId,'isLeaf');
+		var type = rightFactorTree_tree.getUserData(itemId,'type');
+		if (type == "T" && isLeaf != "Y" ) {
+			//权限因子类型不是叶子节点，不能在该类型下添加权限因子!
+			return;
+		}
+		if(type=="R"){
+			//不能在权限因子下面增加权限因子！
+			return;
+		}
+		var r_factorTypeId = document.getElementById("rightFactorForm:oldFactorType").value;
+		if(r_factorTypeId==null || r_factorTypeId==""){
+			var mid = document.getElementById("rightFactorTypeForm:factorTypeId").value;
+			document.getElementById("rightFactorForm:oldFactorType").value = mid;
+			document.getElementById("rightFactorForm:factorType").value = mid;
+		}
+	}
+	
+	//保存按钮事件
+	function onRightFactorAddComplete(data) {
+		document.getElementById("rightFactorForm:rsave").disabled = "";
+		if (data != null && data != "") {
+			//数据权限因子编号已经存在！
+			alert("${msgs['baf.dataRightFactor.AlertMessage2']}" );
+			//设置焦点
+			setFocus("rightFactorForm:rightFactorCode");
+			return;
+		}
+		var dealFlag=document.getElementById("rightFactorForm:r_dealFlag").value;
+		if (dealFlag == "F") {
+			//权限因子配置有误，请重新输入!
+			alert("${msgs['baf.dataRightFactor.configError']}" );
+			return;
+		}
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var factorTypeId = rightFactorTree_tree.getSelectedItemId();
+		var rightFactorId = document.getElementById("rightFactorForm:rightFactorId").value;		
+		if (dealFlag == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		rightFactorTree_tree.refreshItem(factorTypeId);
+		
+		//是否批量新增
+		var isBatchAddNew = document.getElementById("rightFactorForm:r_isBatchAddSave");
+		if(isBatchAddNew.checked==false){
+			var timeout = setTimeout("setselectitem('"+rightFactorId+"')", 800);
+		}
+	}
+	
+	//修改按钮事件
+	function onRightFactorEditComplete(data){
+		document.getElementById("rightFactorForm:rsave").disabled = "";
+		if (data != null && data != "") {
+			var datas = data.split(",");
+			if(datas.length>=3){
+				//数据权限因子编号已经存在！
+				alert("${msgs['baf.dataRightFactor.AlertMessage2']}" );
+				//设置焦点
+				setFocus("rightFactorForm:rightFactorCode");
+				return;
+			}else{
+				var vd = datas[0];
+				if(vd=="C"){
+					//数据权限因子编号已经存在！
+					alert("${msgs['baf.dataRightFactor.AlertMessage2']}" );
+					//设置焦点
+					setFocus("rightFactorForm:rightFactorCode");
+				}
+				if(vd=="L"){
+					//数据权限因子类型不是叶子节点，不能在该类型下添加数据权限因子！
+					alert("${msgs['baf.dataRightFactor.AlertMessage6']}" );
+				}
+				return;
+			}
+		}
+		var dealFlag=document.getElementById("rightFactorForm:r_dealFlag").value;
+		if (dealFlag == "F") {
+			//权限因子配置有误，请重新输入!
+			alert("${msgs['baf.dataRightFactor.configError']}" );
+			return;
+		}
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var factorTypeId = document.getElementById("rightFactorForm:factorType").value;
+		var oldFactorTypeId = document.getElementById("rightFactorForm:oldFactorType").value;
+		var rightFactorId = document.getElementById("rightFactorForm:rightFactorId").value;		
+		if (dealFlag == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		//判断权限因子类型是否变化了，由此判断所要刷新的类型节点
+		if(oldFactorTypeId==factorTypeId){
+			rightFactorTree_tree.refreshItem(oldFactorTypeId);
+		}else{
+			var timeout = setTimeout("rightFactorTree_tree.refreshItem('"+oldFactorTypeId+"')", 200);
+			var timeout = setTimeout("rightFactorTree_tree.refreshItem('"+factorTypeId+"')", 400);
+		}
+		var timeout = setTimeout("setselectitem('"+rightFactorId+"')", 800);
+	}
+	
+	//删除按钮事件
+	function onRightFactorDeleteComplete(){
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var factorTypeId = document.getElementById("rightFactorForm:oldFactorType").value;	
+		var dealFlag = document.getElementById("rightFactorForm:r_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		rightFactorTree_tree.refreshItem(factorTypeId);
+		var timeout = setTimeout("setselectitem('"+factorTypeId+"')", 800);
+	}
+	////-----End
+	
+	
+	//设置保存按钮是否可用
+	function saveDisable(savebtn){
+		document.getElementById(savebtn).disabled=false;
+	}
+	
+	//-------权限因子类型按钮事件------------------//
+	
+	//保存按钮事件
+	function onRightFactorTypeAddComplete(data){
+		document.getElementById("rightFactorTypeForm:save").disabled = "";
+		if(data!=null && data!=""){
+			var datas = data.split(",");
+			if(datas.length>=3){
+				//数据权限因子类型编号已经存在！
+				alert("${msgs['baf.dataRightFactor.AlertMessage3']}" );
+				return;
+			}else{
+				var vd = datas[0];
+				if(vd=="C"){
+					//数据权限因子类型编号已经存在！
+					alert("${msgs['baf.dataRightFactor.AlertMessage3']}" );
+				}
+				if(vd=="N"){
+					//数据权限因子类型名称已存在，若不使用该名称请进行修改！【已改为不允许重复】
+					alert("${msgs['baf.dataRightFactor.AlertMessage4']}" );
+					//设置焦点
+					setFocus("rightFactorTypeForm:factorTypeName");
+				}
+				return;
+			}			
+		}
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var parentFactorTypeId = document.getElementById("rightFactorTypeForm:parentFactorType").value;
+		//var factorTypeId = document.getElementById("rightFactorTypeForm:factorTypeId").value;
+		var dealFlag = document.getElementById("rightFactorTypeForm:t_dealFlag").value;
+		//新增子权限因子类型时，要将父节点的“isLeaf”属性设置为“N”
+		if(parentFactorTypeId!=""){			
+			var isLeaf = rightFactorTree_tree.getUserData(parentFactorTypeId,"isLeaf");
+			if(isLeaf=="Y"){
+				rightFactorTree_tree.setUserData(parentFactorTypeId,"isLeaf","N");
+			}
+		}		
+		
+		rightFactorTree_tree.refreshItem(parentFactorTypeId);
+		var factorTypeId = dealFlag.split("#")[1];
+		//是否批量新增
+		var isBatchAddNew = document.getElementById("rightFactorTypeForm:t_isBatchAddSave");
+		if(isBatchAddNew.checked==false){
+			var timeout = setTimeout("setselectitem('"+factorTypeId+"')", 800);
+		}
+	}
+	
+	//修改按钮事件
+	function onRightFactorTypeEditComplete(data){
+		document.getElementById("rightFactorTypeForm:save").disabled = "";
+		if(data!=null && data!=""){
+			var datas = data.split(",");
+			if(datas.length>=3){
+				//数据权限因子类型编号已经存在！
+				alert("${msgs['baf.dataRightFactor.AlertMessage3']}" );
+				return;
+			}else{
+				var value = datas[0];
+				if(value=="N"){
+					//数据权限因子类型名称已存在，若不使用该名称请进行修改！【已改为不允许重复】
+					alert("${msgs['baf.dataRightFactor.AlertMessage4']}" );
+					//设置焦点
+					setFocus("rightFactorTypeForm:factorTypeName");
+					return;
+				}else{
+					if(value=="C"){
+						//数据权限因子类型编号已经存在！
+						alert("${msgs['baf.dataRightFactor.AlertMessage3']}" );
+					}else if(value=="P"){
+						//不能将其子类型设为父类型！
+						alert("${msgs['baf.dataRightFactor.AlertMessage5']}" );
+					}
+					return;
+				}
+			}
+		}
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var parentFactorTypeId = document.getElementById("rightFactorTypeForm:parentFactorType").value;
+		var oldParentFactorTypeId = document.getElementById("rightFactorTypeForm:oldParentFactorType").value;
+		var factorTypeId = document.getElementById("rightFactorTypeForm:factorTypeId").value;
+		var dealFlag=document.getElementById("rightFactorTypeForm:t_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		//判断父节点是否更改
+		if(parentFactorTypeId==oldParentFactorTypeId){
+			rightFactorTree_tree.refreshItem(parentFactorTypeId);
+		}else{
+			//父节点更改，则需要现在和以前的父节点都要刷新
+			var timeout = setTimeout("rightFactorTree_tree.refreshItem('"+oldParentFactorTypeId+"')", 200);
+			var timeout = setTimeout("rightFactorTree_tree.refreshItem('"+parentFactorTypeId+"')", 400);
+		}
+		var timeout = setTimeout("setselectitem('"+factorTypeId+"')", 800);
+	}
+	
+	//删除按钮事件
+	function onRightFactorTypeDeleteComplete(data){
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var parentId = document.getElementById("rightFactorTypeForm:parentFactorType").value;	
+		var dealFlag = document.getElementById("rightFactorTypeForm:t_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		rightFactorTree_tree.refreshItem(parentId);
+		var timeout = setTimeout("setselectitem('"+parentId+"')", 800);
+	}
+	
+	//新增按钮事件
+	function onRightFactorTypeAdd(){
+		var itemId = rightFactorTree_tree.getSelectedItemId();
+		var subitems = rightFactorTree_tree.getSubItems(itemId);
+		if (subitems != null && subitems != "") {
+			//只用判断一个子节点即可，如果是权限因子类型，则可以增加，如果是权限因子则不允许增加
+			var subarray = subitems.split(",");
+			type = rightFactorTree_tree.getUserData(subarray[0],'type');
+			if (type == "R") {
+				//权限因子类型下已经包含权限因子，不能增加子类型！
+				return false;
+			}
+		}
+	}
+	////--------End-------------////
+	
+	
+	//将编号转换为大写
+	function toUpper(code){
+		code.value = code.value.toUpperCase();
+	}
+	
+	//选择指定的节点
+	function setselectitem(id){
+		rightFactorTree_tree.selectItem(id,1);
+	}
+	
+	//确认删除
+	function confirmDel(){
+		//确定要删除吗？删除后将无法恢复！
+		return confirm("${msgs['baf.dataRightFactor.DelConfirm']}" );
+	}
+	
+	//树的右键菜单
+	function openContextMenu()
+ 	{
+   		try{
+ 	   		var newid = this.getSelectedItemId(); 	   			
+	  		this.selectItem(newid,false);
+	   		var objmenu = Ext.menu.MenuMgr.get("rightMenu");
+	   		var type = this.getUserData(newid,"type");
+	   		var isLeaf = rightFactorTree_tree.getUserData(newid,'isLeaf');
+	   		if(type=="T"){
+	   			if(isLeaf=="Y"){
+	   				if(rightFactorTree_tree.hasChildren(newid)){
+	   					//权限因子类型如果是叶子节点，并且有子节点的话，子节点只能是权限因子
+		   				Ext.getCmp("addType").disable();
+		   				Ext.getCmp("addFactor").enable();
+	   				}else{
+	   					var parentId = rightFactorTree_tree.getParentId(newid);
+	   					//如果类型是叶子节点且为根节点时可以再添加一级类型，否则只能添加权限因子
+	   					if(parentId=="0"){	   						
+		   					Ext.getCmp("addType").enable();
+	   					}else{
+	   						Ext.getCmp("addType").disable();
+	   					}
+			   			Ext.getCmp("addFactor").enable();
+	   				}
+	   			}else{
+	   				Ext.getCmp("addType").enable();
+	   				Ext.getCmp("addFactor").disable();
+	   			}
+	   			Ext.getCmp("deleteTreeNode").enable(); 
+	   		}
+	   		if(type=="R"){
+	   			Ext.getCmp("addType").disable();
+	   			Ext.getCmp("addFactor").disable();
+	   		}
+	   		if( newid == "null" ){
+ 	   			Ext.getCmp("addType").disable();
+ 	   			Ext.getCmp("addFactor").disable();
+ 	   			Ext.getCmp("deleteTreeNode").disable(); 	   			
+ 	   		} 	   	
+	   		
+	   		if( navigator.userAgent.indexOf("MSIE") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //IE浏览器下
+				var e = new Array(window.event.clientX,window.event.clientY);
+				objmenu.showAt(e);
+			}else if( navigator.userAgent.indexOf("Firefox") > 0 ){  //Firefox浏览器下
+				var e = new Array(arguments[1].clientX,arguments[1].clientY);
+				objmenu.showAt(e);
+	 		}
+   		}catch(e){
+     		alert(e.description);
+   		}
+ 	}
+ 	
+ 	//新增权限因子类型
+ 	function addT(){
+ 		var itemId = rightFactorTree_tree.getSelectedItemId();
+ 		var itemText = rightFactorTree_tree.getItemText(itemId);
+ 		t_addTopFactorTypeListener(itemId,itemText,"rightFactorType");
+ 	}
+ 	
+ 	//新增权限因子
+ 	function addR(){ 
+ 		var itemId = rightFactorTree_tree.getSelectedItemId();
+ 		var itemText = rightFactorTree_tree.getItemText(itemId);
+ 		r_addRightFactorListener(itemId,itemText,"rightFactor");
+ 	}
+ 	
+ 	//删除所选节点
+ 	function dels(){
+ 		var itemId = rightFactorTree_tree.getSelectedItemId();
+		var type = rightFactorTree_tree.getUserData(itemId,"type");	
+		if(type=="T"){
+ 			document.getElementById("rightFactorTypeForm:factorTypeId").value = itemId;
+			document.getElementById("rightFactorTypeForm:rightFactorTypeDelete").click();
+		}
+		if(type=="R"){
+ 			document.getElementById("rightFactorForm:rightFactorId").value = itemId;
+			document.getElementById("rightFactorForm:rightFactorDelete").click();
+		}
+ 	} 	
+ 	
+ 	//新增顶级权限因子类型
+ 	function addTopType(){
+ 		t_addTopFactorTypeListener("","","rightFactorType");
+ 	}
+ 	
+ 	//判断是权限因子的新增保存还是修改保存
+ 	function addOrEditRightFactor(data){
+ 		var isAddOrEdit = document.getElementById("rightFactorForm:r_addOrEdit").value;
+ 		if(isAddOrEdit=="add"){
+ 			onRightFactorAddComplete(data);
+ 		}else{
+ 			onRightFactorEditComplete(data);
+ 		}
+ 	}
+ 	
+ 	//判断是新增类型还是修改类型的保存
+ 	function addOrEditFactorType(data){
+ 		var isAddOrEdit = document.getElementById("rightFactorTypeForm:addOrEdit").value;
+ 		if(isAddOrEdit=="add"){
+ 			onRightFactorTypeAddComplete(data);
+ 		}else{
+ 			onRightFactorTypeEditComplete(data);
+ 		}
+ 	}
+ 	
+ 	//设置连续新增复选框显示
+ 	function showChk(gname){
+ 		if(window.sys_error==true) return;
+ 		var group = document.getElementById(gname+"Group");
+ 		group.style.visibility='visible';
+ 		var chk = document.getElementById(gname+"Save");
+ 		chk.checked = false;
+ 		//获得焦点的组件ID
+ 		var focusId = "";
+ 		if(gname=="rightFactorTypeForm:t_isBatchAdd"){
+ 			focusId = "rightFactorTypeForm:factorTypeName";	 		
+		}else{
+			focusId = "rightFactorForm:rightFactorName";
+		}
+		//设置焦点
+		setFocus(focusId);
+ 	}
+ 	 	
+ 	//点击保存按钮时，对表单进行验证
+ 	function validate(formId){
+ 		var isSuccess = validateForm(formId);
+ 		if(isSuccess == true){
+			//将保存按钮置灰，防止多次提交表单
+			if(formId.id == "rightFactorTypeForm"){
+				document.getElementById("rightFactorTypeForm:save").disabled = "true";
+			}else{
+				document.getElementById("rightFactorForm:rsave").disabled = "true";
+			}
+ 		}
+ 		return isSuccess;
+ 	}
+	    //]]>
+		</script>
+		<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+       .column1{
+       		width:16%;
+       		text-align:right;
+       }
+       .column2{
+       		width:34%;
+       		text-align:right;
+       }
+       .column3{
+       		width:84%;
+       		text-align:right;
+       }
+       .bgcolor{
+       		background:white;
+       }
+    </style>  
+	</head>
+	<body>
+	  <f:loadBundle basename="messages" var="msgs" />
+	  <f:view  contentType="text/html">
+	  <regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel region="east" id="west-panel"
+			autoScroll="true" contentEl="west" split="true" width="200"
+			collapsible="true" margins="0 0 0 0" layout="accordion" />
+		<regaltec:viewPortPanel region="center" id="center-panel"
+			contentEl="center" autoScroll="true"/>
+	</regaltec:viewPort>
+
+	<regaltec:extContextMenu id="rightMenu">
+		<regaltec:extContextMenuItem id="addTopType" text="#{msgs['baf.dataRightFactor.addTopFactorType']}" handler="addTopType"/>
+    	<regaltec:extContextMenuItem id="addType" text="#{msgs['baf.dataRightFactor.addFactorType']}" handler="addT"/>
+    	<regaltec:extContextMenuItem id="addFactor" text="#{msgs['baf.dataRightFactor.addRightFactor']}" handler="addR" />
+    	<regaltec:extContextMenuItem id="deleteTreeNode" text="#{msgs['baf.deleteTreeCode']}" handler="dels" />
+    </regaltec:extContextMenu>
+    
+	<div id="west">
+	<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+		<tr>
+			<td height="16" align="right" class="rich-gradient-tab" >
+				<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" />
+			</td>
+		</tr>		
+		<tr>
+			<td id="treeboxbox_tree" width="100%" height="100%"></td>
+		</tr>
+	</table>
+	<regaltec:dhtmlXtree id="rightFactorTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+		loadXML="/baf/jsp/dataRightFactor/rightFactorTreeXMLData.jsp"
+		xmlAutoLoading="/baf/jsp/dataRightFactor/rightFactorTreeXMLData.jsp">
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+	</regaltec:dhtmlXtree>
+	</div>
+
+	<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;" align="center"><rich:spacer height="10px;"/>
+		<rich:tabPanel id="tabPanel" style="width:98%;height:97%;" switchType="client" selectedTab="#{dataRightFactorTypeBean.tabPanel}">
+			<rich:tab name="rightFactorType" label="#{msgs['baf.dataRightFactorType.dataRightFactorTypeInfo']}" style="#{dataRightFactorTypeBean.displayT}">
+				<center><br />
+				<h:form id="rightFactorTypeForm">		
+				<rich:spacer width="5px"/>				
+					<h:panelGrid id="t_grid" columns="2" style="font-size:13px;word-break:break-all;" width="60%" columnClasses="column1,column2" styleClass=".rich-text-color-general">					 
+						<h:outputText value="#{msgs['baf.dataRightFactorType.parentFactorTypeName']}:" />											
+						<h:inputText value="#{dataRightFactorTypeBean.parentFactorTypeName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur();"/>
+					
+						<h:outputText value="#{msgs['baf.dataRightFactorType.factorTypeName']}:" />
+						<h:inputText id="factorTypeName" style="width:95%;height:23px;" value="#{dataRightFactorTypeBean.factorTypeName}" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactorType.factorTypeName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.dataRightFactorType.factorTypeName']}" server="false" client="true" maxLength="64"/>							
+						</h:inputText>						
+
+						<h:outputText value="#{msgs['baf.dataRightFactorType.factorTypeDesc']}:" />
+						<h:inputTextarea value="#{dataRightFactorTypeBean.factorTypeDes}" id="menuDescription" style="width:95%;" rows="5" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" maxLength="128" arg="#{msgs['baf.dataRightFactorType.factorTypeCodeDesc']}" server="false" client="true"/>							
+						</h:inputTextarea>
+						
+						<h:inputHidden id="parentFactorType" value="#{dataRightFactorTypeBean.parentFactorType}"/>
+						<h:inputHidden id="factorTypeId" value="#{dataRightFactorTypeBean.factorTypeId}" />
+						<h:inputHidden id="factorTypeCode" value="#{dataRightFactorTypeBean.factorTypeCode}" />
+						<h:inputHidden id="t_dealFlag" value="#{dataRightFactorTypeBean.dealFlag}" />
+						<h:inputHidden id="parentFactorTypeName" value="#{dataRightFactorTypeBean.parentFactorTypeName}" />	
+						<h:inputHidden id="oldParentFactorType" value="#{dataRightFactorTypeBean.oldParentFactorType}" />	
+						<h:inputHidden id="addOrEdit" value="#{dataRightFactorTypeBean.addOrEdit}" />	
+						<h:inputHidden id="selectTab" value="#{dataRightFactorTypeBean.tabPanel}" />					
+						<h:inputHidden id="temp" value="#{dataRightFactorTypeBean.temp}"/>
+					
+					</h:panelGrid>
+					
+					 <rich:spacer width="5px"/>	
+					<center>
+					<h:panelGroup id="t_isBatchAddGroup" style="visibility:hidden;">		
+						<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+						<h:selectBooleanCheckbox id="t_isBatchAddSave" />	
+					</h:panelGroup>												
+					<rich:toolTip for="t_isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>	
+					<rich:spacer width="5px"/>
+					
+					<a4j:commandButton styleClass="rich-button" type="submit" id="save" value="#{msgs['baf.Save']}" rendered="#{dataRightFactorTypeBean.showSave!='hide'}">
+						<a4j:support event="onclick" onsubmit="if (validate(document.getElementById('rightFactorTypeForm'))==false) return false;" data="#{dataRightFactorTypeBean.functionData}" oncomplete="addOrEditFactorType(data);" action="#{dataRightFactorTypeBean.addOrEdit}" reRender="t_grid"/>
+					</a4j:commandButton> <rich:spacer width="5px"/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="rightFactorTypeAdd" value="#{msgs['baf.Add']}" style="display:none;">
+						<a4j:support event="onclick" onsubmit="if (onRightFactorTypeAdd()==false) return false;" action="#{dataRightFactorTypeBean.addRightFactorTypeListener}" reRender="rightFactorTypeForm"/>    
+					</a4j:commandButton>  <rich:spacer width="5px"/>
+					<a4j:commandButton styleClass="rich-button" type="submit" id="rightFactorTypeSave" value="#{msgs['baf.Save']}" style="display:none;">
+						<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('rightFactorTypeForm'))==false) return false;" data="#{dataRightFactorTypeBean.functionData}" oncomplete="onRightFactorTypeAddComplete(data)" actionListener="#{dataRightFactorTypeBean.addRightFactorType}" reRender="rightFactorTypeForm"/>
+					</a4j:commandButton> <rich:spacer width="5px"/>
+					<a4j:commandButton styleClass="rich-button" type="submit" id="rightFactorTypeEdit" value="#{msgs['baf.Edit']}" style="display:none;">
+						<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('rightFactorTypeForm'))==false) return false;" data="#{dataRightFactorTypeBean.functionData}" oncomplete="onRightFactorTypeEditComplete(data)" actionListener="#{dataRightFactorTypeBean.editRightFactorType}" reRender="rightFactorTypeForm"/>
+					</a4j:commandButton> <rich:spacer width="5px"/>
+					<a4j:commandButton styleClass="rich-button" type="submit" id="rightFactorTypeDelete" value="#{msgs['baf.Delete']}" style="display:none;">
+						<a4j:support event="onclick" onsubmit="if(validateForm(document.getElementById('rightFactorTypeForm'))==false || confirmDel()==false) return false;" oncomplete="onRightFactorTypeDeleteComplete()" action="#{dataRightFactorTypeBean.deleteRightFactorType}" reRender="rightFactorTypeForm"/>
+					</a4j:commandButton>
+					</center>
+					<s:validatorScript functionName="validateForm"/>
+				</h:form></center>
+			</rich:tab>
+			
+			<rich:tab name="rightFactor" label="#{msgs['baf.dataRightFactor.dataRightFactorInfo']}" style="#{dataRightFactorTypeBean.displayR}">
+				<center><br />
+					<h:form id="rightFactorForm">
+					 <rich:spacer width="5px"/>		
+						<h:panelGrid id="panelGrid" columns="4" columnClasses="column1,column2,column1,column2" style="font-size:13px;word-break:break-all;" width="80%" styleClass=".rich-text-color-general">	
+												
+						<h:outputText value="#{msgs['baf.dataRightFactor.rightFactorName']}:" />
+						<h:inputText id="rightFactorName" value="#{dataRightFactorBean.rightFactorName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.rightFactorName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" maxLength="64" arg="#{msgs['baf.dataRightFactor.rightFactorName']}" server="false" client="true"/>								
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.rightFactorCode']}:" />
+						<h:inputText id="rightFactorCode" title="#{msgs['baf.dataRightFactor.rightFactorCodeTips']}" value="#{dataRightFactorBean.rightFactorCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input" onblur="toUpper(this)">							
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.rightFactorCode']}" server="false" client="true"/>
+							<s:commonsValidator type="mask" arg="#{msgs['baf.dataRightFactor.rightFactorCode']}" server="false" client="true" mask="^IDR_.{1,}$">
+								
+							</s:commonsValidator>		
+							<s:commonsValidator type="maxlength" maxLength="64" arg="#{msgs['baf.dataRightFactor.rightFactorCode']}" server="false" client="true"/>								
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.rightFactorType']}:" />
+						<h:inputText value="#{dataRightFactorBean.factorTypeName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur();"/>
+										
+						<h:outputText value="#{msgs['baf.dataRightFactor.authorizeField']}:" />
+						<h:inputText id="authorizeField" value="#{dataRightFactorBean.authorizeField}" style="width:95%;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.authorizeField']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" maxLength="32" arg="#{msgs['baf.dataRightFactor.authorizeField']}" server="false" client="true"/>							
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.nameField']}:" />
+						<h:inputText id="nameField" value="#{dataRightFactorBean.nameField}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.nameField']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" maxLength="32" arg="#{msgs['baf.dataRightFactor.nameField']}" server="false" client="true"/>															
+						</h:inputText>
+										
+						<h:outputText value="#{msgs['baf.dataRightFactor.parentNodeField']}:" />
+						<h:inputText id="parentNodeField" value="#{dataRightFactorBean.parentNodeField}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.treeCodeField']}:" />
+						<h:inputText id="treeCodeField" value="#{dataRightFactorBean.treeCodeField}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.treeCodeLength']}:" />
+						<h:inputText id="treeCodeLength" value="#{dataRightFactorBean.treeCodeLength}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.treeCodeLength']}" server="false" client="true"/>
+							<s:commonsValidator type="integer" arg="#{msgs['baf.dataRightFactor.treeCodeLength']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" maxLength="1" arg="#{msgs['baf.dataRightFactor.treeCodeLength']}" server="false" client="true"/>															
+						</h:inputText>						
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.masterTreeTableName']}:" />		
+						<h:inputText id="masterTreeTableName" value="#{dataRightFactorBean.masterTreeTableName}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.masterTreeTableName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" maxLength="256" arg="#{msgs['baf.dataRightFactor.masterTreeTableName']}" server="false" client="true"/>															
+						</h:inputText>						
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.showFlag']}:" />
+						<h:inputText id="showFlag" value="#{dataRightFactorBean.showFlag}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="maxlength" maxLength="1" arg="#{msgs['baf.dataRightFactor.showFlag']}" server="false" client="true"/>															
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dataRightFactor.orgExtField']}:" />
+						<h:inputText id="orgExtField" value="#{dataRightFactorBean.orgExtField}" style="width:95%;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="maxlength" maxLength="256" arg="#{msgs['baf.dataRightFactor.orgExtField']}" server="false" client="true"/>															
+						</h:inputText>
+						
+						</h:panelGrid>
+						
+						<h:panelGrid id="panelGrid1" columns="2" columnClasses="column1,column3" style="font-size:13px;" width="80%" styleClass=".rich-text-color-general">
+						
+							<h:outputText value="#{msgs['baf.dataRightFactor.dataSource']}:"/>						
+							<h:inputTextarea id="dataSource" rows="3" value="#{dataRightFactorBean.dataSource}" style="width:98%;word-break:break-all;" styleClass="rich-gradient-input" title="#{msgs['baf.dataRightFactor.dataSourceTips']}">
+								<s:commonsValidator type="required" arg="#{msgs['baf.dataRightFactor.dataSource']}" server="false" client="true"/>
+								<s:commonsValidator type="maxlength" maxLength="1024" arg="#{msgs['baf.dataRightFactor.dataSource']}" server="false" client="true"/>								
+							</h:inputTextarea>
+							
+							<h:outputText value="#{msgs['baf.dataRightFactor.rightFactorDesc']}:" />
+							<h:inputTextarea value="#{dataRightFactorBean.rightFactorDesc}"	id="rightFactorDesc" style="width:98%;word-break:break-all;" rows="3" styleClass="rich-gradient-input" >
+								<s:commonsValidator type="maxlength" maxLength="128" arg="#{msgs['baf.dataRightFactor.rightFactorDesc']}" server="false" client="true"/>							
+							</h:inputTextarea>
+							
+							<h:inputHidden id="factorType" value="#{dataRightFactorBean.factorType}"/>
+							<h:inputHidden id="rightFactorId" value="#{dataRightFactorBean.rightFactorId}" />
+							<h:inputHidden id="oldFactorType" value="#{dataRightFactorBean.oldFactorType}"/>
+							<h:inputHidden id="r_dealFlag" value="#{dataRightFactorBean.dealFlag}" />	
+							<h:inputHidden id="r_addOrEdit" value="#{dataRightFactorBean.addOrEdit}" />	
+							
+						</h:panelGrid>
+ 						 <rich:spacer width="5px"/>							 
+						<center>	
+						
+						<h:panelGroup id="r_isBatchAddGroup" style="visibility:hidden;">		
+							<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+							<h:selectBooleanCheckbox id="r_isBatchAddSave" />	
+						</h:panelGroup>												
+						<rich:toolTip for="r_isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>	
+						<rich:spacer width="5px"/>		
+									
+						<a4j:commandButton styleClass="rich-button" type="submit" id="rsave" value="#{msgs['baf.Save']}">
+							<a4j:support event="onclick" onsubmit="if (validate(document.getElementById('rightFactorForm'))==false) return false;" data="#{dataRightFactorBean.functionData}" oncomplete="addOrEditRightFactor(data);" action="#{dataRightFactorBean.addOrEdit}" reRender="panelGrid1"/>
+						</a4j:commandButton> <rich:spacer width="5px"/>						
+						<a4j:commandButton style="display:none" styleClass="rich-button" type="button" id="rightFactorAdd" value="#{msgs['baf.Add']}">
+							<a4j:support event="onclick" onsubmit="if(onRightFactorAdd()==false) return false;" actionListener="#{dataRightFactorBean.addRightFactorListener}" reRender="rightFactorForm" />
+						</a4j:commandButton> <rich:spacer width="5px"/>
+						<a4j:commandButton style="display:none" styleClass="rich-button" type="submit" id="rightFactorSave" value="#{msgs['baf.Save']}">
+							<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('rightFactorForm'))==false) return false;" data="#{dataRightFactorBean.functionData}" oncomplete="onRightFactorAddComplete(data)" actionListener="#{dataRightFactorBean.addRightFactor}" />
+						</a4j:commandButton> <rich:spacer width="5px"/>
+						<a4j:commandButton style="display:none" styleClass="rich-button" type="submit" id="rightFactorEdit" value="#{msgs['baf.Edit']}">
+							<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('rightFactorForm'))==false) return false;" data="#{dataRightFactorBean.functionData}" oncomplete="onRightFactorEditComplete(data)" actionListener="#{dataRightFactorBean.editRightFactor}" reRender="rightFactorForm"/>
+						</a4j:commandButton> <rich:spacer width="5px"/>
+						<a4j:commandButton style="display:none" styleClass="rich-button" type="submit" id="rightFactorDelete" value="#{msgs['baf.Delete']}">
+							<a4j:support event="onclick" onsubmit="if(confirmDel()==false) return false;" oncomplete="onRightFactorDeleteComplete()" action="#{dataRightFactorBean.deleteRightFactor}" reRender="rightFactorForm"/>
+						</a4j:commandButton>
+						</center>		
+						<s:validatorScript functionName="validateForm"/>					
+					</h:form>
+				</center>
+			</rich:tab>
+		</rich:tabPanel>  	
+    			
+ 		<a4j:form>
+	        <a4j:jsFunction name="r_Refresh" reRender="tabPanel" action="#{dataRightFactorBean.refresh}" oncomplete="setFocus('rightFactorForm:rightFactorName')">
+	        	<a4j:actionparam name="dataRightId" value="" />
+	            <a4j:actionparam name="selectTab" assignTo="#{dataRightFactorTypeBean.tabPanel}"/>                
+	        </a4j:jsFunction>   
+	               
+	        <a4j:jsFunction name="t_Refresh" reRender="tabPanel" action="#{dataRightFactorTypeBean.refresh}" oncomplete="setFocus('rightFactorTypeForm:factorTypeName')">
+	        	<a4j:actionparam name="factorTypeId" value="" />
+	            <a4j:actionparam name="selectTab" assignTo="#{dataRightFactorTypeBean.tabPanel}"/>                
+	        </a4j:jsFunction> 	        
+	        
+	        <a4j:jsFunction name="r_addRightFactorListener" reRender="tabPanel" action="#{dataRightFactorBean.addRightFactorListener}" oncomplete="showChk('rightFactorForm:r_isBatchAdd');">
+	        	<a4j:actionparam name="factorType" value="" />
+	        	<a4j:actionparam name="factorTypeName" value="" />
+	        	<a4j:actionparam name="selectTab" assignTo="#{dataRightFactorTypeBean.tabPanel}"/>              
+	        </a4j:jsFunction> 
+	        
+	        <a4j:jsFunction name="t_addTopFactorTypeListener" reRender="tabPanel" action="#{dataRightFactorTypeBean.addRightFactorTypeListener}" oncomplete="showChk('rightFactorTypeForm:t_isBatchAdd');">
+	        	<a4j:actionparam name="parentId" value="" />
+	        	<a4j:actionparam name="parentName" value="" />
+	        	<a4j:actionparam name="selectTab" assignTo="#{dataRightFactorTypeBean.tabPanel}"/>              
+	        </a4j:jsFunction> 
+    	</a4j:form>
+	</div>
+
+	<rich:toolTip for="helpicon" >
+    <div style="width:300;">
+      <h:outputText value="#{msgs['baf.dataRightFactor.helpMessage1']}"/><br />
+      <h:outputText value="1,"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage2']}"/><br />
+      <h:outputText value="2,"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage3']}"/><br />
+      <h:outputText value="3,"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage4']}"/>
+    </div>
+    </rich:toolTip>
+	  </f:view>
+	  
+	  <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</html>

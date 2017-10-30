@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="GB2312"?>
+<esb>
+	<route>
+		<sender>sh_eoms</sender>
+		<receiver>gp_noc</receiver>
+		<time>2009-12-09 14:57:31</time>
+		<service_name>sa_nf_wrd_wd</service_name>
+		<msg_type>request</msg_type>
+		<msg_id>305</msg_id>
+	</route>
+	<interfacemsg>
+		<IMPLNAME>feedback</IMPLNAME>
+		<WSID>2009221900011</WSID>
+		<CONTACT><![CDATA[test]]></CONTACT>
+		<CONTACTTEL><![CDATA[962112]]></CONTACTTEL>
+		<DEALFEEDBACK><![CDATA[自动派发]]></DEALFEEDBACK>
+		<DEALER>上海电信</DEALER>
+	</interfacemsg>
+</esb>

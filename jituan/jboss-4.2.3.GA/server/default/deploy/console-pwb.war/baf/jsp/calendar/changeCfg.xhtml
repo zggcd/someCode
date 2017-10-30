@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+	    <a4j:include viewId="/baf/jsp/taskmange/commonq.xhtml" />	
+		<script type="text/javascript">
+		//<![CDATA[
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		   //响应check点击事件
+		function checkBoxClick(object, value) {	
+		   var itemIdsArr = document.getElementById("adjustForm:gotItemIdValues").value;
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 			
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index>0){
+							str = "#"+value;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+							} else {
+								str = value;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("adjustForm:gotItemIdValues").value = itemIdsArr;
+		}
+		//判断是否选择了一行
+		function checkSelectOneRow() {										
+			var oTable = document.getElementById("adjustForm:itemLists");
+			//获取当前页码数
+			var pageNum = document.getElementById("adjustForm:pageNo").value;
+			if (pageNum <= 0) pageNum = 1;
+			
+			//获取每页数据个数
+			var pageSize = document.getElementById("adjustForm:pageSize").value;
+			
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+				for (var i=0; i<size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("adjustForm:itemLists:"+realNum+":selectFlag");						
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount != 1) {
+					//请勾选一行需要编辑的数据
+					alert("${msgs['baf.org.WarningEditOneRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		/**
+		* 清除查询变量
+		*/
+		function resetVar(){
+			document.getElementById("adjustForm:s_ChangeName").value="";
+			document.getElementById("adjustForm:s_AdjustmentType").value="";
+			document.getElementById("adjustForm:searchStartDateInputDate").value="";
+			document.getElementById("adjustForm:searchEndDateInputDate").value="";
+		}
+		//新增前清空数据
+		function beforeAdd(){
+			//把批量新增的checkbox清空	
+			document.getElementById("addForm:isBatchSaveGroup").style.display="";
+            document.getElementById("addForm:isBatchSave").checked=false;
+			document.getElementById("addForm:adjustname").value="";
+			document.getElementById("addForm:adjusttype").value="";
+			document.getElementById("addForm:startdateInputDate").value="";
+			document.getElementById("addForm:enddateInputDate").value="";
+			document.getElementById("addForm:djustdesc").value="";
+			document.getElementById("addForm:adjustid").value="";
+		}
+		//清除查询的输入框的空格 
+		function clearBlank(){
+			document.getElementById("adjustForm:s_ChangeName").value=document.getElementById("adjustForm:s_ChangeName").value.Trim();		
+		}
+	    //全选select操作表所有项
+		function onSelectALlItems() {
+			var oTable = document.getElementById("adjustForm:itemLists");
+			var oChkAll = document.getElementById("adjustForm:itemLists:selectAll"); 
+			//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+		    if (!oChkAll.checked){
+		      document.getElementById("adjustForm:gotItemIdValues").value = "";
+		    }
+		    
+			//获取当前页码数
+			var pageNum = document.getElementById("adjustForm:pageNo").value;
+			if (pageNum <= 0) pageNum = 1;
+			
+			//获取每页数据个数
+			var pageSize = document.getElementById("adjustForm:pageSize").value;             	
+			if (oTable != null && oChkAll != null) {
+				for (j = 0; j < oTable.rows.length -1; j++) {
+					var realNum = (pageNum-1)*pageSize + j;
+					var e = document.getElementById("adjustForm:itemLists:"+realNum+":selectFlag");
+					if (e.id.indexOf("selectFlag") >= 0) {   
+						//触发CheckBox onclick事件，用来设置itemid
+						if (document.all) {
+							//IE
+							var oldValue= e.checked;
+							e.checked = oChkAll.checked;
+							if (!oldValue && e.checked) {
+								onObjectFireMouseEvent(e, "onclick");
+							}
+						} else {
+							//firefox
+							if (oChkAll.checked) {
+								var oldValue= e.checked;
+								if (!oldValue)
+									onObjectFireMouseEvent(e, "onclick");
+								} else {
+									e.checked = oChkAll.checked;
+								}
+							}
+						}
+					}
+			 	}
+			}
+		//判断是否选择单行或者多行
+		function checkSelectRow() {	
+			 				
+			var oTable = document.getElementById("adjustForm:itemLists");
+			//获取当前页码数
+			var pageNum = document.getElementById("adjustForm:pageNo").value;
+			if (pageNum <= 0) pageNum = 1;
+			
+			//获取每页数据个数
+			var pageSize = document.getElementById("adjustForm:pageSize").value;					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+		    	for (var i=0; i<size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("adjustForm:itemLists:"+realNum+":selectFlag");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+					//请勾选需要删除的数据
+					alert("${msgs['baf.org.WarningDeleteRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		//检查批量新增按钮是否选上，选上了返回TRUE
+		function isBatchChecked(){
+			  //显示操作提示
+			  if(a4jcomplete()==false){
+	 			return;
+	 		  }	
+			document.getElementById('adjustForm:gotItemIdValues').value='';
+			if(document.getElementById("addForm:isBatchSave").checked){
+               return true;
+			}
+			else{
+               return false;
+			}
+		}
+		//让批量新增按钮不可见
+		function batchNosee(){		
+			document.getElementById('addForm:isBatchSaveGroup').style.display="none";
+			document.getElementById('addForm:isBatchSave').checked=false;	
+			//设置焦点
+			setFocus("addForm:adjustname");	
+		}
+		//开始时间不能大于结束时间,如果大于则返回FALSE
+		function timeCompare(start,end){
+			var arr=start.split("-");
+			var starttime=new Date(arr[0],arr[1],arr[2]);
+			var starttimes=starttime.getTime();
+			var arrs=end.split("-");
+			var lktime=new Date(arrs[0],arrs[1],arrs[2]);
+			var lktimes=lktime.getTime();
+
+			if(starttimes>lktimes)
+			{
+			alert("${msgs['baf.calendar.timeCompareHoliday']}");
+			return false;
+			}
+			else
+			return true;
+		}
+		//查询前
+		function beforeQuery(){
+			//去掉空格
+			clearBlank();
+			var start=document.getElementById("adjustForm:searchStartDateInputDate").value;
+			var end=document.getElementById("adjustForm:searchEndDateInputDate").value;
+			if(timeCompare(start,end)){
+            return true;
+			}
+			return false;
+		}	
+		//保存前
+		function beforeSave(){
+			var start=document.getElementById("addForm:startdateInputDate").value;
+			var end=document.getElementById("addForm:enddateInputDate").value;
+			if(timeCompare(start,end)){
+	            return true;
+				}
+				return false;
+		} 
+		
+		//屏蔽退格键的事件监听
+		function forCheck(){
+			if(event.keyCode == 8){
+			    event.returnValue   =   false;
+			}
+		}
+	  
+		//]]>          		
+		</script>
+		</head>
+		<body>
+			<f:loadBundle basename="messages" var="msgs" />
+				<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+					<rich:tabPanel id="tabPanel" style="margin-left:0;margin-right:0;margin-top:5px;margin-bottom:5px;" width="100%" height="99%" switchType="client" >
+						<rich:tab id="changes" name="holidays" label="#{msgs['baf.calendar.changes']}" >
+							<center>
+		<a4j:form id="adjustForm"  style="margin:0;padding:0;">	
+				<center style="width:98%;">
+				    <fieldset id="burinfo" style="margin:0;padding:12px;height:100%;">
+				    <table  border="0" height="90%" width="100%" cellspacing="0" cellpadding="2" style="font-size:13px;" class=".rich-text-color-general">
+				    <tr>
+				        <td>
+						<h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.adjustmentName']}:"/>
+						</td>
+						<td>
+						<h:inputText id="s_ChangeName" value="#{ajustBean.searchName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+						</td>
+						<td>
+						<h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.adjustmentType']}:"/>
+						</td>
+						<td>
+						<h:selectOneMenu style="width:150px;height:23px;"   id="s_AdjustmentType" styleClass="rich-box-border-color-control-select rich-text-control-select"   value="#{ajustBean.searchType}" >
+							<f:selectItems value="#{ajustBean.selectType}" />
+						</h:selectOneMenu>
+						</td>
+						<td>
+				        <a4j:commandButton id="search" value="#{msgs['baf.calendar.select']}" type="submit" styleClass="rich-button"
+				        action="#{ajustBean.doQuery}"  reRender="adjustForm"  onclick="if(!beforeQuery()){return false;}"/>
+						</td>
+				    </tr>
+				    <tr>
+						<td>
+						<h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.startRange']}:"/>
+						</td>
+						<td>
+						<rich:calendar id="searchStartDate"  value="#{ajustBean.searchStartDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+			            </rich:calendar>
+						</td>
+						<td>
+						<h:outputLabel style="font-size:13px;" value="#{msgs['baf.calendar.toRange']}:"/>
+						</td>
+						<td>
+						<rich:calendar id="searchEndDate"  value="#{ajustBean.searchEndDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+			            </rich:calendar>
+				    </td>
+						<td><a4j:commandButton id="reset" onclick="resetVar()" value="#{msgs['baf.calendar.resetSelectConditions']}" type="button" styleClass="rich-button"/></td>			
+					</tr>
+					</table>
+					</fieldset>
+					</center>
+					
+					    	 				 
+					<center><br/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="ChangeAdd" value="#{msgs['baf.calendar.add']}" onclick="beforeAdd()" oncomplete="#{rich:component('addPanel')}.show();setFocus('addForm:adjustname');">
+					</a4j:commandButton>
+					<rich:spacer width="40px"/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="ChangeEdit" value="#{msgs['baf.calendar.edit']}"> 
+						<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{ajustBean.getAdjust}" oncomplete="#{rich:component('addPanel')}.show();batchNosee();" reRender="addForm"/>
+					</a4j:commandButton>
+					<rich:spacer width="40px"/>
+					<a4j:commandButton  styleClass="rich-button" type="button" id="ChangeDelete" value="#{msgs['baf.calendar.delete']}" > 
+					<a4j:support event="onclick" onsubmit="if (checkSelectRow()==false) {return false;}"   oncomplete="#{rich:component('deletePanel')}.show();"></a4j:support>
+					</a4j:commandButton>
+					</center>
+					
+					<rich:spacer height="15px"/>	
+				    <h:panelGroup id="panelGroup" layout="block" styleClass="scrolls" style="width:98%;height:98%">			
+					<rich:dataTable width="100%" id="itemLists" rows="#{ajustBean.pageSize}" columnClasses="col"  style="text-align:center;" onRowDblClick="getChange('#{adjItem.adjustid}')"
+		            value="#{ajustBean.defaultDataModel}" var="adjItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">
+		            <rich:column width="5%" style="text-align:center;">
+				        <f:facet name="header">
+				        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+				        </f:facet>
+			            <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{adjItem.adjustid}');"/>
+			        </rich:column>	  
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="#{msgs['baf.calendar.adjustmentName']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{adjItem.adjustname}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.calendar.adjustmentType']}" style="font-weight:normal;"/>
+				        </f:facet>
+				        <h:outputText value="#{adjItem.adjusttype}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.calendar.adjustmentStartTime']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{adjItem.startdate}" >
+		                <f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+		                </h:outputText>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.calendar.adjustmentEndTime']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{adjItem.enddate}" >
+		                <f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+		                </h:outputText>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.calendar.adjustDesc']}" style="font-weight:normal;"/>
+				        </f:facet>
+				         <h:outputText value="#{adjItem.djustdesc}" />
+		            </h:column>
+		        </rich:dataTable>
+		        <a4j:keepAlive beanName="ajustBean"/>
+				        <table width="95%">
+				            <tr>
+					            <td>
+									<rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{ajustBean.scrollerPage}" id="itemScroller" reRender="adjustForm" oncomplete="document.getElementById('adjustForm:gotItemIdValues').value=''; "/>							
+								</td>
+							</tr>
+						</table>
+			   </h:panelGroup> 
+			   <h:inputHidden id="gotItemIdValues" value="#{ajustBean.selectedItemIds}" />
+			   <h:inputHidden id="pageNo" value="#{ajustBean.scrollerPage}"/>
+			   <h:inputHidden id="pageSize" value="#{ajustBean.pageSize}"/>
+			   <h:inputHidden id="dataTableSize" value="#{ajustBean.dataTableSize}"/>	
+			   
+			   <rich:modalPanel id="deletePanel" autosized="true" width="300">
+			        <f:facet name="header">
+			            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+			            style="padding-right:15px;" />
+			        </f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					    id="hidelinkDelete" styleClass="hidelink"/>
+					    <rich:componentControl for="deletePanel" attachTo="hidelinkDelete"
+					    operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>	
+		        	<center>
+		                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+	                    actionListener="#{ajustBean.deleteAdjust}"
+	                    oncomplete="a4jcomplete();#{rich:component('deletePanel')}.hide();document.getElementById('adjustForm:gotItemIdValues').value='';"
+	                    reRender="adjustForm" />
+						<rich:spacer width="40px"/>
+		                <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                onclick="#{rich:component('deletePanel')}.hide();return false;" />
+					</center>
+			    </rich:modalPanel>	 
+			    
+			    <a4j:jsFunction name="getChange" action="#{ajustBean.getAdjust}" oncomplete="#{rich:component('addPanel')}.show();batchNosee();" reRender="addForm">
+			    	<a4j:actionparam name="adjustflag" assignTo="#{ajustBean.selectedItemIds}"></a4j:actionparam>
+			    </a4j:jsFunction>
+					    </a4j:form>
+						</center>
+					    </rich:tab>
+				</rich:tabPanel>
+			</div>
+			
+			
+			
+			<rich:modalPanel id="addPanel" autosized="true" keepVisualState="false" width="450" height="300">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.org.AddNewTemplate']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png"
+			    id="hidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="addPanel" attachTo="hidelink"
+			    operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>				
+			<a4j:form id="addForm" onsubmit="if (validateForm(document.getElementById('addForm'))==false) return false;">			
+			<center>    	 									
+			<h:panelGrid id="panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">						
+				<h:outputText value="#{msgs['baf.calendar.adjustmentName']}:" />
+				<h:inputText id="adjustname" style="width:280px;height:23px;" value="#{ajustBean.adjustname}" styleClass="rich-gradient-input" maxlength="30">
+					<s:commonsValidator type="required" arg="#{msgs['baf.calendar.adjustmentName']}" server="false" client="true"/>
+					<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.adjustmentName']}" maxLength="32" server="false" client="true" />
+				</h:inputText>
+
+				<h:outputText value="#{msgs['baf.calendar.adjustmentType']}:" />
+				<h:selectOneMenu style="width:280px;height:23px;"   id="adjusttype" styleClass="rich-box-border-color-control-select rich-text-control-select"   value="#{ajustBean.adjusttype}">
+					<f:selectItems value="#{ajustBean.selectType}" />
+					<s:commonsValidator type="required" arg="#{msgs['baf.calendar.adjustmentType']}" server="false" client="true"/>
+				</h:selectOneMenu>
+	
+				
+				<h:outputText value="#{msgs['baf.calendar.adjustmentStartTime']}:" />
+				<rich:calendar id="startdate"  value="#{ajustBean.startdate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:260px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+					<s:commonsValidator type="required" arg="#{msgs['baf.calendar.adjustmentStartTime']}" server="false" client="true"/>
+				</rich:calendar>
+
+										
+				<h:outputText value="#{msgs['baf.calendar.adjustmentEndTime']}:" />
+				<rich:calendar id="enddate"  value="#{ajustBean.enddate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:260px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+					<s:commonsValidator type="required" arg="#{msgs['baf.calendar.adjustmentEndTime']}" server="false" client="true"/>
+				</rich:calendar>
+							
+				<h:outputText value="#{msgs['baf.calendar.adjustDesc']}:" />	
+				<h:inputTextarea id="djustdesc"  rows="5" style="width:280px;resize:none;" styleClass="rich-gradient-input" onkeypress="strMaxLength(120,this.value)" value="#{ajustBean.djustdesc}">				
+					<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.adjustDesc']}" maxLength="124"  server="false" client="true"/>
+				</h:inputTextarea>												
+			</h:panelGrid>
+			
+			<h:panelGroup id="isBatchSaveGroup" style="display:none">	
+	           <h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+	           <h:selectBooleanCheckbox id="isBatchSave"/>
+	        </h:panelGroup>
+	        <rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+	        </rich:toolTip>	<rich:spacer width="2px"/><rich:spacer width="2px"/>						 
+			<a4j:commandButton styleClass="rich-button"  type="submit"  id="changeAddSave"  value="#{msgs['baf.org.Save']}"  onclick="if(!beforeSave()){return false;}"
+			oncomplete="if(!isBatchChecked()){#{rich:component('addPanel')}.hide();}" action="#{ajustBean.saveAdj}" reRender="adjustForm"
+			 >	  
+			</a4j:commandButton> <rich:spacer width="2px"/>
+			<a4j:commandButton styleClass="rich-button" type="button" id="changeCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('addPanel')}.hide(); return false;"/>
+			</center>
+			
+			<h:inputHidden id="adjustid" value="#{ajustBean.adjustid}" />
+			<s:validatorScript functionName="validateForm"/>  	
+			</a4j:form>	
+			</rich:modalPanel>
+			
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+</f:view>
+</html>

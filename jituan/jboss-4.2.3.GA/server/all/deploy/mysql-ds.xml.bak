@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id: mysql-ds.xml 71535 2008-04-01 07:05:03Z adrian@jboss.org $ -->
+<!--  Datasource config for MySQL using 3.0.9 available from:
+http://www.mysql.com/downloads/api-jdbc-stable.html
+-->
+
+<datasources>
+  <local-tx-datasource>
+    <jndi-name>BlocDS</jndi-name>
+	<!--
+	<connection-url>jdbc:mysql://127.0.0.1:3306/osspd?useUnicode=true&amp;characterEncoding=utf-8</connection-url>
+	-->
+	<connection-url>jdbc:mysql://10.145.206.14:3306/newtest?useUnicode=true&amp;characterEncoding=utf-8</connection-url>
+    <driver-class>com.mysql.jdbc.Driver</driver-class>
+    <user-name>root</user-name>
+    <password>123456</password>
+	<min-pool-size>20</min-pool-size>
+	<min-pool-size>50</min-pool-size>
+	<idle-timeout-minutes>5</idle-timeout-minutes>
+	<!-- If you're using Connector/J 3.1.8 or newer, you can use our implementation of these to increase the robustness of the connection pool. -->
+	<exception-sorter-class-name>com.mysql.jdbc.integration.jboss.ExtendedMysqlExceptionSorter</exception-sorter-class-name>
+	<valid-connection-checker-class-name>com.mysql.jdbc.integration.jboss.MysqlValidConnectionChecker</valid-connection-checker-class-name>
+
+    <!--exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter</exception-sorter-class-name-->
+    <!-- should only be used on drivers after 3.22.1 with "ping" support
+    <valid-connection-checker-class-name>org.jboss.resource.adapter.jdbc.vendor.MySQLValidConnectionChecker</valid-connection-checker-class-name>
+    -->
+    <!-- sql to call when connection is created
+    <new-connection-sql>some arbitrary sql</new-connection-sql>
+      -->
+    <!-- sql to call on an existing pooled connection when it is obtained from pool - MySQLValidConnectionChecker is preferred for newer drivers
+    <check-valid-connection-sql>some arbitrary sql</check-valid-connection-sql>
+      -->
+
+    <!-- corresponding type-mapping in the standardjbosscmp-jdbc.xml (optional) -->
+    <metadata>
+       <type-mapping>mySQL</type-mapping>
+    </metadata>
+  </local-tx-datasource>
+</datasources>
+

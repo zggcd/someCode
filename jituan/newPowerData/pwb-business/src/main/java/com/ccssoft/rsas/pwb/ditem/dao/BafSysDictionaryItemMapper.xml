@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.ditem.dao.BafSysDictionaryItemMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItem" >
+    <id column="ITEMID" property="itemid" jdbcType="VARCHAR" />
+    <result column="ITEMCODE" property="itemcode" jdbcType="VARCHAR" />
+    <result column="ITEMNAME" property="itemname" jdbcType="VARCHAR" />
+    <result column="ITEMVALUE" property="itemvalue" jdbcType="VARCHAR" />
+    <result column="ITEMDESC" property="itemdesc" jdbcType="VARCHAR" />
+    <result column="DICTIONARYID" property="dictionaryid" jdbcType="VARCHAR" />
+    <result column="REGIONID" property="regionid" jdbcType="VARCHAR" />
+    <result column="SORTORDER" property="sortorder" jdbcType="DECIMAL" />
+    <result column="ISVALID" property="isvalid" jdbcType="CHAR" />
+    <result column="ITEMSTYLE" property="itemstyle" jdbcType="VARCHAR" />
+    <result column="FULLCODE" property="fullcode" jdbcType="VARCHAR" />
+    <result column="SHORTCODE" property="shortcode" jdbcType="VARCHAR" />
+    <result column="MODIFYTIME" property="modifytime" jdbcType="TIMESTAMP" />
+    <result column="ITEMNAME_AR" property="itemnameAr" jdbcType="VARCHAR" />
+    <result column="EXTFIELD1" property="extfield1" jdbcType="VARCHAR" />
+    <result column="EXTFIELD2" property="extfield2" jdbcType="VARCHAR" />
+    <result column="EXTFIELD3" property="extfield3" jdbcType="VARCHAR" />
+    <result column="EXTFIELD4" property="extfield4" jdbcType="VARCHAR" />
+    <result column="EXTFIELD5" property="extfield5" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    ITEMID, ITEMCODE, ITEMNAME, ITEMVALUE, ITEMDESC, DICTIONARYID, REGIONID, SORTORDER, 
+    ISVALID, ITEMSTYLE, FULLCODE, SHORTCODE, MODIFYTIME, ITEMNAME_AR, EXTFIELD1, EXTFIELD2, 
+    EXTFIELD3, EXTFIELD4, EXTFIELD5
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItemExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from BAF_SYS_DICTIONARY_ITEM
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from BAF_SYS_DICTIONARY_ITEM
+    where ITEMID = #{itemid,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from BAF_SYS_DICTIONARY_ITEM
+    where ITEMID = #{itemid,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItemExample" >
+    delete from BAF_SYS_DICTIONARY_ITEM
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItem" >
+    insert into BAF_SYS_DICTIONARY_ITEM (ITEMID, ITEMCODE, ITEMNAME, 
+      ITEMVALUE, ITEMDESC, DICTIONARYID, 
+      REGIONID, SORTORDER, ISVALID, 
+      ITEMSTYLE, FULLCODE, SHORTCODE, 
+      MODIFYTIME, ITEMNAME_AR, EXTFIELD1, 
+      EXTFIELD2, EXTFIELD3, EXTFIELD4, 
+      EXTFIELD5)
+    values (#{itemid,jdbcType=VARCHAR}, #{itemcode,jdbcType=VARCHAR}, #{itemname,jdbcType=VARCHAR}, 
+      #{itemvalue,jdbcType=VARCHAR}, #{itemdesc,jdbcType=VARCHAR}, #{dictionaryid,jdbcType=VARCHAR}, 
+      #{regionid,jdbcType=VARCHAR}, #{sortorder,jdbcType=DECIMAL}, #{isvalid,jdbcType=CHAR}, 
+      #{itemstyle,jdbcType=VARCHAR}, #{fullcode,jdbcType=VARCHAR}, #{shortcode,jdbcType=VARCHAR}, 
+      #{modifytime,jdbcType=TIMESTAMP}, #{itemnameAr,jdbcType=VARCHAR}, #{extfield1,jdbcType=VARCHAR}, 
+      #{extfield2,jdbcType=VARCHAR}, #{extfield3,jdbcType=VARCHAR}, #{extfield4,jdbcType=VARCHAR}, 
+      #{extfield5,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItem" >
+    insert into BAF_SYS_DICTIONARY_ITEM
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="itemid != null" >
+        ITEMID,
+      </if>
+      <if test="itemcode != null" >
+        ITEMCODE,
+      </if>
+      <if test="itemname != null" >
+        ITEMNAME,
+      </if>
+      <if test="itemvalue != null" >
+        ITEMVALUE,
+      </if>
+      <if test="itemdesc != null" >
+        ITEMDESC,
+      </if>
+      <if test="dictionaryid != null" >
+        DICTIONARYID,
+      </if>
+      <if test="regionid != null" >
+        REGIONID,
+      </if>
+      <if test="sortorder != null" >
+        SORTORDER,
+      </if>
+      <if test="isvalid != null" >
+        ISVALID,
+      </if>
+      <if test="itemstyle != null" >
+        ITEMSTYLE,
+      </if>
+      <if test="fullcode != null" >
+        FULLCODE,
+      </if>
+      <if test="shortcode != null" >
+        SHORTCODE,
+      </if>
+      <if test="modifytime != null" >
+        MODIFYTIME,
+      </if>
+      <if test="itemnameAr != null" >
+        ITEMNAME_AR,
+      </if>
+      <if test="extfield1 != null" >
+        EXTFIELD1,
+      </if>
+      <if test="extfield2 != null" >
+        EXTFIELD2,
+      </if>
+      <if test="extfield3 != null" >
+        EXTFIELD3,
+      </if>
+      <if test="extfield4 != null" >
+        EXTFIELD4,
+      </if>
+      <if test="extfield5 != null" >
+        EXTFIELD5,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="itemid != null" >
+        #{itemid,jdbcType=VARCHAR},
+      </if>
+      <if test="itemcode != null" >
+        #{itemcode,jdbcType=VARCHAR},
+      </if>
+      <if test="itemname != null" >
+        #{itemname,jdbcType=VARCHAR},
+      </if>
+      <if test="itemvalue != null" >
+        #{itemvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="itemdesc != null" >
+        #{itemdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="dictionaryid != null" >
+        #{dictionaryid,jdbcType=VARCHAR},
+      </if>
+      <if test="regionid != null" >
+        #{regionid,jdbcType=VARCHAR},
+      </if>
+      <if test="sortorder != null" >
+        #{sortorder,jdbcType=DECIMAL},
+      </if>
+      <if test="isvalid != null" >
+        #{isvalid,jdbcType=CHAR},
+      </if>
+      <if test="itemstyle != null" >
+        #{itemstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="fullcode != null" >
+        #{fullcode,jdbcType=VARCHAR},
+      </if>
+      <if test="shortcode != null" >
+        #{shortcode,jdbcType=VARCHAR},
+      </if>
+      <if test="modifytime != null" >
+        #{modifytime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="itemnameAr != null" >
+        #{itemnameAr,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield1 != null" >
+        #{extfield1,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield2 != null" >
+        #{extfield2,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield3 != null" >
+        #{extfield3,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield4 != null" >
+        #{extfield4,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield5 != null" >
+        #{extfield5,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItemExample" resultType="java.lang.Integer" >
+    select count(*) from BAF_SYS_DICTIONARY_ITEM
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update BAF_SYS_DICTIONARY_ITEM
+    <set >
+      <if test="record.itemid != null" >
+        ITEMID = #{record.itemid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.itemcode != null" >
+        ITEMCODE = #{record.itemcode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.itemname != null" >
+        ITEMNAME = #{record.itemname,jdbcType=VARCHAR},
+      </if>
+      <if test="record.itemvalue != null" >
+        ITEMVALUE = #{record.itemvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="record.itemdesc != null" >
+        ITEMDESC = #{record.itemdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dictionaryid != null" >
+        DICTIONARYID = #{record.dictionaryid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.regionid != null" >
+        REGIONID = #{record.regionid,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sortorder != null" >
+        SORTORDER = #{record.sortorder,jdbcType=DECIMAL},
+      </if>
+      <if test="record.isvalid != null" >
+        ISVALID = #{record.isvalid,jdbcType=CHAR},
+      </if>
+      <if test="record.itemstyle != null" >
+        ITEMSTYLE = #{record.itemstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fullcode != null" >
+        FULLCODE = #{record.fullcode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.shortcode != null" >
+        SHORTCODE = #{record.shortcode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.modifytime != null" >
+        MODIFYTIME = #{record.modifytime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.itemnameAr != null" >
+        ITEMNAME_AR = #{record.itemnameAr,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extfield1 != null" >
+        EXTFIELD1 = #{record.extfield1,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extfield2 != null" >
+        EXTFIELD2 = #{record.extfield2,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extfield3 != null" >
+        EXTFIELD3 = #{record.extfield3,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extfield4 != null" >
+        EXTFIELD4 = #{record.extfield4,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extfield5 != null" >
+        EXTFIELD5 = #{record.extfield5,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update BAF_SYS_DICTIONARY_ITEM
+    set ITEMID = #{record.itemid,jdbcType=VARCHAR},
+      ITEMCODE = #{record.itemcode,jdbcType=VARCHAR},
+      ITEMNAME = #{record.itemname,jdbcType=VARCHAR},
+      ITEMVALUE = #{record.itemvalue,jdbcType=VARCHAR},
+      ITEMDESC = #{record.itemdesc,jdbcType=VARCHAR},
+      DICTIONARYID = #{record.dictionaryid,jdbcType=VARCHAR},
+      REGIONID = #{record.regionid,jdbcType=VARCHAR},
+      SORTORDER = #{record.sortorder,jdbcType=DECIMAL},
+      ISVALID = #{record.isvalid,jdbcType=CHAR},
+      ITEMSTYLE = #{record.itemstyle,jdbcType=VARCHAR},
+      FULLCODE = #{record.fullcode,jdbcType=VARCHAR},
+      SHORTCODE = #{record.shortcode,jdbcType=VARCHAR},
+      MODIFYTIME = #{record.modifytime,jdbcType=TIMESTAMP},
+      ITEMNAME_AR = #{record.itemnameAr,jdbcType=VARCHAR},
+      EXTFIELD1 = #{record.extfield1,jdbcType=VARCHAR},
+      EXTFIELD2 = #{record.extfield2,jdbcType=VARCHAR},
+      EXTFIELD3 = #{record.extfield3,jdbcType=VARCHAR},
+      EXTFIELD4 = #{record.extfield4,jdbcType=VARCHAR},
+      EXTFIELD5 = #{record.extfield5,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItem" >
+    update BAF_SYS_DICTIONARY_ITEM
+    <set >
+      <if test="itemcode != null" >
+        ITEMCODE = #{itemcode,jdbcType=VARCHAR},
+      </if>
+      <if test="itemname != null" >
+        ITEMNAME = #{itemname,jdbcType=VARCHAR},
+      </if>
+      <if test="itemvalue != null" >
+        ITEMVALUE = #{itemvalue,jdbcType=VARCHAR},
+      </if>
+      <if test="itemdesc != null" >
+        ITEMDESC = #{itemdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="dictionaryid != null" >
+        DICTIONARYID = #{dictionaryid,jdbcType=VARCHAR},
+      </if>
+      <if test="regionid != null" >
+        REGIONID = #{regionid,jdbcType=VARCHAR},
+      </if>
+      <if test="sortorder != null" >
+        SORTORDER = #{sortorder,jdbcType=DECIMAL},
+      </if>
+      <if test="isvalid != null" >
+        ISVALID = #{isvalid,jdbcType=CHAR},
+      </if>
+      <if test="itemstyle != null" >
+        ITEMSTYLE = #{itemstyle,jdbcType=VARCHAR},
+      </if>
+      <if test="fullcode != null" >
+        FULLCODE = #{fullcode,jdbcType=VARCHAR},
+      </if>
+      <if test="shortcode != null" >
+        SHORTCODE = #{shortcode,jdbcType=VARCHAR},
+      </if>
+      <if test="modifytime != null" >
+        MODIFYTIME = #{modifytime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="itemnameAr != null" >
+        ITEMNAME_AR = #{itemnameAr,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield1 != null" >
+        EXTFIELD1 = #{extfield1,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield2 != null" >
+        EXTFIELD2 = #{extfield2,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield3 != null" >
+        EXTFIELD3 = #{extfield3,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield4 != null" >
+        EXTFIELD4 = #{extfield4,jdbcType=VARCHAR},
+      </if>
+      <if test="extfield5 != null" >
+        EXTFIELD5 = #{extfield5,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ITEMID = #{itemid,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.ditem.model.BafSysDictionaryItem" >
+    update BAF_SYS_DICTIONARY_ITEM
+    set ITEMCODE = #{itemcode,jdbcType=VARCHAR},
+      ITEMNAME = #{itemname,jdbcType=VARCHAR},
+      ITEMVALUE = #{itemvalue,jdbcType=VARCHAR},
+      ITEMDESC = #{itemdesc,jdbcType=VARCHAR},
+      DICTIONARYID = #{dictionaryid,jdbcType=VARCHAR},
+      REGIONID = #{regionid,jdbcType=VARCHAR},
+      SORTORDER = #{sortorder,jdbcType=DECIMAL},
+      ISVALID = #{isvalid,jdbcType=CHAR},
+      ITEMSTYLE = #{itemstyle,jdbcType=VARCHAR},
+      FULLCODE = #{fullcode,jdbcType=VARCHAR},
+      SHORTCODE = #{shortcode,jdbcType=VARCHAR},
+      MODIFYTIME = #{modifytime,jdbcType=TIMESTAMP},
+      ITEMNAME_AR = #{itemnameAr,jdbcType=VARCHAR},
+      EXTFIELD1 = #{extfield1,jdbcType=VARCHAR},
+      EXTFIELD2 = #{extfield2,jdbcType=VARCHAR},
+      EXTFIELD3 = #{extfield3,jdbcType=VARCHAR},
+      EXTFIELD4 = #{extfield4,jdbcType=VARCHAR},
+      EXTFIELD5 = #{extfield5,jdbcType=VARCHAR}
+    where ITEMID = #{itemid,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

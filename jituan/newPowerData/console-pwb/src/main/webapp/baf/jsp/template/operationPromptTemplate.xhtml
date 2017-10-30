@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+       xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:regaltec="http://regaltec.org/customConponent"
+      >
+      
+	<!-- 处理中模态框 -->
+	<rich:modalPanel id="operating_panel" width="350" height="100">
+    	<h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="${msgs['baf.message.dealing']}" escape="false"/>
+    </rich:modalPanel>  
+    
+    <!-- 操作成功模态框 -->
+    <rich:modalPanel id="operated_panel" width="350" height="100">
+        <h:graphicImage  value="/baf/images/blue-success.gif"/><h:outputText value="${msgs['baf.message.success']}" escape="false"/>
+    </rich:modalPanel>  
+    
+     <!-- 操作失败模态框 -->  
+    <rich:modalPanel id="sys_error_panel" width="350" height="100">
+        <h:graphicImage  value="/baf/images/blue-error.gif"/><h:outputText id="sysErrorInfo" value="${msgs['baf.message.fail']}" escape="false"/>
+    </rich:modalPanel> 
+    <!--      
+    <a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('operating_panel').component.show();" 
+          onstop="document.getElementById('operating_panel').component.hide();">
+    </a4j:status> 
+     -->	
+  <script>
+  //<![CDATA[
+  /*a4j请求完成之判断系统是否有异常，如果有异常则不显示请求处理完成的界面*/
+  function a4jcomplete()
+  {
+	if( window.sys_error !=  undefined && window.sys_error == true)
+	 {
+	 window.sys_error = false;
+	 return false;
+	 }
+	 var msgPanel =document.getElementById('operated_panel');
+	 msgPanel.component.show();
+	 window.setTimeout('document.getElementById(\'operated_panel\').component.hide()', 1000);
+	 return true;
+  }
+   /*a4j请求错误回调函数*/
+   A4J.AJAX.onError = function(req,status,message)
+   {
+       document.getElementById('operating_panel').component.hide();
+       document.getElementById('operated_panel').component.hide();
+       document.getElementById('sys_error_panel').component.show();
+	   var report = "${msgs['baf.message.fail']}${msgs['baf.message.error']}" + message;
+	  
+	   window.sys_error = true;
+	   document.getElementById('sysErrorInfo').innerText= report;
+	   window.setTimeout('document.getElementById(\'sys_error_panel\').component.hide()', 1500);
+   }
+   /*session超时显示错误信息*/
+   A4J.AJAX.onExpired = function(loc,expiredMsg)
+   {
+	   alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+   }
+   
+   //设置表单组件焦点，参数是要设置焦点组件的ID，如：rightFactorTypeForm:factorTypeName
+   function setFocus(componentId){ 	
+		var esrc = document.getElementById(componentId);
+		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			if(esrc==null){ 
+			   esrc = event.srcElement; 
+			} 
+			var rtextRange =esrc.createTextRange(); 
+			rtextRange.moveStart('character',esrc.value.length); 
+			rtextRange.collapse(true); 
+			rtextRange.select(); 	
+		}else if( navigator.userAgent.indexOf("Firefox") > 0  || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+			esrc.focus();
+		}	
+	}
+ //]]>
+  </script> 
+</html>

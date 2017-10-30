@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<style>
+				.column1 {
+					width: 5%;
+				}
+				
+				.column2 {
+					width: 5%;
+				}
+				
+				.column3 {
+					width: 70%;
+				}
+				
+				.column4 {
+					width: 20%;
+					text-align: right;
+				}
+			.listItem{width:98%;float:left;margin-bottom: 10px;vertical-align: left;}
+				.rich-datascr-button, .rich-datascr-ctrls-separator {border-style: solid;border-width: 1px;cursor: pointer;text-align: center;width: 60px;}.rich-datascr-button, .rich-datascr-ctrls-separator {border-style: solid;border-width: 1px;cursor: pointer;text-align: center;width: 80px;}
+			</style>
+		</head>
+		<body>
+			<h:form id="bulletinForm" style="font-size:13px;">
+				<center>
+					<table width="276px">
+						<tr>
+							<td width="50%">
+							
+							</td>
+							<td align="right">
+								
+							</td>
+						</tr>
+					</table>
+					
+				 <rich:dataTable  width="276px" id="itemLists" rows="#{viewBulletinBean.pageSize}" columnClasses="col"  style="text-align:center;border: 0;background-color:#F3F2F2;" 
+ value="#{viewBulletinBean.dataList}" var="insItem" > 
+	 <rich:column style="border: 0;">
+	<h:panelGrid columns="4" style="font-size:13px;width: 100%;" columnClasses="column1,column2,column3,column4">
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/bulletin_open.gif" alt="#{msgs['baf.bulletin.checked']}" title="#{msgs['baf.bulletin.checked']}" rendered="#{insItem.readCount &gt;= 1}" />
+											<h:graphicImage url="/baf/images/bulletin/bulletin_close.gif" alt="#{msgs['baf.bulletin.checking']}" title="#{msgs['baf.bulletin.checking']}" rendered="#{insItem.readCount != 1}" />
+										</h:panelGroup>
+										
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" title="#{msgs['baf.bulletin.plain']}" rendered="#{insItem.emergency == '2'}" />
+											<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" title="#{msgs['baf.bulletin.urgent']}" rendered="#{insItem.emergency == '1'}" />
+											<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" title="#{msgs['baf.bulletin.exurgent']}" rendered="#{insItem.emergency == '0'}" />
+										</h:panelGroup>
+										
+										<h:panelGroup>
+                                          <a href="/baf/jsp/bulletin/bulletinDetail_portal.xhtml?bulletinId=#{insItem.bulletinId}"
+                                          title="#{msgs['baf.bulletin.title']}:#{insItem.title};#{msgs['baf.bulletin.drafter']}:#{insItem.publisherName};" target="_blank">
+					     <h:outputText value="#{insItem.shortTitle}"/>
+					  </a>
+                                        </h:panelGroup>
+							            
+							            <h:outputText value="#{insItem.publishTime}">
+							            	  <f:convertDateTime pattern="yy/MM/dd" timeZone="GMT+8"/>
+							            </h:outputText>
+									</h:panelGrid>
+
+   </rich:column>
+
+    </rich:dataTable>
+		 <table width="276px" border="0" >
+		            <tr>
+			            <td >
+			               <rich:datascroller align="right" for="itemLists" 
+							 fastStep="1" page="#{viewBulletinBean.scrollPage}" id="itemScroller" reRender="pageNo" rendered="#{viewBulletinBean.rendered}">	
+							</rich:datascroller>
+			            </td>
+			            </tr>
+			            </table>	
+				</center>
+				<a4j:keepAlive beanName="viewBulletinBean"/>
+				<a4j:jsFunction name="addRead" action="#{viewBulletinBean.addRead}" reRender="bulletinForm">
+		        	<a4j:actionparam name="bulletinId" />                
+		        </a4j:jsFunction> 
+		        <h:inputHidden id="pageNo" value="#{viewBulletinBean.scrollPage}"/>
+			</h:form>
+		</body>
+	</f:view>
+</html>

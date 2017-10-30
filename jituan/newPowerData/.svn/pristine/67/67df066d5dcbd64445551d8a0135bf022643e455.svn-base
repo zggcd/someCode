@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+		<script>
+			//<![CDATA[
+			var  saveStatus = true; //数据保存状态 true 保存成功, false保存失败
+			
+				//点击权限因子树触发事件
+			function doOnClick(){	
+	             var itemId = this.getSelectedItemId();
+	             var type = this.getUserData(itemId, 'type');
+	             var rightFactorID = document.getElementById("pForm:rightFactorID").value;
+				 //判断是否点击相同的节点
+				 if (rightFactorID == itemId) {
+					  //不作处理
+					 return;
+				 }  
+	             document.getElementById("pForm:rightFactorID").value = itemId;
+	             if (type == "R") {  
+				 var preType = this.getUserData(rightFactorID, 'type');
+				 if (preType == "R") {
+				 //需要把该权限因子对应勾选数据权限保存到后台
+				 var checkList = dataRightTree_tree.getAllChecked();
+				 var parentList = getSelectedParentID(checkList);
+				 //调用function传递数据到后台，也把点击的节点ID传递给后台，查询是否已有保存的数据
+				 //refresh(rightFactorID, checkList, itemId);	 
+				 //取消数据ID
+				 var cancelDataRight = document.getElementById("pForm:cancelDataRight").value;
+				 d_Refresh(rightFactorID, checkList, parentList, cancelDataRight, itemId);
+		         } else {
+			     d_Refresh("", "", "", "", itemId);
+		         }
+	        } else {
+		         var preType = this.getUserData(rightFactorID, 'type');
+		         if (preType == "R") {
+			     //需要把该权限因子对应勾选数据权限保存到后台
+			     var checkList = dataRightTree_tree.getAllChecked();
+			     var parentList = getSelectedParentID(checkList);
+			     //调用function传递数据到后台，也把点击的节点ID传递给后台，查询是否已有保存的数据
+			     //refresh(rightFactorID, checkList, "");	
+			     //取消数据ID
+			     var cancelDataRight = document.getElementById("pForm:cancelDataRight").value;			  			  
+			     d_Refresh(rightFactorID, checkList, parentList, cancelDataRight, "");
+		   } else {			  
+			     //权限因子类型没有数据权限			 
+			     dataRightTree_tree.deleteChildItems("0");
+		   }	  
+	     }
+	   }
+				
+				//在查询出来的权限树上点击checkbox框触发事件
+			  	function clickCheck(checkId,checkState) {	  
+					//获取该ID是否已经在数据库里选中
+					var isSelect = this.getUserData(checkId, 'isSelect');
+					if (isSelect == "Y" && checkState == 0) {
+						//取消
+						saveCancelDataRight(checkId);
+					} else if (isSelect == "Y" && checkState == 1) {
+						//如果是选中状态，检查下是否在取消里，如果有则删除。
+						deleteCancelDataRight(checkId);
+					}	
+				//取消复选框选中状态，则要进行判断是否要取消父节点的字体加粗
+					if(checkState == 0){
+						cancelStyle(checkId);	
+					}else if(checkState==1){	//设置所有父节点字体加粗
+						setStyle(checkId);
+					}	
+			  	}
+				//设置节点所有父节点字体加粗
+			  	function setStyle(checkId){
+			  		var parentId = dataRightTree_tree.getParentId(checkId);  	
+			  		if(parentId=="0"){
+			  			return;
+			  		} 	
+			  		dataRightTree_tree.setItemStyle(parentId,"font-weight:bold;");
+			  		if(parentId!=0){
+			  			setStyle(parentId);
+			  		}
+			  	}
+				//将节点字体由加粗设为普通
+			  	function cancelStyle(checkId){
+			  		var parentId = dataRightTree_tree.getParentId(checkId);
+			  		if(parentId=="0"){
+			  			return;
+			  		} 
+			  		var children = dataRightTree_tree.getAllSubItems(parentId).split(",");
+			  		var hasChecked = "N";   //指定节点下是否有复选框选中的，Y：有  N：无
+			  		var temp = 0;			//指定节点下是否有是权限路径的，0：无  1：有
+			  		for(var i=0;i<children.length;i++){
+			  			var isAuthPath = dataRightTree_tree.getUserData(children[i],"isAuthPath");
+			  			var checkstate = dataRightTree_tree.isItemChecked(children[i]);
+			  			if(checkstate==1){
+			  				hasChecked = "Y";
+			  				break;
+			  			}
+			  			if(isAuthPath=="Y"){
+			  				temp = 1 ;
+			  				break;
+			  			}
+			  		}
+			  		if(hasChecked=="N" && temp==0){  //当该节点下既没有选中的节点，也没有是权限路径的节点，则取消字体加粗
+			  			dataRightTree_tree.setItemStyle(parentId,"font-weight:normal;");
+			  			dataRightTree_tree.setUserData(parentId,"isAuthPath","N");
+			  			if(parentId!="0"){
+			  				cancelStyle(parentId);
+			  			}
+			  		}
+			  	}
+			  	function saveCancelDataRight(cancelID) {
+				  	var cancelDataRight = document.getElementById("pForm:cancelDataRight").value;
+				  	var save = "";
+				  	//处理
+				  	if (cancelDataRight == "" || cancelDataRight == null) {
+					 	save = cancelID;
+				  	} else {
+					  	save = cancelDataRight + "," + cancelID;
+				  	}	  
+				 	document.getElementById("pForm:cancelDataRight").value = save;
+			  	}
+		  	
+			  	function deleteCancelDataRight(id) {
+				  	var cancelDataRight = document.getElementById("pForm:cancelDataRight").value;
+				  	if (cancelDataRight != null && cancelDataRight != "") {
+						var index = cancelDataRight.indexOf(id);
+						if (index >= 0) {
+							//找到需要删除的数据
+							var str = "";
+							if(index>0){
+								str = ","+id;
+							}
+							if(index==0 && cancelDataRight.indexOf(","!=-1)){
+								str = id + ",";
+							}
+							document.getElementById("pForm:cancelDataRight").value = cancelDataRight.replace(str, "");
+						}
+				  	}
+			  	}
+			
+				//权限树节点展开/合拢前触发事件
+				function openStart(id,openState){
+					if(openState==0){ //0:无子节点   1：展开   -1：合拢
+						var hasCheckbox = dataRightTree_tree.getUserData(id,"hasCheckbox");
+						var url = document.getElementById("pForm:url").value;
+						dataRightTree_tree.setXMLAutoLoading(url+"&hasCheckbox="+hasCheckbox);
+					}
+					return true;
+				}
+				
+				//刷新数据权限树
+				function dRefresh(data){		
+					if (data != null && data != "") {
+						var array = data.split("|");
+						var rightFactorId = array[0];
+						var checkedIds = array[1];
+						var parentIds = array[2];
+						var cancleIds = array[3];
+						
+						var TemplateID = document.getElementById("pForm:TemplateID").value;
+						var url = "${request.contextPath}/baf/jsp/orgobj/template/datatree.jsp?rightFactorId="+rightFactorId+"&selectedDataRight="+checkedIds+"&cancelDataRight="+cancleIds+"&parentID="+parentIds+"&TemplateID="+TemplateID;
+						document.getElementById("pForm:url").value = url;
+						document.getElementById("pForm:cancelDataRight").value = cancleIds;
+						
+						dataRightTree_tree.setXMLAutoLoading(url);
+						dataRightTree_tree.refreshItem("0");				
+						
+					} else {
+					  //不需要重新加载树
+					  dataRightTree_tree.deleteChildItems("0");
+					  document.getElementById("pForm:cancelDataRight").value = "";
+					}
+				}
+			
+				//在查询出来的权限树上点击checkbox框触发事件
+				/*
+			  	function clickCheck(checkId,checkState) {	  
+					//获取该ID是否已经在数据库里选中
+					var isSelect = this.getUserData(checkId, 'isSelect');
+					if (isSelect == "Y" && checkState == 0) {
+						//取消
+						saveCancelDataRight(checkId);
+					} else if (isSelect == "Y" && checkState == 1) {
+						//如果是选中状态，检查下是否在取消里，如果有则删除。
+						deleteCancelDataRight(checkId);
+					}		
+			  	}*/
+			
+				  //保存选中的权限因子和对应勾选的权限
+			      function onSaveDataRight() {     
+					  document.getElementById("pForm:allDataRight").value = "";
+					  var factorID = rightTree_tree.getSelectedItemId();
+					  var type = rightTree_tree.getUserData(factorID, 'type');
+					  if (type == "R") {
+						  //保存权限因子数据
+						  var allChecked = dataRightTree_tree.getAllChecked();
+						
+						  var parentList = getSelectedParentID(allChecked); 
+						  //取消数据ID
+						  var cancelDataRight = document.getElementById("pForm:cancelDataRight").value;	
+						  document.getElementById("pForm:allDataRight").value = 	factorID + "#" + allChecked + "|" + parentList + "|" + cancelDataRight;
+					  }
+					  return true;
+				  }
+			      //保存权限组
+			      function saveRightGroup(){
+			         var checkList = operGroupTree_tree.getAllCheckedBranches();
+			         var uncheckList = operateTree_tree.getAllUnchecked();
+			         document.getElementById("pForm:groupIds").value=checkList;
+			      }
+				  function getSelectedParentID(checkList) {
+					  var parentList = "";
+					  if (checkList != null && checkList != "") {
+						  //获取选中的所有父节点
+						  var selectedArray = checkList.split(',');
+						  for (var i=0; i<selectedArray.length; i++) {
+							  var parentID = selectedArray[i];
+							  var parentArray = "";
+							  do {
+								  parentID = dataRightTree_tree.getParentId(parentID);
+								  if (parentList.indexOf(parentID) >= 0 || parentID == "0") {
+									  //已经包含
+									  break;
+								  }
+								  if (parentArray == "")
+								 	 parentArray = parentID;
+								  else
+									 parentArray += "," + parentID;				  
+							  } while (parentID != "0")
+							  if (parentList == "") {
+								  parentList = parentArray ;
+							  } else {
+								  parentList += "," + parentArray;
+							  }					
+						  }
+					  }
+					  return parentList; 
+			  	}
+			  
+			  	//传递树的所有选中节点和所有展开的节点
+				function setCheckValue(){
+					var checkList = operateTree_tree.getAllCheckedBranches();
+					var uncheckList = operateTree_tree.getAllUnchecked();
+					document.getElementById("pForm:checkedList").value = checkList;
+					document.getElementById("pForm:allList").value = checkList + "," + uncheckList;
+					
+					//保存权限组
+					 saveRightGroup();
+				}
+				//]]>
+			</script>
+            <style>
+            	.filed{
+            	height: 100%;
+            	}
+            </style>
+            <style>
+		       .scrolls{
+		           width:100px;
+		           height:20px;
+		           overflow:auto;
+		       }
+				.cur{
+			        cursor: pointer; 
+			    }	
+		    </style>  
+		</head>
+		<body>
+		<center>			
+			<regaltec:dhtmlXtree id="rightTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+				loadXML="/baf/jsp/dataRightFactor/rightFactorTreeXMLData.jsp"
+				xmlAutoLoading="/baf/jsp/dataRightFactor/rightFactorTreeXMLData.jsp">
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />		
+			</regaltec:dhtmlXtree>
+			<regaltec:dhtmlXtree id="dataRightTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="dataright_tree"
+				loadXML="/baf/jsp/orgobj/template/datatree.jsp"
+				xmlAutoLoading="/baf/jsp/orgobj/template/datatree.jsp">
+				<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>																			
+   				<regaltec:setDxtEevntHandler eventName="onCheck" handler="clickCheck"/> 
+				<regaltec:setDxtEevntHandler eventName="onOpenStart" handler="openStart" />		
+			</regaltec:dhtmlXtree>
+			<regaltec:dhtmlXtree  id="operateTree"
+			    imagePath="/baf/images/dhtmlxtree/" contentEl="useroperatetree"
+                loadXML="/baf/jsp/orgobj/template/operateRightXMLData.jsp?templateID=#{perBean.templateID}"
+		        xmlAutoLoading="/baf/jsp/orgobj/template/operateRightXMLData.jsp">
+            	<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+		      <regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>
+		      <regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"/>
+			</regaltec:dhtmlXtree> 
+			
+    		
+			<f:loadBundle basename="messages" var="msgs" />
+			<div id="center2" style="width:100%;height:100%">			
+				           
+		        <a4j:form id="pForm" onsubmit="setCheckValue()" >    	
+		       	<rich:tabPanel id="tabPanel2" style="margin-left:5px;margin-right:5px;margin-top:5px;" width="99%" height="90%" switchType="client" > 	
+		        	<rich:tab id="authorizationGroup" label="#{msgs['baf.org.user.tab.operateAuthorConfig']}" switchType="client">
+                    <table width="100%" style="height: 100%;">
+                    	<tr>
+                    	<td width="#{perBean.elementdisplayStyle}">
+	               			<fieldset style="height:100%;" >
+			            		<legend><h:outputText value="#{msgs['baf.org.user.tab.operateGroupConfig']}"/></legend>      
+			            		<rich:spacer height="1px;"/>		               			
+								<div id="operGroupTree_tree" style="height:90%;overflow-x:auto;overflow-y:auto;"></div>
+								<regaltec:dhtmlXtree id="operGroupTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="operGroupTree_tree"
+									loadXML="/baf/jsp/orgobj/template/operateGroupXMLData.jsp?templateID=#{perBean.templateID}&amp;userId=#{perBean.userId}"
+									xmlAutoLoading="/baf/jsp/orgobj/template/operateGroupXMLData.jsp?templateID=#{perBean.templateID}&amp;userId=#{perBean.userId}&amp;groupId=">
+									<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+								</regaltec:dhtmlXtree>
+					        </fieldset>
+	               	      </td>
+	               	      <td valign="top" >
+	               	        <div style="height:300px;overflow: auto;#{perBean.elementdisplayStyle}">
+							<fieldset style="height:100%;margin:0;" >
+				            	 <legend><h:outputText value="#{msgs['baf.org.user.tab.operateRightConfig']}"/></legend>      
+				            	 <rich:spacer height="1px;"/>	      		
+								 <div id="useroperatetree" ></div>
+							</fieldset>
+	               	        </div>
+					     </td>
+					     </tr>
+					 </table>
+				</rich:tab> 
+				
+		    <rich:tab id="dataAuthorization" label="#{msgs['baf.org.unit.tab.dataAuthorization']}" style="height:390;#{perBean.dataDisplayStyle}"   switchType="client" >
+		    <a4j:keepAlive beanName="perBean"/>
+		    <table width="100%" height="90%">
+                <tr><td width="50%" height="90%">
+							<fieldset style="height:90%">
+				           	<legend><h:outputText value="#{msgs['baf.org.unit.dataRight']}" /></legend>				           		
+				           	<rich:spacer height="1px;"/>	
+							<div id="treeboxbox_tree" style="width:100%;height:92%;" align="left">			
+							</div>
+							</fieldset>
+                     </td>
+                     <td width="50%" height="90%">
+							<fieldset style="height:90%;" id="right">
+				           	<legend><h:outputText value="#{msgs['baf.org.unit.dataRightTreeTitle']}" /></legend>           	
+							<rich:spacer height="1px;"/>
+							<div id="dataright_tree" style="width:100%;height:92%;" align="left">		
+							</div>	
+							</fieldset>
+					</td></tr>	
+			 </table>			
+			 </rich:tab> 	
+		     </rich:tabPanel>
+		     <rich:spacer width="40px"/>
+		        <center>
+		                <a4j:commandButton value="#{msgs['baf.org.Save']}" type="submit" styleClass="rich-button"       	
+                         action="#{perBean.saveTemplateAuth}"  reRender="tip" oncomplete="a4jcomplete()">
+		                <a4j:support event="onclick" onsubmit="onSaveDataRight()" />
+		                </a4j:commandButton>
+				</center>	
+			<h:inputHidden id="TemplateID" value="#{perBean.templateID}" />
+			<h:inputHidden id="checkedList" value="#{perBean.checked}"/>
+			<h:inputHidden id="allList" value="#{perBean.all}"/>
+			<h:inputHidden id="templateCategory" value="#{perBean.templateCategory}" />	
+			<h:inputHidden id="url" value=""/>
+			<h:inputHidden id="cancelDataRight" value=""/>
+			<h:inputHidden id="allDataRight" value="#{perBean.allDataRight}"/>
+			<h:inputHidden id="groupIds" value="#{perBean.groupIds}"/>
+			<h:inputHidden id="rightFactorID" value=""/>
+			<h:inputHidden id="tip" value="#{perBean.tip}"/>			
+            </a4j:form>
+    						   
+			</div>
+			<a4j:form>
+		<a4j:jsFunction name="d_Refresh"  data="#{perBean.data}" action="#{perBean.refresh}" oncomplete="dRefresh(data)" >
+    	<a4j:actionparam name="saveFactorID" value="" />    <!-- 上次选中的节点Id -->
+    	<a4j:actionparam name="selectedRightID" value="" />     <!-- 所有选中的数据权限 -->     
+    	<a4j:actionparam name="parentID" value="" />       	<!-- 需要展开的数据权限的父节点 -->   	
+    	<a4j:actionparam name="cancelID" value="" />     <!-- 数据库中存在现在取消的数据权限 -->        	
+    	<a4j:actionparam name="getFactorID" value="" />   <!-- 当前选中的节点Id -->
+        </a4j:jsFunction> 
+        </a4j:form>
+			</center>
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+		<script>
+		//<![CDATA[
+
+		    function showTip(){	    
+			    var str=document.getElementById("pForm:tip").value;
+                if(str.length>0&&str!=""){
+                alert(str);
+                // window.close();
+                 }
+		    }
+		     //]]>
+	  	</script>
+</f:view>
+</html>

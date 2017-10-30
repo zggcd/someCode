@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+function showStrategy()  //节点左键单击事件相应函数
+{
+	var itemId = this.getSelectedItemId();
+	var userData = this.getUserData(itemId,'userData');
+	var name = this.getSelectedItemText();
+	if(userData == 'bureau')
+		return;
+	
+    searchDateStrategy(name);  	
+}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+	   td.column1{
+	   width:20%;
+	   }	
+	   td.column2{
+	   width:60%;
+	   }	
+    </style> 
+</head>
+
+<body>
+
+<!-- 节假日列表 -->
+ <h:form id="tabForm">
+<div>
+	<fieldset id="queryinstance" style="height:90%;width:95%;padding:10px 10px 10px 10px;" >			
+    <legend><h:outputText value="#{msgs['baf.dialoutstrategy.querypolicy']}" /></legend>
+	<h:panelGroup id="tabGroup"  styleClass="scrolls" style="width:98%;height:98%">			
+		<rich:dataTable width="100%" id="itemLists" rows="#{dateStrategyBean.pageSize}" columnClasses="col"  style="text-align:center;" 
+           value="#{dateStrategyBean.dataList}" var="dateItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.policy.name']}" style="font-weight:normal;"/>
+	        </f:facet>
+               <h:outputText value="#{dateItem.validDateName}" />     
+           </h:column> 
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.startdate']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.beginDate}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.enddate']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.endDate}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.success.times']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.successNum}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.success.interval']}" style="font-weight:normal;"/>
+	        </f:facet>	        
+	        <h:outputText value="#{dateItem.successSpan}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.fail.times']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.failNum}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.fail.interval']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.failSpan}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.area']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{dateItem.areaName}" />
+           </h:column>
+           	
+           	<f:facet name="footer">				
+				<rich:datascroller align="center" id="itemScroller" selectedStyle="background-color:#FFB93F;"  />
+			</f:facet>
+       </rich:dataTable>
+       <a4j:keepAlive beanName="dateStrategyBean"/>
+   </h:panelGroup> 
+    </fieldset>
+    
+</div>
+</h:form>	
+ <!-- 节假日列表  END-->  	         
+
+
+
+	
+    <a4j:form>
+    <a4j:jsFunction name="searchDateStrategy"  action="#{dateStrategyBean.searchDateStrategy}" reRender="tabForm:itemLists">
+        	     	
+    </a4j:jsFunction> 
+    </a4j:form>
+    
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+    <ui:include src="/baf/jsp/taskmange/commonq.xhtml" />
+</body>
+  	</f:view>
+</html>

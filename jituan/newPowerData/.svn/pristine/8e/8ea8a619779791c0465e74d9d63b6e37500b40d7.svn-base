@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<style>
+				.column1 {
+					width: 5%;
+				}
+				
+				.column2 {
+					width: 5%;
+				}
+				
+				.column3 {
+					width: 70%;
+				}
+				
+				.column4 {
+					width: 20%;
+					text-align: right;
+				}
+			</style>
+		</head>
+		<body style="background-color:#F3F2F2;" >
+			<h:form id="bulletinForm" style="font-size:13px;">
+				<center>
+					<table width="100%" border="0">
+						<tr>
+							<td width="50%">
+								<img src="#{request.contextPath}/baf/images/bulletin/sound.gif"/>
+							</td>
+							<td align="right">
+								<a href="#" onclick="parent.addTab('','#{msgs['baf.bulletin.browseBulletin']}','/baf/jsp/bulletin/viewBulletin.xhtml');">
+									<h:outputText value="#{msgs['kbs.more']}"/>
+								</a>
+							</td>
+						</tr>
+					</table>
+					
+					<table border="0" width="100%" >
+						<tr>
+							<td>
+							<h:panelGroup rendered="#{viewBulletinBean.viewTop == 'Y'}" >
+								<fieldset style="height:100%;" >			
+						            <legend><h:outputText value="置顶公告"/></legend>
+						            <a4j:repeat var="vo" value="#{viewBulletinBean.topBulletinList}" rows="10">
+									<h:panelGrid columns="4" style="font-size:13px;width: 100%;" columnClasses="column1,column2,column3,column4">
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/bulletin_open.gif" alt="#{msgs['baf.bulletin.checked']}" title="#{msgs['baf.bulletin.checked']}" rendered="#{vo.readCount &gt;= 1}" />
+											<h:graphicImage url="/baf/images/bulletin/bulletin_close.gif" alt="#{msgs['baf.bulletin.checking']}" title="#{msgs['baf.bulletin.checking']}" rendered="#{vo.readCount != 1}" />
+										</h:panelGroup>
+										
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" rendered="#{vo.emergency == '2'}"/>
+									    	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" rendered="#{vo.emergency == '1'}"/>
+									    	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" rendered="#{vo.emergency == '0'}"/>
+								    	</h:panelGroup>
+										
+										<h:panelGroup>
+											<a4j:commandLink onclick="parent.addTab('#{vo.bulletinId}','#{msgs['baf.bulletin.bulletinContent']}_#{vo.title}','/baf/jsp/bulletin/bulletinDetail.xhtml?bulletinId=#{vo.bulletinId}','#{vo.title}')" value="#{vo.title}"></a4j:commandLink>
+							            </h:panelGroup>
+							            
+									    <h:outputLabel value="#{vo.publishTime}" title="#{msgs['baf.bulletin.publishTime']}">
+								    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+								    	</h:outputLabel>
+									</h:panelGrid>
+									</a4j:repeat>
+						         </fieldset>
+							</h:panelGroup>
+						    </td>
+						</tr>
+					</table>
+					
+					<table width="98%" border="0">
+						<tr>
+							<td>
+								<a4j:repeat var="insItem" value="#{viewBulletinBean.dataList}" rows="10">
+									<h:panelGrid columns="4" style="font-size:13px;width: 100%;" columnClasses="column1,column2,column3,column4">
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/bulletin_open.gif" alt="#{msgs['baf.bulletin.checked']}" title="#{msgs['baf.bulletin.checked']}" rendered="#{insItem.readCount &gt;= 1}" />
+											<h:graphicImage url="/baf/images/bulletin/bulletin_close.gif" alt="#{msgs['baf.bulletin.checking']}" title="#{msgs['baf.bulletin.checking']}" rendered="#{insItem.readCount != 1}" />
+										</h:panelGroup>
+										
+										<h:panelGroup>
+											<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" title="#{msgs['baf.bulletin.plain']}" rendered="#{insItem.emergency == '2'}" />
+											<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" title="#{msgs['baf.bulletin.urgent']}" rendered="#{insItem.emergency == '1'}" />
+											<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" title="#{msgs['baf.bulletin.exurgent']}" rendered="#{insItem.emergency == '0'}" />
+										</h:panelGroup>
+										
+										<h:panelGroup>
+											<a4j:commandLink onclick="parent.addTab('#{insItem.bulletinId}','#{msgs['baf.bulletin.bulletinContent']}_#{insItem.title}','/baf/jsp/bulletin/bulletinDetail.xhtml?bulletinId=#{insItem.bulletinId}');addRead('#{insItem.bulletinId}');" value="#{insItem.title}"/>
+							            </h:panelGroup>
+							            
+							            <h:outputText value="#{insItem.publishTime}">
+							            	<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8" />
+							            </h:outputText>
+									</h:panelGrid>
+								</a4j:repeat>
+							</td>
+						</tr>
+					</table>
+				</center>
+				
+				<a4j:jsFunction name="addRead" action="#{viewBulletinBean.addRead}" reRender="bulletinForm">
+		        	<a4j:actionparam name="bulletinId" />                
+		        </a4j:jsFunction> 
+		        
+		        <a4j:jsFunction name="onShowViewTop" action="#{viewBulletinBean.showViewTop}"  reRender="bulletinForm"/>
+			</h:form>
+		</body>
+	</f:view>
+</html>

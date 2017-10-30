@@ -1,0 +1,11 @@
+1、请使用社区版JBOSS4.2.3GA，可以向刘翔宇索要，需要数据库驱动ojdbc6.jar ，ojdbc6.jar放置JBOSS4.2.3GA\server\default\lib\ 。
+
+2、将console-pwb.war.rar解压到jboss  \server\default\deploy目录下.
+
+3、将oracle_ds.xml放到jboss      \server\default\deploy目录下。
+
+4、数据库在中国电信集团公司，需要拨通集团VPN才连接访问，请使用IE赚容模式打开集团VPN.
+      集团VPN地址 https://42.99.16.138/portal_default/index1.html
+     登录账号及密码：zengjunjia/123@@qwe
+
+5、应用系统登录地址http://127.0.0.1:8080  ,登录用户及密码：sa/marconi11

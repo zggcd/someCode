@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+<f:view  contentType="text/html">
+	<f:loadBundle basename="messages" var="msgs" />
+	<head>
+	<script>
+	//<![CDATA[
+
+function _setValue(id, status){
+	document.getElementById("listForm:tempId").value = id;
+	document.getElementById("listForm:tempStatus").value = status;
+}
+function _onComplete(){
+	if(a4jcomplete() == false)
+		return;	
+}
+//屏蔽退格键的事件监听
+function forCheck(){
+	if(event.keyCode == 8){
+	    event.returnValue   =   false;
+	}
+}
+
+//初始化iframe的高度
+function initHeight(iframe){
+	if(navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		iframe.style.height = document.body.offsetHeight - 50;
+	}else{
+		iframe.style.height = document.body.offsetHeight - 50;
+	}
+}
+function addTab(id,url,title,receiverType){	
+	var tab = Ext.getCmp("tab_"+id);
+	var tabpanel = Ext.getCmp('extTabPanel');
+	url = "${request.contextPath}"+ url;
+	if(tab){
+		tabpanel.setActiveTab(tab);
+	}else {
+	tabpanel.add({
+        id:"tab_"+id,
+        title:title+'&nbsp;&nbsp;&nbsp;',
+        iconCls: 'tabs',
+         html:"<iframe onload='initHeight(this);' width='100%' style='overflow-x:auto;overflow-y:auto;' height='initHeight(this);' src='"+url+"'/>",
+        closable:true,
+        autoScroll:true
+       }).show();
+	}
+
+	addReader(id,receiverType);
+}
+
+
+//初始化div和fieldset的高度
+function initDivHeight(){
+	if(navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		document.getElementById("query").style.height = document.body.offsetHeight - 50;
+		document.getElementById("field").style.height = document.body.offsetHeight - 70;
+	}else{
+		document.getElementById("query").style.height = document.body.offsetHeight - 80;
+		document.getElementById("field").style.height = document.body.offsetHeight - 70;
+		if(parseInt(document.getElementById("query").style.height) < 400){
+			document.getElementById("query").style.height = "420px";
+			document.getElementById("field").style.height = "400px";
+		}
+	}
+}
+
+//]]>
+</script>
+<style>
+.scrolls{
+    overflow:auto;
+}
+</style>
+	</head>
+	<body style="margin: 10px 10px; " id="body" onload="initDivHeight()">
+	<regaltec:extTabPanel  defaults="{autoHeight:true}" frame="true"
+		plain="true" activeTab="0" tabPosition="top" split="true"
+		collapsible="true" margins="0 0 5 5" enableTabScroll="true"
+		renderTo="body" componentId="extTabPanel" autoScroll="true"
+		plugins="new Ext.ux.TabCloseMenu()"
+		items="[{contentEl:'query', title:'未读消息列表'}]">
+	</regaltec:extTabPanel>
+	<div id="query" class="x-hide-display"  style="padding:5px 5px 5px 5px;height: 100%;" align="center">
+
+	<fieldset id="field"
+		style="margin-left: 5px; margin-right: 5px; margin-top: 20px; margin-bottom: 5px;width: 98%"
+		width="99%"><legend><h:outputLabel
+		value="#{messageBean.userName}收到的消息" style="font-weight:normal;" /></legend> 
+		<a4j:form id="listForm">
+		<a4j:keepAlive beanName="messageBean"></a4j:keepAlive>
+		<rich:dataTable columnClasses="col" id="list"
+			onRowMouseOver="this.style.backgroundColor='#F8F8F8'"
+			onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+			value="#{scrollMessageBean.dataList}" rows="#{scrollMessageBean.pageSize}"
+			var="vo" align="center"
+			style="margin-left:5px;margin-right:5px;margin-top:20px;margin-bottom:5px;"
+			width="99%">			
+			<rich:column>
+				<f:facet name="header">
+					<h:outputText styleClass="headerText "
+						value="#{msgs['baf.bulletin.title']}" style="font-weight:normal;" />
+				</f:facet>
+				<center><h:outputLink value="#" onclick="addTab('#{vo.messageId}', '#{vo.viewLink}', '#{vo.messageTitle}','#{vo.receiverType}');">
+					<h:outputText value="#{vo.messageTitle}" />
+				</h:outputLink></center>
+			</rich:column>
+			<rich:column>
+				<f:facet name="header">
+					<h:outputText styleClass="headerText " value="通知时间"
+						style="font-weight:normal;" />
+				</f:facet>
+				<center><h:outputLabel value="#{vo.notifyTime}"
+					title="通知时间">
+					<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8" />
+				</h:outputLabel></center>
+			</rich:column>
+			<rich:column>
+				<f:facet name="header">
+					<h:outputText styleClass="headerText " value="发送者"
+						style="font-weight:normal;" />
+				</f:facet>
+				<center><h:outputText value="#{vo.senderName}" /></center>
+			</rich:column>
+			<rich:column>
+				<f:facet name="header">
+					<h:outputText styleClass="headerText " value="状态"
+						style="font-weight:normal;" />
+				</f:facet>
+				<center><h:outputText value="已读" rendered="#{vo.viewCount != null}"/>
+				<h:outputText value="未读" rendered="#{vo.viewCount == null}"/></center>
+			</rich:column>
+			<f:facet name="footer">
+				<rich:datascroller align="right" id="itemScroller"
+					selectedStyle="background-color:#FFB93F;" fastStep="1" />
+			</f:facet>
+		</rich:dataTable>
+		
+		<a4j:jsFunction name="addReader" action="#{messageBean.addReader}" oncomplete="refresh()">
+        	<a4j:actionparam name="messageId" value="" />       	      
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="refresh" action="#{messageBean.loadData}" reRender="list">     
+        </a4j:jsFunction>
+	</a4j:form></fieldset>
+	</div>
+	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+	</body>
+</f:view>
+</html>

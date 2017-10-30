@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<head>
+		<title>装维技术论坛</title>
+			<script type="text/javascript">
+			//<![CDATA[
+			function init(){
+				var anchors= document.getElementsByTagName("a");
+			    for (var i=0; i<anchors.length; i++)
+			        {
+			           // var anchor=anchors[i];anchor.target="_blank";
+			        }
+			     if(#{topicAndReplyBean.lastFlag}){
+			          var obj=document.getElementById("quick_reply:itemScroller").firstChild.firstChild.firstChild.lastChild;
+			          if(null!=obj){
+			              Event.fire(obj, 'rich:datascroller:onscroll', {'page': 'last'});
+			          }
+			     }else{
+			        var obj=document.getElementById("quick_reply:itemScroller").firstChild.firstChild.firstChild.firstChild;
+			          if(null!=obj){
+			              Event.fire(obj, 'rich:datascroller:onscroll', {'page': 'first'});
+			          } 
+			     }
+			}
+			
+			function initQReply(data){
+
+			     if(data){
+			          var obj=document.getElementById("quick_reply:itemScroller").firstChild.firstChild.firstChild.lastChild;
+			          if(null!=obj){
+			              Event.fire(obj, 'rich:datascroller:onscroll', {'page': 'last'});
+			          }
+			     }else{
+			        var obj=document.getElementById("quick_reply:itemScroller").firstChild.firstChild.firstChild.firstChild;
+			          if(null!=obj){
+			              Event.fire(obj, 'rich:datascroller:onscroll', {'page': 'first'});
+			          } 
+			     }
+			     document.getElementById("quick_reply:replyContent").value = "";
+			 
+			}
+		function beforeSave(){
+				var name = document.getElementById("quick_reply:title").value;
+				String.prototype.trim=function() { return this.replace(/(^\s*)|(\s*$)/g,""); }
+				var content = document.getElementById("quick_reply:replyContent").value;
+				if(content.trim() == "" ) {
+					alert("内容不能为空~");
+					return false;
+				}
+				if(name == null || name == ""){
+					alert("${msgs['baf.bbs.mustTopicTitle']}");
+					return false;
+				}else if(content.length > 400){
+				 	alert("${msgs['baf.bbs.limitReplyContent']}"+"${msgs['baf.bbs.contextTips']}");
+				 	return false;
+				 }
+				return true;
+			}
+				
+	      var id="";
+	      var user=""
+	      
+	      function setId(id){
+	          this.id=id;
+	         
+	      }
+	      
+	      function setuser(user){
+	          this.user=user;
+	      }
+			 	//回首页
+			function go_index(){
+				window.location.href='${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1';
+			}
+			
+			function addTopic(){
+			   window.location.href='topicInfo.xhtml?boardId=#{topicAndReplyBean.boardId}';
+			}
+				//新人报道
+			function newReport(){
+			   window.location.href='newMenber.xhtml?boardId=#{topicBean.board_id}';
+			}
+		
+			function manage(data){
+			  if(data=="Y"){
+			     window.location.href="#{request.contextPath}/baf/jsp/bbs/topicManage.xhtml?topicId=#{topicAndReplyBean.topicId}";
+			  }else{
+			     alert("${msgs['baf.bbs.sorryNotManagement']}");
+			     return;
+			  }
+			}
+			
+			function editTopic(data){
+			 
+			   if(data=="Y"){
+			     if("#{topicAndReplyBean.topicType}"=="N"){
+			       window.location.href="#{request.contextPath}/baf/jsp/bbs/newMenber.xhtml?topicId=#{topicAndReplyBean.topicId}&amp;type=edit";
+			     }else{
+			         window.location.href="#{request.contextPath}/baf/jsp/bbs/topicEdit.xhtml?topicId=#{topicAndReplyBean.topicId}&amp;type=edit";
+			     }
+			    
+			  }else{
+			       if("#{topicAndReplyBean.userId}"=="#{topicAndReplyBean.curUserId}"){
+			       
+			        if("#{topicAndReplyBean.topicType}"=="N"){
+			       window.location.href="#{request.contextPath}/baf/jsp/bbs/newMenber.xhtml?topicId=#{topicAndReplyBean.topicId}&amp;type=edit";
+			     }else{
+			         window.location.href="#{request.contextPath}/baf/jsp/bbs/topicEdit.xhtml?topicId=#{topicAndReplyBean.topicId}&amp;type=edit";
+			     }
+			     }else{
+			       alert("${msgs['baf.bbs.sorryNTheme']}");
+			       return;
+			     }
+			  }
+			  
+			}
+			
+			function editReply(data){
+			
+			    if(data=="Y"){
+			      window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=3&amp;topicId=#{topicAndReplyBean.topicId}&amp;id="+id;
+			    }else{
+			      if(user=="#{topicAndReplyBean.curUserId}"){
+			         window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=3&amp;topicId=#{topicAndReplyBean.topicId}&amp;id="+id;
+			      }else{
+			       alert("${msgs['baf.bbs.sorryNoReply']}");
+			       return;
+			      }
+			   }
+			    
+			}
+			//打开评分窗口
+			function mark() {
+				//alert("请评分。。。");
+				Richfaces.showModalPanel('modalPanel');
+			}
+			//保存或修改完触发事件
+		    function onItemSaveComplete(data) {
+		    	
+		    	//document.getElementById("queryForm:gotItemIdValues").value = "";
+		   	   //if (data == "N") {
+				  //处理失败
+				 // alert("${msgs['baf.Failure']}");
+			  // }
+			     // alert("${msgs['baf.Success']}");
+		    	if(a4jcomplete()==false){
+					return;
+				}
+			}
+			 //]]>
+			</script>
+		<meta http-equiv="pragma" content="no-cache" />
+		<meta http-equiv="cache-control" content="no-cache" />
+		<meta http-equiv="expires" content="0" />  
+		<link rel="stylesheet" href="${request.contextPath}/baf/jsp/bbs/css/pw_core.css" />
+        <link rel="stylesheet" href="${request.contextPath}/baf/jsp/bbs/css/mian.css" />
+		<style type="text/css">
+			.rich-datascr-button, .rich-datascr-ctrls-separator {border-style: solid;border-width: 1px;cursor: pointer;text-align: center;width: 80px;}
+			.column1{
+				width:20%;
+				text-align:right;
+			}
+			.column2{
+				width:80%;
+				text-align:right;
+			}
+			
+			.rich-table-cell {
+border-right: solid 1px silver;
+border-bottom: solid 1px silver;
+padding: 4px 0px 4px 0px;
+font-size: 11px;
+color: black;
+font-family: Arial,Verdana,sans-serif;
+}
+		</style>
+
+
+		</head>
+		<body onload="init();getMarkInfo();">
+		<f:loadBundle basename="messages" var="msgs" />
+		
+		<center>
+	
+		<ui:include src="/baf/jsp/bbs/top.xhtml"/>
+			<div class="tac mb5"></div>
+			<div class="main-wrap">
+				<div id="main">
+			 <div class="f_tree cc" align="left">
+			 		<rich:spacer height="20px;" />
+					 <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/home.gif" 	style="vertical-align:middle"></h:graphicImage>
+              <h:outputLink onclick="window.location.href='${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1';" value="#" style="vertical-align: middle">
+							<h:outputText value="论坛" style="font-size:13px;"/>
+						</h:outputLink>
+               <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/related_li.gif" 	style="vertical-align:middle;width:16px"></h:graphicImage> 
+               <h:outputLink onclick="window.location.href='${request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=${topicManageBean.boardId}&amp;boardName=${topicManageBean.boardName}';" value="#" style="vertical-align: middle">
+							<h:outputText value="#{topicManageBean.boardName}" style="font-size:13px;"/>
+						</h:outputLink> </div>
+						
+						 <div class="tac mb5"></div>
+			<div id="pw_content" class="mb10">
+			<a4j:form id="quick_reply">
+				<h:inputHidden id="topicId" value="#{topicAndReplyBean.topicId}"></h:inputHidden>
+				<h:inputHidden id="boardId" value="#{topicAndReplyBean.boardId}"></h:inputHidden>
+				<h:inputHidden id="pageNo" value="#{topicAndReplyBean.scrollerPage}" />
+				<h:inputHidden id="pageSize" value="#{topicAndReplyBean.pageSize}" />
+				<rich:spacer height="10px"/>
+				<table align="center" width="100%" border="0" cellspacing="0"
+					cellpadding="0" bgcolor="#FFFFFF">
+					<tr>
+						<td>
+							<table border="0" width="100%">
+								<tr>
+                                  	<td width="5%"></td>
+									<td width="10%" align="right">
+										<h:outputLink onclick="addTopic();" value="#"
+											style="vertical-align: middle;margin-right: 30px;color:#FFFFFF;" styleClass="post fr" rendered="#{topicAndReplyBean.report==false}">
+											<h:outputText value="#{msgs['baf.bbs.newTopic']}"
+												rendered="#{topicAndReplyBean.report==false}" />
+										</h:outputLink>
+										<h:outputLink onclick="newReport();" value="#"
+											style="vertical-align: middle;color:#FFFFFF;" styleClass="post fr" rendered="#{topicAndReplyBean.report and(!commonBean.hadReport)}">
+											<h:outputText value="新人报道"
+												rendered="#{topicAndReplyBean.report and(!commonBean.hadReport)}" />
+										</h:outputLink>
+								</td>
+								</tr>
+							</table>
+							<rich:spacer height="10px"/>
+							<table width="100%" bordercolordark="#aabbaa"
+								bordercolorlight="#aabbaa" cellspacing="0" cellpadding="0"
+								align="center" border="1" style="border-collapse: collapse;">
+
+								<tr>
+									<td bgcolor="#f0f5f0" colspan="2">
+										<table width="100%" border="0" cellspacing="0" cellpadding="0"
+											height="25">
+											<tr>
+												<td valign="middle">
+													<h:outputText
+														value="#{msgs['baf.bbs.topicInfo']}-> #{msgs['baf.bbs.replyNum']}:"
+														style="font-size:13" />
+													<h:outputText
+														value="#{topicAndReplyBean.reply_totalCount} "
+														style="font-size:13" />
+													<rich:spacer width="10"></rich:spacer>
+													<h:outputText value="#{msgs['baf.bbs.topicCreatTm']}:"
+														style="font-size:13" />
+													<h:outputText value="#{topicAndReplyBean.createTime}"
+														style="font-size:13">
+														<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"
+															timeZone="GMT+8" />
+													</h:outputText>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td align="center" bgcolor="#FFFFFF" width="150" rowspan="3"
+										valign="top">
+										<table width="150" border="0" cellspacing="0" cellpadding="0"
+											style="border-collapse: collapse">
+											<tr>
+												<td align="center" height="20" width="150" colspan="2"></td>
+											</tr>
+											<tr>
+												<td align="center" height="30" width="150" colspan="2">
+													<b> <h:outputText value="#{topicAndReplyBean.userName}"
+															style="size:30;"
+															rendered="${topicAndReplyBean.isAnonymous=='N'}" /> <h:outputText
+															value="****" style="size:30;"
+															rendered="${topicAndReplyBean.isAnonymous=='Y'}" /> </b>
+												</td>
+											</tr>
+											<tr>
+												<td align="center" width="150" colspan="2">
+													<h:graphicImage
+														url="${request.contextPath}${topicAndReplyBean.photo}"></h:graphicImage>
+												</td>
+											</tr>
+											<tr>
+
+												<td align="right" width="85">
+													<h:outputText value="#{msgs['baf.bbs.dept']}："
+														style="font-size:13" />
+												</td>
+												<td align="center" width="85">
+													<h:outputText value="#{topicAndReplyBean.unitName}"
+														style="font-size:13"
+														rendered="${topicAndReplyBean.isAnonymous=='N'}" />
+													<h:outputText value="****" style="font-size:13"
+														rendered="${topicAndReplyBean.isAnonymous=='Y'}" />
+												</td>
+											</tr>
+											<tr>
+
+												<td align="right" width="85">
+													<h:outputText value="积分："
+														style="font-size:13" />
+												</td>
+												<td align="left" width="85">
+													<h:outputText value="#{topicAndReplyBean.userPoint}"
+														style="font-size:13"
+														rendered="${topicAndReplyBean.isAnonymous=='N'}" />
+
+													<h:outputText value="****" style="font-size:13"
+														rendered="${topicAndReplyBean.isAnonymous=='Y'}" />
+												</td>
+											</tr>
+											<tr>
+
+												<td align="right" width="85">
+													<!-- 
+													<h:outputText value="帖子类型：" style="font-size:13" />
+													 -->
+												</td>
+												<td align="center" width="85">
+												<!--  
+													<h:outputText value="#{topicAndReplyBean.type}"
+														style="font-size:13" />
+														-->
+												</td>
+											</tr>
+										</table>
+									</td>
+									<td bgcolor="#FFFFFF">
+										<table border="0" cellspacing="0" cellpadding="0" height="20"
+											align="right" valign="top" style="border-collapse: collapse">
+											<tr>
+												<td colspan="5" align="right" valign="middle">
+													<h:graphicImage id="reply"
+														url="#{request.contextPath}/baf/images/bbs/reply.gif"
+														style="vertical-align: middle"
+														rendered="${topicAndReplyBean.isLock=='N'}" />
+													<h:outputLink
+														value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=1&amp;topicId=#{topicAndReplyBean.topicId}&amp;boardId=#{topicAndReplyBean.boardId}"
+														style="vertical-align:middle">
+														<h:outputText value="#{msgs['baf.bbs.reply']}"
+															rendered="${topicAndReplyBean.isLock=='N'}" />
+													</h:outputLink>
+													<rich:spacer width="20px" />
+													<h:graphicImage id="replynow"
+														url="#{request.contextPath}/baf/images/bbs/replynow.gif"
+														style="vertical-align: middle"
+														rendered="${topicAndReplyBean.isLock=='N'}" />
+													<h:outputLink
+														value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=2&amp;topicId=#{topicAndReplyBean.topicId}&amp;boardId=#{topicAndReplyBean.boardId}"
+														style="vertical-align:middle">
+														<h:outputText value="#{msgs['baf.bbs.nowReply']}"
+															rendered="${topicAndReplyBean.isLock=='N'}" />
+													</h:outputLink>
+													<rich:spacer width="20px" />
+													<h:graphicImage id="edit"
+														url="#{request.contextPath}/baf/images/bbs/edit.gif"
+														style="vertical-align:middle"
+														rendered="${topicAndReplyBean.isLock=='N'}" />
+													<h:outputLink onclick="isTopEdit();" value="#"
+														style="vertical-align: middle">
+														<h:outputText value="#{msgs['baf.bbs.edit']}"
+															rendered="${topicAndReplyBean.isLock=='N'}" />
+													</h:outputLink>
+													<rich:spacer width="20px" />
+													<h:graphicImage id="admin"
+														url="#{request.contextPath}/baf/images/bbs/admin.gif"
+														style="vertical-align:middle"
+														rendered="${topicAndReplyBean.isManage}" />
+													<h:outputLink onclick="gotomanage();" value="#"
+														style="vertical-align:middle">
+														<h:outputText value="#{msgs['baf.bbs.manage']}"
+															rendered="${topicAndReplyBean.isManage}" />
+													</h:outputLink>
+													<rich:spacer width="20px" />
+													<h:graphicImage id="mark"
+														url="#{request.contextPath}/baf/images/bbs/edit.gif"
+														style="vertical-align:middle"
+														rendered="${topicAndReplyBean.isManage}" />
+													<h:outputLink onclick="mark();" value="javascript:void(0);"
+														style="vertical-align: middle" >
+														<h:outputText value="评分" rendered="${topicAndReplyBean.isManage}"/>
+													</h:outputLink>
+													<rich:spacer width="20px" />
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+								<tr>
+									<td height="24" bgcolor="#FFFFFF" width="545">
+										<h:outputText value="#{msgs['baf.bbs.title']}:"
+											style="font-size:13" />
+										<h:outputText value="#{topicAndReplyBean.title}"
+											style="color:#ff0000;font-size:13" />
+									</td>
+								</tr>
+								<tr>
+									<td height="154" bgcolor="#FFFFFF" align="center" valign="top"
+										width="100%">
+										<table height="220" width="100%" border="0" cellspacing="0"
+											cellpadding="0">
+											<tr>
+												<td rowspan="2" width="20" height="20"></td>
+												<td height="20" colspan="2"></td>
+											</tr>
+											<tr>
+												<td valign="top">
+													<div style="width: 95%"></div>
+													<h:outputText value="#{topicAndReplyBean.content}"
+														escape="false"></h:outputText>
+														<br/><br/><br/><br/><br/>
+														<h:panelGroup id="markInfo">
+														<div style="">
+														<table border="0" width="98%">
+															<c:forEach items="${markInfoList}" var="markInfo">
+																<tr style="BORDER-RIGHT: 1px ; BORDER-TOP: 1px ; BORDER-LEFT:  1px ; BORDER-BOTTOM: 1px dashed#cccccc;;height:40;">
+																	<td width="8%" align="right"><h:outputText value="评分人：" style="font-size:13"/></td>
+																	<td width="10%" align="left"><h:outputText value="#{markInfo.marker}" style="color:blue;font-size:13"/></td>
+																	<td width="10%" align="right"><h:outputText value="积分数：" style="font-size:13"/></td>
+																	<td width="4%" align="left"><h:outputText value="#{markInfo.pointNum}" style="color:red;font-size:13"/></td> 
+																	<td width="8%" align="right"><h:outputText value="内容：" style="font-size:13"/></td>
+																	<td width="61%" align="left"><h:outputText value="#{markInfo.remark}" style="font-size:13"/></td>
+																</tr>
+															</c:forEach>
+														</table>
+														</div>
+														</h:panelGroup>
+												</td>
+												<td width="20"></td>
+											</tr>
+										</table>
+										<table width="100%" border="0" cellspacing="0" cellpadding="0"
+											style="border-collapse: collapse">
+											<tr>
+												<td width="20" height="20"></td>
+												<td height="20" colspan="2" align="left"></td>
+											</tr>
+											<tr>
+												<td width="20" height="20"></td>
+												<td height="20" colspan="2" align="left">
+													<h:outputText value="#{msgs['baf.bbs.downLoad']}:"
+														style="font-size:13;font-weight: bold"
+														rendered="#{topicAndReplyBean.isAttachment=='Y'}" />
+												</td>
+											</tr>
+											<a4j:repeat value="#{topicAndReplyBean.uploadFileList}"
+												var="attchement">
+												<tr>
+													<td width="20" height="20"></td>
+													<td>
+														<h:commandLink value="#{attchement.fileName}"
+															actionListener="#{topicAndReplyBean.openThisFile}">
+															<f:param value="#{attchement.attachmentId}"
+																name="attachmentId" />
+															<f:param value="#{topicAndReplyBean.topicId}"
+																name="ownerId" />
+														</h:commandLink>
+													</td>
+													<td width="20"></td>
+												</tr>
+											</a4j:repeat>
+										</table>
+										<table width="100%" border="0" cellspacing="0" cellpadding="0"
+											style="border-collapse: collapse">
+											<tr>
+												<td valign="bottom" align="left" height="32" colspan="2">
+													<font color="#999999"></font>
+												</td>
+											</tr>
+											<tr>
+												<td align="left" height="24"></td>
+												<td align="right" width="10%"></td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</table>
+				<rich:dataTable width="100%"  id="dataList"
+					rows="#{topicAndReplyBean.pageSize}" style="border: 0"
+					value="#{topicAndReplyBean.firstDataModel}" var="vo"
+					onRowMouseOver="this.style.backgroundColor='#F8F8F8'"
+					onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+					bgcolor="#FFFFFF">
+					<rich:column style="border: 0; " bgcolor="#FFFFFF">
+						<table align="center" width="100%" border="0" cellspacing="0"
+							cellpadding="0" bgcolor="#FFFFFF">
+							<tr>
+								<td>
+									<table width="100%" bordercolordark="#aabbaa"
+										bordercolorlight="#aabbaa" cellspacing="0" cellpadding="0"
+										align="center" border="1" style="border-collapse: collapse">
+										<tr>
+											<td bgcolor="#f0f5f0" colspan="2">
+												<table width="100%" border="0" cellspacing="0"
+													cellpadding="0" height="25">
+													<tr>
+														<td valign="middle">
+															<h:outputText value="#{msgs['baf.bbs.replyTm']}:"
+																style="font-size:13" />
+															<h:outputText value="#{vo.responseTime}"
+																style="font-size:13">
+																<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss"
+																	timeZone="GMT+8" />
+															</h:outputText>
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr>
+											<td align="center" bgcolor="#FFFFFF" width="150" rowspan="3"
+												valign="top">
+												<table width="150" border="0" cellspacing="0"
+													cellpadding="0">
+													<td align="center" height="20" colspan="2"></td>
+													<tr>
+														<td align="center" height="30" colspan="2">
+															<b><h:outputText value="****" style="size:30;"
+																	rendered="${vo.isAnonymous=='Y'}" /> </b>
+															<b> <h:outputText value="#{vo.userName}"
+																	style="size:30;" rendered="${vo.isAnonymous=='N'}" />
+															</b>
+														</td>
+													</tr>
+													<tr>
+														<td align="center" colspan="2">
+															<h:graphicImage
+																url="${request.contextPath}${vo.photo}"></h:graphicImage>
+														</td>
+													</tr>
+													<tr>
+
+														<td align="right" width="85">
+															<h:outputText value="#{msgs['baf.bbs.dept']}："
+																style="font-size:13" />
+														</td>
+														<td align="center" width="85">
+															<h:outputText value="****" style="font-size:13"
+																rendered="${vo.isAnonymous=='Y'}" />
+															<h:outputText value="#{vo.unitName}" style="font-size:13"
+																rendered="${vo.isAnonymous=='N'}" />
+														</td>
+													</tr>
+													<tr>
+														<td align="right" width="85">
+															<h:outputText value="积分："
+																style="font-size:13" />
+														</td>
+														<td align="left" width="85">
+															<h:outputText value="#{vo.userPoint}"
+																style="font-size:13" rendered="${vo.isAnonymous=='N'}" />
+															<h:outputText value="****" style="font-size:13"
+																rendered="${vo.isAnonymous=='Y'}" />
+														</td>
+													</tr>
+													<tr>
+														<td align="right" width="150">
+														<!-- 
+															<h:outputText value="帖子类型：" style="font-size:13" />
+															 -->
+														</td>
+														<td align="center" width="150">
+														<!--  
+															<h:outputText value="#{topicAndReplyBean.type}"
+																style="font-size:13" />
+																-->
+														</td>
+													</tr>
+												</table>
+											</td>
+											<td bgcolor="#FFFFFF">
+												<table border="0" cellspacing="0" cellpadding="0"
+													height="20" align="right">
+													<tr>
+														<td colspan="5">
+															<h:graphicImage id="reply"
+																url="#{request.contextPath}/baf/images/bbs/reply.gif"
+																style="vertical-align: middle"
+																rendered="${topicAndReplyBean.isLock=='N'}"></h:graphicImage>
+															<h:outputLink
+																value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=1&amp;topicId=#{topicAndReplyBean.topicId}&amp;boardId=#{topicAndReplyBean.boardId}"
+																style="vertical-align:middle">
+																<h:outputText value="#{msgs['baf.bbs.reply']}"
+																	rendered="${topicAndReplyBean.isLock=='N'}" />
+															</h:outputLink>
+															<rich:spacer width="20px" />
+															<h:graphicImage id="replynow"
+																url="#{request.contextPath}/baf/images/bbs/replynow.gif"
+																style="vertical-align: middle"
+																rendered="${topicAndReplyBean.isLock=='N'}" />
+															<h:outputLink
+																value="#{request.contextPath}/baf/jsp/bbs/bbsReply.xhtml?type=2&amp;topicId=#{topicAndReplyBean.topicId}&amp;id=#{vo.id}&amp;boardId=#{topicAndReplyBean.boardId}"
+																style="vertical-align:middle">
+																<h:outputText value="#{msgs['baf.bbs.nowReply']}"
+																	rendered="${topicAndReplyBean.isLock=='N'}" />
+															</h:outputLink>
+															<rich:spacer width="20px" />
+															<h:graphicImage id="edit"
+																url="#{request.contextPath}/baf/images/bbs/edit.gif"
+																style="vertical-align: middle"
+																rendered="${topicAndReplyBean.isLock=='N'}"></h:graphicImage>
+															<h:outputLink
+																onclick="setuser('#{vo.userId}');setId('#{vo.id}');isReEdit();"
+																value="#" style="vertical-align:middle">
+																<h:outputText value="#{msgs['baf.bbs.edit']}"
+																	rendered="${topicAndReplyBean.isLock=='N'}" />
+															</h:outputLink>
+															<rich:spacer width="20px" />
+															<h:graphicImage id="admin"
+																url="#{request.contextPath}/baf/images/bbs/admin.gif"
+																style="vertical-align: middle"
+																rendered="${topicAndReplyBean.isManage}"></h:graphicImage>
+															<h:outputLink onclick="gotomanage();" value="#"
+																style="vertical-align:middle">
+																<h:outputText value="#{msgs['baf.bbs.manage']}"
+																	rendered="${topicAndReplyBean.isManage}" />
+															</h:outputLink>
+															<rich:spacer width="20px" />
+															<h:graphicImage id="mark"
+														url="#{request.contextPath}/baf/images/bbs/edit.gif"
+														style="vertical-align:middle"
+														rendered="${topicAndReplyBean.isManage}" />
+													<h:outputLink onclick="mark();" value="javascript:void(0);"
+														style="vertical-align: middle">
+														<h:outputText value="评分" rendered="${topicAndReplyBean.isManage}" />
+													</h:outputLink>
+															<rich:spacer width="20px" />
+														</td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+										<tr bgcolor="#f0f5f0">
+											<td height="24" bgcolor="#FFFFFF">
+												<h:outputText value="#{msgs['baf.bbs.title']}: "
+													style="font-size:13" />
+												<h:outputText value="#{vo.title} "
+													style="font-size:13;color:#ff0000" />
+											</td>
+										</tr>
+										<tr bgcolor="#f0f5f0">
+											<td height="154" bgcolor="#FFFFFF" align="center"
+												valign="top">
+												<table height="220" width="100%" border="0" cellspacing="0"
+													cellpadding="0">
+													<tr>
+														<td rowspan="2" width="20" height="20"></td>
+														<td height="20" colspan="2"></td>
+													</tr>
+													<tr>
+														<td valign="top" style="word-break: break-all;">
+															<h:outputText value="#{vo.content}" escape="false"></h:outputText>
+														</td>
+														<td width="20"></td>
+													</tr>
+												</table>
+												<table width="100%" border="0" cellspacing="0"
+													cellpadding="0">
+													<tr>
+														<td width="20" height="20"></td>
+														<td height="20" colspan="2" align="left"></td>
+													</tr>
+													<tr>
+														<td width="20" height="20"></td>
+														<td height="20" colspan="2" align="left">
+															<h:outputText value="#{msgs['baf.bbs.downLoad']}:"
+																style="font-size:13;font-weight: bold"
+																rendered="#{vo.isAttachment=='Y'}" />
+														</td>
+													</tr>
+													<a4j:repeat value="#{vo.uploadFileList}" var="attchement">
+														<tr>
+															<td width="20" height="20"></td>
+															<td>
+																<h:commandLink value="#{attchement.fileName}"
+																	actionListener="#{topicAndReplyBean.openThisFile}">
+																	<f:param value="#{attchement.attachmentId}"
+																		name="attachmentId" />
+																	<f:param value="#{vo.id}" name="ownerId" />
+																</h:commandLink>
+															</td>
+															<td width="20"></td>
+														</tr>
+													</a4j:repeat>
+												</table>
+												<table width="100%" border="0" cellspacing="0"
+													cellpadding="0">
+													<tr>
+														<td valign="bottom" align="left" height="32" colspan="2">
+															<font color="#999999"></font>
+														</td>
+													</tr>
+													<tr>
+														<td align="left" height="24"></td>
+														<td align="right" width="10%"></td>
+													</tr>
+												</table>
+											</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</rich:column>
+				</rich:dataTable>
+				<table width="93%" border="0">
+					<tr>
+						<td>
+							<rich:datascroller align="right" for="dataList"
+								fastControls="hide" fastStep="1"
+								page="#{topicAndReplyBean.scrollerPage}" id="itemScroller"
+								reRender="pageNo">
+								<f:facet name="first">
+									<h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+								</f:facet>
+								<f:facet name="first_disabled">
+									<h:outputText value="#{msgs['rf4.datascroller.fisrt']}" />
+								</f:facet>
+								<f:facet name="last">
+									<h:outputText value="#{msgs['rf4.datascroller.last']}" />
+								</f:facet>
+								<f:facet name="last_disabled">
+									<h:outputText value="#{msgs['rf4.datascroller.last']}" />
+								</f:facet>
+								<f:facet name="previous">
+									<h:outputText value="#{msgs['rf4.datascroller.previous']}" />
+								</f:facet>
+								<f:facet name="previous_disabled">
+									<h:outputText value="#{msgs['rf4.datascroller.previous']}" />
+								</f:facet>
+								<f:facet name="next">
+									<h:outputText value="#{msgs['rf4.datascroller.next']}" />
+								</f:facet>
+								<f:facet name="next_disabled">
+									<h:outputText value="#{msgs['rf4.datascroller.next']}" />
+								</f:facet>
+							</rich:datascroller>
+						</td>
+					</tr>
+				</table>
+
+				<f:facet name="header" rendered="${topicAndReplyBean.isLock=='N'}">
+					<h:outputText value="#{msgs['baf.bbs.quickReply']}"></h:outputText>
+				</f:facet>
+				<center>
+					<table width="98%" border="0" cellspacing="1" cellpadding="0">
+						<tr>
+							<td width="8%" align="center">
+							<!-- 
+								<h:outputText style="font-size:13px;"
+									value="#{msgs['baf.bbs.userName']}: "
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+									 -->
+							</td>
+							<td>
+							<!-- 
+								<h:inputText id="replyName" maxlength="32"
+									value="#{topicAndReplyBean.replyName}" disabled="true"
+									rendered="${topicAndReplyBean.isLock=='N'}"
+									style="width:90%;height:23px;" styleClass="rich-gradient-input">
+								</h:inputText>
+								<h:selectBooleanCheckbox id="anonymous"
+									title="#{msgs['baf.bbs.anonymous']}"
+									value="#{topicAndReplyBean.anonymous}"
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+								<h:outputText style="font-size:13px;"
+									value="#{msgs['baf.bbs.anonymous']} "
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+								<h:inputHidden id="replyId" value="#{topicAndReplyBean.replyId}"></h:inputHidden>
+								 -->
+							</td>
+						</tr>
+						<tr>
+							<td align="center">
+								<h:outputText style="font-size:13px;"
+									value="#{msgs['baf.bbs.topicTitle']}: "
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+							</td>
+							<td>
+								<h:inputText id="title" maxlength="32"
+									value="#{topicAndReplyBean.replyTitle}"
+									rendered="${topicAndReplyBean.isLock=='N'}"
+									style="width:45%;height:23px;" styleClass="rich-gradient-input">
+									<s:commonsValidator type="required"
+										arg="#{msgs['baf.bbs.topicTitle']}" server="false"
+										client="true" />
+								</h:inputText>
+								<rich:spacer height="5px" />
+								<h:outputText value="*" style="color: red;"
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+							</td>
+						</tr>
+						<tr>
+							<td align="center">
+								<h:outputText style="font-size:13px;"
+									value=" #{msgs['baf.bbs.replyContext']}: "
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+								<br />
+								<h:outputText style="font-size:13px;color:red;"
+									value="(#{msgs['baf.bbs.contextTips']})"
+									rendered="${topicAndReplyBean.isLock=='N'}" />
+
+							</td>
+							<td>
+								<h:inputTextarea value="#{topicAndReplyBean.replyContent}"
+									id="replyContent" rows="6"
+									rendered="${topicAndReplyBean.isLock=='N'}" style="width:95%;" />
+							</td>
+						</tr>
+						<tr >
+							
+							<td align="center" colspan="2">
+								<h:selectBooleanCheckbox id="anonymous"
+									title="#{msgs['baf.bbs.anonymous']}"
+									value="#{topicAndReplyBean.anonymous}"
+									rendered="false" />
+								<h:outputText style="font-size:15px;vertical-align: middle;"
+									value="#{msgs['baf.bbs.anonymous']} "
+									rendered="false"  />
+								<h:inputHidden id="replyId" value="#{topicAndReplyBean.replyId}"></h:inputHidden>
+								<a4j:commandButton styleClass="rich-button" type="submit"
+									id="test_save" value="#{msgs['baf.Save']}"
+									onclick="if(!beforeSave()){return false;}"
+									action="#{topicAndReplyBean.save}"
+									oncomplete="initQReply(data);"
+									data="#{topicAndReplyBean.lastPage}"
+									rendered="${topicAndReplyBean.isLock=='N'}"
+									reRender="quick_reply" />
+									<h:selectBooleanCheckbox id="lastPage"
+									title="跳转到最后一页"
+									value="#{topicAndReplyBean.lastPage}"
+									rendered="${topicAndReplyBean.isLock=='N'}"/>
+								<h:outputText style="font-size:15px;vertical-align: middle;"
+									value="跳转到最后一页"
+									  rendered="${topicAndReplyBean.isLock=='N'}"/>
+							</td>
+						</tr>
+					</table>
+				</center>
+				
+				<rich:spacer height="10px" />
+				<s:validatorScript functionName="validateForm" />
+			</a4j:form>
+			</div></div></div>
+			<a4j:keepAlive beanName="topicAndReplyBean" />
+			<a4j:form>
+				<a4j:jsFunction action="#{topicAndReplyBean.isManager}"
+					name="gotomanage" data="#{topicAndReplyBean.runFlag}"
+					oncomplete="manage(data);" />
+				<a4j:jsFunction action="#{topicAndReplyBean.isManager}"
+					name="isTopEdit" data="#{topicAndReplyBean.runFlag}"
+					oncomplete="editTopic(data);" />
+				<a4j:jsFunction action="#{topicAndReplyBean.isManager}"
+					name="isReEdit" data="#{topicAndReplyBean.runFlag}"
+					oncomplete="editReply(data);" />
+					<a4j:jsFunction action="#{topicAndReplyBean.getMarkInfoList}"
+					name="getMarkInfo" 
+					reRender="markInfo" />
+			</a4j:form>
+
+			<!-- 正在操作模态框 -->
+			<rich:modalPanel id="panel" width="350" height="100">
+				<h:graphicImage value="/baf/images/blue-loading.gif" />
+				<h:outputText value="#{msgs['baf.Processing']}" escape="false" />
+
+			</rich:modalPanel>
+
+			<!--新增/编辑模态框 -->
+			<rich:modalPanel id="modalPanel" autosized="true"
+				keepVisualState="false" width="480" height="230">
+				<f:facet name="header">
+					<h:outputText value="评分信息栏" />
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+					<h:panelGroup>
+						<h:graphicImage value="/baf/images/icons/close.png" id="hidelink"
+							styleClass="hidelink" />
+						<rich:componentControl for="modalPanel" attachTo="hidelink"
+							operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>
+				<a4j:form id="addPointDetailForm">
+					<center>
+						<br />
+						<br />
+						<h:panelGrid id="holidayItem" columns="2"
+							columnClasses="column1,column2" style="font-size:13px;width:90%;">
+							<h:outputText value="评分数: " />
+							<h:inputText id="pointNum" style="width:95%;height:23px;"
+								styleClass="rich-gradient-input"
+								value="#{topicAndReplyBean.pointNum}">
+								<s:commonsValidator type="required" arg="评分数" server="false"
+									client="true" />
+								<s:commonsValidator type="integer" arg="长度" server=" false " client="true" /> 
+								<s:commonsValidator type="maxlength" arg="评分数" maxLength="10"
+									server="false" client="true" />
+							</h:inputText>
+
+							<h:outputText value="评分简短语: " />
+
+							<h:inputTextarea id="describe" style="width:95%;resize:none;" rows="4" styleClass="rich-gradient-input" value="#{topicAndReplyBean.shortRemark}">				
+								<s:commonsValidator type="required" arg="评分简短语" server="false" client="true"/>
+								<s:commonsValidator type="maxlength"  arg="评分简短语" maxLength="50"  server="false" client="true"/>				 
+							</h:inputTextarea>									
+						</h:panelGrid>	
+					  </center>	
+					  <rich:spacer height="20px"/>
+					  <center>
+				    
+						<rich:spacer height="2px"/> 
+				        <a4j:commandButton styleClass="rich-button" type="submit" id="itemAddOrEditSave" value="#{msgs['baf.org.Save']}">	
+					       <a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('addPointDetailForm'))==false) {return false;} " 
+					       action="#{topicAndReplyBean.mark}" data="#{topicAndReplyBean.dealFlag}" 
+					       oncomplete="onItemSaveComplete(data);if(data=='Y') {#{rich:component('modalPanel')}.hide();}"  reRender="dataList"/>
+					      
+				        </a4j:commandButton> 
+						<rich:spacer height="2px"/>
+				        <a4j:commandButton styleClass="rich-button" type="button" id="itemCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+				     </center>	  
+				     <s:validatorScript functionName="validateForm"/>  	
+				     
+				   </a4j:form>
+				</rich:modalPanel>		
+	
+			</center>
+
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+			
+		</body>
+	</f:view>
+</html>

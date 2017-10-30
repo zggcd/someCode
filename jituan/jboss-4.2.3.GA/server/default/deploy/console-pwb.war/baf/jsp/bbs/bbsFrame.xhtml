@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+		<title>电信bbs</title>
+			<script type="text/javascript">
+			//<![CDATA[
+　               		//回首页
+			function go_index(){
+				window.location.href="${request.contextPath}/baf/jsp/bbs/bbsFrame.xhtml";
+			}
+			function setURL(){
+				bbsframe.document.location.href = "${request.contextPath}/baf/jsp/bbs/bbsindex.xhtml";
+			}
+			 //]]>
+			</script>
+			<style type="text/css">
+				.bbs {
+					background-image: url(#{request.contextPath}/baf/images/bbs/bbs_top_bg.gif);
+					height: 48px;
+				}
+			</style>
+		</head>
+		
+		<body onload="setURL();">
+		<f:loadBundle basename="messages" var="msgs" />
+		  <regaltec:viewPort>
+			  <regaltec:boxComponent region="north" el="north" height="48" />
+			  <regaltec:boxComponent region="center" el="bbsframe" />
+		  </regaltec:viewPort>
+		  
+		  <div id="north" class="layout-north;" style="height:48px" >
+		  	
+		  	<table border="0" width="100%">
+		  		<tr>
+		  			<td><h:graphicImage  url="#{request.contextPath}/baf/images/bbs/bbs_logo.png" style="vertical-align:middle;height:48" onclick="go_index();return false;"/></td>
+		  			<td style="width:10%;"><!-- <a4j:commandButton styleClass="rich-button" type="submit" id="goindex" value="#{msgs['baf.bbs.home']}" onclick="go_index();return false;"/> --> 
+		  			<h:graphicImage id="goindex" url="#{request.contextPath}/baf/images/bbs/backward_home2.gif" onclick="go_index();return false;" style="vertical-align: middle" />
+		  			</td>
+		  		</tr>	
+		  	</table>
+		  </div>
+		  <div id="center">
+		  <iframe id="bbsframe" name="bbsframe" src="about:blank" scrolling="no" frameborder="0" height="100%" width="100%" />
+		  </div>
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/>
+	    	<h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

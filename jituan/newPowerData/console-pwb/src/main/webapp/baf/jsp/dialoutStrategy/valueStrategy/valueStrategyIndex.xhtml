@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+function showStrategy()  //节点左键单击事件相应函数
+{
+	var itemId = this.getSelectedItemId();
+	var userData = this.getUserData(itemId,'userData');
+	var name = this.getSelectedItemText();
+	if(userData == 'bureau')
+		return;
+	
+    searchValueStrategy(name);  	
+}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+	   td.column1{
+	   width:20%;
+	   }	
+	   td.column2{
+	   width:60%;
+	   }	
+    </style> 
+</head>
+
+<body>
+
+<!-- 时段策略列表 -->
+ <h:form id="tabForm">
+<div>
+	<fieldset id="queryinstance" style="height:90%;width:95%;padding:10px 10px 10px 10px;" >			
+    <legend><h:outputText value="#{msgs['baf.dialoutstrategy.strategySearch']}" /></legend>
+	<h:panelGroup id="tabGroup"  styleClass="scrolls" style="width:98%;height:98%">			
+		<rich:dataTable width="100%" id="itemLists" rows="#{valueStrategyBean.pageSize}" columnClasses="col"  style="text-align:center;" 
+           value="#{valueStrategyBean.dataList}" var="valueItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.strategyName']}" style="font-weight:normal;"/>
+	        </f:facet>
+               <h:outputText value="#{valueItem.validValueName}" />     
+           </h:column>            
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.beginValue']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{valueItem.beginValue}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.endValue']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{valueItem.endValue}" />
+           </h:column>           
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.successNum']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{valueItem.successNum}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.successSpan']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{valueItem.successSpan}" />
+           </h:column>
+           <h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.area']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{valueItem.areaName}" />
+           </h:column>
+           	
+           	<f:facet name="footer">				
+				<rich:datascroller align="center" id="itemScroller" selectedStyle="background-color:#FFB93F;"  />
+			</f:facet>
+       </rich:dataTable>
+       <a4j:keepAlive beanName="valueStrategyBean"/>
+   </h:panelGroup> 
+    </fieldset>
+    
+</div>
+</h:form>	
+ <!-- 时段策略列表  END-->  	         
+	
+    <a4j:form>
+    <a4j:jsFunction name="searchValueStrategy"  action="#{valueStrategyBean.searchValueStrategy}" reRender="tabForm:itemLists">
+        	     	
+    </a4j:jsFunction> 
+    </a4j:form>
+    
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+    <ui:include src="/baf/jsp/taskmange/commonq.xhtml" />
+</body>
+  	</f:view>
+</html>

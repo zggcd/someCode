@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<f:loadBundle basename="messages" var="msgs" />
+
+	<head> 
+	<script type="text/javascript">
+	//<![CDATA[
+	function sub(skin,themeId){
+		var skins = document.getElementsByName("rd");
+		if(skin==""){
+			for(var i=0;i<skins.length;i++){
+				if(skins[i].checked){
+					var values = skins[i].value.split(",");
+					skin = values[0];
+					themeId = values[1];
+				}
+			}
+		}
+		//确保在修改主题之前保存所有数据		
+		if(confirm("${msgs['baf.skin.confirm']}")){
+			changeSkin(skin,themeId);						
+		}
+	}
+	
+	//更换主题完成事件
+	function onSaveComplete(){
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+ 		//设置主题模块目前只会出现在两个地方，一是主页面tab页，二是桌面定制页面，所以保存完之后要刷新frame页面要有判断。
+ 		var parentDocument = parent.document.location;
+ 		if(parentDocument.href.indexOf("frame.xhtml")==-1){
+ 			parentDocument = parent.parent.parent.document.location;
+ 		}
+		parentDocument.reload(true);
+	}
+	function ondisabled(){
+		document.getElementById("sform:elementDelete").disabled = true;
+	}
+	//]]>
+	</script>
+	<style type="text/css">
+	.font{
+		font-weight:   bold;
+		color:#0000FF;
+		font-size:14px;
+	}
+	.rich-table{
+	   border: none;
+	}
+	.rich-table-cell{
+	  border: none;
+	}
+	.imageborder
+	{
+		 border: 1px solid;
+	}
+	</style> 
+	</head>
+<body>
+ 
+	<h:form id="sform">
+		<center>
+			<rich:dataGrid value="#{skinBean.themes}"  border="0" frame="void" var="theme" columns="3" width="100%">
+            	<center>
+                	<h:graphicImage url="/baf/images/skin/#{theme.themeCode}.png" style="cursor:hand;" height="200px" width="250px" styleClass="imageborder" onclick="sub('#{theme.themeCode}','#{theme.themeId}')" title="#{msgs['baf.skin.title']}"/><br /><br />
+                	
+                	<h:outputLabel rendered="#{skinBean.skin==theme.themeCode}">
+		    		<input type="radio" id="rd" name="rd" value="${theme.themeCode},${theme.themeId}" checked="checked"/><rich:spacer width="5px"/>
+		    		</h:outputLabel>
+		    		
+		    		<h:outputLabel rendered="#{skinBean.skin!=theme.themeCode}">
+		    		<input type="radio" id="rd" name="rd" value="${theme.themeCode},${theme.themeId}"/><rich:spacer width="5px"/>
+		    		</h:outputLabel>
+		    		
+		    		<h:outputText value="#{theme.themeDesc}"  styleClass="font"/><br /><br />
+                </center>
+          	</rich:dataGrid>		
+		   	<a4j:commandButton styleClass="rich-button" type="submit" id="elementDelete" value="#{msgs['baf.module.btnSave']}" onclick="sub('','');ondisabled();" disabled="false" immediate="true" reRender="elementDelete">
+		   	</a4j:commandButton>
+		</center>
+	 
+    </h:form>
+	
+    <a4j:form>
+        <a4j:jsFunction name="changeSkin" action="#{skinBean.change}" oncomplete="onSaveComplete()">
+        	<a4j:actionparam name="skin" value="" assignTo="#{skinBean.skin}" />
+        	<a4j:actionparam name="themeId" value="" assignTo="#{skinBean.themeId}" />               
+        </a4j:jsFunction> 
+		
+    </a4j:form>
+	
+  	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>
+
+

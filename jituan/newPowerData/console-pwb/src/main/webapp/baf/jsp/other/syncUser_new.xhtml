@@ -1,0 +1,1377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<f:loadBundle basename="messages" var="msgs" />
+	<head>
+		<script>
+		//<![CDATA[
+		
+		//查询按钮onSubmit事件.
+			function checkQueryInputValues(type){
+		
+			    var beginTime = "";
+				var endTime = "";
+				 if(type == "addUser"){
+					beginTime = document.getElementById("syncForm:startTimeInputDate").value;
+					endTime = document.getElementById("syncForm:endTimeInputDate").value;
+					document.getElementById("syncForm:searchType").value = "addUser";
+				}else if(type == "updateUser"){
+					beginTime = document.getElementById("syncUpdateForm:startTimeUpInputDate").value;
+					endTime = document.getElementById("syncUpdateForm:endTimeUpInputDate").value;
+					document.getElementById("syncUpdateForm:searchType").value = "updateUser";
+				}else if(type == "deleUser"){
+					beginTime = document.getElementById("syncDeleForm:startTimeUpInputDate").value;
+					endTime = document.getElementById("syncDeleForm:endTimeUpInputDate").value;
+					document.getElementById("syncDeleForm:searchType").value = "deleUser";
+				}else if(type == "syncUser"){
+					beginTime = document.getElementById("syncedForm:startTimeUpInputDate").value;
+					endTime = document.getElementById("syncedForm:endTimeUpInputDate").value;
+					document.getElementById("syncedForm:searchType").value = "syncUser";
+				}
+				
+				var returnValue = false;
+				if(beginTime == "" || endTime == "" || typeof(beginTime) =="undefined" || typeof(endTime) =="undefined"){
+					returnValue = true;
+				}else{
+					returnValue = inputSeachTimeCheck(beginTime, endTime)
+				}	
+				if(returnValue == true){
+					Richfaces.showModalPanel("panel");
+				}	
+		
+				return returnValue;
+			}
+		    
+		
+		//在树上还原显示用户选中的部门
+		   	function loadedCallBack(){
+		    	var  uids = document.getElementById("syncForm:unitIds").value;    
+		        var  uidArray = uids.split("#");
+		        if(  uidArray != null && uidArray.length  != undefined &&  uidArray.length > 0 )
+		        { 
+		           for(var i = 0 ; i< uidArray.length;i++)
+		           {
+		               ORGTree_tree.setCheck(uidArray[i],1);   
+		           }
+		        }
+		   	}		  
+		   	
+			//点击复选框时，若树上已勾选复选框，则取消以前勾选的
+			function cancelOldChecked(itemId, checkstate){
+				var checkedId = ORGTree_tree.getAllChecked();
+				if(checkedId.indexOf(",") != -1){
+					var oldCheckedId = checkedId.replace(itemId,"").replace(",","");
+					ORGTree_tree.setCheck(oldCheckedId, "0");
+				}
+			}
+			
+			//导入到指定部门时，判断是否在树上选择了部门
+			function beforeImportToUnitForUnfoldTree(witchForm){
+				//弹出模态框时，将类型存放到了人员新增tab页的隐藏域中，这里获取之前存放的类型
+				var type = document.getElementById("syncForm:searchType").value;
+				
+				document.getElementById(witchForm + ":selectedItemIds").value = objIdArray.join(",");
+				
+				if(witchForm.indexOf("sync") != -1)
+					document.getElementById(witchForm +":selectedUnitId").value = objParentIdArray.join(",");
+				
+				document.getElementById(witchForm + ":searchType").value = type;
+				return true;
+			}
+			
+			
+				function afterGetAllOrgIds(){
+				//刷新组织树
+		 		ORGTree_tree.deleteChildItems("0");
+			  	ORGTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/other/orgtree.jsp?fullUnitIds=" + document.getElementById("panelForm:fullUnitIds").value);
+			  	ORGTree_tree.refreshItem("0"); 
+
+			  	Richfaces.showModalPanel("orgPanel");
+			}
+			//批量选中的对象列表
+			var curSelUserAddArray = new Array;
+			var curSelUserUpdateArray = new Array;
+			var curSelUserDeleArray = new Array;
+			
+			//往对象数组中加减数据
+			function selObj(obj,type){
+				var curSelObjArray = new Array;
+				if(type == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(type == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}else if(type == "deleUser"){
+					curSelObjArray = curSelUserDeleArray;
+				}
+				var v = obj.value;
+				if(obj.checked && curSelObjArray.indexOf(v)==-1){
+					curSelObjArray.push(v);
+				}else if(!obj.checked && curSelObjArray.indexOf(v)>-1){
+					curSelObjArray.remove(v);
+				}
+			}
+				//全选复选框
+			function selObjAll(checked,domName) {
+				var curSelObjArray = new Array;
+				if(domName == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(domName == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}else if(domName == "deleUser"){
+					curSelObjArray = curSelUserDeleArray;
+				}
+				$A(document.getElementsByName(domName)).each(function(ch){
+					ch.checked = checked;
+					var v = ch.value;
+					if(v != undefined){
+						if(checked && curSelObjArray.indexOf(v)==-1){
+							curSelObjArray.push(v);
+						}else if(!checked && curSelObjArray.indexOf(v)>-1){
+							curSelObjArray.remove(v);
+						}
+					}
+				});
+			}
+			
+			
+			//在每次分页的时候，记忆查询结果列表中选中的对象
+			function saveSelledObj(domName){	
+				var curSelObjArray = new Array;
+				if(domName == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(domName == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}
+				else if(domName == "deleUser"){
+					curSelObjArray = curSelUserDeleArray;
+				}
+				$A(document.getElementsByName(domName)).each(function(ch){
+					if(curSelObjArray.indexOf(ch.value)>-1){
+						ch.checked = true;
+					}
+				});
+			}
+			var objIdArray = new Array;	     	//对象ID集合
+			var objNameArray = new Array;	    //对象Name集合
+			var objParentIdArray = new Array;	//对象父ID集合
+			//导入到指定部门时，判断是否在树上选择了部门
+			function beforeImportToNewUnit(){
+			    //setbusinessCde();
+				var checkedId = ORGTree_tree.getAllChecked();
+			
+				if(checkedId == ""){
+					//请选择一个部门！
+					alert("#{msgs['baf.other.selectUnit']}");
+					return false;
+				}else{ 
+					var text = ORGTree_tree.getItemText(checkedId);
+					//是否将数据导入到指定的部门下面
+					if(!confirm("#{msgs['baf.other.confirmImport']} '"+ objNameArray.join("、") +"' #{msgs['baf.other.importTo']} '" + text + "' #{msgs['baf.dataprocess.message5']}#{msgs['baf.questionMark']}")){
+						return false;
+					}
+					for(var i=0;i<objParentIdArray.length;i++){
+						objParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + objParentIdArray[i] + "#" + checkedId);
+					}
+					//弹出模态框时，将类型存放到了人员新增tab页的隐藏域中，这里获取之前存放的类型
+					var type = document.getElementById("syncForm:searchType").value;
+					if(type.indexOf("addUnit") == 0 || type.indexOf("updateUnit") == 0){
+						document.getElementById("panelForm:selectedItemIds").value = objIdArray.join(",");
+						document.getElementById("panelForm:selectedUnitId").value = checkedId;
+						document.getElementById("panelForm:selectedUnitName").value = text;
+					}else{
+						document.getElementById("panelForm:selectedItemIds").value = objParentIdArray.join(",");
+					}
+					document.getElementById("panelForm:searchType").value = type;
+					Richfaces.showModalPanel("panel");
+				}
+				
+				return true;
+			}
+			
+			
+			//恢复到指定部门时判,判断是否选择了数据，默认展开树
+			function showModalPanelForUnfoldTree(type){
+				var curSelObjArray = new Array;
+				if(type == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(type == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}
+				else if(type == "deleUser"){
+					curSelObjArray = curSelUserDeleArray;
+				}
+				if(curSelObjArray.length == 0){
+					//请选择要导入的数据！
+					alert("#{msgs['baf.other.selectImportData']}");
+					return false;
+				}else{
+					//恢复到指定部门时，将当前操作类型放在第一个tab页的隐藏域中，便于在模态框中确定时获取该类型值
+					document.getElementById("syncForm:searchType").value = type;
+					if(type.indexOf("New") > 0){
+						//获取勾选的数据对象
+						getSelectedData(type.replace("New",""));
+					}else{
+						//获取勾选的数据对象
+						getSelectedData(type);
+					}
+					//弹出复选框
+					//Richfaces.showModalPanel("orgPanel");
+				}
+			}
+			
+			//获取选中行的相关数据
+			function getSelectedData(type){
+				var curSelObjArray = new Array;
+				if(type == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(type == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}else if(type == "deleUser"){
+				   curSelObjArray = curSelUserDeleArray;
+				}
+				objIdArray = new Array;	     	//对象ID集合	
+				objNameArray = new Array;	    //对象Name集合
+				objParentIdArray = new Array;	//对象父ID集合
+				for(var i = 0;i < curSelObjArray.length;i++){
+					var v = curSelObjArray[i].split(";");
+					objIdArray.push(v[0]);
+					objNameArray.push(v[1]);
+					objParentIdArray.push(v[2]);
+				}
+			}
+			
+			
+				//导入到指定部门时，判断是否在树上选择了部门
+			function beforeImportToUnitForUnfoldTree(witchForm){
+				//弹出模态框时，将类型存放到了人员新增tab页的隐藏域中，这里获取之前存放的类型
+				var type = document.getElementById("syncForm:searchType").value;
+				
+				document.getElementById(witchForm + ":selectedItemIds").value = objIdArray.join(",");
+				
+				if(witchForm.indexOf("sync") != -1)
+					document.getElementById(witchForm +":selectedUnitId").value = objParentIdArray.join(",");
+				
+				document.getElementById(witchForm + ":searchType").value = type;
+				return true;
+			}
+			
+				//恢复到指定部门完成事件
+			function onImportNewUnitComplete(data){	
+					
+		 		Richfaces.hideModalPanel("panel");
+				
+		 		var type = document.getElementById("panelForm:searchType").value;
+		 
+		 		
+		 			if(data != "" && data != undefined){
+			 		
+		 				var strs = data.split("#");
+						var msg = '';
+			 			if(typeof(strs[1]) != 'undefined' && strs[1]!= '')
+		 					msg = "'"+ strs[1] +"' #{msgs['baf.other.importFail']}";	//所属部门不存在，导入失败！
+		 				
+		 				if(typeof(strs[0]) != 'undefined' && strs[0]!= '')
+			 				if(msg!='')
+				 				msg = msg + ", "
+			 				msg = msg + "'" +strs[0]+"'#{msgs['baf.other.userIsExist']}";			//人员已存在，导入失败
+ 						
+		 				alert(msg);		 			
+		 				
+			 		}else{
+						if(a4jcomplete()==false){
+				 			return;
+				 		}
+				 		 if(confirm("#{msgs['baf_syn_msn']}")){  
+				 		    refreshUserAddList(); 
+				 		   refreshUserSyncList();
+				 		   RichFaces.switchTab('tabPanel','userSync');
+                          
+		 		            if(type == "addUser"){
+					            curSelUserAddArray = new Array;
+				            }else if(type == "updateUser"){
+					            curSelUserUpdateArray = new Array;
+				          }else{
+					            curSelUserDeleArray = new Array;
+			            	}
+		 		            Richfaces.hideModalPanel("orgPanel");
+		 		             setTabRendered('userSync');
+		 		           return;
+		 		         }
+			 		}
+			 
+			 	
+		 		//清空数组
+				if(type == "addUser"){
+					curSelUserAddArray = new Array;
+				}else if(type == "updateUser"){
+					curSelUserUpdateArray = new Array;
+				}else{
+					curSelUserDeleArray = new Array;
+				}
+		 		Richfaces.hideModalPanel("orgPanel");
+		 		if(type == "addUser"){	  
+		 		       //刷新人员新增列表
+			 		   refreshUserAddList(); 
+
+			 	
+		 		}else if(type == "updateUser"){
+					//刷新人员修改列表
+		 			refreshUserUpdateList();
+				}else if(type == "deleUser"){
+					//刷新人员修改列表
+		 			refreshUserDeleList();
+				}else if(type == "syncUser"){
+				   refreshUserSyncList();
+				    
+				}
+			}
+			
+				//设置是否重新渲染tab页
+			function setTabRendered(tabId){
+				
+				if(tabId == "userAdd" ){
+					setTabContentRendered("userAdd","syncForm");
+					Richfaces.showModalPanel("panel");
+				}
+				if(tabId == "userUpdate" ){
+					setTabContentRendered("userUpdate","syncUpdateForm");
+					Richfaces.showModalPanel("panel");
+				}
+				if(tabId == "userDele" ){
+					setTabContentRendered("userDele","syncDeleForm");
+					Richfaces.showModalPanel("panel");
+				}
+				if(tabId == "userSync" ){
+					setTabContentRendered("userSync","syncedForm");
+					Richfaces.showModalPanel("panel");
+
+				}
+			}
+			
+				//调用userBean里面的方法显示人员详情
+			function showUserInfo(form){
+				var userId = document.getElementById(form+":userIdForBaf").value;
+
+				if(userId == null || typeof(userId)== "undefined" || userId == ""){
+					alert("#{msgs['baf.other.notExistInBaf']}");
+					return;
+				}
+				if(form=="syncedForm")	{
+				   userEdit(userId);
+				}else{
+				   userInfo(userId);
+				}			
+				
+			}
+			
+			
+			
+			
+				//只修改人员信息，不修改组织关系
+			function beforeOnlyUpdateUser(type){
+				var curSelObjArray = new Array;
+				if(type == "addUser"){
+					curSelObjArray = curSelUserAddArray;
+				}else if(type == "updateUser"){
+					curSelObjArray = curSelUserUpdateArray;
+				}
+				if(curSelObjArray.length == 0){
+					//请选择要导入的数据！
+					alert("#{msgs['baf.other.selectImportData']}");
+					return false;
+				}else{			
+					//是否将数据到导入部门下面
+					if(!confirm("#{msgs['baf.other.isOnlyUpdateUser']}")){
+						return false;
+					}
+					for(var i=0;i<objParentIdArray.length;i++){
+						objParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + objParentIdArray[i]);
+					}
+					if(type == "addUser"){
+						document.getElementById("syncForm:selectedItemIds").value = objParentIdArray.join(",");
+						document.getElementById("syncForm:searchType").value = "addUser";
+					}else if(type == "updateUser"){
+						document.getElementById("syncUpdateForm:selectedItemIds").value = objParentIdArray.join(",");
+						document.getElementById("syncUpdateForm:searchType").value = "updateUser";
+					}
+					Richfaces.showModalPanel("panel");
+				}
+				return true;
+			}
+			
+				//导入部门完成事件
+			function onImportOldUnitComplete(type,data){
+		 		Richfaces.hideModalPanel("panel");
+
+		 		//分人员和部门来不同处理
+		 		if(type == "addUser" ||type == "updateUser"){
+		 			if(data != "" && data != undefined){
+			 		
+		 				var strs = data.split("#");
+						var msg = '';
+			 			if(typeof(strs[1]) != 'undefined' && strs[1]!= '')
+		 					msg = "'"+ strs[1] +"' #{msgs['baf.other.importFail']}";	//所属部门不存在，导入失败！
+		 				
+		 				if(typeof(strs[0]) != 'undefined' && strs[0]!= ''){
+			 				if(msg!='')
+				 				msg = msg + ", "
+			 				msg = msg + "'" +strs[0]+"'#{msgs['baf.other.userIsExist']}";			//人员已存在，导入失败
+		 				}
+		 				alert(msg);		 			
+		 				
+			 		}else{
+						if(a4jcomplete()==false){
+				 			return;
+				 		}
+			 		}
+			 	}
+		 		//清空数组
+				if(type == "addUser"){
+					curSelUserAddArray = new Array;
+				}else if(type == "updateUser"){
+					curSelUserUpdateArray = new Array;
+				}
+				if(type == "addUser"){
+			 		//刷新人员新增列表
+			 		refreshUserAddList(); 
+		 		}else if(type == "updateUser"){
+					//刷新人员修改列表
+		 			refreshUserUpdateList();
+				}
+			}
+			
+				//重置查询条件
+			function resetConditions(type){
+				if(type == "addUser"){
+					document.getElementById("syncForm:searchUserName").value = "";
+				
+					document.getElementById("syncForm:searchLoginName").value = "";
+					document.getElementById("syncForm:startTimeInputDate").value = "";
+					document.getElementById("syncForm:endTimeInputDate").value = "";
+				}else if(type == "updateUser"){
+					document.getElementById("syncUpdateForm:seaUpUserName").value = "";
+			
+					document.getElementById("syncUpdateForm:seaUpLoginName").value = "";
+					document.getElementById("syncUpdateForm:startTimeUpInputDate").value = "";
+					document.getElementById("syncUpdateForm:endTimeUpInputDate").value = "";
+				}
+			}
+			
+			  //查询日志日期验证.开始日期不能大于结束日期,如果大于则返回FALSE 
+			function inputSeachTimeCheck(beginDay,endDay){
+				var beginDate = beginDay.split(" ");
+				var arr1 = beginDate[0].split("-");
+				var begin = new Date(arr1[0],arr1[1],arr1[2]);
+				var beginDaytime = begin.getTime();
+				var hour1 = beginDate[1].split(":")[0];
+				var mini1 = beginDate[1].split(":")[1];
+		
+				var endDate = endDay.split(" ");
+				var arr2 = endDate[0].split("-");
+				var end = new Date(arr2[0],arr2[1],arr2[2]);
+				var endDayTime = end.getTime();
+				var hour2 = endDate[1].split(":")[0];
+				var mini2 = endDate[1].split(":")[1];
+		
+				if(beginDaytime >= endDayTime){
+					if(beginDaytime > endDayTime){
+						alert("${msgs['baf.dataImport.dateCompare']}");
+						return false;
+					}else{
+						if(hour1>hour2 || (hour1==hour2 && mini1>mini2)){
+							alert("${msgs['baf.dataImport.dateCompare']}");
+							return false;
+						}else{
+							return true;
+						}
+					}
+				}else{
+					return true;
+				}
+			}	
+			
+		
+			
+			//删除人员时，判断是否选择了数据
+			function beforeDelete(){
+				var curSelObjArray = new Array;
+		
+					curSelObjArray = curSelUserDeleArray;
+				
+				if(curSelObjArray.length == 0){
+					//请选择要删除的数据
+					//alert("#{msgs['baf.other.selectImportData']}");
+					alert("#{msgs['baf.other.chooseToDelete']}");
+					return false;
+				}else{			
+					//是否删除这些数据
+					if(!confirm("#{msgs['baf.other.confirmDelete']}")){
+						return false;
+					}
+					for(var i=0;i<objParentIdArray.length;i++){
+						objParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + objParentIdArray[i]);
+					}
+					
+						document.getElementById("syncDeleForm:selectedItemIds").value = objParentIdArray.join(",");
+						document.getElementById("syncDeleForm:searchType").value = "deleUser";
+					
+					Richfaces.showModalPanel("panel");
+				}
+				return true;
+			}
+			
+				//删除部门完成事件
+			function onDeleteComplete(type){			
+		 		Richfaces.hideModalPanel("panel");
+		 		if(a4jcomplete()==false){
+		 			return;
+		 		}		
+		 		//清空数组
+				
+				curSelUserDeleArray = new Array;
+		
+		 		refreshUserDeleList();
+				
+			}
+			
+			
+			function updUser(data){
+			   	Richfaces.hideModalPanel("panel");
+			   if(data=="Y"){
+			      alert("${msgs['baf.message.success']}");
+			   }
+			}
+		    //]]>
+		</script>
+		<style type="text/css">
+		.column1{
+			width:15%;
+			text-align:left;
+		}
+		.column2{
+			width:35%;
+			text-align:left;
+		}
+		      
+		</style>   
+	</head>
+	
+	<body>
+		<regaltec:viewPort ctCls="panel-bdColor">	
+			<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+				contentEl="center"/>
+		</regaltec:viewPort>
+		
+		<regaltec:dhtmlXtree id="ORGTree" imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_orgtree"
+			loadXML="/baf/jsp/other/orgtree.jsp,loadedCallBack"
+			xmlAutoLoading="/baf/jsp/other/orgtree.jsp?fullunitids=#{syncUserBean.fullUnitIds},loadedCallBack">
+			<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>	
+			<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />
+		</regaltec:dhtmlXtree>
+	
+		<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+			<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:97%;" switchType="client"> 
+				<!-- 人员新增 -->
+				<rich:tab id="user" label="#{msgs['baf.org.Employee']}#{msgs['baf.Add']}" style="height:100%;width:100%;" >
+					<br/>
+					<center>
+					<!-- 查询Panel -->
+					<h:form id="syncForm">
+					      
+							
+						<h:panelGroup >
+							<rich:panel style="width:95%;">				
+								<h:panelGrid columns="5" style="font-size:13px;width:70%" columnClasses="column1,column2, column1,column2, column1"  styleClass=".rich-text-color-general">	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}:" style="font-weight:normal;"/>
+										<h:inputText id="searchUserName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.userName}"/>
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}:" style="font-weight:normal;"/>
+										<h:inputText id="searchLoginName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.loginName}"/>
+										<h:panelGroup>											
+										<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="query" value="#{msgs['baf.bulletin.query']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('addUser') == false) return false;" action="#{syncUserBean.searchDataByConditions}" requestDelay="100" 
+												oncomplete="Richfaces.hideModalPanel('panel');" reRender="userAddList,userAddScroller,pageNo"/>				
+										</a4j:commandButton>		
+								
+										</h:panelGroup>		
+
+									
+										
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logBeginTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="startTime"  value="#{syncUserBean.startTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											 defaultTime="00:00" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+											 
+									   <h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logEndTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="endTime"  value="#{syncUserBean.endTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											 defaultTime="23:59"  inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										
+									 	<h:panelGroup>		
+										<!-- 重置按钮 -->
+											<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+											<a4j:support event="onclick" onsubmit="resetConditions('addUser');return false;"/>
+										</a4j:commandButton>
+										</h:panelGroup>		
+										
+										
+								</h:panelGrid>	
+							</rich:panel>	
+									
+							<br/>
+							
+							<center>
+								
+								<rich:spacer width="10px"/>	
+								
+								<!-- 导入到指定部门 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="importToNewUnit" value="#{msgs['baf.other.importToNewParent']}" style="width: 115px">
+								<a4j:support event="onclick" onsubmit="if(showModalPanelForUnfoldTree('addUser')==false)return false;if (beforeImportToUnitForUnfoldTree('syncForm')==false) return false;"
+										action="#{syncUserBean.getAllOrgIds}" oncomplete="afterGetAllOrgIds();" reRender="selectedUnitId,panelForm"/>
+						
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								<!-- 刷新人员列表 -->
+								    <a4j:jsFunction name="refreshUserAddList" action="#{syncUserBean.loadAddUserData}" reRender="userAddList,userAddScroller,pageNo"/>
+								
+								<h:inputHidden id="selectedItemIds" value="#{syncUserBean.selectedItemIds}"/>
+								<h:inputHidden id="unitIds" value="#{syncUserBean.unitIds}"/>
+								<h:inputHidden id="searchType" value="#{syncUserBean.searchType}"/>
+								<h:inputHidden id="pageNo" value="#{syncUserBean.addUserScrollerPage}"/>
+								<h:inputHidden id="selectedUnitId" value="#{syncUserBean.selectedUnitId}"/>
+								
+							
+							</center>					
+					    	<br/>
+					    	
+						    <rich:dataTable width="95%" id="userAddList" rows="#{syncUserBean.pageSize}" columnClasses="col"
+								value="#{syncUserBean.itemList}" var="insItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+								<rich:column width="4%" style="text-align:center;">
+							        <f:facet name="header">
+										<input type="checkbox" onclick="selObjAll(this.checked,'addUser');"/>
+									</f:facet>
+									<input type="checkbox" name="addUser" value="#{insItem.sid};#{insItem.userName};#{insItem.unitId}" onclick="selObj(this,'addUser');"/>
+						        </rich:column>	
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.userName}"/>
+							    </rich:column>
+							    <rich:column style="width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.loginName}"/>
+							    </rich:column>
+								<rich:column style="text-align:center;width:4%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{msgs['baf.radioMankind']}" rendered="#{insItem.gender == 'M'}" />
+								    <h:outputText value="#{msgs['baf.radioFemale']}" rendered="#{insItem.gender == 'F'}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.employeeType}"/>
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.telephoneNumber}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.mobile}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.phsNumber}" />
+							    </rich:column>
+						    </rich:dataTable>
+						    <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller for="userAddList" align="right" id="userAddScroller" selectedStyle="background-color:#FFB93F;" fastStep="1" 
+											page="#{syncUserBean.addUserScrollerPage}" reRender="pageNo" oncomplete="saveSelledObj('addUser');"/>
+									</td>
+								</tr>
+							</table>
+						</h:panelGroup>
+					</h:form>
+					</center>
+			    </rich:tab>
+			    
+			    
+			    
+			
+			   	    <!-- 人员修改 -->
+			    <rich:tab id="userUpdate" label="#{msgs['baf.org.Employee']}#{msgs['baf.Edit']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('userUpdate');">
+			    	<br/>
+			    	<center>
+					<h:form id="syncUpdateForm">
+						<h:panelGroup rendered="#{syncUserBean.userUpdateTabRendered}">
+							<!-- 查询Panel -->
+							<rich:panel style="width:95%;">
+								<h:panelGrid columns="5" style="font-size:13px;width:70%;" columnClasses="column1,column2,column1,column2,column1" styleClass=".rich-text-color-general">	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpUserName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.userName}"/>
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpLoginName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.loginName}"/>														
+										<h:panelGroup>	
+									   	<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="queryUser" value="#{msgs['baf.bulletin.query']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('updateUser') == false) return false;" action="#{syncUserBean.searchDataByConditions}" requestDelay="100" 
+												oncomplete="Richfaces.hideModalPanel('panel');" reRender="userUpdateList,userUpdateScroller,pageNo"/>				
+										</a4j:commandButton>
+									 	</h:panelGroup>	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logBeginTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="startTimeUp"  value="#{syncUserBean.startTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="00:00" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logEndTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="endTimeUp"  value="#{syncUserBean.endTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="23:59" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:panelGroup>	
+										<!-- 重置按钮 -->
+										<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+											<a4j:support event="onclick" onsubmit="resetConditions('updateUser');return false;"/>
+										</a4j:commandButton>
+										</h:panelGroup>	
+																	
+									
+								</h:panelGrid>
+					    	</rich:panel>
+					    	<br/>
+					    	 
+					    	<center>
+						    	
+							
+								<rich:spacer width="10px"/>	
+								<!-- 导入指定部门 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="importNew" value="#{msgs['baf.other.importToNewParent']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="if(showModalPanelForUnfoldTree('updateUser')==false)return false;if (beforeImportToUnitForUnfoldTree('syncUpdateForm')==false) return false;"
+										action="#{syncUserBean.getAllOrgIds}" oncomplete="afterGetAllOrgIds();" reRender="panelForm, selectedUnitId"/>
+								</a4j:commandButton>
+								
+								<!-- 修改基本信息(原组织人员信息不变) -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="importUser" value="#{msgs['baf.other.onlyUpdateUser']}" style="width: 220px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('updateUser');if (beforeOnlyUpdateUser('updateUser')==false) return false;"
+										action="#{syncUserBean.updateOnlyUser}" oncomplete="onImportOldUnitComplete('updateUser',data);" />
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>	
+								
+							
+								
+								<!-- 刷新人员修改列表 -->
+								<a4j:jsFunction name="refreshUserUpdateList" action="#{syncUserBean.loadUpdateUserData}" reRender="userUpdateList,userUpdateScroller"/>
+								
+								<a4j:jsFunction name="translateRdnToUserId" limitToList="true" action="#{syncUserBean.translateRdnToUserId}" oncomplete="showUserInfo('syncUpdateForm');" reRender="userIdForBaf">
+						           <a4j:actionparam name="userRdn" assignTo="#{syncUserBean.userRdn}"  />           
+						        </a4j:jsFunction>
+								
+								<h:inputHidden id="selectedItemIds" value="#{syncUserBean.selectedItemIds}"/>
+								<h:inputHidden id="selectedUnitId" value="#{syncUserBean.selectedUnitId}"/>
+								<h:inputHidden id="selectedUnitName" value="#{syncUserBean.selectedUnitName}"/>
+								<h:inputHidden id="searchType" value="#{syncUserBean.searchType}"/>
+								<h:inputHidden id="pageNo" value="#{syncUserBean.updateUserScrollerPage}"/>
+								<h:inputHidden id="userIdForBaf" value="#{syncUserBean.userIdForBaf}"/>
+								<h:inputHidden id="userRdn" value="#{syncUserBean.userRdn}"/>
+							</center>				
+						    <br/>
+						    
+						    <rich:dataTable width="95%" id="userUpdateList" rows="#{syncUserBean.pageSize}" columnClasses="col"
+						     	value="#{syncUserBean.userItemList}" var="insItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+								<rich:column width="4%" style="text-align:center;">
+							        <f:facet name="header">
+										<input type="checkbox" onclick="selObjAll(this.checked,'updateUser');"/>
+									</f:facet>
+									<input type="checkbox" name="updateUser" value="#{insItem.sid};#{insItem.userName};#{insItem.unitId}" onclick="selObj(this,'updateUser');"/>
+						        </rich:column>	
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText"  value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputLink styleClass="headerText" onclick="translateRdnToUserId('#{insItem.sid}');return false; ">
+								    	<h:outputText value="#{insItem.userName}" title="#{msgs['baf.oher.clickAndCheckUserInfo']}" />
+								    </h:outputLink>
+							    </rich:column>
+							    <rich:column style="width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.loginName}"/>
+							    </rich:column>
+								<rich:column style="text-align:center;width:4%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{msgs['baf.radioMankind']}" rendered="#{insItem.gender == 'M'}" />
+								    <h:outputText value="#{msgs['baf.radioFemale']}" rendered="#{insItem.gender == 'F'}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.employeeType}"/>
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.telephoneNumber}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.mobile}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.phsNumber}" />
+							    </rich:column>
+							  
+						    </rich:dataTable>
+						    <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller for="userUpdateList" align="right" id="userUpdateScroller" selectedStyle="background-color:#FFB93F;" fastStep="1"  
+											page="#{syncUserBean.updateUserScrollerPage}" reRender="pageNo" oncomplete="saveSelledObj('updateUser');"/>							
+									</td>
+								</tr>
+							</table>
+						</h:panelGroup>
+					</h:form>
+					</center>
+			    </rich:tab>
+			    
+			    
+			    
+			    	    <!-- 人员删除 -->
+			    <rich:tab id="userDele" label="#{msgs['baf.org.Employee']}#{msgs['baf.Delete']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('userDele');">
+			    	<br/>
+			    	<center>
+					<h:form id="syncDeleForm">
+						<h:panelGroup rendered="#{syncUserBean.userDeleTabRendered}">
+							<!-- 查询Panel -->
+							<rich:panel style="width:95%;">
+								<h:panelGrid columns="5" style="font-size:13px;width:70%;" columnClasses="column1,column2,column1,column2,column1" styleClass=".rich-text-color-general">	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpUserName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.userName}"/>
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpLoginName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.loginName}"/>														
+										<h:panelGroup>	
+									   	<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="queryUser" value="#{msgs['baf.bulletin.query']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('deleUser') == false) return false;" action="#{syncUserBean.searchDataByConditions}" requestDelay="100" 
+												oncomplete="Richfaces.hideModalPanel('panel');" reRender="userDeleList,userDeleScroller,pageNo"/>				
+										</a4j:commandButton>
+									 	</h:panelGroup>	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logBeginTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="startTimeUp"  value="#{syncUserBean.startTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="00:00" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logEndTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="endTimeUp"  value="#{syncUserBean.endTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="23:59" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:panelGroup>	
+										<!-- 重置按钮 -->
+										<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+											<a4j:support event="onclick" onsubmit="resetConditions('DeleUser');return false;"/>
+										</a4j:commandButton>
+										</h:panelGroup>	
+																	
+									
+								</h:panelGrid>
+					    	</rich:panel>
+					    	<br/>
+					    	 
+					    	<center>
+						    	
+							
+								<rich:spacer width="10px"/>	
+													<!-- 删除人员 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="deleteDefault" value="#{msgs['baf.other.deleteUser']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('deleUser');if (beforeDelete()==false) return false;" 
+										action="#{syncUserBean.deleteUser}" oncomplete="onDeleteComplete('deleUser');"/>
+								
+							</a4j:commandButton>
+								
+								<!-- 刷新人员删除列表 -->
+								<a4j:jsFunction name="refreshUserDeleList" action="#{syncUserBean.loadDeleUserData}" reRender="userDeleList,userDeleScroller"/>
+								
+								<a4j:jsFunction name="translateRdnToUserId" limitToList="true" action="#{syncUserBean.translateRdnToUserId}" oncomplete="showUserInfo('syncDeleForm');" reRender="userIdForBaf">
+						           <a4j:actionparam name="userRdn" assignTo="#{syncUserBean.userRdn}"  />           
+						        </a4j:jsFunction>
+								
+								<h:inputHidden id="selectedItemIds" value="#{syncUserBean.selectedItemIds}"/>
+								<h:inputHidden id="selectedUnitId" value="#{syncUserBean.selectedUnitId}"/>
+								<h:inputHidden id="selectedUnitName" value="#{syncUserBean.selectedUnitName}"/>
+								<h:inputHidden id="searchType" value="#{syncUserBean.searchType}"/>
+								<h:inputHidden id="pageNo" value="#{syncUserBean.deleUserScrollerPage}"/>
+								<h:inputHidden id="userIdForBaf" value="#{syncUserBean.userIdForBaf}"/>
+								<h:inputHidden id="userRdn" value="#{syncUserBean.userRdn}"/>
+							</center>				
+						    <br/>
+						    
+						    <rich:dataTable width="95%" id="userDeleList" rows="#{syncUserBean.pageSize}" columnClasses="col"
+						     	value="#{syncUserBean.userDeleList}" var="deleItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+								<rich:column width="4%" style="text-align:center;">
+							        <f:facet name="header">
+										<input type="checkbox" onclick="selObjAll(this.checked,'DeleUser');"/>
+									</f:facet>
+									<input type="checkbox" name="DeleUser" value="#{deleItem.sid};#{deleItem.userName};#{deleItem.unitId}" onclick="selObj(this,'deleUser');"/>
+						        </rich:column>	
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText"  value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputLink styleClass="headerText" onclick="translateRdnToUserId('#{deleItem.sid}');return false; ">
+								    	<h:outputText value="#{deleItem.userName}" title="#{msgs['baf.oher.clickAndCheckUserInfo']}" />
+								    </h:outputLink>
+							    </rich:column>
+							    <rich:column style="width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{deleItem.loginName}"/>
+							    </rich:column>
+								<rich:column style="text-align:center;width:4%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{msgs['baf.radioMankind']}" rendered="#{deleItem.gender == 'M'}" />
+								    <h:outputText value="#{msgs['baf.radioFemale']}" rendered="#{deleItem.gender == 'F'}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{deleItem.employeeType}"/>
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{deleItem.telephoneNumber}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{deleItem.mobile}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{deleItem.phsNumber}" />
+							    </rich:column>
+							  
+						    </rich:dataTable>
+						    <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller for="userDeleList" align="right" id="userDeleScroller" selectedStyle="background-color:#FFB93F;" fastStep="1"  
+											page="#{syncUserBean.deleUserScrollerPage}" reRender="pageNo" oncomplete="saveSelledObj('deleUser');"/>							
+									</td>
+								</tr>
+							</table>
+						</h:panelGroup>
+					</h:form>
+					</center>
+			    </rich:tab>
+			    
+			    
+			 <!--  已同步人员信息查询 --> 
+			    <rich:tab id="userSync" label="已同步#{msgs['baf.org.Employee']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('userSync');" >
+			    	<br/>
+			    	<center>
+					<h:form id="syncedForm">
+						<h:panelGroup id="syn_panel" rendered="#{syncUserBean.userSyncTabRendered}">
+							<!-- 查询Panel -->
+							<rich:panel style="width:95%;">
+								<h:panelGrid columns="5" style="font-size:13px;width:70%;" columnClasses="column1,column2,column1,column2,column1" styleClass=".rich-text-color-general">	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpUserName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.userName}"/>
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}:" style="font-weight:normal;"/>
+										<h:inputText id="seaUpLoginName" style="width:200px;height:23px;" styleClass="rich-gradient-input"  value="#{syncUserBean.loginName}"/>														
+										<h:panelGroup>	
+									   	<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="queryUser" value="#{msgs['baf.bulletin.query']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('syncUser') == false) return false;" action="#{syncUserBean.searchDataByConditions}" requestDelay="100" 
+												oncomplete="Richfaces.hideModalPanel('panel');" reRender="userSyncList,userSyncScroller,pageNo"/>				
+										</a4j:commandButton>
+									 	</h:panelGroup>	
+									
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logBeginTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="startTimeUp"  value="#{syncUserBean.startTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="00:00" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.logEndTimeLabel']}:" style="font-weight:normal;"/>
+										<rich:calendar id="endTimeUp"  value="#{syncUserBean.endTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+											defaultTime="23:59" oninputkeydown="forCheck();" inputStyle="width:180px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+										<h:panelGroup>	
+										<!-- 重置按钮 -->
+										<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+											<a4j:support event="onclick" onsubmit="resetConditions('syncUser');return false;"/>
+										</a4j:commandButton>
+										</h:panelGroup>	
+																	
+									
+								</h:panelGrid>
+					    	</rich:panel>
+					    	<br/>
+					    	 
+					    	<center>
+						    	
+							
+								<rich:spacer width="10px"/>	
+								
+								<rich:spacer width="10px"/>	
+								
+							
+								
+								<!-- 刷新人员已同步列表 -->
+								<a4j:jsFunction name="refreshUserSyncList" action="#{syncUserBean.loadSyncUserData}" reRender="userSyncList,userSyncScroller" />
+								
+								<a4j:jsFunction name="translateRdnToUserId" limitToList="true" action="#{syncUserBean.translateRdnToUserId}" oncomplete="showUserInfo('syncedForm');" reRender="userIdForBaf">
+						           <a4j:actionparam name="userRdn" assignTo="#{syncUserBean.userRdn}"  />           
+						        </a4j:jsFunction>
+								
+								<h:inputHidden id="selectedItemIds" value="#{syncUserBean.selectedItemIds}"/>
+								<h:inputHidden id="selectedUnitId" value="#{syncUserBean.selectedUnitId}"/>
+								<h:inputHidden id="selectedUnitName" value="#{syncUserBean.selectedUnitName}"/>
+								<h:inputHidden id="searchType" value="#{syncUserBean.searchType}"/>
+								<h:inputHidden id="pageNo" value="#{syncUserBean.syncUserScrollerPage}"/>
+								<h:inputHidden id="userIdForBaf" value="#{syncUserBean.userIdForBaf}"/>
+								<h:inputHidden id="userRdn" value="#{syncUserBean.userRdn}"/>
+							</center>				
+						    <br/>
+						    
+						    <rich:dataTable width="95%" id="userSyncList" rows="#{syncUserBean.pageSize}" columnClasses="col"
+						     	value="#{syncUserBean.userSyncList}" var="insItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+								
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText"  value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputLink styleClass="headerText" onclick="translateRdnToUserId('#{insItem.sid}');return false; ">
+								    	<h:outputText value="#{insItem.userName}" title="#{msgs['baf.oher.clickAndCheckUserInfo']}" />
+								    </h:outputLink>
+							    </rich:column>
+							    <rich:column style="width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.loginName}"/>
+							    </rich:column>
+								<rich:column style="text-align:center;width:4%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{msgs['baf.radioMankind']}" rendered="#{insItem.gender == 'M'}" />
+								    <h:outputText value="#{msgs['baf.radioFemale']}" rendered="#{insItem.gender == 'F'}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.employeeType}"/>
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.telephoneNumber}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.mobile}" />
+							    </rich:column>
+							    <rich:column style="text-align:center;width:8%;">
+								    <f:facet name="header">
+								    	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+								    </f:facet>
+								    <h:outputText value="#{insItem.phsNumber}" />
+							    </rich:column>
+						    </rich:dataTable>
+						    <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller for="userSyncList" align="right" id="userSyncScroller" selectedStyle="background-color:#FFB93F;" fastStep="1"  
+											page="#{syncUserBean.syncUserScrollerPage}" reRender="pageNo" oncomplete="saveSelledObj('syncUser');"/>							
+									</td>
+								</tr>
+							</table>
+						</h:panelGroup>
+					</h:form>
+					</center>
+			    </rich:tab>
+		    </rich:tabPanel>
+	    </div>
+		
+	  	<!-- 选择部门模态框 -->
+		<rich:modalPanel id="orgPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataprocess.selectorg']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hl" styleClass="hidelink"/>
+	    		<rich:componentControl for="orgPanel" attachTo="hl" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<center>
+				<fieldset style="height:350px;width:100%;text-align:left;">
+	           		<legend><h:outputText value="#{msgs['baf.dataprocess.selectorg']}" /></legend>				           		
+	           		<rich:spacer height="1px;"/>	
+	           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+						<tr>
+							<td id="treeboxbox_orgtree" width="100%" height="100%"></td>
+						</tr>
+					</table>
+				</fieldset>
+				<br />
+				<h:form id="panelForm">
+				
+					<!-- 确定按钮 -->
+					<a4j:commandButton styleClass="rich-button" type="button" id="orgPanelConfirm" value="#{msgs['baf.Confirm']}" onclick="#{rich:component('orgPanel')}.hide();return false;">
+						<a4j:support event="onclick" onsubmit="if(beforeImportToNewUnit() == false) return false;" action="#{syncUserBean.importToNewUnit}" oncomplete="onImportNewUnitComplete(data);"
+						 data="#{syncUserBean.returnNames}"/>
+					</a4j:commandButton>				
+					<rich:spacer width="5px"/>
+					
+					<!-- 关闭按钮 -->
+				    <a4j:commandButton styleClass="rich-button" type="button" id="orgPanelClose" value="#{msgs['baf.Close']}" onclick="#{rich:component('orgPanel')}.hide();return false;"/>
+				    
+				    <h:inputHidden id="selectedItemIds" value="#{syncUserBean.selectedItemIds}"/>
+					<h:inputHidden id="selectedUnitId" value="#{syncUserBean.selectedUnitId}"/>
+					<h:inputHidden id="selectedUnitName" value="#{syncUserBean.selectedUnitName}"/>
+					<h:inputHidden id="searchType" value="#{syncUserBean.searchType}"/>
+					<h:inputHidden id="fullUnitIds" value="#{syncUserBean.fullUnitIds}"/>
+					<h:inputHidden id="businessCdes" value="#{syncUserBean.businessCdes}"/>
+				</h:form>		
+			</center>
+		</rich:modalPanel>    
+	
+		<!-- 人员信息模态框  -->
+		<rich:modalPanel id="user_panel" style="margin-left:5px;margin-right:5px;margin-top:5px;" switchType="client" width="750" height="320">
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.userinfo.userinfo']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="userhidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="user_panel" attachTo="userhidelink" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			
+			<h:form id="userForm">
+			<fieldset style="height:220px" >
+	           <legend><h:outputText value="#{msgs['baf.org.user.tab.user']}"/></legend>
+	        <h:panelGroup  rendered="#{userBean.rendereds}" >
+			<table width="100%">
+			 		<tr>
+			 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userName']}:" style="font-size:13px;"/></td>
+			 			<td width="30%"><h:inputText  id="userName"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.userName}" disabled="true" /></td>
+			 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.loginName']}:" style="font-size:13px;"/></td>
+			 			<td width="30%"><h:inputText  id="loginName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.loginName}" disabled="true"/></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userType']}:" style="font-size:13px;"/></td>
+			 			<td>
+			 			<h:selectOneMenu style="width:95%;height:23px;" id="userType" value="#{userBean.userType}" styleClass="rich-box-border-color-control-select rich-text-control-select" disabled="true">
+						 	<f:selectItems value="#{userBean.userTypeSelectItems}"/>
+						 </h:selectOneMenu>
+						 </td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.gender']}:" style="font-size:13px;"/></td>
+			 			<td> <h:selectOneRadio id="gender" value="#{userBean.gender}" style="font-size:13px;" disabled="true">
+						    <f:selectItem itemLabel="#{msgs['baf.radioMankind']}" itemValue="M" />
+						    <f:selectItem  itemLabel="#{msgs['baf.radioFemale']}"  itemValue="F" />
+				    	 </h:selectOneRadio></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.employDate']}:" style="font-size:13px;"/></td>
+			 			<td><rich:calendar id="employDate"  styleClass="rich-gradient-input" value="#{userBean.employDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" disabled="true" inputStyle="width:85%;height:23px;" inputClass="rich-gradient-input" /></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.duty']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText id="duty" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.duty}" disabled="true"/></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.officePhone']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="officePhone"  style="width:95%;height:23px;"  styleClass="rich-gradient-input"  value="#{userBean.officePhone}" disabled="true"/></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.homePhone']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="homePhone" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.homePhone}" disabled="true"/></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.mobilePhone']}:" style="font-size:13px;color: red;"/></td>
+			 			<td><h:inputText  id="mobilePhone"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.mobilePhone}" title="#{msgs['baf.userinfo.modify']}" disabled="true"/></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.phs']}:" style="font-size:13px;color: red;"/></td>
+			 			<td><h:inputText  id="phs"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.phs}" title="#{msgs['baf.userinfo.modify']}" disabled="true"/>  </td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.email']}:" style="font-size:13px;"/></td>
+			 			<td> <h:inputText  id="email"   style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.email}" disabled="true"/></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.nativenet']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="limitedIp"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.nativenetName}" disabled="true" /> </td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.post.parentUnit']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText id="parentOrgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.unitNames}" disabled="true"/></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.post']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="orgName"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.postNames}" disabled="true"/></td>
+			 		</tr>
+			 	</table>
+			 	</h:panelGroup>
+			</fieldset>
+			<rich:spacer height="15px"/>
+	       	<center>	       		
+				<h:commandButton type="button" id="templateModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('user_panel')}.hide(); return false;"/>
+				<h:inputHidden value="#{userBean.userId}" />
+				<h:inputHidden value="#{userBean.loginName}" />
+				<h:inputHidden value="#{userBean.userName}" />
+			</center>
+			<a4j:keepAlive beanName="userBean"/>
+		</h:form>
+		</rich:modalPanel>	
+		
+		
+		
+			<!-- 人员信息模态框  -->
+		<rich:modalPanel id="edit_panel" style="margin-left:5px;margin-right:5px;margin-top:5px;" switchType="client" width="750" height="320">
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.userinfo.userinfo']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="userhidelink1" styleClass="hidelink"/>
+			    <rich:componentControl for="edit_panel" attachTo="userhidelink1" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+		<h:form id="userEditForm">
+			<fieldset style="height:220px" >
+	           <legend><h:outputText value="#{msgs['baf.org.user.tab.user']}"/></legend>
+	        <h:panelGroup  rendered="#{userBean.rendereds}" >
+			<table width="100%">
+			 		<tr>
+			 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userName']}:" style="font-size:13px;"/></td>
+			 			<td width="30%"><h:inputText  id="userName"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.userName}" disabled="true" /></td>
+			 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.loginName']}:" style="font-size:13px;"/></td>
+			 			<td width="30%"><h:inputText  id="loginName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.loginName}" disabled="true"/></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userType']}:" style="font-size:13px;"/></td>
+			 			<td>
+			 			<h:selectOneMenu style="width:95%;height:23px;" id="userType" value="#{userBean.userType}" styleClass="rich-box-border-color-control-select rich-text-control-select" >
+						 	<f:selectItems value="#{userBean.userTypeSelectItems}"/>
+						 </h:selectOneMenu>
+						 </td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.gender']}:" style="font-size:13px;"/></td>
+			 			<td> <h:selectOneRadio id="gender" value="#{userBean.gender}" style="font-size:13px;" >
+						    <f:selectItem itemLabel="#{msgs['baf.radioMankind']}" itemValue="M" />
+						    <f:selectItem  itemLabel="#{msgs['baf.radioFemale']}"  itemValue="F" />
+				    	 </h:selectOneRadio></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.employDate']}:" style="font-size:13px;"/></td>
+			 			<td><rich:calendar id="employDate"  styleClass="rich-gradient-input" value="#{userBean.employDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" disabled="true" inputStyle="width:85%;height:23px;" inputClass="rich-gradient-input" /></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.duty']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText id="duty" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.duty}" /></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.officePhone']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="officePhone"  style="width:95%;height:23px;"  styleClass="rich-gradient-input"  value="#{userBean.officePhone}" /></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.homePhone']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="homePhone" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.homePhone}" /></td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.mobilePhone']}:" style="font-size:13px;color: red;"/></td>
+			 			<td><h:inputText  id="mobilePhone"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.mobilePhone}" title="#{msgs['baf.userinfo.modify']}" /></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.phs']}:" style="font-size:13px;color: red;"/></td>
+			 			<td><h:inputText  id="phs"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.phs}" title="#{msgs['baf.userinfo.modify']}" />  </td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.email']}:" style="font-size:13px;"/></td>
+			 			<td> <h:inputText  id="email"   style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.email}" /></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.nativenet']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="limitedIp"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.nativenetName}" disabled="true" /> </td>
+			 		</tr>
+			 		<tr>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.post.parentUnit']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText id="parentOrgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.unitNames}" disabled="true"/></td>
+			 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.post']}:" style="font-size:13px;"/></td>
+			 			<td><h:inputText  id="orgName"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.postNames}" disabled="true"/></td>
+			 		</tr>
+			 	</table>
+			 	</h:panelGroup>
+			</fieldset>
+			<rich:spacer height="15px"/>
+	       	<center>	
+	       	<a4j:commandButton styleClass="rich-button" type="button" id="orgPanelConfirm" value="#{msgs['baf.Confirm']}" >
+	       	<a4j:support event="onclick"  onsubmit="Richfaces.showModalPanel('panel');" action="#{userBean.userUpdate}" oncomplete="updUser(data);" data="#{userBean.dealFlag}"/>
+	       	</a4j:commandButton>	       	
+				<h:commandButton type="button" id="templateModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('edit_panel')}.hide(); return false;"/>
+				<h:inputHidden value="#{userBean.userId}" />
+				<h:inputHidden value="#{userBean.loginName}" />
+				<h:inputHidden value="#{userBean.userName}" />
+			</center>
+			<a4j:keepAlive beanName="userBean"/>
+		</h:form>
+		</rich:modalPanel>	 
+		<h:form>
+	    	<a4j:jsFunction name="userInfo" limitToList="true" action="#{userBean.userInfo}" oncomplete="Richfaces.showModalPanel('user_panel');" reRender="userForm">
+	           <a4j:actionparam name="userId" assignTo="#{userBean.userId}"  />           
+	        </a4j:jsFunction>
+	        <a4j:jsFunction name="userEdit" limitToList="true" action="#{userBean.userInfo}" oncomplete="Richfaces.showModalPanel('edit_panel');" reRender="userEditForm">
+	           <a4j:actionparam name="userId" assignTo="#{userBean.userId}"  />           
+	        </a4j:jsFunction>
+	        <a4j:keepAlive beanName="userBean"/>
+	    </h:form>
+	    	
+	    
+	    <!-- 设置tab页内容渲染状态 -->
+					        <a4j:jsFunction name="setTabContentRendered" action="#{syncUserBean.setTabContentRendered}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="#{syncUserBean.reRenderIds},tabRendered">
+					        	<a4j:actionparam name="tabId" value="" />
+					        	<a4j:actionparam name="reRenderIds" assignTo="#{syncUserBean.reRenderIds}"/>
+					        </a4j:jsFunction> 
+	    
+ 
+	    <!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+	    
+		<a4j:keepAlive beanName="syncUserBean"/>
+	    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+  	</f:view>
+</html>

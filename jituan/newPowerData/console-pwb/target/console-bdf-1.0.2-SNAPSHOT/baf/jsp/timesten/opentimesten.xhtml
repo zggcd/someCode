@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<script>
+//<![CDATA[
+	function ondisabled(){
+	  	document.getElementById("conform:openbuttom").disabled = true;
+	  	document.getElementById("conform:closebuttom").disabled = false;
+	}
+	function ondisabledopen(){
+	  	document.getElementById("conform:openbuttom").disabled = false;
+	  	document.getElementById("conform:closebuttom").disabled = true;
+	}
+	function disable(){
+		var isopen = '#{componentTest.isopentimesten}';
+		if(isopen == 'Y'){
+			ondisabled();
+		}else{
+			ondisabledopen();
+		}
+	}
+//]]>
+</script>
+<body style="margin: 100px 100px;" onload="disable();">
+<h:form id="conform">
+	<a4j:commandButton styleClass="rich-button" type="submit" id="openbuttom" value="开启内存数据库" onclick="ondisabled();" disabled="false" action="#{componentTest.openCon}" />                                                   
+	<rich:spacer width="40px"/>
+	<a4j:commandButton styleClass="rich-button" type="submit" id="closebuttom" value="关闭内存数据库" onclick="ondisabledopen();" action="#{componentTest.colseCon}" />
+</h:form>
+</body>
+</f:view>
+</html>

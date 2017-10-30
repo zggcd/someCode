@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+      
+<f:view locale="${loginFrameBean.loginStatus}">
+	<f:loadBundle basename="messages" var="msgs" />
+	
+<head> 
+    <title><h:outputText value="基础平台"/></title>                                       
+ 	<script>
+ 	//<![CDATA[
+
+
+	
+	//]]>
+ 	</script>
+	<style type="text/css">
+	.pic {
+        margin-bottom: -4px;
+        margin-right: 2px;
+    }
+    .logo{
+    	height:44px;
+    	width:396px;
+    	background-image: url(#{request.contextPath}#{loginFrameBean.logoURL});
+    }
+    .column1{
+    width:5%;
+    text-align:right;
+    }
+    .column2{
+    width:95%;
+    }
+.regaltec-marquee{width:auto;font-size:9pt;height:20px;border:1px solid red;}
+.regaltec-marquee ul{list-style:none;}
+.regaltec-marquee ul li{margin-bottom:20px;}
+.regaltec-marquee ul li img{margin-right:5px;float:left;height:12px;width:13px;}
+.regaltec-marquee ul li a{float:left;}
+
+
+
+
+.scrollmsg{width:80%;font-size:9pt;height:20px;overflow:hidden;}
+	</style>
+    </head>
+    
+	<body style="overflow-x:hidden;overflow-y:hidden;">		
+
+ 
+
+<!-- 
+<embed name='MM_controlSound1' src="#{request.contextPath}/baf/wav/02.WAV" loop="false" autostart="false"  hidden="true" width="0" height="0"/>			
+				 -->
+				<input type="hidden" id="arrayCount" value="0" />
+				
+				<!-- 布局表格 -->
+				<table  width="100%" id="layout">
+				<tr>
+				<td width="20%" align="right">
+				<a href="javascript:hideTip();" id="msgtip">
+				<h:outputText value="${scrollMessageBean.notReadCount}"></h:outputText>
+				<img src="/baf/images/message/blt_norevert2.gif" border="0"/>
+				</a>
+				<a style="text-decoration:none;" href="javascript:addNewTab('abc123','/baf/jsp/message/messageIndex.xhtml','消息')">消息列表                 </a>
+				</td>
+				<td width="70%">
+	    </td>
+	    <td >
+		<img id="soundimg" src="/baf/images/message/sound_on.gif" border="0" onclick="sound_onoff()" title = "关闭消息声音提示" />
+				</td>
+				</tr>
+				</table>
+				<!-- 布局表格 END-->
+		<rich:panel style="font-size:16px;">
+		   <f:facet name="header" >
+		   <h:outputText value="测试发布消息到缓存"></h:outputText>
+		   </f:facet>
+		   <h:form id="testForm">
+		   <table width="100%">
+		   <tr>
+		     <td align="right" width="50%"><h:outputText value="消息题目:"/></td>
+		     <td><h:inputText value="#{testMessageBean.messageTitle}"/></td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="接收者名称:"/></td>
+		     <td><h:inputText value="#{testMessageBean.receiverName}" /></td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="消息类型:"/></td>
+		     <td><h:inputText value="#{testMessageBean.messageType}" /></td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="接收者类型:"/></td>
+		     <td><h:selectOneMenu id="receiveType"  value="#{testMessageBean.receiveType}"  style="height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+				 <f:selectItems value="#{testMessageBean.receiveTypes}"/>
+			     </h:selectOneMenu>
+			  </td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="接收者ID(测试者需要准确指定部门ID):"/></td>
+		     <td><h:inputText value="#{testMessageBean.receiverId}" /></td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="紧急程度(00,01,02.....):"/></td>
+		     <td><h:inputText value="#{testMessageBean.warnLevel}" /></td>
+		   </tr>
+		   <tr>
+		     <td align="right"><h:outputText value="提示方式"/></td>
+		     <td><h:selectOneMenu id="promtMode"  value="#{testMessageBean.promptMode}"  style="height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+				 <f:selectItems value="#{testMessageBean.selectPromptModes}"/>
+			     </h:selectOneMenu>
+			</td>
+		   </tr>
+		   <tr>
+		     <td colspan="2" align="center">
+		     <a4j:commandButton value="发送消息" styleClass="rich-button" action="#{testMessageBean.testCache}" oncomplete="a4jcomplete()">
+		     </a4j:commandButton>
+		     
+		     <a4j:commandButton value="测试消息数据迁移" styleClass="rich-button" action="#{testMessageBean.testFun}" oncomplete="a4jcomplete()">
+		     </a4j:commandButton>
+		     </td>
+		   </tr>
+		   </table>
+		   </h:form>
+		</rich:panel>		
+
+		<a4j:form>
+			<a4j:jsFunction name="getNotReadMsg" action="#{testMessageBean.getNotReadCount}" oncomplete="hidePanel()" reRender="tipPanel"></a4j:jsFunction>
+		    <a4j:jsFunction name="refreshMsg" action="#{testMessageBean.getMsgList}" reRender="msgGroup"></a4j:jsFunction>
+			<a4j:jsFunction name="addReader" action="#{messageBean.addReader}">
+        	     <a4j:actionparam name="messageId" value="" />       	      
+            </a4j:jsFunction>
+		</a4j:form>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+		<script>
+		//<![CDATA[
+function myAddTab(id,title,url){
+	var parentW = null;
+	try {
+		parentW = window.parent;
+	} catch (e) {
+		parentW = window;
+	}
+	if(null !=parentW) parentW.addTab(id,title,url);
+	addReader(id);
+}
+//]]>
+        </script>
+	</body>
+</f:view>
+</html>
+
+

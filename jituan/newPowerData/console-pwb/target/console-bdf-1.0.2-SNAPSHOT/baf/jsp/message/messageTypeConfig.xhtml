@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+      
+<f:view contentType="text/html" >
+	<f:loadBundle basename="messages" var="msgs" />
+	
+<head> 
+    <title><h:outputText value="基础平台"/></title>                                       
+ 	<script>
+ 	//<![CDATA[
+ 	//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+    function showDetail(){
+    	var id = dictItemTree_tree.getSelectedItemId();
+    	var itemCode=dictItemTree_tree.getUserData(id,"itemCode");
+    	getMsgtypeByCode(itemCode);
+    }
+  	//屏蔽退格键的事件监听
+	function forCheck(){
+		if(event.keyCode == 8){
+		    event.returnValue   =   false;
+		}
+	}
+	//点击查询按纽列表未渲染前置灰
+	function ondisabled(){
+		document.getElementById("msgForm:save").disabled = true;
+	}
+	//]]>
+ 	</script>
+<!-- 解决模态框居左上角，且有脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg.ajax4jsf.javascript.PrototypeScript.xhtml" type="text/javascript"/>
+<!-- 解决重载PrototypeScript之后导致suggestionbox组件输完文本之后出现脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg/richfaces/renderkit/html/scripts/scriptaculous/effects.js.xhtml" type="text/javascript"/>
+
+    </head>
+    
+	<body>	
+	    <regaltec:dhtmlXtree id="dictItemTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="east-panel"
+		loadXML="/baf/jsp/message/dictItemXMLData.jsp"
+		xmlAutoLoading="/baf/jsp/message/dictItemXMLData.jsp">
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="showDetail" />
+		
+	</regaltec:dhtmlXtree>
+		
+	<regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel region="east" id="eastpanel" 
+			autoScroll="false" contentEl="east-panel" split="true" width="230"   minSize="200" maxSize="400" 
+			collapsible="true" margins="0 0 0 0" layout="accordion" />		
+		<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+			contentEl="center" />	
+	</regaltec:viewPort>
+	<div id="east-panel">   
+  	</div>
+  	
+  	
+  	<!-- 主工作区DIV START-->
+  	
+  	<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel"  style="margin-left:2px;margin-right:2px;margin-top:2px;"  width="99%" height="99%" switchType="client" >
+		<rich:tab id="msgCfg" label="消息类型配置" style="text-align:center;">
+		<h:form id="msgForm" >
+		<center>
+		<table width="80%" style="margin:10px 0px 0px 0px;font-size:13px;" border="0">
+		<tr>
+		<td width="25%" align="right"><h:outputText value="声音文件编号:" title="等级越紧急，数值越高"/></td>
+		<td>
+		<h:selectOneMenu id="voiceCode" title="等级越紧急，数值越高"  value="#{messageTypegBean.voiceCode}"  style="width:95%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+				<f:selectItems value="#{messageTypegBean.voiceCodeList}"/>
+			</h:selectOneMenu>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="开始时间段1:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="startTime1" height="20px" width="95%" value="#{messageTypegBean.startTime1}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="结束时间段1:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="endTime1" height="20px" width="95%" value="#{messageTypegBean.endTime1}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="开始时间段2:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="startTime2" height="20px" width="95%" value="#{messageTypegBean.startTime2}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="结束时间段2:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="endTime2" height="20px" width="95%" value="#{messageTypegBean.endTime2}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="开始时间段3:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="startTime3" height="20px" width="95%" value="#{messageTypegBean.startTime3}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right">
+		<h:outputText value="结束时间段3:"></h:outputText>
+		</td>
+		<td>
+		<regaltec:selectTime id="endTime3" height="20px" width="95%" value="#{messageTypegBean.endTime3}" hourSystem="24" timeFormat="HH:mm"/>
+		</td>
+		</tr>
+		<tr>
+		<td align="right"><h:outputText value="图片编号:" />
+		</td>
+		<td>
+		<h:selectOneMenu id="imgCode" title="消息提示图片"  value="#{messageTypegBean.imgCode}"  style="width:95%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+				<f:selectItems value="#{messageTypegBean.imgCodeList}"/>
+		</h:selectOneMenu>
+		</td>
+		</tr>
+		<tr>
+		<td align="right"><h:outputText value="提示模式:"></h:outputText></td>
+		<td>
+		 <h:selectBooleanCheckbox id="move" value="#{messageTypegBean.promptMove}"></h:selectBooleanCheckbox>
+		 <h:outputText value="滚动"></h:outputText>
+		 <h:selectBooleanCheckbox id="pop" value="#{messageTypegBean.promptPop}"></h:selectBooleanCheckbox>
+		 <h:outputText value="弹出"></h:outputText>
+		</td>
+		</tr>
+		
+		
+		</table>
+		<div style="margin:20px 0px 0px 0px;">
+		  <a4j:commandButton id="save" action="#{messageTypegBean.save}" disabled="false" onclick="ondisabled();" styleClass="rich-button" value="保存"  oncomplete="a4jcomplete()" reRender="save">
+          </a4j:commandButton>
+        </div>
+		</center>
+		<s:validatorScript functionName="validateForm"/>  
+		<h:inputHidden id="dictItemCode" value="#{messageTypegBean.dictItemCode}"></h:inputHidden>
+		</h:form>
+		</rich:tab>
+		</rich:tabPanel>	
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+     </div>
+     
+     <!-- 主工作区DIV END-->
+     <a4j:form>
+     <a4j:jsFunction name="getMsgtypeByCode" action="#{messageTypegBean.getMsgByCode}" reRender="tabPanel">
+        <a4j:actionparam name="dictItemCode" assignTo="#{messageTypegBean.dictItemCode}" />  
+     </a4j:jsFunction>
+     </a4j:form>
+	</body>
+</f:view>
+</html>
+
+

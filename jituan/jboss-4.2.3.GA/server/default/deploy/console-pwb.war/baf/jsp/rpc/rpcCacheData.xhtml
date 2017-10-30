@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+      <f:loadBundle basename="messages" var="msgs" />
+<f:view  contentType="text/html">
+	<head>
+		<title></title>
+			<script>
+	//<![CDATA[
+	   function rpc(){
+	     var types="";
+	     var names=document.getElementsByName("type");
+	     for(var i=0;i<names.length;i++){
+	          var type=names[i].value;
+	          if(names[i].checked){
+	             types+=type+"#";
+	          }
+	        
+	     }
+	    if(types==""){
+	       alert("请先选择更新数据类型！");
+	       return;
+	    }
+	
+	     var obj=document.getElementById("types");
+	     obj.value=types;
+	     form1.submit();
+	     
+	   }
+		//]]>
+	</script>
+    <style>
+ 
+	</style>
+	</head>
+	<body>
+    <rich:panel style="font-size:16px;">
+     <f:facet name="header" >
+		   <h:outputText value="服务器缓存数据同步"></h:outputText>
+	 </f:facet>
+	 <center>
+	
+     <table width="70%"  style="font-size:13px;font-weight:normal;">
+     
+     <tr>
+     <td width="5%" align="right"><input value="0" name="type" type="checkbox" onclick=""/></td>
+     <td width="15%" align="left"> <h:outputText styleClass="headerText " value="字典" style="font-weight:normal;"/></td>
+    
+     <td width="5%" align="right"><input value="1" name="type" type="checkbox" onclick=""/></td>
+     <td  width="15%" align="left"> <h:outputText styleClass="headerText " value="人员" style="font-weight:normal;"/></td>
+   
+     <td width="5%" align="right"><input value="2" name="type" type="checkbox" onclick=""/></td>
+     <td width="15%" align="left"> <h:outputText styleClass="headerText " value="局向" style="font-weight:normal;"/></td>
+  
+     <td width="5%" align="right"><input value="3" name="type" type="checkbox" onclick=""/></td>
+     <td width="15%" align="left"> <h:outputText styleClass="headerText " value="业务" style="font-weight:normal;"/></td>
+  
+     <td width="5%" align="right"><input value="4" name="type" type="checkbox" onclick=""/></td>
+     <td width="15%" align="left"> <h:outputText styleClass="headerText " value="组织" style="font-weight:normal;"/></td>
+     </tr>
+     
+    
+      </table>
+      <div align="center"> <h:commandButton type="button" styleClass="rich-button" onclick="rpc();" style="width:50px" value="同步"></h:commandButton></div>
+       <form id="form1" target="info" action="${request.contextPath}/rpcClient.jsp">
+       <input type="hidden" id="types" name="types"/>
+      </form>
+      <iframe scrolling="auto" id="info"  name="info" height="200px" frameborder="1" width="90%">
+      
+      
+      </iframe>
+   
+     </center>
+    </rich:panel>
+	</body>
+	</f:view>
+</html>

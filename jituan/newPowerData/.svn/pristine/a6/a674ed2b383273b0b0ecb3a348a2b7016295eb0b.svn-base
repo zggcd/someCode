@@ -1,0 +1,798 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<head>
+	<script>	
+	//<![CDATA[
+	
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		
+		 //响应check点击事件
+		function checkBoxClick(object, value) {	
+			//alert("响应check点击事件");	
+		   var itemIdsArr = document.getElementById("queryForm:gotItemIdValues").value;
+		   if (itemIdsArr == null || itemIdsArr == "") {
+		   	 if (object.checked == true) {							
+				itemIdsArr = value;
+			 } 
+		   } else {
+			    if (object.checked == true) {
+					itemIdsArr = itemIdsArr + "#" + value;	 			
+				} 
+				else { //去掉取消选中的值
+					var index = itemIdsArr.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index > 0){
+							str = "#"+value;
+						} else {
+							if(index==0 && itemIdsArr.indexOf("#")!=-1){
+								str = value + "#";
+							} else {
+								str = value;
+							}
+						}
+					itemIdsArr = itemIdsArr.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+			document.getElementById("queryForm:gotItemIdValues").value = itemIdsArr;
+		}
+		
+		 //编辑,判断是否选择了一行
+	    function checkSelectOneRow() {								
+		  var oTable = document.getElementById("queryForm:dataList");
+		  //获取当前页码数
+		  var pageNum = document.getElementById("queryForm:pageNo").value;
+		  if (pageNum <= 0) pageNum = 1;
+		  //获取每页数据个数
+		  var pageSize = document.getElementById("queryForm:pageSize").value;
+		  var size = oTable.rows.length - 1; //去除列头一行
+		  var selectCount = 0;
+		  if (size != null) {
+		  	for (var i=0; i < size; i++) {
+		   	    var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");						
+				if (e != null && e.checked) {
+			    	selectCount ++;
+				}
+		  	}
+		  	if (selectCount != 1) {
+		   		 //请勾选一行需要编辑的数据
+				alert("${msgs['baf.org.WarningEditOneRow']}");
+				return false;
+		  	}
+		  }
+		  return true;
+		}	
+		
+		//判断是否选择单行或者多行
+		function checkSelectRow() {		
+			var oTable = document.getElementById("queryForm:dataList");
+			//获取当前页码数
+			var pageNum = document.getElementById("queryForm:pageNo").value;
+			if (pageNum <= 0) {
+				pageNum = 1;
+			}
+			//获取每页数据个数
+			var pageSize = document.getElementById("queryForm:pageSize").value;					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+		    	for (var i=0; i < size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+					//请勾选需要删除的数据
+					alert("${msgs['baf.org.WarningDeleteRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		//全选select操作表所有项
+	function onSelectALlItems() {
+		var oTable = document.getElementById("queryForm:dataList");
+		var oChkAll = document.getElementById("queryForm:dataList:selectAll"); 
+		//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+	    if (!oChkAll.checked){
+	      document.getElementById("queryForm:gotItemIdValues").value = "";
+	    }
+		//获取当前页码数
+		var pageNum = document.getElementById("queryForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value; 
+		if (oTable != null && oChkAll != null) {
+			for (j = 0; j < oTable.rows.length -1; j++) {
+				var realNum = (pageNum-1)*pageSize + j;
+				//取得当前页中的第几行
+				var e = document.getElementById("queryForm:dataList:"+realNum+":selectedItem");
+				if(e==null||e=="undefined")
+				{
+				   continue;
+				}
+				if (e.id.indexOf("selectedItem") >= 0) {   
+					//触发CheckBox onclick事件，用来设置itemid
+					if (document.all) {
+						//IE
+						var oldValue= e.checked;
+						e.checked = oChkAll.checked;
+						if (!oldValue && e.checked) {
+							onObjectFireMouseEvent(e, "onclick");
+						}
+					} else {
+						//firefox
+						if (oChkAll.checked) {
+							var oldValue= e.checked;
+							if (!oldValue)
+								onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+				}
+		 	}
+		}		
+		
+		//新增规则
+		function addRule(){
+			addForRule();
+		}
+		
+		//重置
+		function resetCondition(){
+			document.getElementById("queryForm:search_seqRuleName").value = "";
+			document.getElementById("queryForm:search_seqRuleCode").value = "";
+		}
+		
+		//按回车调用查询按钮的单击事件
+			function forSelect(){
+				if(event.keyCode==13){
+					document.getElementById('queryForm:itemForSearch').onclick();
+				}
+			}
+		
+		//规则项保存完成触发事件
+		function onSaveRuleItem(data){
+			document.getElementById("queryForm:gotItemIdValues").value = "";
+			if(data=="N"){
+				//保存失败
+	   			alert("${msgs['baf.org.WarningHandleFailure']}");
+	   			return false;
+	   		}
+	   		if(a4jcomplete()==false){
+	 			return;
+	 		}  
+		}
+		
+		//删除完成
+		function onDicItemsDelComplete(data) {
+			if(a4jcomplete()==false){
+			 	return;
+		 	}
+			if (data == "N") {
+				//处理失败
+				alert("${msgs['baf.org.WarningHandleFailure']}");
+				
+		    }else{    
+		    	document.getElementById("queryForm:gotItemIdValues").value = "";
+		    	rereshItemScroller();
+		    }
+			//如果全选框已经选中，则撤销掉勾选
+			var oChkAll = document.getElementById("queryForm:dataList:selectAll");  
+			if (oChkAll.checked)
+				oChkAll.checked = !oChkAll.checked;
+		}
+		
+		//翻页时全选框撤销掉勾选
+		function checkChkAll(){
+			var oChkAll = document.getElementById("queryForm:dataList:selectAll"); 
+			if (oChkAll.checked)
+			oChkAll.checked = !oChkAll.checked;
+		}
+		
+		//规则保存完成触发事件
+			function onSaveRule(data){
+			document.getElementById("queryForm:gotItemIdValues").value = "";
+				if(data=="SN"){
+					alert("${msgs['baf.sequence.ruleseq']}");
+					return false;
+				}
+				if(data=="R"){
+					//规则编码已存在，请重新填写！
+		   			alert("${msgs['baf.sequence.rulesCodeExists']}");
+		   			return false;
+		   		}
+		   		if(data=="N"){
+		   			//保存失败
+		   			alert("${msgs['baf.org.WarningHandleFailure']}");
+		   			return false;
+		   		}
+		   		if(data=="NS"){
+		   			//规则項列表中至少要有一个流水号类型的规则項存在!
+		   		    alert("${msgs['baf.sequence.ruleOnerulesExist']}");
+		   		    return false;
+		   		}
+		   		if(data=="ND"){
+		   			//规则項列表中不能超过一个日期类型的规则項!
+		   		    alert("${msgs['baf.sequence.ruleOnedateTypes']}");
+		   		    return false;
+		   		}
+		   		if(a4jcomplete()==false){
+		 			return;
+		 		}   		
+		   } 
+		
+		//新增规则项时按规则项类型显示对应文本框
+		function valueChange(){
+			var type = document.getElementById("addRuleItemForm:itemType").value;
+			if(type == "P"){
+				document.getElementById("tName").style.display = "block";
+				document.getElementById("ttName").style.display = "block";
+			}else{
+				document.getElementById("tName").style.display = "none";
+				document.getElementById("ttName").style.display = "none";
+			}
+			if(type == "C"){
+				document.getElementById("tCode").style.display = "block";
+				document.getElementById("ttCode").style.display = "block";
+			}else{
+				document.getElementById("tCode").style.display = "none";
+				document.getElementById("ttCode").style.display = "none";
+			}
+			if(type == "D"){
+				document.getElementById("tDate").style.display = "block";
+				document.getElementById("ttDate").style.display = "block";
+				document.getElementById("ttIsInit").style.display = "block";
+				document.getElementById("tIsInit").style.display = "block";
+			}else{
+				document.getElementById("tDate").style.display = "none";
+				document.getElementById("ttDate").style.display = "none";
+				document.getElementById("ttIsInit").style.display = "none";
+				document.getElementById("tIsInit").style.display = "none";
+			}
+			if(type == "S"){
+				document.getElementById("tInit").style.display = "block";
+				document.getElementById("tInc").style.display = "block";
+				document.getElementById("tRule").style.display = "block";
+				document.getElementById("ttInit").style.display = "block";
+				document.getElementById("ttInc").style.display = "block";
+				document.getElementById("ttRule").style.display = "block";
+			}else{
+				document.getElementById("tInit").style.display = "none";
+				document.getElementById("tInc").style.display = "none";
+				document.getElementById("tRule").style.display = "none";
+				document.getElementById("ttInit").style.display = "none";
+				document.getElementById("ttInc").style.display = "none";
+				document.getElementById("ttRule").style.display = "none";
+			}
+		}
+		
+		//检查不能输入中文字符
+		function checkIsStr(obj){
+			var str = new RegExp(/^[^\u4e00-\u9fa5]{0,}$/);
+			if(str.test(obj.value)){
+				return true;
+			}else{
+				//不能输入中文字符
+				alert("${msgs['baf.sequence.noInportZH']}");
+				obj.value="";
+				obj.focus();
+				return false;
+			}
+		}
+		
+		//检查输入字符是否为数字,如果有非数字就返回false
+		function checkIsInt(obj){
+			var num="0123456789";
+			var str=obj.value;
+			var ch;
+			for(i=0;i < str.length;i++){
+			ch=str.charAt(i);
+				if(num.indexOf(ch)==-1){
+					alert("${msgs['baf.bureau.WaringNotInt']}");
+					obj.value="";
+					obj.focus();
+					return false;
+				}
+			}
+			return true;
+		}
+		//判断是否选择单行或者多行
+		function checkListSelectRow(obj) {		
+			var rd=document.getElementsByName("rd");
+			var flag=false;
+			for(i=0;i<rd.length;i++){
+				if(rd[i].checked){
+					flag=true;
+				}
+			}		   
+			if (!flag) {
+				if(obj.id=="addForm:edit"){
+					//请勾选需要修改的数据
+					alert("${msgs['baf.sequence.needSelectData']}");
+					return false;
+					}
+				else{
+				   //请勾选需要删除的数据
+					alert("${msgs['baf.sequence.needDelData']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		//限制规则项里至少要有一条数据
+		function ruleItemNotNull(){
+		var oTable=document.getElementById("addForm:lists");
+		var rowNum=oTable.rows.length;
+		if(rowNum<=1){
+			//规则项里至少要有一条数据！
+		    alert("${msgs['baf.sequence.ruleItemRow']}");
+		    return false;
+		}
+		return true;
+		}
+		
+		//定义通用的函数交换两个结点的位置
+		function swapNode(node1,node2){
+		    //获取父结点
+		    var _parent=node1.parentNode;
+		    //获取两个结点的相对位置
+		    var _t1=node1.nextSibling;
+		    var _t2=node2.nextSibling;
+		    //将node2插入到原来node1的位置
+		    if(_t1)_parent.insertBefore(node2,_t1);
+		    else _parent.appendChild(node2);
+		    //将node1插入到原来node2的位置
+		    if(_t2)_parent.insertBefore(node1,_t2);
+		    else _parent.appendChild(node1);
+		}
+		
+		//上移
+		function moveUp(){
+			var rd=document.getElementsByName("rd");
+			for(i=0;i<rd.length;i++){
+			 	if(rd[i].checked){
+					var _row=rd[i].parentNode.parentNode;
+					//如果不是第一行，则与上一行交换顺序
+		    		 if(_row.previousSibling){
+		    		 	swapNode(_row,_row.previousSibling);
+		    		 	break;
+		    		 }
+	    		}
+    		}
+		}
+		
+		//下移
+		function moveDown(){
+			var rd=document.getElementsByName("rd");
+			for(i=0;i<rd.length;i++){
+				 if(rd[i].checked){
+				   var _row=rd[i].parentNode.parentNode;
+				   //如果不是最后一行，则与下一行交换顺序
+				   if(_row.nextSibling){
+				   		swapNode(_row,_row.nextSibling);
+				   		break;
+				   	}
+			    }
+			 }
+		}
+		
+		//上移下移时,判断是否选择了一行
+	    function selectOneRow(obj) {	
+		    var rd=document.getElementsByName("rd");
+				var flag=false;
+				for(i=0;i<rd.length;i++){
+				if(rd[i].checked){
+					flag=true;
+					}
+				}		   
+				if (!flag) {
+					if(obj.id=="addForm:moveup"){
+						//请勾选需要上移的数据
+						alert("${msgs['baf.sequence.selectMoveUp']}");
+						return false;
+						}
+					else if(obj.id=="addForm:movedown"){
+						//请勾选需要下移的数据
+						alert("${msgs['baf.sequence.selectMoveDown']}");
+						return false;
+					}
+				}
+			return true;
+		}	
+		//排序完成后，将排好的数据ID传到后台
+		function ruleItemValue(){
+			var oTable = document.getElementById("addForm:lists");
+			var rowNum=oTable.rows.length;//去掉表头一行数据
+			var s ="";
+			for(i=1;i<rowNum;i++){
+			 var obj = oTable.rows(i).cells(0).children(1).value;
+			 if(s==""){
+				s = s+obj;
+			    }else{
+				 s = s+","+obj;
+			    }
+			}
+			//将得到的ID拼成字符串赋给后台属性
+			document.getElementById("addForm:sequenceruleitem").value = s;
+		}
+
+	//]]>
+	</script>
+</head>
+<body>
+	<f:view  contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<rich:tabPanel id="tabPanel" style="width:100%;height:97%;" switchType="client" selectedTab="#{sequenceRuleBean.selectTab}">
+			<!-- 信息列表 -->
+			<rich:tab id="tab_select" label="#{msgs['baf.sequence.infoItem']}" switchType="client" style="display:block;" >	
+				<a4j:form id="queryForm">
+					<center>
+						<rich:panel style="width:95%;">	
+							<h:panelGrid id="panelGrid" columns="4" style="font-size:13px;" styleClass=".rich-text-color-general">	
+								<h:panelGroup>
+									<h:outputText value="#{msgs['baf.sequence.seqRuleName']}: "/>
+									<h:inputText id="search_seqRuleName" value="#{sequenceRuleBean.search_ruleName}" style="width:200px;height:23px;" styleClass="rich-gradient-input">
+										<rich:hotKey key="return" handler="forSelect();"/>
+									</h:inputText>
+									<rich:spacer height="2px"/>
+								</h:panelGroup>
+								<h:panelGroup>
+									<h:outputText value="#{msgs['baf.sequence.seqRuleCode']}: "/>
+									<h:inputText id="search_seqRuleCode" value="#{sequenceRuleBean.search_ruleCode}" style="width:200px;height:23px;" styleClass="rich-gradient-input">
+										<rich:hotKey key="return" handler="forSelect();"/>
+									</h:inputText>
+									<rich:spacer height="2px"/>
+								</h:panelGroup>
+								<a4j:commandButton styleClass="rich-button" id="itemForSearch" value="#{msgs['baf.Select']}"  action="#{sequenceRuleBean.selectAllSeqRuleForPage}" limitToList="true" reRender="dataList,pageNo,pageSize" />
+								<a4j:commandButton styleClass="rich-button" type="reset" id="reset" value="#{msgs['baf.calendar.reset']}" onclick="resetCondition();"/>
+							</h:panelGrid>
+						</rich:panel>
+						<rich:spacer height="2px"/>	
+						<center>							 
+						<a4j:commandButton styleClass="rich-button" type="submit" id="seqAdd" value="#{msgs['baf.Add']}" onclick="addRule();"/>
+						<rich:spacer width="40px"/>
+						<a4j:commandButton styleClass="rich-button" type="submit" id="seqEdit" value="#{msgs['baf.Edit']}" > 
+							<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{sequenceRuleBean.showEditRule}" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';" reRender="tabPanel,addForm" />
+						</a4j:commandButton> 
+						<rich:spacer width="40px"/>
+						<a4j:commandButton styleClass="rich-button" type="button" id="seqDelete" value="#{msgs['baf.Delete']}">
+							<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('delItemPanel')}.show();} return false;"/>
+						</a4j:commandButton>
+						</center>
+						<rich:spacer height="10px"/>
+						<!-- 显示列表 -->
+						<rich:dataTable width="95%" id="dataList" rows="#{sequenceRuleBean.pageSize}" columnClasses="col"
+			            value="#{sequenceRuleBean.defaultDataModel}" var="ruleItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+			            >
+			            	<rich:column width="5%" style="text-align:center;">
+						        <f:facet name="header">
+						        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+						        </f:facet>
+					            <h:selectBooleanCheckbox id="selectedItem" onclick="checkBoxClick(this, '#{ruleItem.ruleId}');"/>
+					        </rich:column>	  
+				            <rich:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText " value="#{msgs['baf.sequence.seqRuleName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <center><h:outputText value="#{ruleItem.ruleName}" /></center>
+				            </rich:column>
+				            <rich:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.seqRuleCode']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <center><h:outputText value="#{ruleItem.ruleCode}" /></center>
+				            </rich:column>
+				            <rich:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.seqRuleDesc']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <center><h:outputText value="#{ruleItem.ruleDesc}" /></center>
+				            </rich:column>
+				            <rich:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.seqRuleDate']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <center>
+							        <h:outputLabel value="#{ruleItem.currentDate}">
+										<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+									</h:outputLabel>
+								</center>
+				            </rich:column>
+				            <rich:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.seqRule']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <center><h:outputText value="#{ruleItem.currentSeq}" /></center>
+				            </rich:column>
+				            <f:facet name="footer">				
+				                <rich:datascroller align="right"  fastStep="1" id="itemScroller" page="#{sequenceRuleBean.scrollerPage}" reRender="pageNo" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';checkChkAll();"/>	
+		                    </f:facet>
+			            </rich:dataTable>
+	
+						
+						<h:inputHidden id="pageNo" value="#{sequenceRuleBean.scrollerPage}"/>
+		       		 	<h:inputHidden id="pageSize" value="#{sequenceRuleBean.pageSize}"/>	
+		       		 	<h:inputHidden id="gotItemIdValues" value="#{sequenceRuleBean.selectedItemIds}" />
+		       		 	
+						
+						<!-- 删除确认模态框 -->
+						 <rich:modalPanel id="delItemPanel" autosized="true" width="300">
+				    	     <f:facet name="header">
+								<h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}" style="padding-right:15px;" />
+					         	</f:facet> 
+								<!-- 关闭按钮 -->
+						    	<f:facet name="controls">
+									<h:panelGroup>
+							 			<h:graphicImage value="/baf/images/icons/close.png"
+							 				id="hidelinkDelete" styleClass="hidelink"/>
+										<rich:componentControl for="delItemPanel" attachTo="hidelinkDelete"
+											operation="hide" event="onclick" />
+									</h:panelGroup>
+								</f:facet>	
+							<center>
+								<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+						                 	data="#{sequenceRuleBean.dealFlag}"
+						                    action="#{sequenceRuleBean.delSequenceRule}"
+						                    oncomplete="#{rich:component('delItemPanel')}.hide();onDicItemsDelComplete(data);"
+						                    reRender="dataList,itemScroller,pageNo,pageSize" />
+								<rich:spacer width="40px"/>
+								<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button" onclick="#{rich:component('delItemPanel')}.hide();return false;" />
+							</center>
+						</rich:modalPanel>	
+				
+		       		 	<a4j:keepAlive  beanName= "sequenceRuleBean" />
+						<s:validatorScript functionName="validateForm"/> 
+					</center>
+				</a4j:form>
+			</rich:tab>
+			<!-- 流水号配置 -->
+			<rich:tab id="tab_sequence" label="#{msgs['baf.sequence.RuleItemCfg']}" switchType="client" style="display:#{sequenceRuleBean.tabDisplay};" >	
+				<a4j:form id="addForm">
+					<fieldset style="height:60%;">
+						<legend><h:outputText value="#{msgs['baf.sequence.RuleInfo']}" /></legend>
+						<center>
+							<table width="90%" border="0">
+								<tr align="right">
+									<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.sequence.RuleName']}: "/></td>
+									<td width="40%">
+										<h:inputText id="ruleName" maxlength="32" value="#{sequenceRuleBean.ruleName}" style="width:95%;height:23px;" styleClass="rich-gradient-input">
+										  <s:commonsValidator type="required" arg="#{msgs['baf.sequence.RuleName']}" server="false" client="true"/>
+										</h:inputText>
+									</td>
+									<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.sequence.RuleCode']}: "/></td>
+									<td>
+									<h:inputText id="ruleCode" maxlength="32" value="#{sequenceRuleBean.ruleCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input">
+									   <s:commonsValidator type="required" arg="#{msgs['baf.sequence.RuleCode']}" server="false" client="true"/>
+									</h:inputText>
+									</td>
+								</tr>
+								<tr align="right">
+									<td><h:outputText style="font-size:13px;"  value="#{msgs['baf.sequence.RuleSequence']}: "/></td>
+									<td id="cseq">
+										<h:inputText id="currentSeq" maxlength="6"  value="#{sequenceRuleBean.currentSeq}" onblur="checkIsInt(this);" style="width:95%;height:23px;" styleClass="rich-gradient-input" disabled="#{sequenceRuleBean.disabledValue}">
+										<!--    <s:commonsValidator type="required" arg="#{msgs['baf.sequence.RuleSequence']}" server="false" client="true"/> -->
+										</h:inputText>
+									</td>
+									<td></td>
+									<td></td>
+								</tr>
+								<tr align="right">
+									<td><h:outputText style="font-size:13px;" value="#{msgs['baf.sequence.RuleSequenceDesc']}: "/></td>
+									<td colspan="3" >
+										<h:inputTextarea  id="ruleDepict" rows="5" value="#{sequenceRuleBean.ruleDesc}" style="width:98%;resize:none;" styleClass="rich-gradient-input" >
+										   <s:commonsValidator type="maxlength" arg="#{msgs['baf.sequence.RuleSequenceDesc']}" server="false" client="true" maxLength="64"/>
+										</h:inputTextarea>
+									</td>
+								</tr>
+							</table>
+						</center>
+					</fieldset>
+					<rich:spacer height="2px"/>	
+					<fieldset>
+					<legend><h:outputText value="#{msgs['baf.sequence.RuleTab']}" /></legend>
+						<rich:spacer height="2px"/>	
+						<center>							 
+						<a4j:commandButton styleClass="rich-button" type="submit"  id="add" value="#{msgs['baf.Add']}" action="#{sequenceRuleBean.clearRuleItem}" reRender="addRuleItemForm">
+							<a4j:support event="onclick" oncomplete="#{rich:component('modalPanel')}.show();"/>
+							<rich:spacer width="40px"/>
+						</a4j:commandButton>
+						<a4j:commandButton styleClass="rich-button" type="submit" id="edit" value="#{msgs['baf.Edit']}" action="#{sequenceRuleBean.getItem}" reRender="addRuleItemForm" oncomplete="#{rich:component('modalPanel')}.show();"> 
+						<a4j:support event="onclick" onsubmit="if(checkListSelectRow(this)==false){return false;}"></a4j:support>
+							<rich:spacer width="40px"/>	
+						</a4j:commandButton>
+						<a4j:commandButton styleClass="rich-button" type="button" id="del" value="#{msgs['baf.Delete']}" action="#{sequenceRuleBean.deleteRuleItem}" reRender="lists"> 
+							<rich:spacer width="40px"/>
+							<a4j:support event="onclick" onsubmit="if(checkListSelectRow(this)==false){return false;}"></a4j:support>
+						</a4j:commandButton>
+						<a4j:commandButton styleClass="rich-button" type="button" id="moveup" value="#{msgs['baf.sequence.moveUp']}"> 
+							<rich:spacer width="40px"/>
+							<a4j:support event="onclick" onsubmit="if (selectOneRow(this)==false) return false;" oncomplete="moveUp();"/>
+						</a4j:commandButton>
+						<a4j:commandButton styleClass="rich-button" type="button" id="movedown" value="#{msgs['baf.sequence.moveDown']}"> 
+							<rich:spacer width="40px"/>
+							<a4j:support event="onclick" onsubmit="if (selectOneRow(this)==false) return false;" oncomplete="moveDown();"/>
+						</a4j:commandButton>
+						</center>
+						<rich:spacer height="2px"/>	
+						<!-- 显示列表 -->
+						<center>
+							<rich:dataTable width="95%" id="lists" columnClasses="col"
+					            value="#{sequenceRuleBean.displayItemList}" var="caleItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+					            	<rich:column width="5%" style="text-align:center;">
+								        <f:facet name="header">
+								        	<h:outputText styleClass="headerText " value="#{msgs['baf.dataImport.assginCmd']}" style="font-weight:normal;"/>
+								        </f:facet>
+							            	<input type="radio" id="rd" name="rd" value="#{caleItem.ruleItemId}"/> 
+							            	<h:inputHidden  id="aa" value="#{caleItem.ruleItemId}"/>
+							            	<rich:spacer width="5px"/>
+							        </rich:column>	
+						            <rich:column>
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText " value="#{msgs['baf.sequence.RulesName']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <center><h:outputText value="#{caleItem.ruleItemName}" /></center>
+						            </rich:column>
+						            <rich:column>
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.RulesType']}" style="font-weight:normal;"/>
+								        </f:facet>
+								        <center><h:outputText value="#{caleItem.ruleItemTypeName}" /></center>
+						            </rich:column>
+						            <rich:column>
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.sequence.parameterName']}" style="font-weight:normal;"/>
+								        </f:facet>
+								        <center><h:outputText value="#{caleItem.parameterName}" /></center>
+						            </rich:column>
+					            </rich:dataTable>
+				            </center>
+		        		</fieldset>
+			        	<table width="100%">
+			        		<tr>
+			        			<td align="center">
+			        				<rich:spacer height="30px"/>
+			        				<a4j:commandButton styleClass="rich-button" type="submit" id="save" value="#{msgs['baf.Save']}"  >
+				        				<a4j:support event="onclick" onsubmit="if(ruleItemNotNull()==false)return false;if (validateForm(document.getElementById('addForm'))==false) return false;ruleItemValue();" action="#{sequenceRuleBean.save}" oncomplete="onSaveRule(data);" data="#{sequenceRuleBean.dealFlag}" reRender="itemScroller,queryForm,tabPanel" >
+				        				</a4j:support>
+			        				</a4j:commandButton>
+			        			 <h:inputHidden id="sequenceruleitem" value="#{sequenceRuleBean.sequenceRuleItem}"></h:inputHidden>
+			        			</td>
+			        		</tr>
+			        	</table>
+			        	<h:inputHidden id="ruleId" value="#{sequenceRuleBean.ruleId}"/>
+		    	</a4j:form>
+				
+		    	<!--新增/编辑模态框 -->
+		    	<rich:modalPanel id="modalPanel" autosized="false" keepVisualState="false" width="450" height="300">
+		    		<f:facet name="header">
+						<h:outputText value="#{msgs['baf.sequence.RulesInfo']}"/>
+					</f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					        id="hidelink" styleClass="hidelink"/>
+					    <rich:componentControl for="modalPanel" attachTo="hidelink"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>		
+					<a4j:form id="addRuleItemForm">
+						<table style="font-size:13px;" width="85%" >
+							<tr>
+								<td width="40%" align="right"><h:outputText value="#{msgs['baf.sequence.RulesName']}: "/></td>
+								<td width="60%">
+								<h:inputText id="seqName" value="#{sequenceRuleBean.ruleItemName}" maxlength="32" style="width:95%;height:23px;" styleClass="rich-gradient-input" >
+								<s:commonsValidator type="required" arg="#{msgs['baf.sequence.RulesName']}" server="false" client="true"/>	
+								</h:inputText>
+								</td>
+							</tr>
+							<tr>
+								<td align="right"><h:outputText value="#{msgs['baf.sequence.RulesType']}: "/></td>
+								<td>
+									<h:selectOneMenu id="itemType" style="width:95%;height:23px;" value="#{sequenceRuleBean.ruleItemType}" onchange="valueChange();">
+										<f:selectItems value="#{sequenceRuleBean.ruleItemTypeMap}" />
+								    <s:commonsValidator type="required" arg="#{msgs['baf.sequence.RulesType']}" server="false" client="true"/>
+									</h:selectOneMenu>
+								</td>
+							</tr>
+							<tr>
+								<td align="right"><h:outputText value="#{msgs['baf.sequence.seperator']}: "/></td>
+								<td>
+									<h:inputText id="seperator" maxlength="1" value="#{sequenceRuleBean.seperator}" onblur="checkIsStr(this);" style="width:95%;height:23px;" styleClass="rich-gradient-input">
+									</h:inputText>
+								</td>
+							</tr>
+							<tr  id="trName" >
+								<td id="ttName" style="#{sequenceRuleBean.parameterStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.parameterName']}: "/></td>
+								<td id="tName" style="#{sequenceRuleBean.parameterStyle}">
+									<h:inputText id="arameterName" maxlength="32" value="#{sequenceRuleBean.parameterName}" style="width:95%;height:23px;" styleClass="rich-gradient-input" >
+									</h:inputText>
+								</td>
+							</tr>
+							<tr id="trCode" >
+								<td id="ttCode" style="#{sequenceRuleBean.itemCodeStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.itemCode']}: "/></td>
+								<td id="tCode" style="#{sequenceRuleBean.itemCodeStyle}">
+									<h:inputText id="temCode" maxlength="32" value="#{sequenceRuleBean.itemCode}" style="width:95%;height:23px;" styleClass="rich-gradient-input" >
+									</h:inputText>
+								</td>
+							</tr>
+							<tr  id="trDate" >
+								<td id="ttDate" style="#{sequenceRuleBean.dateStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.dateFormat']}: "/></td>
+								<td id="tDate" style="#{sequenceRuleBean.dateStyle}">
+									<h:selectOneMenu id="dateFormat" style="width:95%;height:23px;" value="#{sequenceRuleBean.dateFormat}">
+										<f:selectItems value="#{sequenceRuleBean.dateFormatTypeMap}" />
+									</h:selectOneMenu>
+								</td>
+							</tr>
+							<tr id="trIsInit" >
+								<td id="ttIsInit" style="#{sequenceRuleBean.dateStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.isInitialValue']}: "/></td>
+								<td id="tIsInit" style="#{sequenceRuleBean.dateStyle}">
+									<h:selectOneMenu id="isInitialValue" style="width:95%;height:23px;" value="#{sequenceRuleBean.switchItemMode}">
+										<f:selectItems value="#{sequenceRuleBean.isInitialValueTypeMap}" />
+									</h:selectOneMenu>
+								</td>
+							</tr>
+							<tr id="trInit" >
+								<td id="ttInit" style="#{sequenceRuleBean.seqStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.initialValue']}: "/></td>
+								<td id="tInit" style="#{sequenceRuleBean.seqStyle}"><h:inputText id="initialValue" onblur="checkIsInt(this);" maxlength="12" value="#{sequenceRuleBean.initialValue}" style="width:95%;height:23px;" styleClass="rich-gradient-input" /></td>
+							</tr>
+							<tr id="trInc" >
+								<td id="ttInc" style="#{sequenceRuleBean.seqStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.incrementBy']}: "/></td>
+								<td id="tInc" style="#{sequenceRuleBean.seqStyle}"><h:inputText id="incrementBy" onblur="checkIsInt(this);" maxlength="12" value="#{sequenceRuleBean.incrementBy}" style="width:95%;height:23px;" styleClass="rich-gradient-input" /></td>
+							</tr>
+							<tr id="trRule" >
+								<td id="ttRule" style="#{sequenceRuleBean.seqStyle}" align="right"><h:outputText value="#{msgs['baf.sequence.ruleLen']}: "/></td>
+								<td id="tRule" style="#{sequenceRuleBean.seqStyle}"><h:inputText id="sequenceLen" onblur="checkIsInt(this);" maxlength="12" value="#{sequenceRuleBean.sequenceLen}" style="width:95%;height:23px;" styleClass="rich-gradient-input" /></td>
+							</tr>
+							<tr>
+								<td colspan="2" align="center">
+									<a4j:commandButton styleClass="rich-button" type="submit" id="saveRuleItem" value="#{msgs['baf.org.Save']}">	
+								       <a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('addRuleItemForm'))==false) return false;"  action="#{sequenceRuleBean.addSeqRuleItem}" data="#{sequenceRuleBean.dealFlag}" oncomplete="onSaveRuleItem(data); if(data=='Y') {#{rich:component('modalPanel')}.hide();}" reRender="lists" />	
+							        </a4j:commandButton> 
+								</td>
+							</tr>
+						</table>
+						<h:inputHidden id="itemId" value="#{sequenceRuleBean.ruleItemId}"></h:inputHidden>
+					</a4j:form>
+		    	</rich:modalPanel>
+			</rich:tab>
+		</rich:tabPanel>
+
+		<a4j:form>
+			<a4j:jsFunction name="addForRule" action="#{sequenceRuleBean.initialization}" reRender="tabPanel,queryForm" />
+			<a4j:jsFunction name="rereshItemScroller" action="#{sequenceRuleBean.selectAllSeqRuleForPage}" reRender="pageNo" />
+		</a4j:form>
+	</f:view>
+	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</html>

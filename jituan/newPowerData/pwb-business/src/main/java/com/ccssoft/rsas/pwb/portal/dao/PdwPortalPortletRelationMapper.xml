@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.portal.dao.PdwPortalPortletRelationMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelation" >
+    <id column="INSTANCE_ID" property="instanceId" jdbcType="VARCHAR" />
+    <id column="PANEL_ID" property="panelId" jdbcType="VARCHAR" />
+    <id column="PORTLET_INSTANCE_ID" property="portletInstanceId" jdbcType="VARCHAR" />
+    <result column="PORTAL_ORDER" property="portalOrder" jdbcType="DECIMAL" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    INSTANCE_ID, PANEL_ID, PORTLET_INSTANCE_ID, PORTAL_ORDER
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelationExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_PORTLET_RELATION
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelationKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_PORTLET_RELATION
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+      and PANEL_ID = #{panelId,jdbcType=VARCHAR}
+      and PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelationKey" >
+    delete from PDW_PORTAL_PORTLET_RELATION
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+      and PANEL_ID = #{panelId,jdbcType=VARCHAR}
+      and PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelationExample" >
+    delete from PDW_PORTAL_PORTLET_RELATION
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelation" >
+    insert into PDW_PORTAL_PORTLET_RELATION (INSTANCE_ID, PANEL_ID, PORTLET_INSTANCE_ID, 
+      PORTAL_ORDER)
+    values (#{instanceId,jdbcType=VARCHAR}, #{panelId,jdbcType=VARCHAR}, #{portletInstanceId,jdbcType=VARCHAR}, 
+      #{portalOrder,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelation" >
+    insert into PDW_PORTAL_PORTLET_RELATION
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="instanceId != null" >
+        INSTANCE_ID,
+      </if>
+      <if test="panelId != null" >
+        PANEL_ID,
+      </if>
+      <if test="portletInstanceId != null" >
+        PORTLET_INSTANCE_ID,
+      </if>
+      <if test="portalOrder != null" >
+        PORTAL_ORDER,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="instanceId != null" >
+        #{instanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="panelId != null" >
+        #{panelId,jdbcType=VARCHAR},
+      </if>
+      <if test="portletInstanceId != null" >
+        #{portletInstanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="portalOrder != null" >
+        #{portalOrder,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelationExample" resultType="java.lang.Integer" >
+    select count(*) from PDW_PORTAL_PORTLET_RELATION
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update PDW_PORTAL_PORTLET_RELATION
+    <set >
+      <if test="record.instanceId != null" >
+        INSTANCE_ID = #{record.instanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.panelId != null" >
+        PANEL_ID = #{record.panelId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.portletInstanceId != null" >
+        PORTLET_INSTANCE_ID = #{record.portletInstanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.portalOrder != null" >
+        PORTAL_ORDER = #{record.portalOrder,jdbcType=DECIMAL},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update PDW_PORTAL_PORTLET_RELATION
+    set INSTANCE_ID = #{record.instanceId,jdbcType=VARCHAR},
+      PANEL_ID = #{record.panelId,jdbcType=VARCHAR},
+      PORTLET_INSTANCE_ID = #{record.portletInstanceId,jdbcType=VARCHAR},
+      PORTAL_ORDER = #{record.portalOrder,jdbcType=DECIMAL}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelation" >
+    update PDW_PORTAL_PORTLET_RELATION
+    <set >
+      <if test="portalOrder != null" >
+        PORTAL_ORDER = #{portalOrder,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+      and PANEL_ID = #{panelId,jdbcType=VARCHAR}
+      and PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalPortletRelation" >
+    update PDW_PORTAL_PORTLET_RELATION
+    set PORTAL_ORDER = #{portalOrder,jdbcType=DECIMAL}
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+      and PANEL_ID = #{panelId,jdbcType=VARCHAR}
+      and PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

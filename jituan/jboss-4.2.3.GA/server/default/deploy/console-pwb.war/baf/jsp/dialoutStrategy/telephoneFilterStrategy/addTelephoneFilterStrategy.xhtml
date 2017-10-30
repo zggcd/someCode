@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+
+function remove_onclick(index){
+	target.deleteRow(index);
+}
+
+function insertTelephoneFilter(){
+	var valueType = document.getElementById('addForm:valueType').value;
+	var beginTelephoneFilter = document.getElementById('addForm:tempTelephoneFilter').value;
+	insertItem(valueType, beginTelephoneFilter);
+}
+function save(){
+	var telephoneFilterName = document.getElementById('addForm:telephoneFilterName').value;
+	if(typeof(telephoneFilterName)=="undefined" || telephoneFilterName == ''){
+		alert("${msgs['baf.dialoutstrategy.strategyNameShouldntBeNull']}！");
+		return false;
+	}
+
+	var table = document.getElementById('addForm:itemLists');
+	var rows = table.rows.length ;
+	if(rows <= 1){
+		alert("${msgs['baf.dialoutstrategy.pleaseAddStrategy']}！");
+		return false;
+	}
+
+	return true;
+}
+function afterInsert(){
+	var msg = document.getElementById('addForm:msg').value;
+	if(msg.indexOf("Y") == -1){
+		alert(msg);
+	}
+}
+function afterSave(){
+	if(a4jcomplete()==false) return false;
+	window.parent.frames.refreshTree();
+}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+           text-align:left;
+       }
+	   .column1{
+			width:15%;
+			text-align:left;
+		}
+		.column2{
+			width:85%;
+			text-align:left;
+		}
+		.col{
+			text-align:center;
+		}
+    </style> 
+</head>
+
+<body >
+<!-- 号码过滤策略列表 -->
+<a4j:form  id="addForm">
+<fieldset id="queryinstance" style="margin:5px 5px 5px 5px; padding:10px 10px 10px 10px;" >			
+    <legend><h:outputText value="#{msgs['baf.dialoutstrategy.addTelephoneFilterStrategy']}" /></legend>
+    <rich:spacer height="10px;"></rich:spacer>
+    <h:panelGrid columns="1"     style="font-size:13px;width:100%;text-align:left;table-layout:fixed " styleClass=".rich-text-color-general">
+	<h:panelGroup id="addTab1"  styleClass="scrolls" style="width:98%;height:98%;">				
+		<h:outputText value="#{msgs['baf.dialoutstrategy.currentArea']}："></h:outputText>
+		<h:outputText id="areaName" size="20" value="#{addTelephoneFilterStrategyBean.areaName}" styleClass="rich-gradient-input"  >
+		</h:outputText>		
+	</h:panelGroup>
+	<h:panelGroup id="addTab2"  styleClass="scrolls" style="width:98%;height:98%;">		
+		<h:outputText value="#{msgs['baf.dialoutstrategy.telephoneFilterStrategyName']}："></h:outputText>
+		<h:inputText id="telephoneFilterName" size="20" maxlength="20" value="#{addTelephoneFilterStrategyBean.telephoneFilterName}" styleClass="rich-gradient-input"  >
+		</h:inputText>		
+	</h:panelGroup>
+    
+	<h:panelGroup id="tabGroup"  styleClass="scrolls" style="width:98%;height:98%; ">	
+   <rich:dataTable width="95%" id="itemLists"  columnClasses="col" rowKeyVar="row"
+       value="#{addTelephoneFilterStrategyBean.dataList}" var="currItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+       title="#{msgs['baf.dict.dataTable.ItemEditTip']}" onRowDblClick="editItem(#{row});">       	      
+        <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.prefix']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.prefix}" />
+        </h:column>
+        <h:column>
+           	<f:facet name="header">
+            <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.minLength']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.minLen}" />
+        </h:column>
+       	<h:column>
+           	<f:facet name="header">
+	        <h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.maxLength']}" style="font-weight:normal;"/>
+	        </f:facet>
+	        <h:outputText value="#{currItem.maxLen}" />
+        </h:column>       	                
+       <h:column>
+       		<f:facet name="header">
+     		<h:outputText styleClass="headerText" value="#{msgs['baf.dialoutstrategy.operation']}" style="font-weight:normal;"/>
+     		</f:facet>
+     		<center>
+           	<a4j:commandButton value="#{msgs['baf.dialoutstrategy.delete']}" type="button" onclick="deleteItem(#{row});" styleClass="rich-button">
+	 		</a4j:commandButton>
+	 		<rich:spacer width="5px;"></rich:spacer>
+	 		<a4j:commandButton value="#{msgs['baf.dialoutstrategy.edit']}" type="button" onclick="editItem(#{row});" styleClass="rich-button">
+	 		</a4j:commandButton>
+	 		</center>
+       </h:column>        
+   	 </rich:dataTable>   
+   	</h:panelGroup>
+   	
+   	</h:panelGrid>		 
+</fieldset>
+<rich:spacer width="10px;"></rich:spacer> 
+<fieldset id="newPan" style="margin:5px 5px 5px 5px; padding:10px 10px 10px 10px;" >
+	<h:panelGrid id="addGrid" columns="4" width="100%" style="font-size:13px;" styleClass=".rich-text-color-general">
+		
+		<h:outputText value="#{msgs['baf.dialoutstrategy.prefix']}："></h:outputText>		
+		<h:inputText id="beginTelephoneFilter" size="20" maxlength="10" value="#{addTelephoneFilterStrategyBean.prefix}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.prefix']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.prefix']}"   server="false" client="true"/>
+		</h:inputText>	
+		<h:outputText value="#{msgs['baf.dialoutstrategy.minLength']}："></h:outputText>					
+		<h:inputText id="endTelephoneFilter" size="20" maxlength="10" value="#{addTelephoneFilterStrategyBean.minLen}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.minLength']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.minLength']}"   server="false" client="true"/>
+		</h:inputText>	
+		<h:outputText value="#{msgs['baf.dialoutstrategy.maxLength']}："></h:outputText>		
+		<h:inputText id="successNum" size="20" maxlength="10" value="#{addTelephoneFilterStrategyBean.maxLen}" styleClass="rich-gradient-input"  >
+			<s:commonsValidator type="mask" mask="^[0-9]*$" arg="#{msgs['baf.dialoutstrategy.maxLength']}" server="false" client="true"/>
+			<s:commonsValidator type="required"  arg="#{msgs['baf.dialoutstrategy.maxLength']}"   server="false" client="true"/>
+		</h:inputText>		
+		
+	</h:panelGrid>
+	<center>
+	 <a4j:commandButton value="#{msgs['baf.desktop.addPanel']}" type="button" onclick="if (valivalueForm(document.getElementById('addForm'))==false) return false;" action="#{addTelephoneFilterStrategyBean.insertItem}" reRender="addForm:itemLists, addForm:isEdit, addForm:msg" styleClass="rich-button" oncomplete="afterInsert();">
+	 </a4j:commandButton>
+	 <rich:spacer width="10px;"></rich:spacer>
+	 <a4j:commandButton value="#{msgs['baf.dialoutstrategy.reset']}" type="reset"  styleClass="rich-button" >
+	 </a4j:commandButton>
+	</center>
+</fieldset>
+<h:inputHidden id="isEdit" value="#{addTelephoneFilterStrategyBean.isEdit}"/>
+<h:inputHidden id="msg" value="#{addTelephoneFilterStrategyBean.msg}"/>
+<a4j:keepAlive  beanName= "addTelephoneFilterStrategyBean" />
+<rich:spacer width="10px;"></rich:spacer> 
+<h:panelGrid id="buttonGrid" columns="1" width="100%" style="font-size:13px;" styleClass=".rich-text-color-general">
+<h:panelGroup>
+<center>
+<a4j:commandButton value="#{msgs['baf.dialoutstrategy.save']}" type="submit" onclick="if(save()==false) return false;" action="#{addTelephoneFilterStrategyBean.saveTelephoneFilter}" reRender="addForm:itemLists, addForm:isEdit" styleClass="rich-button" oncomplete="afterSave();">
+ </a4j:commandButton>
+ <rich:spacer width="10px;"></rich:spacer>
+ <a4j:commandButton value="#{msgs['baf.dialoutstrategy.return']}" type="button" onclick="history.back();" styleClass="rich-button" >
+ </a4j:commandButton>
+ </center>
+ </h:panelGroup>
+</h:panelGrid>
+<s:validatorScript functionName="valivalueForm"/> 
+</a4j:form>
+
+    <a4j:form>    
+    
+    <a4j:jsFunction name="deleteItem"  action="#{addTelephoneFilterStrategyBean.deleteItem}" reRender="addForm:itemLists,addForm:isEdit">
+    	<a4j:actionparam name="row"  /> 
+    </a4j:jsFunction> 
+    
+    <a4j:jsFunction name="editItem"  action="#{addTelephoneFilterStrategyBean.editItem}" reRender="addForm:addGrid,addForm:isEdit"  >
+       <a4j:actionparam name="row"  /> 
+    </a4j:jsFunction> 
+    
+    <a4j:jsFunction name="insertItem"  action="#{addTelephoneFilterStrategyBean.insertItem}"  reRender="addForm:itemLists,addForm:isEdit,addForm:msg" >
+      
+    </a4j:jsFunction> 
+    </a4j:form>
+    
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+    <ui:include src="/baf/jsp/taskmange/commonq.xhtml" />
+</body>
+  	</f:view>
+</html>

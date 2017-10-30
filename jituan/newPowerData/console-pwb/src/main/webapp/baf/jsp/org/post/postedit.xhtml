@@ -1,0 +1,761 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+
+<head>
+<script>
+//<![CDATA[
+  var  saveStatus = true; //数据保存状态 true 保存成功, false保存失败
+
+  function getSelectedParentID(checkList) {
+	  var parentList = "";
+	  if (checkList != null && checkList != "") {
+		  //获取选中的所有父节点
+		  var selectedArray = checkList.split(',');
+		  for (var i=0; i<selectedArray.length; i++) {
+			  var parentID = selectedArray[i];
+			  var parentArray = "";
+			  do {
+				  parentID = selectRightTree_tree.getParentId(parentID);
+				  if (parentList.indexOf(parentID) >= 0 || parentID == "0") {
+					  //已经包含
+					  break;
+				  }
+				  if (parentArray == "")
+				 	 parentArray = parentID;
+				  else
+					 parentArray += "," + parentID;				  
+			  } while (parentID != "0")
+			  if (parentList == "") {
+				  parentList = parentArray ;
+			  } else {
+				  parentList += "," + parentArray;
+			  }					
+		  }
+	  }
+	  return parentList; 
+  }
+  
+  /*设置选中的业务配置数据项到一个隐藏域，保障用户已选的业务配置项提交到后台*/
+  function setSelectBusinessConfigItems(checkId,checkState)
+  {
+      var values  = this.getAllCheckedBranches();
+      var bcitemsobj = document.getElementById("postForm:businessConfigItems");
+      bcitemsobj.value = values;
+  }
+
+  //数据权限因子树
+  function doOnClick() {
+	  var itemId = this.getSelectedItemId();
+	  var type = this.getUserData(itemId, 'type');
+	  var rightFactorID = document.getElementById("postForm:rightFactorID").value;
+
+	  //判断是否点击相同的节点
+	  if (rightFactorID == itemId) {
+		  //不作处理
+		  return;
+	  }
+	  
+	  document.getElementById("postForm:rightFactorID").value = itemId;
+	  if (type == "R") {  
+		  var preType = this.getUserData(rightFactorID, 'type');
+		  if (preType == "R") {
+			  //需要把该权限因子对应勾选数据权限保存到后台
+			  var checkList = selectRightTree_tree.getAllChecked();
+			  var parentList = getSelectedParentID(checkList);
+			  //调用function传递数据到后台，也把点击的节点ID传递给后台，查询是否已有保存的数据
+			  //refresh(rightFactorID, checkList, itemId);	 
+			  //取消数据ID
+			  var cancelDataRight = document.getElementById("postForm:cancelDataRight").value;
+			  refresh(rightFactorID, checkList, parentList, cancelDataRight, itemId);
+		  } else {
+			  refresh("", "", "", "", itemId);
+		  }
+	  } else {
+		  var preType = this.getUserData(rightFactorID, 'type');
+		  if (preType == "R") {
+			  //需要把该权限因子对应勾选数据权限保存到后台
+			  var checkList = selectRightTree_tree.getAllChecked();
+			  var parentList = getSelectedParentID(checkList);
+			  //调用function传递数据到后台，也把点击的节点ID传递给后台，查询是否已有保存的数据
+			  //refresh(rightFactorID, checkList, "");	
+			  //取消数据ID
+			  var cancelDataRight = document.getElementById("postForm:cancelDataRight").value;			  			  
+			  refresh(rightFactorID, checkList, parentList, cancelDataRight, "");
+		  } else {			  
+			  //权限因子类型没有数据权限			 
+			  selectRightTree_tree.deleteChildItems("0");
+		  }	  
+	  }
+  }
+
+  function onReFreshComplete(data) {  
+	  if (data != null && data != "") {
+		  //需要重新加载树
+		  var arrays = data.split('|');
+		  var itemId = arrays[0];
+		  var selectedID = arrays[1];
+		  var parentID = arrays[2];
+		  var cancelID = arrays[3];
+		  
+		  var postID = document.getElementById("postForm:orgID").value;
+		  var url = "#{request.contextPath}/baf/jsp/org/post/datatree.jsp?authDataFlag=${postBean.authDataFlag}&rightFactorID="+itemId+"&selectedDataRight="+selectedID+"&cancelDataRight="+cancelID+"&parentID="+parentID+"&postID="+postID;
+		  document.getElementById("postForm:url").value=url;
+		  document.getElementById("postForm:cancelDataRight").value=cancelID;	
+		  selectRightTree_tree.setXMLAutoLoading(url);
+		  selectRightTree_tree.refreshItem("0");  		  
+	  } else {
+		  //不需要重新加载树
+		  selectRightTree_tree.deleteChildItems("0");
+		  document.getElementById("postForm:cancelDataRight").value = "";
+	  }	  
+  }
+
+  function doOnOpenStart(id, openState) {
+	  if (openState == 0) {
+		  var flag = this.getUserData(id, 'hasCheckbox');	
+		  var url = document.getElementById("postForm:url").value;
+		  selectRightTree_tree.setXMLAutoLoading(url+"&hasCheckbox="+flag);
+	  }
+	  return true;
+  } 
+  
+  //查询出来的树结构  点击checkbox框
+  function clickCheck(checkId,checkState) {	  
+		//获取该ID是否已经在数据库里选中
+		var isSelect = this.getUserData(checkId, 'isSelect');
+		if (isSelect == "Y" && checkState == 0) {
+			//取消
+			saveCancelDataRight(checkId);
+		} else if (isSelect == "Y" && checkState == 1) {
+			//如果是选中状态，检查下是否在取消里，如果有则删除。
+			deleteCancelDataRight(checkId);
+		}		
+		
+		//取消复选框选中状态，则要进行判断是否要取消父节点的字体加粗
+		if(checkState == 0){
+			cancelStyle(checkId);	
+		}else if(checkState==1){	//设置所有父节点字体加粗
+			setStyle(checkId);
+		}
+  }
+  
+  	//设置节点所有父节点字体加粗
+ 	function setStyle(checkId){
+ 		var parentId = selectRightTree_tree.getParentId(checkId);  	
+ 		if(parentId=="0"){
+ 			return;
+ 		} 	
+ 		selectRightTree_tree.setItemStyle(parentId,"font-weight:bold;");
+ 		selectRightTree_tree.setUserData(parentId,"isAuthPath","Y");
+ 		if(parentId!=0){
+ 			setStyle(parentId);
+ 		}
+ 	}
+ 	
+ 	//将节点字体由加粗设为普通
+ 	function cancelStyle(checkId){
+ 		var parentId = selectRightTree_tree.getParentId(checkId);
+ 		if(parentId=="0"){
+ 			return;
+ 		} 
+ 		var children = selectRightTree_tree.getAllSubItems(parentId).split(",");
+ 		var hasChecked = "N";   //指定节点下是否有复选框选中的，Y：有  N：无
+ 		var temp = 0;			//指定节点下是否有是权限路径的，0：无  1：有
+ 		for(var i=0;i<children.length;i++){
+ 			var isAuthPath = selectRightTree_tree.getUserData(children[i],"isAuthPath");
+ 			var checkstate = selectRightTree_tree.isItemChecked(children[i]);
+ 			if(checkstate==1){
+ 				hasChecked = "Y";
+ 				break;
+ 			}
+ 			if(isAuthPath=="Y"){
+ 				temp = 1 ;
+ 				break;
+ 			}
+ 		}
+ 		if(hasChecked=="N" && temp==0){  //当该节点下既没有选中的节点，也没有是权限路径的节点，则取消字体加粗
+ 			selectRightTree_tree.setItemStyle(parentId,"font-weight:normal;");
+ 			selectRightTree_tree.setUserData(parentId,"isAuthPath","N");
+ 			if(parentId!="0"){
+ 				cancelStyle(parentId);
+ 			}
+ 		}
+ 	}
+
+  function saveCancelDataRight(cancelID) {
+	  var cancelDataRight = document.getElementById("postForm:cancelDataRight").value;
+
+	  var save = "";
+	  //处理
+	  if (cancelDataRight == "" || cancelDataRight == null) {
+		 save = cancelID;
+	  } else {
+		  save = cancelDataRight + "," + cancelID;
+	  }	  
+	  document.getElementById("postForm:cancelDataRight").value = save;
+  }
+
+  function deleteCancelDataRight(id) {
+	  var cancelDataRight = document.getElementById("postForm:cancelDataRight").value;
+	  if (cancelDataRight != null && cancelDataRight != "") {
+			var index = cancelDataRight.indexOf(id);
+			if (index >= 0) {
+				//找到需要删除的数据
+				var str = "";
+				if(index>0){
+					str = ","+id;
+				} else {
+					if(index==0 && cancelDataRight.indexOf(",") != -1){
+						str = id + ",";
+					} else {
+						str = value;
+					}
+				}
+				document.getElementById("postForm:cancelDataRight").value = cancelDataRight.replace(str, "");
+			}
+	  }
+  }
+
+  //保存选中的权限因子和对应勾选的权限
+  function onSaveDataRight() {
+	  document.getElementById("postForm:allDataRight").value = "";
+	  var factorID = rightFactorTree_tree.getSelectedItemId();
+	  var type = rightFactorTree_tree.getUserData(factorID, 'type');
+	  if (type == "R") {
+		  //保存权限因子数据
+		  var checkList = selectRightTree_tree.getAllChecked();
+		  var parentList = getSelectedParentID(checkList); 
+		  //取消数据ID
+		  var cancelDataRight = document.getElementById("postForm:cancelDataRight").value;	
+		  document.getElementById("postForm:allDataRight").value = 	factorID + "#" + checkList + "|" + parentList + "|" + cancelDataRight;
+	  }
+	  return true;
+  }
+
+  //点击人员列表复选框
+  function onCheckBoxClick() {
+	  //判断是否新增，还是取消
+	  //设置selectIDs,cancelIDs的值。
+  }
+  
+  	//将选择的岗位模板数据渲染给当前岗位对象
+	function doOnTemplateClick(){
+		var itemId = this.getSelectedItemId();
+		var itemText = this.getSelectedItemText();
+		setTemplateValue(itemId,itemText);
+	}
+	
+	//存为模板复选框选中状态变化
+	function chkchange(){
+		var chk = document.getElementById("postForm:saveToTemplate");		
+		if(chk.checked==true){
+			RichFaces.switchTab('postForm:tabPanel','postForm:orgunit','orgunit');
+			document.getElementById("postForm:tid").style.display = "block";
+			document.getElementById("postForm:saveTemplateName").focus();
+		}else{
+			document.getElementById("postForm:tid").style.display = "none";
+			document.getElementById("postForm:saveTemplateName").value = "";
+		}
+		document.getElementById("postForm:saveToTemplate").blur();
+	}
+	
+	//保存完成触发事件
+	function onSaveComplete(data){
+   		if(data!=null && data!=""){
+   			/*if(data=="N"){
+   				alert("${msgs['baf.Failure']}");
+   				return;
+   			}*/
+   			if(data=="T"){
+   				alert("${msgs['baf.org.unit.saveModuleFail']}");
+   				return;
+   			}
+   		}
+   		if(a4jcomplete()==false){
+	   		document.getElementById('postForm:btnSave').disabled = '';
+	 	    return;
+	    } 
+   		var chk = document.getElementById("postForm:saveToTemplate");
+   		chk.checked = false;	
+   		document.getElementById("postForm:tid").style.display = "none";
+		document.getElementById("postForm:saveTemplateName").value = "";	
+		var orgId = data.split("#")[1];  //新增完之后要定位到新增的岗位时，用这句代码
+   		refreshTreeItem(orgId);   	
+   		//设置焦点
+   		setFocus("postForm:orgName");	
+   		//请求完成之后设置当前请求状态为N
+   		parent.setRequestStatus('N');
+   		/*var orgId = document.getElementById("postForm:orgID").value;
+	 	  if(orgId!=""){
+	 		  var timeout = setTimeout("parent.setselectitem('"+orgId+"')", 800);
+	 	  }*/
+   }
+   
+   //验证对象存为模板的名称
+   function validateSaveTemplateName(returnvalue){
+   	   var chk = document.getElementById("postForm:saveToTemplate");	
+	   var tname = document.getElementById("postForm:saveTemplateName").value;
+	   if(chk.checked==true && tname==""){
+	   	   alert("${msgs['baf.org.tnameMessage']}");
+	   	   RichFaces.switchTab('postForm:tabPanel','postForm:orgunit','orgunit');	   
+	   	   document.getElementById("postForm:saveTemplateName").focus();
+	   	   returnvalue = false;
+	   }
+	   return returnvalue;
+   }
+	//保存业务配置
+	function onSaveBussiness(){
+	    var checkList = bcontreeObj_tree.getAllCheckedBranches();
+		var uncheckList = bcontreeObj_tree.getAllUnchecked();
+	    document.getElementById("postForm:busChecked").value = checkList;
+	    document.getElementById("postForm:busUnChecked").value = uncheckList; 
+	}
+	
+	//保存操作权限组
+	function onSaveGroup(){
+		var allCheckedGroupId = operGroupTree_tree.getAllChecked();
+        document.getElementById("postForm:allCheckGroupIds").value = allCheckedGroupId;
+	}
+	
+	//切换tab页时对基本信息进行验证
+	function tabValidate(){
+		var isSuccess = true;
+		if(event.srcElement.id !='postForm:orgunit_lbl'){
+			isSuccess = validateForm(postForm);
+		}
+		if(event.srcElement.id !='postForm:orgunit_lbl' && isSuccess==true){
+			isSuccess = validateSaveTemplateName(isSuccess);
+		}
+		return isSuccess;
+	}
+	
+	/*表单校验扩展*/
+	function validateAll(formobj){
+	   var returnvalue = true;
+	   //验证form表单
+	   returnvalue = validateForm(formobj);
+	   //判断模板名称是否为空
+	   returnvalue = validateSaveTemplateName(returnvalue);
+	   if(returnvalue==true){
+	   		//将保存按钮置灰，防止多次提交表单
+	   		document.getElementById('postForm:btnSave').disabled = 'true';
+	   		//保存业务配置
+	   		onSaveBussiness();
+	   		//向后台保存数据权限
+	   		onSaveDataRight();
+	   		//保存操作权限
+	   		onSaveGroup();
+	   }
+	   return returnvalue;
+	}
+//]]>
+</script>
+<style type="text/css">
+.column1{
+	width:25%;
+}
+.column2{
+	width:45%;
+}
+.column4{
+	width:30%;
+}
+.column5{
+	width:70%;
+}
+
+.column6{
+	width:25%;
+	text-align:right;
+}
+.column7{
+	width:45%;
+	text-align:right;
+}
+.column8{
+	width:30%;
+}
+</style>
+</head>
+<body onload="setFocus('postForm:orgName')">
+
+<a4j:form id="postForm" > <!-- onsubmit="return validateForm(this);" -->
+       <regaltec:dhtmlXtree id="bcontreeObj"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="bcontree"
+			loadXML="/baf/jsp/org/unit/bussinessTreeXMLData.jsp?objectType=P&amp;requestId=#{postBean.orgID}"
+			xmlAutoLoading="/baf/jsp/org/unit/bussinessTreeXMLData.jsp?objectType=P&amp;requestId=#{postBean.orgID}">
+      <regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"></regaltec:setDxtEnable>
+      <regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"></regaltec:setDxtEnable>
+      <regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>	
+      <regaltec:setDxtEevntHandler eventName="onCheck" handler="setSelectBusinessConfigItems" />      
+	</regaltec:dhtmlXtree> 
+	<rich:tabPanel id="tabPanel" ontabchange="return tabValidate();" style="margin-left:5px;margin-right:5px;margin-top:5px;" width="99%" height="90%" switchType="client" >
+		<!-- 岗位基本信息 -->
+		<rich:tab id="orgunit" label="#{msgs['baf.org.post.tab.post']}">
+			<h:inputHidden id="orgID" value="#{postBean.orgID}" />
+			<h:inputHidden id="parentOrgID" value="#{postBean.parentOrgID}" />
+			<fieldset style="height:100%" >
+            <legend><h:outputText value="#{msgs['baf.org.post.tab.post']}"/></legend>
+            
+            <h:panelGrid id="post" columns="3" columnClasses="column6,column7,column8"   style="font-size:13px;width:100%;" styleClass=".rich-text-color-general">
+		
+				<h:outputText value="#{msgs['baf.org.post.parentUnit']}:" />
+				<h:inputText id="parentOrgName" style="width:300px;height:23px;" styleClass="rich-gradient-input"  readonly="true" value="#{postBean.parentOrgName}" onfocus="this.blur();"/>
+				<a4j:commandButton type="button" styleClass="rich-button" style="width:70px;"  value="#{msgs['baf.org.unit.selectTemplate']}" >
+					<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('postForm:templateModalPanel'); return false;"/>
+				</a4j:commandButton>
+			
+				<h:outputText value="#{msgs['baf.org.post.postName']}:" />
+				<h:inputText id="orgName" style="width:300px;height:23px;" styleClass="rich-gradient-input"  value="#{postBean.orgName}">
+					<s:commonsValidator type="required" arg="#{msgs['baf.org.post.postName']}" server="false" client="true"/>				 
+					<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.post.postName']}" maxLength="64"  server="false" client="true"/>
+				</h:inputText>
+				<h:outputText value=""/>				
+			
+				<h:outputText value="#{msgs['baf.org.post.phone']}:" />
+				<h:inputText id="phone" style="width:300px;height:23px;" styleClass="rich-gradient-input" value="#{postBean.phone}" >	
+		   			<s:commonsValidator type="maxlength"  maxLength="16" arg="#{msgs['baf.org.post.phone']}" server="false" client="true"/>	
+				</h:inputText>
+				<h:outputText value=""/>
+			
+				<h:outputText value="#{msgs['baf.org.TemplateName']}:" />				
+				<h:inputText id="templateName" style="width:300px;height:23px;" styleClass="rich-gradient-input"  value="#{postBean.templateName}" onfocus="this.blur()" title="#{msgs['baf.org.templateName']}"/>
+				<h:outputText value=""/>
+			
+				<h:outputText value="#{msgs['baf.org.post.authDataFlag']}:" />
+			    <h:selectOneRadio id="authDataFlag" value="#{postBean.authDataFlag}" style="font-size:13px;">
+				    <f:selectItem itemLabel="#{msgs['baf.radioYes']}" itemValue="Y"  />
+				    <f:selectItem  itemLabel="#{msgs['baf.radioNo']}"  itemValue="N" />
+			    </h:selectOneRadio>
+				<h:outputText value=""/>
+			
+				<h:outputText value="#{msgs['baf.org.unit.orgDes']}:" />
+				<h:inputTextarea id="orgDes" style="width:300px;height:50px;word-break:break-all;resize:none;" styleClass="rich-gradient-input" value="#{postBean.orgDes}">				
+					<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.post.orgDes']}" maxLength="255"  server="false" client="true"/>
+				</h:inputTextarea>
+				<h:outputText value=""/>
+			
+				<h:inputHidden id="orgTemplateId" value="#{postBean.orgTemplateID}"/>
+			</h:panelGrid>
+			
+			<rich:spacer height="50px"/>
+			<rich:panel id="tid" header="#{msgs['baf.org.inputTname']}" style="text-align:left;width:40%;display:none;">			
+			<h:panelGrid id="torg" columns="2" columnClasses="column4,column5" style="font-size:13px;width:90%;" styleClass=".rich-text-color-general">
+				<h:outputText value="#{msgs['baf.org.TemplateName']}:" />
+				<h:inputText id="saveTemplateName" style="width:100%;height:23px;" styleClass="rich-gradient-input"  value="#{postBean.saveTemplateName}">
+					<s:commonsValidator type="maxlength" arg="#{msgs['baf.org.TemplateName']}" maxLength="64" server="false" client="true"/>
+				</h:inputText>
+			</h:panelGrid>
+			</rich:panel>
+			
+			 </fieldset>
+		</rich:tab>
+			
+		<!-- 业务配置 -->
+		<rich:tab id="businessConfig" label="#{msgs['baf.org.post.tab.businessConfig']}" switchType="client">
+			<h:inputHidden id="businessConfigItems" value="#{postBean.businessConfigItems}"></h:inputHidden>
+			<fieldset style="height:100%" >
+	            <legend><h:outputText value="#{msgs['baf.org.post.tab.businessConfig']}"/></legend>
+				<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+					<tr>
+						<td id="bcontree" width="100%" height="100%"></td>
+					</tr>
+				</table>
+            </fieldset>
+		</rich:tab>
+			
+		<!-- 操作权限组配置 -->
+		<rich:tab id="authorizationGroup" label="#{msgs['baf.org.user.tab.operateAuthorConfig']}" switchType="client">
+            <table width="100%" height="100%" cellpadding="3%">
+              <tr>
+               	<td width="30%">
+              		<fieldset style="height:100%" >
+	            		<legend><h:outputText value="#{msgs['baf.org.user.tab.operateGroupConfig']}"/></legend>      
+	            		<rich:spacer height="1px;"/>		               			
+	            		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+							<tr>
+								<td id="operGroupTree_tree" width="100%" height="100%"></td>
+							</tr>
+						</table>
+						
+						<regaltec:dhtmlXtree id="operGroupTree"
+							imagePath="/baf/images/dhtmlxtree/" contentEl="operGroupTree_tree"
+							loadXML="/baf/jsp/org/post/operateGroupXMLData.jsp?postId=#{postBean.orgID}&amp;nativenetGroupId=#{operRigGroupBean.nativenetGroupId}"
+							xmlAutoLoading="/baf/jsp/org/post/operateGroupXMLData.jsp?postId=#{postBean.orgID}&amp;groupId=&amp;nativenetGroupId=#{operRigGroupBean.nativenetGroupId}">
+							<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+						</regaltec:dhtmlXtree>
+		          	</fieldset>
+              	</td>
+              </tr>
+             </table>
+		</rich:tab>
+			
+		<!-- 数据权限配置 -->
+		<rich:tab id="dataAuthorization" label="#{msgs['baf.org.post.tab.dataAuthorization']}" switchType="client">
+			<table width="100%" height="100%">
+                <tr>
+	                <td width="50%">
+						<fieldset style="height:98%">
+			           		<legend><h:outputText value="#{msgs['baf.org.unit.dataRight']}"/></legend>				           		
+			           		<rich:spacer height="1px;"/>
+			           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+								<tr>
+									<td id="dataRight_Tree" width="100%" height="100%"></td>
+								</tr>
+							</table>
+							<regaltec:dhtmlXtree id="rightFactorTree"
+								imagePath="/baf/images/dhtmlxtree/" contentEl="dataRight_Tree"
+								loadXML="/baf/jsp/org/unit/rightFactorTreeXMLData.jsp"
+								xmlAutoLoading="/baf/jsp/org/unit/rightFactorTreeXMLData.jsp">
+								<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick"/>																		
+							</regaltec:dhtmlXtree>		           		
+			           	</fieldset>	
+		        	</td>
+		        	
+	                <td width="50%">			
+						<fieldset style="height:98%">
+			           		<legend><h:outputText value="#{msgs['baf.org.unit.dataRightTreeTitle']}" /></legend>				           		
+			           		<rich:spacer height="1px;"/>
+			           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+								<tr>
+									<td id="selectRight_Tree" width="100%" height="100%"></td>
+								</tr>
+							</table>
+							<regaltec:dhtmlXtree id="selectRightTree"
+								imagePath="/baf/images/dhtmlxtree/" contentEl="selectRight_Tree"
+								loadXML="/baf/jsp/org/post/datatree.jsp?authDataFlag=#{postBean.authDataFlag}"
+								xmlAutoLoading="/baf/jsp/org/post/datatree.jsp?authDataFlag=#{postBean.authDataFlag}">
+								<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+						    	<regaltec:setDxtEevntHandler eventName="onCheck" handler="clickCheck"/> 
+						    	<regaltec:setDxtEevntHandler eventName="onOpenStart" handler="doOnOpenStart"/>	
+							</regaltec:dhtmlXtree>		           		
+			           	</fieldset>	          
+					</td>
+				</tr>	
+			</table>	
+			
+		</rich:tab>
+			
+		<!-- 岗位人员 -->
+		<rich:tab id="orguser" label="#{msgs['baf.org.post.person']}" switchType="client">
+			<fieldset style="height:100%" >
+            <legend><h:outputText value="#{msgs['baf.org.post.personList']}"/></legend>
+            <rich:spacer height="10px"/>	
+				<rich:dataTable id="postuser"  align="center" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+					cellpadding="0" cellspacing="0" width="100%" border="0" var="orguser" value="#{postBean.defaultDataModel}" rows="#{postBean.pageSize}"> 		
+					        				
+				 	<rich:column width="12%" >
+						<f:facet name="header">
+						    <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userName']}" />
+						</f:facet>
+					    <h:outputText id="t_userName" value="#{orguser.userName}"/>
+				 	</rich:column>
+				 	<rich:column width="12%" >
+	            		<f:facet name="header">
+	                        <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}"/>
+			        	</f:facet>
+	                	<h:outputText id="t_gender" value="#{orguser.gender}" />
+	            	</rich:column>
+				 	<rich:column width="12%" >
+	            		<f:facet name="header">
+	                		<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}"/>
+			        	</f:facet>
+	                	<h:outputText id="t_loginName" value="#{orguser.loginName}" />
+	            	</rich:column>
+				 	<rich:column width="25%" >
+						<f:facet name="header">
+						    <h:outputText styleClass="headerText" value="#{msgs['baf.org.post.phone']}" />
+						</f:facet>
+					    <h:outputText id="t_officePhone" value="#{orguser.officePhone}"/>
+				 	</rich:column>			 		
+				 	<rich:column width="34%" >
+						<f:facet name="header">
+						    <h:outputText styleClass="headerText" value="#{msgs['baf.org.post.postName']}" />
+						</f:facet>
+					    <h:outputText id="t_postName" value="#{orguser.unitName}"/>
+				 	</rich:column>		 	
+			 	</rich:dataTable>
+			 	<h:inputHidden id="selectIDs" value="#{postBean.selectIDs}"/>
+			 	<h:inputHidden id="cancelIDs" value="#{postBean.cancelIDs}"/>
+			    <h:inputHidden id="busChecked" value="#{postBean.busChecked}"/>
+			    <h:inputHidden id="busUnChecked" value="#{postBean.busUnChecked}"/>
+			 	<table width="100%">
+            	<tr>
+	            <td>
+					<rich:datascroller align="right"  for="postuser" fastStep="1"  page="#{postBean.scrollerPage}" id="sc" />
+					<a4j:keepAlive beanName="postBean"/>
+				</td>
+				</tr>
+				</table>
+			</fieldset>
+		</rich:tab>
+		
+		<!-- 岗位扩展属性 -->
+			<rich:tab id="orgpostext" label="#{msgs['baf.org.post.postExt']}" switchType="client" rendered="#{postBean.postExtDefineList!=null}">
+				<fieldset style="height:100%" >
+	            <legend><h:outputText value="#{msgs['baf.org.post.postExt']}"/></legend>
+	            <rich:spacer height="10px"/>
+	            <center>	            
+	            <h:panelGrid columns="2" style="font-size:13px;word-break:break-all;" width="60%" dir="ltr" columnClasses="column1,column2">
+		            <c:forEach var="ext" items="#{postBean.postExtDefineList}" step="1">
+		            	<h:outputText value="#{ext.propertyName}:"/>
+		            	
+		            	<h:panelGroup>
+			            	<h:inputText value="#{postBean.postExtVO[ext.fieldName]}" style="width:95%;height:23px;" styleClass="rich-gradient-input" rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='S'}">
+								<s:commonsValidator type="maxlength" arg="#{ext.propertyName}" maxLength="512"  server="false" client="true"/>
+		           			</h:inputText>
+		           			<h:inputText value="#{postBean.postExtVO[ext.fieldName]}" style="width:95%;height:23px;" styleClass="rich-gradient-input" rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='N'}">
+								<s:commonsValidator type="integer" arg="#{ext.propertyName}" server="false" client="true"/>
+		           			</h:inputText>
+		           			
+	            			<regaltec:dictionary type="dictionary" baseFlat="1" dicCode="#{ext.dataFrom}" optValueType="itemValue" value="#{organizationBean.unitExtVO[ext.fieldName]}" style="width:95%;height:23px;" rendered="#{ext.controlType=='COMBO'}"/>
+	           			</h:panelGroup>	
+	           			
+	           		</c:forEach>
+	           	</h:panelGrid>		        
+	            </center>
+	            </fieldset>
+			</rich:tab>
+		
+	</rich:tabPanel>
+	
+		<rich:spacer height="1" />
+				
+		<!-- 选择岗位模板   -->
+		<rich:modalPanel id="templateModalPanel" autosized="false" keepVisualState="false" width="450" height="400">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.org.unit.select']}#{msgs['baf.org.post.postTemplate']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="templateModalPanel" attachTo="hidelink" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<fieldset style="height:90%">
+	       		<legend><h:outputText value="#{msgs['baf.org.post.postTemplate']}" /></legend>				           		
+	       		<rich:spacer height="1px;"/>
+	       		<table style="width:100%;height:92%;overflow-x:auto;overflow-y:auto;">
+	       			<tr><td id="template_tree"></td></tr>
+	       		</table>	
+				
+				<regaltec:dhtmlXtree id="templateTree"
+					imagePath="/baf/images/dhtmlxtree/" contentEl="template_tree"
+					loadXML="/baf/jsp/org/unit/orgTemplateXMLData.jsp?category=P"
+					xmlAutoLoading="/baf/jsp/org/unit/orgTemplateXMLData.jsp">
+					<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnTemplateClick" />	
+				</regaltec:dhtmlXtree>		
+					
+			</fieldset>
+			<center>
+			<h:commandButton type="button" id="templateModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('templateModalPanel')}.hide(); return false;"/>
+			</center>
+		</rich:modalPanel>
+		<CENTER>
+		<!-- 存为模板 -->
+		<h:panelGroup id="saveToTemplateGroup">		
+			<h:selectBooleanCheckbox id="saveToTemplate" onclick="chkchange();" value="#{postBean.chkstate}"/>	
+			<h:outputLabel value="#{msgs['baf.org.saveToTemplate']}" style="font-size:13px;"  styleClass="rich-text-color-general"/>
+		</h:panelGroup>												
+		<rich:toolTip for="saveToTemplate" value="#{msgs['baf.org.saveToTemplateTip']}"/>	
+		<rich:spacer width="10px"/>
+		
+		<!-- 连续新增 -->
+		<h:panelGroup id="isBatchAddGroup" rendered="#{postBean.orgID==null || postBean.orgID==''}">
+			<h:selectBooleanCheckbox id="isBatchAddSave" value="#{postBean.batchAddChkState}"/>			
+			<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}" style="font-size:13px;"  styleClass="rich-text-color-general"/>												
+			<rich:toolTip for="isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>
+			<rich:spacer width="10px"/>
+		</h:panelGroup>
+		
+		<!-- 保存按钮 -->
+		<a4j:commandButton id="btnSave" value="#{msgs['baf.org.unit.save']}" styleClass="rich-button">
+		<a4j:actionparam name="handleType" value="save"/>
+		<a4j:support event="onclick" onsubmit="parent.setRequestStatus('Y');if (validateAll(document.getElementById('postForm'))==false) return false;" action="#{postBean.save}"  data="#{postBean.dealFlag}" oncomplete="onSaveComplete(data);" reRender="postForm"/>
+		</a4j:commandButton>
+		
+		<!-- &nbsp;<a4j:commandButton type="submit" value="#{msgs['baf.org.unit.saveTemplate']}" styleClass="rich-button" oncomplete="alert('模板保存成功!');"/> -->
+		</CENTER>
+		
+		<s:validatorScript functionName="validateForm"/>
+		
+		<!-- 隐藏域 -->
+		<h:inputHidden id="rightFactorID" value=""/>
+		<h:inputHidden id="url" value=""/>			
+		<h:inputHidden id="cancelDataRight" value=""/>
+		<h:inputHidden id="allDataRight" value="#{postBean.allDataRight}"/>			
+		<h:inputHidden id="allCheckGroupIds" value="#{postBean.allCheckGroupIds}"/>
+		
+		<!-- 处理时显示等待对话框 -->
+		<a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('postForm:panel').component.show()" onstop="document.getElementById('postForm:panel').component.hide()">
+		</a4j:status>
+		<rich:modalPanel id="panel" width="350" height="100">
+          <h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+        </rich:modalPanel>			
+	</a4j:form>
+	
+	<a4j:form>
+	    <a4j:jsFunction name="reflashPost"  status="a4jstatus"    limitToList="true"  action="#{postBean.reflashPost}" oncomplete="setFocus('postForm:orgName');parent.setRequestStatus('N');" reRender="postForm" >
+	            <a4j:actionparam name="orgId" assignTo="#{postBean.orgID}"  />
+	            <a4j:actionparam name="handleType" value="edit"/>                
+	    </a4j:jsFunction>
+	
+	    <a4j:jsFunction name="refresh" action="#{postBean.refresh}" data="#{postBean.data}" oncomplete="onReFreshComplete(data);">
+	    	<a4j:actionparam name="saveFactorID" value=""/>
+	    	<a4j:actionparam name="selectedRightID" value=""/>
+	    	<a4j:actionparam name="parentID" value=""/>
+	    	<a4j:actionparam name="cancelID" value=""/>
+	    	<a4j:actionparam name="getFactorID" value=""/>
+	    </a4j:jsFunction>	
+	    
+	    <a4j:jsFunction name="setTemplateValue" action="#{postBean.saveTemplate}" reRender="post,templateModalPanel">
+	    	<a4j:actionparam name="templateId" value="" />    <!-- 选中的模板Id -->
+	    	<a4j:actionparam name="templateName" value="" />    <!-- 选中的模板Name -->
+	    </a4j:jsFunction>  
+        
+        <!-- 刷新岗位页面中的人员列表 -->
+        <a4j:jsFunction name="listPostUser" limitToList="true"  action="#{postBean.reflash}" reRender="postuser">
+            <a4j:actionparam name="unitId" assignTo="#{postBean.orgID}"  />
+            <a4j:actionparam name="scrollerPage"  value="1" assignTo="#{postBean.scrollerPage}"  />                  
+        </a4j:jsFunction>
+    </a4j:form>	
+		    	
+   <script>
+   /*刷新父窗口树某一个节点*/
+   function refreshTreeItem(orgID)
+   {
+      var parentObjId = document.getElementById("postForm:parentOrgID").value;
+      if( parentObjId == "" || parentObjId == null) return;
+      parent.refreshTreeItem(parentObjId);
+      var orgId = "";
+      //orgID为空时是修改，不为空时是新增
+      if(orgID==""){
+      	 orgId = document.getElementById("postForm:orgID").value;
+      }else{
+      	 orgId = orgID;
+      }
+ 	  if(orgId!=""){
+ 		  var timeout = setTimeout("parent.selectItem('"+orgId+"');", 800);
+ 	  }
+   }
+  </script> 
+  
+  <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>
+ 

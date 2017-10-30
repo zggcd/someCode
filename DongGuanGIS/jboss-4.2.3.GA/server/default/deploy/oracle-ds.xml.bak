@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  JBoss Server Configuration                                           -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<!-- $Id: oracle-ds.xml,v 1.6 2004/09/15 14:37:40 loubyansky Exp $ -->
+<!-- ==================================================================== -->
+<!--  Datasource config for Oracle originally from Steven Coy             -->
+<!-- ==================================================================== -->
+
+
+<datasources>
+  <local-tx-datasource>
+    <jndi-name>RegalBdpDB</jndi-name>
+
+	<!--<connection-url>jdbc:oracle:thin:@172.16.29.78:1521:oraida</connection-url>--> 
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.44:1521:rbdp</connection-url>-->
+ 	<connection-url>jdbc:oracle:thin:@199.3.11.20:1521/orcl</connection-url>
+ 	<!--<connection-url>jdbc:oracle:thin:@172.16.29.78:1521:oraida</connection-url>-->
+ 	<!--<connection-url>jdbc:oracle:thin:@199.3.5.31:1521:Ora10</connection-url>-->
+  
+   <!--<connection-url>jdbc:oracle:thin:@ 172.17.11.28:1521:SDH</connection-url>-->
+	 <!--
+	  <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 199.3.8.236)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = ORA92)))</connection-url>
+	  
+	   
+	   <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 127.0.0.1)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = eoms)))</connection-url>
+	   -->
+	  <!--<connection-url>jdbc:oracle:oci8:@SVR9I</connection-url>-->
+	<!--
+
+		Here are a couple of the possible OCI configurations.
+		For more information, see http://otn.oracle.com/docs/products/oracle9i/doc_library/release2/java.920/a96654/toc.htm
+
+	<connection-url>jdbc:oracle:oci:@youroracle-tns-name</connection-url>
+		or
+	<connection-url>jdbc:oracle:oci:@(description=(address=(host=youroraclehost)(protocol=tcp)(port=1521))(connect_data=(SERVICE_NAME=yourservicename)))</connection-url>
+
+		Clearly, its better to have TNS set up properly.
+	 -->
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+	<!-- 
+	  <user-name>kebao</user-name>
+      <password>password</password>
+     <user-name>cost_ccatsupt</user-name>
+      <password>regalsupt</password>
+	 <user-name>baf</user-name>
+      <password>password</password>
+	  <user-name>paas</user-name>
+      <password>paas123</password>
+   -->  
+    
+   <user-name>gis_new</user-name>
+      <password>gis_new</password>
+	
+    <!--
+    Qiu Gechuan add to test the connection pool
+    -->
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+        
+    <!-- Uses the pingDatabase method to check a connection is still valid before handing it out from the pool -->
+    <!--valid-connection-checker-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleValidConnectionChecker</valid-connection-checker-class-name-->
+    <!-- Checks the Oracle error codes and messages for fatal errors -->
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+        <!-- sql to call when connection is created
+        <new-connection-sql>some arbitrary sql</new-connection-sql>
+        -->
+
+        <!-- sql to call on an existing pooled connection when it is obtained from pool - the OracleValidConnectionChecker is prefered
+        <check-valid-connection-sql>some arbitrary sql</check-valid-connection-sql>
+        -->
+
+      <!-- corresponding type-mapping in the standardjbosscmp-jdbc.xml (optional) -->
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+  <local-tx-datasource>
+    <jndi-name>oa</jndi-name>
+
+	<!--<connection-url>jdbc:oracle:thin:@172.16.29.79:1521:ORA92</connection-url> -->
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.44:1521:rbdp</connection-url>-->     <connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.78:1521:oraida</connection-url>-->  
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.185:1521/baf</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@199.3.5.31:1521:Ora10</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@199.3.5.31:1521:Ora10</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.180:1521:oragis</connection-url>-->
+	 <!--
+	  <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 199.3.8.236)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = ORA92)))</connection-url>
+	  
+	   
+	   <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 127.0.0.1)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = eoms)))</connection-url>
+	   -->
+	  <!--<connection-url>jdbc:oracle:oci8:@SVR9I</connection-url>-->
+	<!--
+
+		Here are a couple of the possible OCI configurations.
+		For more information, see http://otn.oracle.com/docs/products/oracle9i/doc_library/release2/java.920/a96654/toc.htm
+
+	<connection-url>jdbc:oracle:oci:@youroracle-tns-name</connection-url>
+		or
+	<connection-url>jdbc:oracle:oci:@(description=(address=(host=youroraclehost)(protocol=tcp)(port=1521))(connect_data=(SERVICE_NAME=yourservicename)))</connection-url>
+
+		Clearly, its better to have TNS set up properly.
+	 -->
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+<!--
+	<user-name>kebao</user-name>
+    <password>password</password>
+	<user-name>baf</user-name>
+      <password>password</password>
+   -->  
+     
+	  <user-name>baf</user-name>
+      <password>password</password>
+    
+    <!--
+    Qiu Gechuan add to test the connection pool
+    -->
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+        
+    <!-- Uses the pingDatabase method to check a connection is still valid before handing it out from the pool -->
+    <!--valid-connection-checker-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleValidConnectionChecker</valid-connection-checker-class-name-->
+    <!-- Checks the Oracle error codes and messages for fatal errors -->
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+        <!-- sql to call when connection is created
+        <new-connection-sql>some arbitrary sql</new-connection-sql>
+        -->
+
+        <!-- sql to call on an existing pooled connection when it is obtained from pool - the OracleValidConnectionChecker is prefered
+        <check-valid-connection-sql>some arbitrary sql</check-valid-connection-sql>
+        -->
+
+      <!-- corresponding type-mapping in the standardjbosscmp-jdbc.xml (optional) -->
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+  <local-tx-datasource>
+    <jndi-name>tml</jndi-name>
+
+	<!--<connection-url>jdbc:oracle:thin:@172.16.29.79:1521:ORA92</connection-url> -->
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.44:1521:rbdp</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.185:1521/baf</connection-url>-->
+   <connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.78:1521:oraida</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@199.3.5.31:1521:Ora10</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@199.3.5.31:1521:Ora10</connection-url>-->
+   <!--<connection-url>jdbc:oracle:thin:@172.16.29.180:1521:oragis</connection-url>-->
+	 <!--
+	  <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 199.3.8.236)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = ORA92)))</connection-url>
+	  
+	   
+	   <connection-url>jdbc:oracle:oci8:@(DESCRIPTION =(ADDRESS_LIST=(ADDRESS =(PROTOCOL=TCP)(HOST = 127.0.0.1)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = eoms)))</connection-url>
+	   -->
+	  <!--<connection-url>jdbc:oracle:oci8:@SVR9I</connection-url>-->
+	<!--
+
+		Here are a couple of the possible OCI configurations.
+		For more information, see http://otn.oracle.com/docs/products/oracle9i/doc_library/release2/java.920/a96654/toc.htm
+
+	<connection-url>jdbc:oracle:oci:@youroracle-tns-name</connection-url>
+		or
+	<connection-url>jdbc:oracle:oci:@(description=(address=(host=youroraclehost)(protocol=tcp)(port=1521))(connect_data=(SERVICE_NAME=yourservicename)))</connection-url>
+
+		Clearly, its better to have TNS set up properly.
+	 -->
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+<!--
+	<user-name>kebao</user-name>
+    <password>password</password>
+	<user-name>baf</user-name>
+      <password>password</password>
+-->
+   <user-name>baf</user-name>
+      <password>password</password>
+    
+    <!--
+    Qiu Gechuan add to test the connection pool
+    -->
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+        
+    <!-- Uses the pingDatabase method to check a connection is still valid before handing it out from the pool -->
+    <!--valid-connection-checker-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleValidConnectionChecker</valid-connection-checker-class-name-->
+    <!-- Checks the Oracle error codes and messages for fatal errors -->
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+        <!-- sql to call when connection is created
+        <new-connection-sql>some arbitrary sql</new-connection-sql>
+        -->
+
+        <!-- sql to call on an existing pooled connection when it is obtained from pool - the OracleValidConnectionChecker is prefered
+        <check-valid-connection-sql>some arbitrary sql</check-valid-connection-sql>
+        -->
+
+      <!-- corresponding type-mapping in the standardjbosscmp-jdbc.xml (optional) -->
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+ 
+  
+  
+</datasources>

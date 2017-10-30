@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.funcparams.dao.FuncParamsDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.funcparams.model.FuncParamsVO">
+		<id column="FDUFUNCTIONID" jdbcType="VARCHAR" property="functionID" />
+		<result column="FDIPARAMSNO" jdbcType="INTEGER" property="paramsNO" />
+		<result column="FDCDATATYPE" jdbcType="CHAR" property="dataType" />
+		<result column="FDCOBJECTTYPE" jdbcType="VARCHAR" property="objectType" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addFuncParams" parameterType="com.ccssoft.rsas.metadata.funcparams.model.FuncParamsVO">
+		insert into TBFUNCPARAMS (FDUFUNCTIONID, FDIPARAMSNO, 
+		FDCDATATYPE, FDCOBJECTTYPE, FDCDESC)
+		values (#{functionID,jdbcType=VARCHAR}, #{paramsNO,jdbcType=INTEGER}, 
+		#{dataType,jdbcType=CHAR}, #{objectType,jdbcType=VARCHAR}, 
+		#{desc,jdbcType=VARCHAR} )
+	</insert>
+	
+	<update id="updateFuncParams" parameterType="com.ccssoft.rsas.metadata.funcparams.model.FuncParamsVO">
+		update TBFUNCPARAMS
+		set FDIPARAMSNO = #{paramsNO,jdbcType=INTEGER}, 
+		FDCDATATYPE = #{dataType,jdbcType=CHAR}, FDCOBJECTTYPE = #{objectType,jdbcType=VARCHAR}, 
+		FDCDESC = #{desc,jdbcType=VARCHAR}
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delFuncParams" parameterType="java.util.Map">
+		delete from TBFUNCPARAMS
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+		and FDIPARAMSNO = #{paramsNO,jdbcType=INTEGER}
+	</delete>
+	
+	<delete id="delAllFuncParams" parameterType="java.lang.String">
+		delete from TBFUNCPARAMS
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getFuncParams" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select FDUFUNCTIONID, FDIPARAMSNO, 
+		FDCDATATYPE, FDCOBJECTTYPE, FDCDESC
+		from TBFUNCPARAMS
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+		and FDIPARAMSNO = #{paramsNO,jdbcType=INTEGER}
+	</select>
+	
+	<select id="getFuncParamss" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUFUNCTIONID, FDIPARAMSNO, 
+		FDCDATATYPE, FDCOBJECTTYPE, FDCDESC
+		from TBFUNCPARAMS
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</select>
+</mapper>

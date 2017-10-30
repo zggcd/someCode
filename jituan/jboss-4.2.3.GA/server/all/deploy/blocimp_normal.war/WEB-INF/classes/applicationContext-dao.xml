@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+	<bean id="ifaceConfigDeclareDAO" class="com.regaltec.blocimp.dao.IfaceConfigDeclareDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceConfigInstanceDAO" class="com.regaltec.blocimp.dao.IfaceConfigInstanceDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceConfigMappingDAO" class="com.regaltec.blocimp.dao.IfaceConfigMappingDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceConfCacheDAO" class="com.regaltec.blocimp.dao.IfaceConfCacheDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+ 
+	<bean id="ifaceConfigSystemDAO" class="com.regaltec.blocimp.dao.IfaceConfigSystemDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="ifaceConfigProtocolDAO" class="com.regaltec.blocimp.dao.IfaceConfigProtocolDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceLogListenerDAO" class="com.regaltec.blocimp.dao.IfaceLogListenerDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="ifaceDaemonDocumentDAO" class="com.regaltec.blocimp.dao.IfaceDaemonDocumentDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="ifaceDaemonAttachmentDAO" class="com.regaltec.blocimp.dao.IfaceDaemonAttachmentDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceLogEventDAO" class="com.regaltec.blocimp.dao.IfaceLogEventDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="ifaceLogEventHisDAO" class="com.regaltec.blocimp.dao.IfaceLogEventHisDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceLogRepairDAO" class="com.regaltec.blocimp.dao.IfaceLogRepairDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceLogRepositoryDAO" class="com.regaltec.blocimp.dao.IfaceLogRepositoryDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="ifaceLogRepositoryHisDAO" class="com.regaltec.blocimp.dao.IfaceLogRepositoryHisDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="ifaceLogStrategyDAO" class="com.regaltec.blocimp.dao.IfaceLogStrategyDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptCheckDAO" class="com.regaltec.blocimp.dao.SuptCheckDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptCheckOutDAO" class="com.regaltec.blocimp.dao.SuptCheckOutDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptFaceDAO" class="com.regaltec.blocimp.dao.SuptFaceDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="suptFaceTriggerDAO" class="com.regaltec.blocimp.dao.SuptFaceTriggerDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysAlarmDAO" class="com.regaltec.blocimp.dao.SysAlarmDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysAttachmentDAO" class="com.regaltec.blocimp.dao.SysAttachmentDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysDicConfigDAO" class="com.regaltec.blocimp.dao.SysDicConfigDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysDicItemDAO" class="com.regaltec.blocimp.dao.SysDicItemDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysModuleDAO" class="com.regaltec.blocimp.dao.SysModuleDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysRoleDAO" class="com.regaltec.blocimp.dao.SysRoleDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysRoleModuleDAO" class="com.regaltec.blocimp.dao.SysRoleModuleDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysServiceConfigDAO" class="com.regaltec.blocimp.dao.SysServiceConfigDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysUnitDAO" class="com.regaltec.blocimp.dao.SysUnitDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysUnitRoleDAO" class="com.regaltec.blocimp.dao.SysUnitRoleDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysUserDAO" class="com.regaltec.blocimp.dao.SysUserDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysUserRoleDAO" class="com.regaltec.blocimp.dao.SysUserRoleDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysUserUnitDAO" class="com.regaltec.blocimp.dao.SysUserUnitDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="sysParameterConfDAO" class="com.regaltec.blocimp.dao.SysParameterConfDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+	
+	<bean id="genericDAO" class="com.regaltec.blocimp.dao.GenericDAO" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptTaticElementDAO" class="com.regaltec.blocimp.dao.SuptTaticElementDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptTaticGroupDAO" class="com.regaltec.blocimp.dao.SuptTaticGroupDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="SuptTaticInstanceDAO" class="com.regaltec.blocimp.dao.SuptTaticInstanceDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="SuptTaticRelationDAO" class="com.regaltec.blocimp.dao.SuptTaticRelationDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="SuptIfaceGroupRelationDAO" class="com.regaltec.blocimp.dao.SuptIfaceGroupRelationDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="SuptFaceErrTackDAO" class="com.regaltec.blocimp.dao.SuptFaceErrTackDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="SuptValueListDAO" class="com.regaltec.blocimp.dao.SuptValueListDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+   
+	<bean id="sysTipsDAO" class="com.regaltec.blocimp.dao.SysTipsDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+	<bean id="suptReturnDAO" class="com.regaltec.blocimp.dao.SuptReturnDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+    <bean id="suptReturnValidDAO" class="com.regaltec.blocimp.dao.SuptReturnValidDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+    <bean id="suptSaveValueDAO" class="com.regaltec.blocimp.dao.SuptSaveValueDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+    
+    <bean id="suptQueryItemValueDAOImpl" class="com.regaltec.blocimp.dao.SuptQueryItemValueDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+    <bean id="ifaceDaemonErrorDAO" class="com.regaltec.blocimp.dao.IfaceDaemonErrorDAOImpl" p:sqlMapClientTemplate-ref="sqlMapClientTemplate" />
+
+</beans>

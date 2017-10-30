@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>装维进度透明查询</title>
+    <link rel="stylesheet" href="lib/css/style_progress.css">
+</head>
+<body id="progress">
+<form id="payForm" action="" role="form" name="form1" method="post" onsubmit="return false;">
+    <div class="top">
+        <p>装移机查询</p><img class="img" src="lib/images/u561.png">
+        <select id="selectType" title="选择业务类型">
+            <option selected value="宽带">宽带</option>
+            <option value="固话">固话</option>
+            <option value="IPTV">IPTV</option>
+        </select>
+        <p style="width:10px;"><span> > </span></p>
+        <select id="selectNum" title="选择账号类型" v-model="numType">
+            <option selected value="单号">单号</option>
+            <option value="身份证号码">身份证号码</option>
+            <option value="业务号码">业务号码(宽带账号\ITV账号)</option>
+        </select>
+        <p style="width:10px;"><span> > </span></p>
+        <div id="num"><input id="seachNum" type="text" value="" placeholder="请输入{{numType}}" @keyup.enter="searchInfo"/></div>
+        <img id="search" src="lib/images/u32.png" @click="searchInfo">
+        <img class="img_bottom" src="lib/images/u201.png">
+    </div>
+    <div id="userinfo" class="content">
+        <div class="info">
+            <div class="info_base">
+                <img src="lib/images/u197.png" class="info_img1">
+                <img src="lib/images/u199.png" class="info_img2">
+                <div class="info_p1">{{ customer.contactor }}</div>
+                <div class="info_p2">{{ customer.customerLevel }}</div>
+            </div>
+            <div class="info_table">
+                <div class="table_th">产品</div>
+                <div class="table_con"><img src="lib/images/u228.png"><p>{{ customer.productType }}</p></div>
+                <div class="table_th">订单号</div>
+                <div class="table_con"><p>{{ customer.customerOrderNumber }}</p></div>
+                <div class="table_th">宽带账号</div>
+                <div class="table_con"><p>{{ customer.accNumber }}</p></div>
+                <div class="table_thaddr">装机地址</div>
+                <div class="table_conaddr"><p>{{ customer.installAddressNew }}</p></div>
+            </div>
+        </div>
+        </form>
+        <div class="order">
+            <p class="tit">订单追踪</p>
+            <div class="order_img">
+                <div class="cen">
+                    <div class="pictxt">
+                        <div id="ord1" class="order_img1"></div>
+                        <div class="order_con1">
+                            <p>业务受理</p>
+                            <p class="sta">{{ bills.acceptTime ? bills.acceptTime : ' 等待执行...' }}</p>
+                        </div>
+                    </div>
+                    <div class="order_img5"></div>
+                    <div class="pictxt">
+                        <div id="ord2" class="order_img2"></div>
+                        <div class="order_con2">
+                            <p>网络施工</p>
+                            <p class="sta">{{ bills.createTime ? bills.createTime : ' 等待执行...' }}</p>
+                        </div>
+                    </div>
+                    <div class="order_img5"></div>
+                    <div class="pictxt">
+                        <div id="ord3" class="order_img3"></div>
+                        <div class="order_con3">
+                            <p>上门服务</p>
+                            <p class="sta">{{ bills.bookingStartTime ? bills.bookingStartTime : ' 等待执行...' }}</p>
+                        </div>
+                    </div>
+                    <div class="order_img5"></div>
+                    <div class="pictxt">
+                        <div id="ord4" class="order_img4"></div>
+                        <div class="order_con4">
+                            <p>竣工</p>
+                            <p class="sta">{{ bills.completeTime ? bills.completeTime : ' 等待执行...' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flow">
+            <div id="flow1" class="flow_img1"></div><div class="iconImg1"></div>
+            <div id="flow2" class="flow_img2"></div><div class="iconImg2"></div>
+            <div id="flow3" class="flow_img3"></div><div class="iconImg3"></div>
+            <div id="flow4" class="flow_img4"></div><div class="iconImg4"></div>
+            <div id="flow5" class="flow_img5"></div><div class="iconImg5"></div>
+            <div id="flow6" class="flow_img6"></div><div class="iconImg6"></div>
+            <div id="flow7" class="flow_img7"></div><div class="iconImg7"></div>
+            <div id="flow8" class="flow_img8"></div>
+            <div class="flow_txt1">
+                <p>业务受理</p>
+                <p class="sta1">{{ progresses.acceptTime ? progresses.acceptTime : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt2">
+                <p>网络配置</p>
+                <p class="sta2">{{ progresses.createTime ? progresses.createTime : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt3">
+                <p>派发施工单</p>
+                <p class="sta3">{{ progresses.arrsvrTime ? progresses.arrsvrTime : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt4">
+                <p>预约上门</p>
+                <p class="sta4">{{ progresses.bookingOptStartTime ? progresses.bookingOptStartTime : ' 等待执行... ...' }}{{ progresses.bookingStartTime }}{{ progresses.bookingEndTime }}</p>
+            </div>
+            <div class="flow_txt5">
+                <p>上门施工</p>
+                <p class="sta5">{{ progresses.visitWork ? progresses.visitWork : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt6">
+                <p>施工回单</p>
+                <p class="sta6">{{ progresses.returnTime ? progresses.returnTime : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt7">
+                <p>竣工</p>
+                <p class="sta7">{{ progresses.completeTime ? progresses.completeTime : ' 等待执行... ...' }}</p>
+            </div>
+            <div class="flow_txt8">
+                <p>回访</p>
+                <p class="sta8">{{ progresses.visitSatisfyId ? progresses.visitSatisfyId : ' 等待执行... ...' }}</p>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="lib/script/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src='lib/script/Polyfill.js'></script>
+    <script type="text/javascript" src='lib/script/vue.js'></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#progress',
+            data : function(){
+                return {
+                    customer : {
+                        contactor : "",             //用户姓名
+                        customerLevel : "",         //用户等级
+                        productType : "",           //产品
+                        customerOrderNumber : "",   //订单号
+                        accNumber : "",             //宽带账号
+                        installAddressNew : ""      //装机地址
+                    },
+                    bills : {
+                        acceptTime : "",            //业务受理时间
+                        createTime : "",            //预约上门时间
+                        bookingStartTime : "",      //预约上门时间
+                        completeTime : ""           //竣工时间
+                    },
+                    progresses : {
+                        acceptTime : "",            //业务受理时间
+                        arrsvrTime : "",            //派发施工单时间
+                        bookingOptStartTime : "",   //预约上门时间
+                        bookingStartTime : "",      //预约开始时间
+                        bookingEndTime : "",        //预约结束时间
+                        createTime : "",            //网络配置时间
+                        visitWork : "",             //上门施工时间
+                        returnTime : "",            //施工回单时间
+                        completeTime : "",          //竣工时间
+                        visitSatisfyId : ""         //回访时间
+                    }
+                }
+            },
+            methods : {
+                searchInfo : function () {
+                    var selectType = $("#selectType").val();
+                    var selectNum = $("#selectNum").val();
+                    var seachNum = $("#seachNum").val();
+                    var param = [{"selectType":selectType},{"selectNum":selectNum},{"seachNum":seachNum}]
+                    this.clearhightlight();
+                    this.allInfo("/orderProgress.do",param);
+                },
+                allInfo : function (url,param) {
+                    $.ajax({
+                        type:"POST",
+                        url: url,
+                        data : $('#payForm').serialize(),
+                        dataType : "json",
+                        success : function(data){
+                            if(!data.orderProgress.length){
+                                alert("数据异常！");
+                                return false;
+                            }
+
+                            this.customer.contactor = data.orderProgress[0].contactor || '-';
+                            this.customer.customerLevel = (data.orderProgress[0].customerLevel || '-') + '星级客户';
+                            this.customer.productType = data.orderProgress[0].productType || '-';
+                            this.customer.customerOrderNumber = data.orderProgress[0].customerOrderNumber || '-';
+                          
+                            this.customer.accNumber = data.orderProgress[0].accNumber || '-';
+                            this.customer.installAddressNew = data.orderProgress[0].installAddressNew || '-';
+                            
+                            if(data.orderProgress[0].acceptTime){
+                                this.progresses.acceptTime = data.orderProgress[0].acceptTime + " 订单已完成受理，派开通";
+                                this.bills.acceptTime = data.orderProgress[0].acceptTime;
+                                this.hightlight(1);
+                                this.hightlightUp(1);
+                                if(data.orderProgress[0].createTime){
+                                    this.progresses.createTime = data.orderProgress[0].createTime + " 网络配置完成时间";
+                                    this.bills.createTime = data.orderProgress[0].createTime;
+                                    this.hightlight(2);
+                                    this.hightlightUp(2);
+                                    if(data.orderProgress[0].arrsvrTime){
+                                        this.progresses.arrsvrTime = data.orderProgress[0].arrsvrTime + " 已派单给施工人员，准备施工";
+                                            this.hightlight(3);
+                                        if(data.orderProgress[0].bookingOptStartTime){
+                                            this.progresses.bookingOptStartTime = data.orderProgress[0].bookingOptStartTime + " 已成功与您预约上门服务，上门时间预计为：";
+                                            this.progresses.bookingStartTime = data.orderProgress[0].bookingStartTime + "～";
+                                            this.progresses.bookingEndTime = data.orderProgress[0].bookingEndTime + "，上门安装人员为朱建华，联系电话：18034135413。如您需要调整上门装机时间，请及时与上门服务人员联系，进行改约。";
+                                            this.bills.bookingStartTime = data.orderProgress[0].bookingStartTime || '-';
+                                            this.hightlight(4);
+                                            this.hightlightUp(3);
+                                            if(data.orderProgress[0].visitWork){
+                                                this.progresses.visitWork = data.orderProgress[0].visitWork + " 上门时间";
+                                                this.hightlight(5);
+                                                if(data.orderProgress[0].returnTime){
+                                                    this.progresses.returnTime = data.orderProgress[0].returnTime + " 满意";
+                                                    this.hightlight(6);
+                                                    if(data.orderProgress[0].completeTime){
+                                                        this.progresses.completeTime = data.orderProgress[0].completeTime + " 满意";
+                                                        this.bills.completeTime = data.orderProgress[0].completeTime || '-';
+                                                        this.hightlight(7);
+                                                        this.hightlightUp(4);
+                                                        if(data.orderProgress[0].visitSatisfyId){
+                                                           this.progresses.visitSatisfyId = " 满意";
+                                                           this.hightlight(8);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }.bind(this),
+                        error : function() {
+                            alert("数据加载错误！");
+                        }
+                    })
+                },
+                hightlightUp : function(val){
+                    for(var i=1;i<=val;i++){
+                        var idName = "#ord" + i;
+                        var className = "order_img" + i + "_active";
+                        $(idName).removeClass();
+                        $(idName).addClass(className);
+                    }
+                    var txtColor = ".order_con" + val + " .sta";
+                    $(txtColor)[0].style.color = "#000000";
+                },
+                hightlight : function(val){
+                    for(var i=1;i<=val;i++){
+                        var idName = "#flow" + i;
+                        var className = "flow_img" + i + "_active";
+                        $(idName).removeClass();
+                        $(idName).addClass(className);
+                    }
+                    var txtColor = ".flow_txt" + val + " .sta" + val;
+                    $(txtColor)[0].style.color = "#000000";
+                },
+                clearhightlight : function(){
+                    var progresses = this.$root.progresses
+                    var bills = this.$root.bills
+                    progresses.acceptTime =  ' 等待执行... ...';
+                    progresses.arrsvrTime =  ' 等待执行... ...';
+                    progresses.bookingOptStartTime =  ' 等待执行... ...';
+                    progresses.bureauWork =  ' 等待执行... ...';
+                    progresses.netConfig =  ' 等待执行... ...';
+                    progresses.visitWork =  ' 等待执行... ...';
+                    progresses.returnTime =  ' 等待执行... ...';
+                    progresses.completeTime =  ' 等待执行... ...';
+                    progresses.visitSatisfyId =  ' 等待执行... ...';
+                    bills.acceptTime =  ' 等待执行...';
+                    bills.createTime =  ' 等待执行...';
+                    bills.bookingStartTime =  ' 等待执行...';
+                    bills.completeTime =  ' 等待执行...';
+                    for(var i=1;i<=8;i++){
+                        var idName = "#flow" + i;
+                        var className = "flow_img" + i;
+                        var classNameActive = "flow_img" + i + "_active";
+                        var sta = "sta" + i;
+                        $(idName).removeClass();
+                        $(idName).addClass(className);
+                        var txtColor = ".flow_txt" + i + " .sta" + i;
+                        $(txtColor)[0].style.color = "#989898";
+                    }
+                    for(var i=1;i<=4;i++){
+                        var idName = "#ord" + i;
+                        var className = "order_img" + i;
+                        var classNameActive = "order_img" + i + "_active";
+                        $(idName).removeClass();
+                        $(idName).addClass(className);
+                        var txtColor = ".order_con" + i + " .sta";
+                        $(txtColor)[0].style.color = "#989898";
+                    }
+                }
+            }
+        })
+    </script>
+</body>
+</html>

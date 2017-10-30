@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+function F(str){
+	var obj=document.getElementById(str);
+	return obj;
+}
+
+var divflag=0;
+function showDiv(){
+	var addGroupDIV=F("addGroupDIV");
+	var addBtn=F("groupForm:addBtn");
+	//展开
+	if(divflag==0){
+	addGroupDIV.style.display="";
+	divflag=1;
+	addBtn.value="隐藏";
+	}
+	//收起
+	else{
+	addGroupDIV.style.display="none";
+	divflag=0;
+	addBtn.value="新建";
+	}
+}
+
+function editshowDiv(){
+	divflag=0;
+	showDiv();
+}
+
+function hiddeDiv(){
+	divflag=1;
+	showDiv();
+}
+
+//全选select操作表所有项------------------用于置顶公告列表
+function onSelectALlTopItems() {
+	var oTable = document.getElementById("groupForm:itemLists");
+	var oChkAll = document.getElementById("groupForm:itemLists:selectAll"); 
+	//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+if (!oChkAll.checked){
+  document.getElementById("groupForm:tempId").value = "";
+}          	
+	if (oTable != null && oChkAll != null) {
+		for (j = 0; j < oTable.rows.length -1; j++) {
+			var e = document.getElementById("groupForm:itemLists:"+j+":selectFlag");
+			if (e!=null&&e.id.indexOf("selectFlag") >= 0) {   
+				//触发CheckBox onclick事件，用来设置itemid
+				if (document.all) {
+					//IE
+					var oldValue= e.checked;
+					e.checked = oChkAll.checked;
+					if (!oldValue && e.checked) {
+						onObjectFireMouseEvent(e, "onclick");
+					}
+				} else {
+					//firefox
+					if (oChkAll.checked) {
+						var oldValue= e.checked;
+						if (!oldValue)
+							onObjectFireMouseEvent(e, "onclick");
+						} else {
+							e.checked = oChkAll.checked;
+						}
+					}
+				}
+			}
+	 	}
+	}
+
+//响应check点击事件
+function checkBoxClick(object, value) {			
+	var templateIDArray = document.getElementById("groupForm:tempId").value;
+	if (templateIDArray == null || templateIDArray == "") {
+		if (object.checked == true) {							
+			templateIDArray = value;
+		} 
+	} else {
+		if (object.checked == true) {
+			templateIDArray = templateIDArray + "#" + value;	 			
+		} else {
+			var index = templateIDArray.indexOf(value);
+			if (index >= 0) {																
+				var str = "";
+				if(index>0){
+					str = "#"+value;
+				} else {
+					if(index==0 && templateIDArray.indexOf("#")!=-1){
+						str = value + "#";
+						
+					} else {
+						str = value;
+					}
+				}
+				templateIDArray = templateIDArray.replace(str, "");
+			}
+		}
+	}
+	//保存勾选的模板ID值， 格式为 id~id~id
+	document.getElementById("groupForm:tempId").value = templateIDArray;
+}
+function toDelete(){
+  var ids=F("groupForm:tempId");
+  if(ids.value==""||ids.length==0){
+       alert("请勾选要删除的群组!");
+       return false;
+  }
+  if(window.confirm("确认删除选中的群组??")){
+	  deleteGroup();
+	  return true;
+  }
+  return false;
+}
+
+function toDisabled(obj){
+	obj.disabled=true;
+}
+	//点击保存按钮时，对表单进行验证
+	function validate(formId){
+		var isSuccess = validateForm(formId);
+		return isSuccess;
+	}
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:800px;
+           height:400px;
+           overflow:auto;
+       }
+	   td.column1{
+	   		width:30%;
+	   		text-align:right;
+	   }	
+	   td.column2{
+	   		width:70%;
+	   		text-align:right;
+	   }	
+	   .tip{
+	   font-weight:normal;font-size:14;color:red;
+	   position:absolute;
+	   top:3px;
+	   right:30px;
+	   font-size:13px;
+	   }
+    </style>    
+        
+    <!--[if !IE]><!-->
+    <style>
+	    legend{
+	    	margin:5 5 5 5;
+	    }
+    </style>
+    <!--<![endif]-->    
+</head>
+<!-- 解决模态框居左上角，且有脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg.ajax4jsf.javascript.PrototypeScript.xhtml" type="text/javascript"/>
+
+<!-- 解决重载PrototypeScript之后导致suggestionbox组件输完文本之后出现脚本错误的问题 -->
+<script src="${request.contextPath}/a4j/g/3_3_3.Finalorg/richfaces/renderkit/html/scripts/scriptaculous/effects.js.xhtml" type="text/javascript"/>
+
+<body >
+    <span id="operateTip" class="tip">操作提示</span>
+    <h:form id="groupForm">
+     <rich:tabPanel id="tabPanel" switchType="client"  style="margin-left:5px;margin-right:5px;margin-top:5px;height:97%;width:98%;">
+			<rich:tab id="tab" label="接收人群组配置">
+		    <div id="addGroupDIV" style="margin:20 0 0 0;display:none;">
+		    <table width="95%" style="font-size:13px;">
+		    <tr>
+		    <td align="right" width="15%"><h:outputText value="群组名称:" /><span style="color:red;">*</span></td>
+		    <td width="35%">
+		    <h:inputText value="#{groupBean.groupName}" maxlength="30"  style="width:98%;height:23;" styleClass="rich-gradient-input">
+		    <s:commonsValidator type="required" arg="群组名称" server="false" client="true"/>
+		    </h:inputText>
+		    </td>
+		    <td align="right" width="15%"><h:outputText value="群组编码:"  /><span style="color:red;">*</span></td>
+		    <td>
+		    <h:inputText value="#{groupBean.groupCode}" style="width:98%;height:23;" maxlength="30" >
+		    <s:commonsValidator type="required" arg="群组编码" server="false" client="true"/>
+		    </h:inputText>
+		    </td>
+		    </tr>
+		    <tr>
+		    <td align="right"><h:outputText value="接收对象:" /><span style="color:red;">*</span></td>
+		    <td colspan="3">
+		    <h:inputHidden id="hid" value="#{groupBean.hid}"></h:inputHidden>
+		    <h:inputHidden id="receiverType" value="#{groupBean.receiverType}"></h:inputHidden>
+		    <h:inputText onfocus="this.blur()" id="receivers" value="#{groupBean.receiverNames}" size="60" maxlength="500" style="width:86%;height:23;" styleClass="rich-gradient-input">
+		    <s:commonsValidator type="required" arg="#{msgs['baf.bulletin.receivers']}" server="false" client="true"/>
+		    </h:inputText>
+		    <rich:spacer width="5px"/>
+		    <regaltec:selectObject id="selectObj"
+		     dataSource="TREE_BULLETIN_RECEIVER"
+		     userDataNames="TABLEROWID#KEYWORD#OBJECTCATEGORY" amount="0" formName="groupForm" 
+		     fieldNames="hid#receivers#receiverType" enableSuggestionBox="false"
+		     userItem="TABLEROWID" fieldItem="hid"  
+		     showTextbox="false" suggestionAction="#{pinyinBean.autocomplete}" 
+		     fetchValue="id#tableRowId#keyWord#parentName" 
+		     expandLevel="10" oneOffLoad="false" listNum="15" alignMatch="center"> 
+			</regaltec:selectObject>
+		    </td>
+		    </tr>
+		    <tr>
+		      <td align="right" valign="top"><h:outputText value="群组描述:" /></td>
+		      <td colspan="3">
+		          <h:inputTextarea style="width:95%;height:50px;" styleClass="rich-gradient-input" value="#{groupBean.groupDesc}">
+		              <s:commonsValidator type="maxlength" arg="群组描述:" server="false" client="true" maxLength="100"/>
+		          </h:inputTextarea>
+		      </td>
+		    </tr>
+		    <tr>
+		    <td><rich:spacer width="2px"></rich:spacer></td>
+			<td align="center" colspan="3">
+			          <a4j:commandButton value="保存"  styleClass="rich-button" type="button" id="saveBtn"  action="#{groupBean.saveGroup}" reRender="itemLists" oncomplete="a4jcomplete()">
+		                 <a4j:support event="onclick"  onsubmit="if(validate(document.getElementById('groupForm'))==false)return false;" />
+		              </a4j:commandButton>
+			</td>
+		    </tr>
+		    </table>
+		     <h:inputHidden id="groupId" value="#{groupBean.groupId}"></h:inputHidden>
+		    </div>
+		    
+		    
+		  <fieldset style="margin:40 10;">
+		   <legend><h:outputText value="已有群组信息"></h:outputText></legend>
+		    <a4j:commandButton value="新建"  styleClass="rich-button" disabled="false" type="button" onclick="toDisabled(this)" id="addBtn" action="#{groupBean.clearData}" reRender="groupForm" oncomplete="showDiv()">
+		    </a4j:commandButton>
+		    <rich:spacer width="10px"></rich:spacer>
+		    <a4j:commandButton value="删除"  styleClass="rich-button" disabled="false" type="button"  id="delBtn" onclick="if(toDelete()){toDisabled(this);}" >
+		    </a4j:commandButton>
+		    <rich:spacer width="10px"></rich:spacer>
+			<rich:dataTable width="100%" id="itemLists" rows="#{groupBean.pageSize}" columnClasses="col"  style="text-align:center;"  title="请双击条目进行编辑和查看" onRowDblClick="groupDetail('#{groupItem.groupId}')"
+		            value="#{groupBean.myGrouplist}" var="groupItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+		    <rich:column style="width:50px;">
+		    <f:facet name="header">
+		   	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlTopItems();"/>
+		   	</f:facet>
+			<center>
+		     <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{groupItem.groupId}')"/>      
+		     </center>
+		 </rich:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="群组名称" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{groupItem.groupName}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="群组描述" style="font-weight:normal;"/>
+				        </f:facet>
+				        <h:outputText value="#{groupItem.groupDesc}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="接收人概况" style="font-weight:normal;"/>
+				        </f:facet>
+				        <a4j:commandLink onclick="getMembersByGroupId('#{groupItem.groupId}')" value="#{groupItem.tempString}"></a4j:commandLink>
+		            </h:column>
+		            <f:facet name="footer">				
+			            <rich:datascroller align="right" id="itemScroller"  selectedStyle="background-color:#FFB93F;"  />
+	                </f:facet>
+		        </rich:dataTable>
+		        </fieldset>
+			</rich:tab>
+	</rich:tabPanel>
+	<h:inputHidden id="tempId" value="#{groupBean.tempIds}"></h:inputHidden>
+	<a4j:jsFunction name="deleteGroup"   action="#{groupBean.deleteGroupsById}" reRender="groupForm" oncomplete="a4jcomplete()" >
+    </a4j:jsFunction>
+    <a4j:jsFunction name="groupDetail" action="#{groupBean.groupDetail}" reRender="groupForm" oncomplete="editshowDiv()">
+       <a4j:actionparam name="groupId" assignTo="#{groupBean.groupId}"/> 
+    </a4j:jsFunction>
+    <a4j:jsFunction name="getMembersByGroupId" action="#{groupBean.getMembersByGroupId}" reRender="groupModal" oncomplete="#{rich:component('groupModal')}.show();">
+       <a4j:actionparam name="groupId" assignTo="#{groupBean.groupId}"/> 
+    </a4j:jsFunction>
+    <s:validatorScript functionName="validateForm"/> 
+    </h:form>
+    
+    
+    	
+     	<rich:modalPanel id="groupModal" autosized="true" width="800">
+	        <f:facet name="header">
+	        	<h:outputText value="群成员信息" style="padding-right:15px;" />
+	        </f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+					<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkDelete" styleClass="hidelink"/>
+					<rich:componentControl for="groupModal" attachTo="hidelinkDelete"	operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>
+			<h:form id="impForm">	
+	        	<center>
+	        	<div class="scrolls">	
+	        	<rich:dataTable width="100%" id="userinfo"  columnClasses="col"  style="text-align:center;"   
+		            value="#{groupBean.membersList}" var="userItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"> 
+		            <h:column style="text-align:left; float:left;" >
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="名称" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{userItem.objectName}" />
+		            </h:column> 
+		            <h:column style="text-align:left; float:left;" >
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="上级部门" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{userItem.objectFullName}" />
+		            </h:column> 
+		        </rich:dataTable>	
+		        </div>        	      	
+		            <a4j:commandButton value="关闭" type="button" styleClass="rich-button"  onclick="#{rich:component('groupModal')}.hide();return false;" />
+				</center>
+			</h:form>
+		</rich:modalPanel>
+    
+    <rich:toolTip for="operateTip" >
+    <div style="width:300;">
+     1)新建群组请点击“新建”按钮，在滑出的输入框里输入必要的信息后点保存<br/>
+	 2)(可选)新建按钮被点击后，会变成“隐藏”按钮，点击隐藏，输入框就会消失<br/>
+	 3)如要进行编辑或查看某项群组信息，请双击列表中的该项条目<br/>
+	 4)点接收人概况的链接，在弹出的对话框中可以看到接收人的全路径信息
+    </div>
+    </rich:toolTip>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<title><h:outputText value="#{msgs['modifyPassword']}" />
+			</title>
+			<style type="text/css">
+.column1 {
+	width: 20%;
+	text-align: right;
+}
+
+.column2 {
+	width: 35%;
+	text-align: left;
+}
+
+.column3 {
+	width: 45%;
+}
+</style>
+			<script type="text/javascript">  
+    //<![CDATA[
+    var img="<img src='${request.contextPath}/baf/images/icons/error.png' style='vertical-align: middle'/>";
+    
+    function init(){
+      var length="#{loginFrameBean.pswLength}";
+     length=parseInt(length);
+     if(length<6){
+        length=6;
+     }
+     if(length>31){
+        length=31;
+     }
+       var oldPass = document.getElementById("passForm:oldPass");
+    	var newPass = document.getElementById("passForm:newPass");
+    	var reNewPass = document.getElementById("passForm:reNewPass");
+    
+    	//newPass.maxLength=length;
+    	//reNewPass.maxLength=length;
+    }
+    
+    //验证旧密码是否正确
+    function validateOldPassword(){
+    	var oldPass = document.getElementById("passForm:oldPass").value;
+    	var opass = document.getElementById("passForm:opass").value;
+    	 var trip=document.getElementById("oldTrip");
+    	if(oldPass!=opass && oldPass!=""){
+    		//原密码输入不正确
+    		 trip.innerHTML="<img src='${request.contextPath}/baf/images/icons/error.png' style='vertical-align: middle'/>${msgs['oldPassError']}";
+    		 trip.style.display="inline";
+    		document.getElementById("passForm:oldPass").value = "";
+    		setFocus("passForm:oldPass");
+    		return;
+    	}
+    	 trip.style.display="none";
+    }
+    
+    //验证两次输入的新密码是否一致
+    function validateNewPassword(){
+    /*
+    	if(validateForm(document.getElementById("passForm"))==false){
+    		return false;
+    	}
+    	var newPass = document.getElementById("passForm:newPass").value;
+    	var reNewPass = document.getElementById("passForm:reNewPass").value;
+    	
+    	//是否加强密码验证
+    	if("#{loginFrameBean.verify_pw}" == "Y"){
+	    	//正则表达式，验证必须包含数字和字母，以及制定的特殊字符
+	    	var mask = /^(?=.*?[a-zA-Z])(?=.*?\d)(?=.*?[!@#$%^&*()]).*$/;
+	    	if(mask.test(newPass) == false){
+	    		//密码必须包含数字、字母以及数字键对应的特殊字符！
+	    		alert("#{msgs['passwordInvalid']}");
+	    		document.getElementById("passForm:newPass").value = "";
+	    		document.getElementById("passForm:reNewPass").value = "";
+	    		setFocus("passForm:newPass");
+	    		return false;
+	    	}
+    	}
+    	
+    	
+    	if(newPass!=reNewPass){
+    		//两次输入的密码不一致
+    		alert("${msgs['newPassError']}");
+    		document.getElementById("passForm:newPass").value = "";
+    		document.getElementById("passForm:reNewPass").value = "";
+    		setFocus("passForm:newPass");
+    		return false;
+    	}
+    	
+    	var oldPass = document.getElementById("passForm:oldPass").value;
+    	//新密码不能和原密码相同
+    	if(newPass == oldPass){
+    		alert("${msgs['newPassMustDifferent']}");
+    		document.getElementById("passForm:newPass").value = "";
+    		document.getElementById("passForm:reNewPass").value = "";
+    		setFocus("passForm:newPass");
+    		return false;
+    	}
+    	*/
+    	var oldPass = document.getElementById("passForm:oldPass").value;
+    	var newPass = document.getElementById("passForm:newPass").value;
+    	var reNewPass = document.getElementById("passForm:reNewPass").value;
+   
+    	if(oldPass==""){
+    	 if(document.getElementById("oldTrip").style.display=="none"){
+    	    document.getElementById("oldTrip").innerHTML=img+"原密码不能为空!";
+    	    document.getElementById("oldTrip").style.display="inline";
+    	 }
+    	
+    	}
+    	if(newPass==""){
+    	   if(document.getElementById("newTrip").style.display=="none"){
+    	  document.getElementById("newTrip").innerHTML=img+"新密码不能为空!";
+    	   document.getElementById("newTrip").style.display="inline";
+    	   }
+    	}
+    	if(reNewPass==""){
+    	if(document.getElementById("reTrip").style.display=="none"){
+    	  document.getElementById("reTrip").innerHTML=img+"确认新密码不能为空!";
+    	   document.getElementById("reTrip").style.display="inline";
+    	   }
+    	}
+    	if(newPass!=reNewPass){
+    		//两次输入的密码不一致
+    	  if(document.getElementById("reTrip").style.display=="none"){
+    	       document.getElementById("reTrip").innerHTML=img+"${msgs['newPassError']}";
+    	       document.getElementById("reTrip").style.display="inline";
+    	   }
+    		document.getElementById("passForm:newPass").value = "";
+    		document.getElementById("passForm:reNewPass").value = "";
+    		setFocus("passForm:newPass");
+    		return false;
+    	}
+    	if(oldPass==""||newPass==""||reNewPass==""){
+    	  return false;
+    	}
+    	return true;
+    }
+    
+    function checkPsw(){
+      var newPass = document.getElementById("passForm:newPass").value;
+      var reNewPass = document.getElementById("passForm:reNewPass").value;
+      var trip=document.getElementById("reTrip");
+      if(newPass!=""&&reNewPass!=""){
+      if(newPass!=reNewPass){
+    		//两次输入的密码不一致
+    		 trip.innerHTML=img+"${msgs['newPassError']}";
+    		 trip.style.display="inline";
+    		document.getElementById("passForm:reNewPass").value = "";
+    		document.getElementById("passForm:reNewPass").focus();
+    		return false;
+    		
+    	}
+    	}
+    	 trip.style.display="none";
+    }
+    
+    //修改密码完成事件
+    function onModifyComplete(data){
+    	if(a4jcomplete()==false){
+ 			return;
+ 		}
+ 		//用户密码到期修改密码时，需要重新登录
+ 		if(data=="Y"){
+	 		//请用新密码重新登录系统！
+	 		alert("#{msgs['anewLoginMessage']}");
+	 		var flag="#{loginFrameBean.isSHLogin}";
+ 	     var customUrl="#{loginFrameBean.customUrl}";
+ 	     if(flag=='Y'){
+ 	       top.location="#{loginFrameBean.ssoUrl}";
+ 	     }else{
+ 	        if(""==customUrl||"Y"==customUrl){
+ 	         top.location ="${request.contextPath}/baf/jsp/uiframe/login.xhtml";
+ 	        }else{
+ 	            top.location ="${request.contextPath}"+customUrl;
+ 	        } 
+ 	     }
+		  
+	   	}
+    }
+    
+   function valiPsw(obj,trip){
+     var psw=obj.value;
+     
+     var length="#{loginFrameBean.pswLength}";
+     length=parseInt(length);
+     if(length<6){
+        length=6;
+     }
+     if(length>31){
+        length=31;
+     }
+     var num=Math.floor(length/2);
+    
+     if(psw!=""){
+        var re   =   /^[0-9a-zA-Z!@#$%^&*()]*$/;
+       if(!re.test(psw)){
+        trip.innerHTML=img+"密码只支持数字键上的特殊字符";
+         obj.value="";
+          document.getElementById("passForm:reNewPass").value="";
+         obj.focus();
+          return false;
+       }
+       if(obj.value.length<length){
+         trip.innerHTML=img+"密码长度至少为"+length+"位！";
+          obj.value="";
+          document.getElementById("passForm:reNewPass").value="";
+         obj.focus();
+         return false;
+          
+      }
+      var temp=psw.split('');
+      var first=temp[0];
+      var count=1;
+      var flag=false;
+      for(var i=1;i<temp.length;i++){
+        
+        if(first==temp[i]){  
+           count=count+1;
+           if(count==num){
+              flag=true;
+              break;
+           }
+        }else{
+           first=temp[i];
+           count=1;
+        }
+      
+      }
+      if(flag){
+       trip.innerHTML=img+"密码里面不能有连续"+num+"个或以上相同的字符!";
+         obj.value="";
+         document.getElementById("passForm:reNewPass").value="";
+        obj.focus();
+         return false;
+      }
+     
+     flag=true;
+    
+     var reg="0123456789";
+      //校验数字顺序连续
+     for(var i=0;i<temp.length;i++){
+      count=0;
+       if(reg.indexOf(temp[i])>-1){//如果是数字
+         count+=1;
+         for(var n=i+1;n<temp.length;n++){
+            if(reg.indexOf(temp[n])>-1){//校验每个字符为数字
+               if(parseInt(temp[n-1])+1==parseInt(temp[n])){//如果后面比前面大1
+                 count+=1;
+               }else{
+                 break;
+               }
+             }else{
+                 break;
+             }
+       }
+
+       if(count>num-1){
+          flag=false;
+           break;
+       }    
+     }
+    }
+    //校验数字倒序排序
+    if(flag){
+       for(var i=0;i<temp.length;i++){
+      count=0;
+       if(reg.indexOf(temp[i])>-1){//如果是数字
+         count+=1;
+         for(var n=i+1;n<temp.length;n++){
+            if(reg.indexOf(temp[n])>-1){//校验每个字符为数字
+               if(parseInt(temp[n-1])==parseInt(temp[n])+1){//如果前面比后面大1
+                 count+=1;
+               }else{
+                 break;
+               }
+             }else{
+                 break;
+             }
+       }
+       if(count>num-1){
+          flag=false;
+           break;
+       }    
+     }
+    }
+    }
+    if(!flag){
+        trip.innerHTML=img+"密码不能有"+num+"个或以上连续的数字!";
+         obj.value="";
+         document.getElementById("passForm:reNewPass").value="";
+         obj.focus();
+         return false;
+    }
+   /*   if(length<11){
+         flag=true;
+         first=temp[0];
+         var end=temp[length-1];
+         if(first==0&&end!=0){
+            for(var i=1;i<temp.length-1;i++){
+               if(parseInt(temp[i])+1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+            if(!flag){
+               flag=true;
+           for(var i=1;i<temp.length-1;i++){
+               if(parseInt(temp[i])-1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+            }
+           
+         }
+        if(first!=0&&end==0){
+         
+            flag=true;
+            for(var i=0;i<temp.length-2;i++){
+               if(parseInt(temp[i])+1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+            if(!flag){
+               flag=true;
+               for(var i=0;i<temp.length-2;i++){
+               if(parseInt(temp[i])-1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+            }
+          
+         }
+         if(first!=0&&end!=0){
+         flag=true;
+            for(var i=0;i<temp.length-1;i++){
+               if(parseInt(temp[i])+1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+           if(!flag) {
+             flag=true;
+              for(var i=0;i<temp.length-1;i++){
+               if(parseInt(temp[i])-1!=parseInt(temp[i+1])){
+                  flag=false;
+                  break;
+               }
+            }
+           }
+         }
+       if(flag){
+         trip.innerHTML=img+"密码不能是连续的数字!";
+          obj.value="";
+          document.getElementById("passForm:reNewPass").value="";
+         obj.focus();
+         return false;
+       }
+      }*/
+      	var oldPass = document.getElementById("passForm:oldPass").value;
+    	//新密码不能和原密码相同
+    	if(psw == oldPass){
+    		 trip.innerHTML=img+"${msgs['newPassMustDifferent']}";
+    		obj.value = "";
+    		document.getElementById("passForm:reNewPass").value="";
+    		obj.focus();
+    		return false;
+    	}
+    	
+      
+     }
+     
+     return true;
+      
+   }
+   
+   function showTrip(num){
+      var length="#{loginFrameBean.pswLength}";
+     length=parseInt(length);
+     if(length<6){
+        length=6;
+     }
+     if(length>31){
+        length=31;
+     }
+     if(num==1){
+       document.getElementById('trip1').innerHTML="密码至少为"+length+"位。"
+       document.getElementById('trip1').style.display='block';
+     }
+     if(num==2){
+        document.getElementById('trip2').style.display='block';
+     }
+   }
+   
+    function displayTrip(num){
+    
+      if(num==1){
+        document.getElementById('trip1').style.display='none';
+     }
+     if(num==2){
+        document.getElementById('trip2').style.display='none';
+     }
+   }
+   
+   function newTrip(obj){
+   var trip=document.getElementById("newTrip");
+    if(!valiPsw(obj,trip)){
+       trip.style.display="inline";
+    }else{
+        trip.style.display="none";
+    }
+   }
+   
+     document.onkeydown=function(e)  
+    {    
+        //debugger;  
+        //获得键盘按下事件,支持ie，ff，google，safari，opera  
+        var loginae=(typeof event!='undefined')?window.event:e;  
+        if(loginae.keyCode==13)  
+        {  
+            document.getElementById("passForm:btnSave").focus();
+         }    
+    }  
+    
+    //]]>
+    </script>
+		</head>
+
+		<body style="overflow-x: hidden; overflow-y: hidden;"
+			onload="setFocus('passForm:oldPass');init()">
+			<div id="center"
+				style="background: white; height: 100%; margin-top: 0px; margin-bottom: 0px;"
+				align="center">
+				<rich:tabPanel id="tabPanel" style="width:100%;height:100%;"
+					switchType="client">
+					<rich:tab id="modifyPass" label="#{msgs['modifyPassword']}"
+						style="text-align:center;">
+						<rich:spacer height="50px;" />
+						<h:form id="passForm">
+							<center>
+								<table
+									style="vertical-align: middle; width: 700px; font-size: 13px;">
+									<tr>
+										<td class="column1">
+											<h:outputText value="#{msgs['oldPassword']}："
+												transient="true" />
+										</td>
+										<td class="column2">
+											<h:inputSecret id="oldPass" value=""
+												style="width:100%;height:23px;"
+												styleClass="rich-gradient-input"
+												onblur="validateOldPassword()">
+												<s:commonsValidator type="required"
+													arg="#{msgs['oldPassword']}" server="false" client="true" />
+												<s:commonsValidator type="maxlength" maxLength="31"
+													arg="#{msgs['oldPassword']}" server="false" client="true" />
+												<s:commonsValidator type="minlength" minLength="6"
+													arg="#{msgs['oldPassword']}" server="false" client="true" />
+											</h:inputSecret>
+										</td>
+										<td class="column3">
+											<h:outputText value="*" style="color:red;" />
+											<div id="oldTrip"
+												style=" display: none; border: 1px solid #F8B3D0; background-color: #FFF5FA; vertical-align: middle;  padding: 8px; ">
+											</div>
+										</td>
+									</tr>
+									<tr style="height: 20px;">
+										<td colspan="3">
+										</td>
+									</tr>
+
+									<tr>
+										<td class="column1">
+											<h:outputText value="#{msgs['newPassword']}："
+												transient="true" />
+										</td>
+										<td class="column2">
+											<h:inputSecret id="newPass" value="#{userLoginBean.newPass}"
+												style="width:100%;height:23px;"
+												styleClass="rich-gradient-input" onfocus="showTrip(1);"
+												onblur="displayTrip(1);newTrip(this); " >
+												<s:commonsValidator type="required"
+													arg="#{msgs['newPassword']}" server="false" client="true" />
+												<s:commonsValidator type="maxlength" maxLength="31"
+													arg="#{msgs['newPassword']}" server="false" client="true" />
+												<s:commonsValidator type="minlength" minLength="6"
+													arg="#{msgs['newPassword']}" server="false" client="true" />
+											</h:inputSecret>
+										</td>
+										<td class="column3">
+
+											<h:outputText value="*" style="color:red;" />
+											<div id="newTrip"
+												style="display: none; border: 1px solid #F8B3D0; background-color: #FFF5FA; vertical-align: middle;  padding: 8px;">
+											</div>
+
+										</td>
+									</tr>
+									<tr style="height: 20px;">
+										<td class="column1"></td>
+										<td colspan="2">
+											<div id="trip1" style="display: none; color: red;">
+
+											</div>
+										</td>
+									</tr>
+									<tr>
+										<td class="column1">
+											<h:outputText value="#{msgs['confirmNewPass']}："
+												transient="true" />
+										</td>
+										<td class="column2">
+											<h:inputSecret id="reNewPass" value=""
+												style="width:100%;height:23px;"
+												styleClass="rich-gradient-input" onblur="checkPsw();displayTrip(2);" onfocus="showTrip(2);"
+											>
+												<s:commonsValidator type="required"
+													arg="#{msgs['confirmNewPass']}" server="false"
+													client="true" />
+												<s:commonsValidator type="maxlength" maxLength="31"
+													arg="#{msgs['confirmNewPass']}" server="false"
+													client="true" />
+												<s:commonsValidator type="minlength" minLength="6"
+													arg="#{msgs['confirmNewPass']}" server="false"
+													client="true" />
+											</h:inputSecret>
+										</td>
+										<td class="column3">
+											<h:outputText value="*" style="color:red;" />
+											<div id="reTrip"
+												style="display: none; border: 1px solid #F8B3D0; background-color: #FFF5FA; vertical-align: middle;  padding: 8px;">
+											</div>
+
+										</td>
+									</tr>
+										<tr style="height: 20px;">
+										<td class="column1"></td>
+										<td colspan="2">
+											<div id="trip2" style="display: none; color: red;">请再次输入密码。</div>
+										</td>
+									</tr>
+								</table>
+								<br />
+								<h:panelGrid columns="2"
+									style="width:600px;font-size:13px;text-align:center;">
+									<h:panelGroup style="width:55%;algin:center">
+										<a4j:commandButton id="btnSave" type="submit"
+											styleClass="rich-button" value="#{msgs['baf.Save']}">
+											<a4j:support event="onclick"
+												onsubmit="if(validateNewPassword()==false) return false;"
+												action="#{userLoginBean.modifyPassword}"
+												data="#{userLoginBean.modifyPwdStatus}"
+												oncomplete="onModifyComplete(data)" reRender="passForm">
+												<c:if test="#{paramValues.userId != null}">
+													<a4j:actionparam name="userId"
+														value="#{paramValues.userId}" />
+												</c:if>
+												<c:if test="#{paramValues.loginName != null}">
+													<a4j:actionparam name="loginName"
+														value="#{paramValues.loginName}" />
+												</c:if>
+											</a4j:support>
+										</a4j:commandButton>
+									<h:panelGroup style="width:45%;algin:center">
+									</h:panelGroup>
+									
+										</h:panelGroup>
+								</h:panelGrid>
+							</center>
+
+							<s:validatorScript functionName="validateForm" />
+							<h:inputHidden id="opass" value="#{userLoginBean.oldPass}" />
+						</h:form>
+					</rich:tab>
+				</rich:tabPanel>
+			</div>
+
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+		</body>
+	</f:view>
+</html>
+
+
+

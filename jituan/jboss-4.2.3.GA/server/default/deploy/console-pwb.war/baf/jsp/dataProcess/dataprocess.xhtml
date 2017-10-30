@@ -1,0 +1,1500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+ 
+<f:loadBundle basename="messages" var="msgs" />
+<f:view  contentType="text/html">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	    <script>
+		//<![CDATA[		
+			//查询按钮onSubmit事件.
+	    	function checkQueryInputValues(type){
+	   	        var beginTime = "";
+				var endTime = "";
+				if(type == "org"){
+					beginTime = document.getElementById("orgForm:orgBeginTimeInputDate").value;
+					endTime = document.getElementById("orgForm:orgEndTimeInputDate").value;
+					document.getElementById("orgForm:searchType").value = "org";
+					document.getElementById("orgForm:scrollerPage").value = 1;
+				}else if(type == "user"){
+					beginTime = document.getElementById("userForm:userBeginTimeInputDate").value;
+					endTime = document.getElementById("userForm:userEndTimeInputDate").value;
+					document.getElementById("userForm:searchType").value = "user";
+					document.getElementById("userForm:scrollerPage").value = 1;
+				}else if(type == "business"){
+					beginTime = document.getElementById("businessForm:businessBeginTimeInputDate").value;
+					endTime = document.getElementById("businessForm:businessEndTimeInputDate").value;
+					document.getElementById("businessForm:searchType").value = "business";
+					document.getElementById("businessForm:scrollerPage").value = 1;
+				}else{
+					beginTime = document.getElementById("bureauForm:bureauBeginTimeInputDate").value;
+					endTime = document.getElementById("bureauForm:bureauEndTimeInputDate").value;
+					document.getElementById("bureauForm:searchType").value = "bureau";
+					document.getElementById("bureauForm:scrollerPage").value = 1;
+				}
+				var returnValue = false;
+				if(beginTime == "" || endTime == ""){
+					returnValue = true;
+				}else{
+					returnValue = inputSeachTimeCheck(beginTime, endTime)
+				}
+				if(returnValue == true){
+					Richfaces.showModalPanel("panel");
+				}
+				return returnValue;
+	    	}
+		    
+	        //查询日期验证.开始日期不能大于结束日期,如果大于则返回FALSE 
+			function inputSeachTimeCheck(beginDay,endDay){
+				var beginDate = beginDay.split(" ");
+				var arr1 = beginDate[0].split("-");
+				var begin = new Date(arr1[0],arr1[1],arr1[2]);
+				var beginDaytime = begin.getTime();
+				var hour1 = beginDate[1].split(":")[0];
+				var mini1 = beginDate[1].split(":")[1];
+	
+				var endDate = endDay.split(" ");
+				var arr2 = endDate[0].split("-");
+				var end = new Date(arr2[0],arr2[1],arr2[2]);
+				var endDayTime = end.getTime();
+				var hour2 = endDate[1].split(":")[0];
+				var mini2 = endDate[1].split(":")[1];
+	
+				if(beginDaytime >= endDayTime)
+				{
+					if(beginDaytime > endDayTime){
+						alert("${msgs['baf.dataImport.dateCompare']}");
+						return false;
+					}else{
+						if(hour1>hour2 || (hour1==hour2 && mini1>mini2)){
+							alert("${msgs['baf.dataImport.dateCompare']}");
+							return false;
+						}else{
+							return true;
+						}
+					}
+				}else{
+					return true;
+				}
+			}				
+			
+			//日期比较，beginDay比endDay小，返回ture，否则返回false
+			function compareDate(beginDay,endDay){
+				var beginDate = beginDay.split(" ");
+				var arr1 = beginDate[0].split("-");
+				var begin = new Date(arr1[0],arr1[1],arr1[2]);
+				var beginDaytime = begin.getTime();
+				var hour1 = beginDate[1].split(":")[0];
+				var mini1 = beginDate[1].split(":")[1];
+	
+				var endDate = endDay.split(" ");
+				var arr2 = endDate[0].split("-");
+				var end = new Date(arr2[0],arr2[1],arr2[2]);
+				var endDayTime = end.getTime();
+				var hour2 = endDate[1].split(":")[0];
+				var mini2 = endDate[1].split(":")[1];
+	
+				if(beginDaytime >= endDayTime)
+				{
+					if(beginDaytime > endDayTime){
+						return false;
+					}else{
+						if(hour1>hour2 || (hour1==hour2 && mini1>mini2)){
+							return false;
+						}else{
+							return true;
+						}
+					}
+				}else{
+					return true;
+				}
+			}	
+				
+			//重置查询条件
+			function resetConditions(type){
+				if(type == "org"){
+					document.getElementById("orgForm:unitName").value = "";
+					document.getElementById("orgForm:orgBeginTimeInputDate").value = "";
+					document.getElementById("orgForm:orgEndTimeInputDate").value = "";
+				}else if(type == "user"){
+					document.getElementById("userForm:userName").value = "";
+					document.getElementById("userForm:loginName").value = "";
+					document.getElementById("userForm:userBeginTimeInputDate").value = "";
+					document.getElementById("userForm:userEndTimeInputDate").value = "";
+				}else if(type == "business"){
+					document.getElementById("businessForm:businessName").value = "";
+					document.getElementById("businessForm:businessCode").value = "";
+					document.getElementById("businessForm:businessBeginTimeInputDate").value = "";
+					document.getElementById("businessForm:businessEndTimeInputDate").value = "";
+				}else{
+					document.getElementById("bureauForm:bureauName").value = "";
+					document.getElementById("bureauForm:bureauCode").value = "";
+					document.getElementById("bureauForm:bureauBeginTimeInputDate").value = "";
+					document.getElementById("bureauForm:bureauEndTimeInputDate").value = "";
+				}
+			}
+			
+			//屏蔽退格键的事件监听
+			function forCheck(){
+				if(event.keyCode == 8){
+				    event.returnValue = false;
+				}
+			}
+			
+			//在每次分页的时候，记忆查询结果列表中选中的对象
+			function saveSelledObj(domName){
+				var curSelObjArray = new Array;
+				if(domName == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(domName == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(domName == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(domName == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}				
+				$A(document.getElementsByName(domName)).each(function(ch){
+					if(curSelObjArray.indexOf(ch.value)>-1){
+						ch.checked = true;
+					}
+				});
+			}
+			
+			//批量选中的对象列表
+			var curSelOrgArray = new Array;
+			var curSelUserArray = new Array;
+			var curSelBusinessArray = new Array;
+			var curSelBureauArray = new Array;
+			
+			//往对象数组中加减数据
+			function selObj(obj,type){
+				var curSelObjArray = new Array;
+				if(type == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(type == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(type == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(type == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}
+				var v = obj.value;
+				if(obj.checked && curSelObjArray.indexOf(v)==-1){
+					curSelObjArray.push(v);
+				}else if(!obj.checked && curSelObjArray.indexOf(v)>-1){
+					curSelObjArray.remove(v);
+				}
+			}
+			
+			//全选复选框
+			function selObjAll(checked,domName) {
+				var curSelObjArray = new Array;
+				if(domName == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(domName == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(domName == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(domName == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}
+				$A(document.getElementsByName(domName)).each(function(ch){
+					ch.checked = checked;
+					var v = ch.value;
+					if(v != undefined){
+						if(checked && curSelObjArray.indexOf(v)==-1){
+							curSelObjArray.push(v);
+						}else if(!checked && curSelObjArray.indexOf(v)>-1){
+							curSelObjArray.remove(v);
+						}
+					}
+				});
+			}
+		    
+			var objIdArray = new Array;	     	//对象ID集合
+			var objNameArray = new Array;	 	//对象Name集合
+			var objParentIdArray = new Array;	//对象父ID集合
+			var objIdAndParentIdArray = new Array;	//对象ID与父ID拼的串的集合
+			var objTypeIdArray = new Array;	//部门类型集合
+			var objInvalidNameArray = new Array;	//存放无效数据名称
+			var objNotDeleteNameArray = new Array;	//存放不能删除的名称集合
+			
+			//获取选中行的相关数据
+			function getSelectedData(type, operatetype){			
+				var curSelObjArray = new Array;
+				if(type == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(type == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(type == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(type == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}
+				objIdArray = new Array;	     	//对象ID集合
+				objNameArray = new Array;	 	//对象Name集合
+				objParentIdArray = new Array;	//对象父ID集合
+				objIdAndParentIdArray = new Array;	//对象ID与父ID拼的串的集合	
+				objTypeIdArray = new Array;	//部门类型集合	
+				objInvalidNameArray = new Array;	//无效上级的数据名称集合
+				objNotDeleteNameArray = new Array;	//存放不能删除的名称集合
+				
+				var deleteDate = "#{dataProcessBean.deleteDate}";
+				for(var i = 0;i < curSelObjArray.length;i++){
+					var v = curSelObjArray[i].split(";");
+					if(type == "org"){
+						if(v[4] == "N" && operatetype == "resumeold"){
+							objInvalidNameArray.push(v[1]);
+							continue;
+						}
+						if(operatetype == "delete" && compareDate(v[5], deleteDate) == false){
+							objNotDeleteNameArray.push(v[1]);
+							continue;
+						}
+						objIdArray.push(v[0]);
+						objNameArray.push(v[1]);
+						objParentIdArray.push(v[2]);
+						objIdAndParentIdArray.push(v[0] + "#" + v[2]);
+						objTypeIdArray.push(v[3]);
+					}else{
+						if(v[3] == "N" && operatetype == "resumeold"){
+							objInvalidNameArray.push(v[1]);
+							continue;
+						}
+						if(operatetype == "delete" && compareDate(v[4], deleteDate) == false){
+							objNotDeleteNameArray.push(v[1]);
+							continue;
+						}
+						objIdArray.push(v[0]);
+						objNameArray.push(v[1]);
+						objParentIdArray.push(v[2]);
+						objIdAndParentIdArray.push(v[0] + "#" + v[2]);
+					}
+				}
+			}
+			
+			//彻底删除
+			function deleteAll(type){			
+				var curSelObjArray = new Array;
+				if(type == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(type == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(type == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(type == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}
+				if(curSelObjArray.length == 0){
+					//请选择要删除的数据！
+					alert("#{msgs['baf.dataprocess.selectdeldata']}#{msgs['baf.dataprocess.data']}#{msgs['baf.excalmatoryMark']}");
+					return false;
+				}else{
+					var num = "#{dataProcessBean.num}";
+					if(objNotDeleteNameArray.length > 0){
+						//不能删除几天之内的数据
+						alert("'"+ objNotDeleteNameArray.join("、") +"' #{msgs['baf.dataprocess.message7']} "+ num +" #{msgs['baf.dataprocess.message8']} "+ num +" #{msgs['baf.dataprocess.message9']}");
+					}				
+					if(objIdArray.length > 0){
+						//是否彻底删除数据
+						if(!confirm("#{msgs['baf.dataprocess.isquitedelete']} '" + objNameArray.join("、") + "' #{msgs['baf.questionMark']}#{msgs['baf.leftBracket']}#{msgs['baf.dataprocess.notresume']}#{msgs['baf.rightBracket']}")){
+							return false;
+						}
+					}else{
+						return false;
+					}
+					if(type == "org"){
+						document.getElementById("orgForm:orgParamIds").value = objIdArray.join(",");
+						document.getElementById("orgForm:searchType").value = "org";
+					}else if(type == "user"){
+						document.getElementById("userForm:userParamIds").value = objIdArray.join(",") + "$" + objIdAndParentIdArray.join(",");
+						document.getElementById("userForm:searchType").value = "user";
+					}else if(type == "business"){
+						document.getElementById("businessForm:businessParamIds").value = objIdArray.join(",");
+						document.getElementById("businessForm:searchType").value = "business";
+					}else if(type == "bureau"){
+						document.getElementById("bureauForm:bureauParamIds").value = objIdArray.join(",");
+						document.getElementById("bureauForm:searchType").value = "bureau";
+					}
+					Richfaces.showModalPanel("panel");
+				}
+				return true;
+			}
+			
+			//点击复选框时，若树上已勾选复选框，则取消以前勾选的
+			function cancelOldChecked(itemId, checkstate){
+				var checkedId = this.getAllChecked();
+				if(checkedId.indexOf(",") != -1){
+					var oldCheckedId = checkedId.replace(itemId,"").replace(",","");
+					this.setCheck(oldCheckedId, "0");
+				}
+			}
+			
+			//恢复到原始上级时，判断是否选择了数据
+			function beforeResumeOldParent(type){			
+				var curSelObjArray = new Array;
+				var typename = "";
+				if(type == "org"){
+					curSelObjArray = curSelOrgArray;
+					typename = "#{msgs['baf.org.unit.parentOrgName']}";
+				}else if(type == "user"){
+					curSelObjArray = curSelUserArray;
+					typename = "#{msgs['baf.org.post.parentUnit']}";
+				}else if(type == "business"){
+					curSelObjArray = curSelBusinessArray;
+					typename = "#{msgs['baf.orgview.higherLlevel']}";
+				}else if(type == "bureau"){
+					curSelObjArray = curSelBureauArray;
+					typename = "#{msgs['baf.bureau.parentbureauName']}";
+				}
+				if(curSelObjArray.length == 0){
+					//请选择要恢复的数据！
+					alert("#{msgs['baf.dataprocess.selectresumedata']}#{msgs['baf.dataprocess.data']}#{msgs['baf.excalmatoryMark']}");
+					return false;
+				}else{
+					if(objInvalidNameArray.length > 0){
+						//要恢复的数据的上级已删除，不能将其恢复！
+						alert("'" + objInvalidNameArray.join("、") + "' #{msgs['baf.dataprocess.message1']}" + typename + "#{msgs['baf.dataprocess.message3']}#{msgs['baf.excalmatoryMark']}");
+					}
+					if(objIdArray.length > 0){
+						//是否恢复数据到原始上级下面
+						if(!confirm("#{msgs['baf.dataprocess.message4']} '" + objNameArray.join("、") + "' #{msgs['baf.dataprocess.message2']}" + typename + "#{msgs['baf.dataprocess.message5']}#{msgs['baf.questionMark']}")){
+							return false;
+						}
+					}else{
+						return false;
+					}
+					for(var i=0;i<objIdAndParentIdArray.length;i++){
+						if(type == "org"){
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + objParentIdArray[i] + "#" + objTypeIdArray[i]);
+						}else if(type == "user"){
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + objParentIdArray[i]);
+						}else{
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + objParentIdArray[i]);
+						}
+					}
+					if(type == "user"){
+						document.getElementById("userForm:userParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("userForm:searchType").value = "user";
+					}else if(type == "org"){
+						document.getElementById("orgForm:orgParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("orgForm:searchType").value = "org";
+					}else if(type == "business"){
+						document.getElementById("businessForm:businessParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("businessForm:searchType").value = "business";
+					}else if(type == "bureau"){
+						document.getElementById("bureauForm:bureauParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("bureauForm:searchType").value = "bureau";
+					}
+					Richfaces.showModalPanel("panel");
+				}
+				return true;
+			}
+			
+			//恢复到指定部门，时判断是否选择了数据
+			function showModalPanel(type){			
+				var curSelObjArray = new Array;
+				if(type == "org"){
+					curSelObjArray = curSelOrgArray;
+				}else if(type == "user"){
+					curSelObjArray = curSelUserArray;
+				}else if(type == "business"){
+					curSelObjArray = curSelBusinessArray;
+				}else if(type == "bureau"){
+					curSelObjArray = curSelBureauArray;
+				}
+				if(curSelObjArray.length == 0){
+					//请选择要恢复的数据！
+					alert("#{msgs['baf.dataprocess.selectresumedata']}#{msgs['baf.dataprocess.data']}#{msgs['baf.excalmatoryMark']}");
+					return;
+				}else{
+					//弹出模态框
+					if(type == "user"){
+						Richfaces.showModalPanel("userOrgPanel");
+					}else if(type == "org"){
+						Richfaces.showModalPanel("orgPanel");
+					}else if(type == "business"){
+						Richfaces.showModalPanel("businessPanel");
+					}else if(type == "bureau"){
+						Richfaces.showModalPanel("bureauPanel");
+					}
+				}
+			}
+			
+			//在组织树模态框点击确定时，先判断是否选择了要恢复到的部门
+			function beforeResumeNewParent(type){
+				var checkedId = "";
+				var typename = "";
+				var checkedText = "";
+				if(type == "org"){
+					checkedId = ORGTree_tree.getAllChecked();
+					checkedText = ORGTree_tree.getItemText(checkedId);
+					typename = "#{msgs['baf.org.unit']}";
+				}else if(type == "user"){
+					checkedId = userORGTree_tree.getAllChecked();
+					checkedText = userORGTree_tree.getItemText(checkedId);
+					typename = "#{msgs['baf.org.user']}";
+				}else if(type == "business"){
+					checkedId = businessTree_tree.getAllChecked();
+					checkedText = businessTree_tree.getItemText(checkedId);
+					typename = "#{msgs['baf.dataImport.optionalBusiness']}";
+				}else if(type == "bureau"){
+					checkedId = bureauTree_tree.getAllChecked();
+					checkedText = bureauTree_tree.getItemText(checkedId);
+					typename = "#{msgs['baf.dataImport.optionalBurean']}";
+				}
+				if(checkedId == ""){
+					//请选择要恢复到的父节点！
+					alert("#{msgs['baf.dataprocess.selectresumedata1']}" + typename + "#{msgs['baf.excalmatoryMark']}");
+					return false;
+				}else{
+					//是否恢复数据到指定上级下面
+					if(!confirm("#{msgs['baf.dataprocess.message4']} '" + objNameArray.join("、") + "' #{msgs['baf.dataprocess.message6']} '" + checkedText + "' #{msgs['baf.dataprocess.message5']}#{msgs['baf.questionMark']}")){
+						return false;
+					}
+					for(var i=0;i<objIdAndParentIdArray.length;i++){
+						if(type == "org"){
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + checkedId + "#" + objTypeIdArray[i]);
+						}else if(type == "user"){
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + objNameArray[i] + "#" + checkedId);
+						}else{
+							objIdAndParentIdArray.splice(i, 1, objIdArray[i] + "#" + checkedId);
+						}
+					}
+					if(type == "org"){
+						document.getElementById("orgPanelForm:orgParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("orgPanelForm:searchType").value = "org";
+					}else if(type == "user"){
+						document.getElementById("userOrgPanelForm:userParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("userOrgPanelForm:searchType").value = "user";
+					}else if(type == "business"){
+						document.getElementById("businessPanelForm:businessParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("businessPanelForm:searchType").value = "business";
+					}else if(type == "bureau"){
+						document.getElementById("bureauPanelForm:bureauParamIds").value = objIdAndParentIdArray.join(",");
+						document.getElementById("bureauPanelForm:searchType").value = "bureau";
+					}
+					Richfaces.showModalPanel("panel");
+				}
+				return true;
+			}
+			
+			//恢复到指定上级完成事件
+			function onResumeNewParentComplete(type){			
+		 		Richfaces.hideModalPanel("panel");
+				if(a4jcomplete()==false){
+		 			return;
+		 		}		 		
+		 		if(type == "user"){
+		 			curSelUserArray = new Array;
+		 			Richfaces.hideModalPanel("userOrgPanel");
+			 		//刷新人员列表
+			 		refreshUserList();
+		 		}else if(type == "org"){
+		 			curSelOrgArray = new Array;
+		 			Richfaces.hideModalPanel("orgPanel");
+		 			//刷新部门列表
+		 			refreshOrgList();
+		 		}else if(type == "business"){
+		 			curSelBusinessArray = new Array;
+		 			Richfaces.hideModalPanel("businessPanel");
+		 			//刷新业务列表
+		 			refreshBusinessList();
+		 		}else if(type == "bureau"){
+		 			curSelBureauArray = new Array;
+		 			Richfaces.hideModalPanel("bureauPanel");
+		 			//刷新局向列表
+		 			refreshBureauList();
+		 		}
+		 		//刷新树
+		 		refreshTree(type);
+			}
+			
+			//恢复到原始上级完成事件
+			function onResumeOldParentComplete(type){
+		 		Richfaces.hideModalPanel("panel");
+				if(a4jcomplete()==false){
+		 			return;
+		 		}
+		 		if(type == "user"){
+		 			curSelUserArray = new Array;
+			 		//刷新人员列表
+			 		refreshUserList();
+		 		}else if(type == "org"){
+		 			curSelOrgArray = new Array;
+		 			//刷新部门列表
+		 			refreshOrgList();
+		 		}else if(type == "business"){
+		 			curSelBusinessArray = new Array;
+		 			//刷新业务列表
+		 			refreshBusinessList();
+		 		}else if(type == "bureau"){
+		 			curSelBureauArray = new Array;
+		 			//刷新局向列表
+		 			refreshBureauList();
+		 		}
+		 		//刷新树
+		 		refreshTree(type);
+			}
+			
+			//刷新树
+			function refreshTree(type){
+				if(type == "user"){
+					//刷新组织树
+			 		usetrORGTree_tree.deleteChildItems("0");
+				  	usetrORGTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/dataProcess/orgtree.jsp");
+				  	usetrORGTree_tree.refreshItem("0"); 
+		 		}else if(type == "org"){	 		
+			 		//刷新组织树
+			 		ORGTree_tree.deleteChildItems("0");
+				  	ORGTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/dataProcess/orgtree.jsp");
+				  	ORGTree_tree.refreshItem("0"); 
+		 		}else if(type == "business"){		 		
+			 		//刷新业务树
+			 		businessTree_tree.deleteChildItems("0");
+				  	businessTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/dataProcess/businesstree.jsp");
+				  	businessTree_tree.refreshItem("0"); 
+		 		}else if(type == "bureau"){	 		
+			 		//刷新局向树
+			 		bureauTree_tree.deleteChildItems("0");
+				  	bureauTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/dataProcess/bureautree.jsp");
+				  	bureauTree_tree.refreshItem("0"); 
+		 		}
+			}
+			
+			//删除完成之后触发事件
+			function onDeleteComplete(type){
+				Richfaces.hideModalPanel("panel");
+				if(a4jcomplete() == false){
+					return;
+				}
+				if(type == "user"){
+		 			curSelUserArray = new Array;
+			 		//刷新人员列表
+			 		refreshUserList();
+		 		}else if(type == "org"){
+		 			curSelOrgArray = new Array;
+		 			//刷新部门列表
+		 			refreshOrgList();
+		 		}else if(type == "business"){
+		 			curSelBusinessArray = new Array;
+		 			//刷新业务列表
+		 			refreshBusinessList();
+		 		}else if(type == "bureau"){
+		 			curSelBureauArray = new Array;
+		 			//刷新局向列表
+		 			refreshBureauList();
+		 		}
+			}
+			
+			//查询完成之后触发事件
+			function onSearchComplete(type){
+				Richfaces.hideModalPanel("panel");
+				if(type == "user"){
+		 			curSelUserArray = new Array;
+		 		}else if(type == "org"){
+		 			curSelOrgArray = new Array;
+		 		}else if(type == "business"){
+		 			curSelBusinessArray = new Array;
+		 		}else if(type == "bureau"){
+		 			curSelBureauArray = new Array;
+		 		}
+			}
+			
+			//设置是否重新渲染tab页
+			function setTabRendered(tabId){
+				if(tabId == "user" && document.getElementById("orgForm:userRendered").value == "false"){
+					setTabContentRendered("user","orgtreepg,userForm");
+					Richfaces.showModalPanel("panel");
+				}
+				if(tabId == "business" && document.getElementById("orgForm:businessRendered").value == "false"){
+					setTabContentRendered("business","businesstreepg,businessForm");
+					Richfaces.showModalPanel("panel");
+				}
+				if(tabId == "bureau" && document.getElementById("orgForm:bureauRendered").value == "false"){
+					setTabContentRendered("bureau","bureautreepg,bureauForm");
+					Richfaces.showModalPanel("panel");
+				}
+			}
+			//点击查询按纽列表未渲染前置灰
+			function ondisabled(type){
+				if(type == "org"){
+					document.getElementById("orgForm:searchOrg").disabled = true;
+				}else if(type == "user"){
+					document.getElementById("userForm:searchUser").disabled = true;
+				}else if(type == "business"){
+					document.getElementById("businessForm:searchBusiness").disabled = true;
+				}else if(type == "bureau"){
+					document.getElementById("bureauForm:searchBureau").disabled = true;
+				}	
+			}
+		//]]>
+		</script>
+		<style type="text/css">
+			
+		</style>
+	</head>
+	<body> 
+	
+		<regaltec:viewPort ctCls="panel-bdColor">	
+			<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+				contentEl="center"/>
+		</regaltec:viewPort>
+		
+		<!-- 恢复部门时的组织树 -->
+		<regaltec:dhtmlXtree id="ORGTree"
+			imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_orgtree"
+			loadXML="/baf/jsp/dataProcess/orgtree.jsp"
+			xmlAutoLoading="/baf/jsp/dataProcess/orgtree.jsp">
+			<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+			<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />	
+		</regaltec:dhtmlXtree>  
+		
+		<h:panelGroup id="orgtreepg">
+			<h:panelGroup rendered="#{dataProcessBean.userRendered}">
+				<!-- 恢复人员时的组织树 -->
+				<regaltec:dhtmlXtree id="userORGTree"
+					imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_userorgtree"
+					loadXML="/baf/jsp/dataProcess/orgtree.jsp"
+					xmlAutoLoading="/baf/jsp/dataProcess/orgtree.jsp">
+					<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+					<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />	
+				</regaltec:dhtmlXtree>
+			</h:panelGroup>
+		</h:panelGroup>  
+		
+		<h:panelGroup id="businesstreepg">
+			<h:panelGroup rendered="#{dataProcessBean.businessRendered}">		
+				<!-- 业务树 -->
+				<regaltec:dhtmlXtree id="businessTree"
+					imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_businesstree"
+					loadXML="/baf/jsp/dataProcess/businesstree.jsp"
+					xmlAutoLoading="/baf/jsp/dataProcess/businesstree.jsp">
+					<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+					<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />	
+				</regaltec:dhtmlXtree>
+			</h:panelGroup>
+		</h:panelGroup>  
+		
+		<h:panelGroup id="bureautreepg">
+			<h:panelGroup rendered="#{dataProcessBean.bureauRendered}">		
+				<!-- 局向树 -->
+				<regaltec:dhtmlXtree id="bureauTree"
+					imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_bureautree"
+					loadXML="/baf/jsp/dataProcess/bureautree.jsp"
+					xmlAutoLoading="/baf/jsp/dataProcess/bureautree.jsp">
+					<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+					<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />	
+				</regaltec:dhtmlXtree>
+			</h:panelGroup>
+		</h:panelGroup>
+	
+		<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+			<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:97%;" switchType="client">
+				<!-- 部门 -->
+				<rich:tab id="org" label="#{msgs['baf.dataImport.optionalOragnization']}" style="height:100%;width:100%;" rendered="true">
+					<br/>
+					<center>
+			        	<a4j:form id="orgForm">
+			        		<!-- 查询Panel -->
+							<rich:panel style="width:95%;">				
+								<h:panelGrid id="orgpg" columns="5" style="font-size:13px;" styleClass=".rich-text-color-general">	
+							        <h:panelGroup>
+							        	<h:outputText value="#{msgs['baf.org.unit.orgName']}："/>
+	  									<h:inputText id="unitName" value="#{dataProcessBean.unitName}" style="width:150px;;height:23px;" styleClass="rich-gradient-input"/>
+									</h:panelGroup>
+									
+									<rich:spacer width="10px"/>  
+									
+									<h:panelGroup>
+										<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+										<rich:calendar id="orgBeginTime"  value="#{dataProcessBean.orgStartTime}" 
+											datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+											inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+										</rich:calendar>
+									</h:panelGroup>
+									
+									<rich:spacer width="10px"/>  
+									
+									<h:panelGroup>
+										<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+										<rich:calendar id="orgEndTime"  value="#{dataProcessBean.orgEndTime}" 
+											datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+											inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+										</rich:calendar>
+										
+										<rich:spacer width="20px"/> 
+										
+										<!-- 查询按钮 -->
+										<a4j:commandButton styleClass="rich-button" type="submit" id="searchOrg" value="#{msgs['baf.calendar.select']}">
+											<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('org') == false) return false;ondisabled('org');" disabled="false" action="#{dataProcessBean.searchDataByConditions}" oncomplete="onSearchComplete('org');" reRender="orgList,orgScroller,searchOrg" requestDelay="100"/>
+										</a4j:commandButton>
+										<rich:spacer width="5px"/>
+										<!-- 重置按钮 -->
+										<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+											<a4j:support event="onclick" onsubmit="resetConditions('org');return false;"/>
+										</a4j:commandButton>
+									</h:panelGroup>	
+								</h:panelGrid>	
+							</rich:panel>		
+					    	 
+							<br/>
+							<!-- 恢复到原始部门 -->
+							<a4j:commandButton styleClass="rich-button" type="submit" id="resumeOldOrg" value="#{msgs['baf.dataprocess.resumeOld']}#{msgs['baf.org.unit']}" style="width: 115px">
+								<a4j:support event="onclick" onsubmit="getSelectedData('org','resumeold');if (beforeResumeOldParent('org')==false)return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeOldParentComplete('org');"/>
+							</a4j:commandButton>
+							<rich:spacer width="10px"/>
+							
+							<!-- 恢复到指定部门 -->
+							<a4j:commandButton styleClass="rich-button" type="submit" id="resumeNewOrg" value="#{msgs['baf.dataprocess.resumeNew']}#{msgs['baf.org.unit']}" style="width: 115px">
+								<a4j:support event="onclick" onsubmit="showModalPanel('org'); return false;"/>
+							</a4j:commandButton>
+							<rich:spacer width="10px"/>
+							
+							<!-- 彻底删除 -->
+							<a4j:commandButton styleClass="rich-button" id="deleteOrg" value="#{msgs['baf.dataprocess.quitedelete']}" style="width: 75px">
+								<a4j:support event="onclick" onsubmit="getSelectedData('org','delete');if(deleteAll('org') == false) return false;" action="#{dataProcessBean.delete}" oncomplete="onDeleteComplete('org');"/>
+							</a4j:commandButton>							
+							
+							<!-- 刷新部门列表 -->
+							<a4j:jsFunction name="refreshOrgList" action="#{dataProcessBean.loadOrg}" reRender="orgList,orgScroller"/>
+							
+							<!-- 设置tab页内容渲染状态 -->
+					        <a4j:jsFunction name="setTabContentRendered" action="#{dataProcessBean.setTabContentRendered}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="#{dataProcessBean.reRenderIds},tabRendered">
+					        	<a4j:actionparam name="tabId" value="" />
+					        	<a4j:actionparam name="reRenderIds" assignTo="#{dataProcessBean.reRenderIds}"/>
+					        </a4j:jsFunction> 
+							
+							<h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+							<h:inputHidden id="scrollerPage" value="#{dataProcessBean.orgScrollerPage}"/>
+							<h:inputHidden id="orgParamIds" value="#{dataProcessBean.orgParamIds}"/>
+							
+						    <h:panelGroup id="tabRendered">
+								<!-- tab页内容是否渲染 -->
+								<h:inputHidden id="userRendered" value="#{dataProcessBean.userRendered}"/>
+								<h:inputHidden id="businessRendered" value="#{dataProcessBean.businessRendered}"/>
+								<h:inputHidden id="bureauRendered" value="#{dataProcessBean.bureauRendered}"/>
+							</h:panelGroup>
+			
+							<br/><br/>
+							
+							<!-- 显示列表 -->
+							<rich:dataTable width="95%" id="orgList" rows="#{dataProcessBean.pageSize}"
+					            value="#{dataProcessBean.defaultDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+					            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+					            <rich:column style="width:5px;">
+						            <f:facet name="header">
+										<input type="checkbox" onclick="selObjAll(this.checked,'org');"/>
+									</f:facet>
+									<input type="checkbox" name="org" value="#{item.orgid};#{item.orgname};#{item.parentorgid};#{item.objecttypeid};#{item.parentOrgIsvalid};#{item.modifyTime}" onclick="selObj(this,'org');"/>
+					            </rich:column>
+					            <rich:column style="width:20%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.orgName']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.orgname}" />
+					            </rich:column>	            
+					            <rich:column style="width:10%;text-align:center;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.orgType']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.objecttypename}" />
+					            </rich:column>
+					            <rich:column style="width:10%;text-align:center;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.phone']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.phone}" />
+					            </rich:column>
+					            <rich:column style="width:10%;text-align:center;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.fax']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.fax}" />
+					            </rich:column>
+					            <rich:column style="width:7%;text-align:center;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.isoa']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.isOA == 'Y' ? msgs['baf.radioYes'] : msgs['baf.radioNo']}" />
+					            </rich:column>	
+					            <rich:column style="width:16%;text-align:center;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.dataprocess.deleteTime']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.modifyTime}">
+					                	<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+					                </h:outputText>
+					            </rich:column>
+					            <rich:column style="width:27%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.parentOrgName']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{item.parentorgname}" title="#{item.all_parent_name}" style="cursor:pointer;"/>
+					                <h:outputText value="#{msgs['baf.leftBracket1']}#{msgs['baf.dataprocess.invalid']}#{msgs['baf.rightBracket1']}" rendered="#{item.parentOrgIsvalid == 'N'}" style="color:red;"/>
+					            </rich:column>	
+					        </rich:dataTable>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="orgList" fastStep="1"  page="#{dataProcessBean.orgScrollerPage}" id="orgScroller" oncomplete="saveSelledObj('org');" reRender="scrollerPage"/>							
+									</td>
+								</tr>
+							</table>
+							
+					    </a4j:form>	
+				    </center>	 	
+				</rich:tab>
+				
+				<!-- 人员 -->
+				<rich:tab id="user" label="#{msgs['baf.org.user']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('user');">
+					<br/>
+					<center>
+			        	<a4j:form id="userForm">
+			        		<h:panelGroup rendered="#{dataProcessBean.userRendered}">
+				        		<!-- 查询Panel -->
+								<rich:panel style="width:95%;">				
+									<h:panelGrid id="userpg" columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">	
+					  					<h:panelGroup>
+					  						<h:outputText value="#{msgs['baf.org.user.userName']}："/>
+					  						<h:inputText id="userName" value="#{dataProcessBean.userName}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+										</h:panelGroup>
+										
+										<rich:spacer width="5px"/>  
+										
+										<h:panelGroup>
+											<h:outputText value="#{msgs['baf.org.user.loginName']}："/>
+					  						<h:inputText id="loginName" value="#{dataProcessBean.loginName}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+					  					</h:panelGroup>
+					  					
+					  					<rich:spacer width="5px"/>  
+					  					
+								        <h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+											<rich:calendar id="userBeginTime"  value="#{dataProcessBean.userStartTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+											</rich:calendar>
+										</h:panelGroup>
+										
+										<rich:spacer width="5px"/>  
+										
+										<h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+											<rich:calendar id="userEndTime"  value="#{dataProcessBean.userEndTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+											</rich:calendar>
+											
+											<rich:spacer width="5px"/> 
+											
+											<!-- 查询按钮 -->
+											<a4j:commandButton styleClass="rich-button" type="submit" id="searchUser" value="#{msgs['baf.calendar.select']}">
+												<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('user') == false) return false;ondisabled('user');" action="#{dataProcessBean.searchDataByConditions}" disabled="false" oncomplete="onSearchComplete('user');" reRender="userList,userScroller,searchUser" requestDelay="100"/>
+											</a4j:commandButton>
+											<rich:spacer width="5px"/>
+											<!-- 重置按钮 -->
+											<a4j:commandButton styleClass="rich-button" id="resetUser" value="#{msgs['buttonResetLable']}">
+												<a4j:support event="onclick" onsubmit="resetConditions('user'); return false;"/>
+											</a4j:commandButton>
+											
+										</h:panelGroup>	
+									</h:panelGrid>	
+								</rich:panel>
+						    	 
+								<br/>
+								<!-- 恢复到原始部门 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeOldUser" value="#{msgs['baf.dataprocess.resumeOld']}#{msgs['baf.org.unit']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('user','resumeold');if (beforeResumeOldParent('user')==false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeOldParentComplete('user');"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 恢复到指定部门 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeNewUser" value="#{msgs['baf.dataprocess.resumeNew']}#{msgs['baf.org.unit']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="showModalPanel('user'); return false;"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 彻底删除 -->
+								<a4j:commandButton styleClass="rich-button" id="deleteUser" value="#{msgs['baf.dataprocess.quitedelete']}" style="width: 75px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('user','delete');if(deleteAll('user') == false) return false;" action="#{dataProcessBean.delete}" oncomplete="onDeleteComplete('user');"/>
+								</a4j:commandButton>
+								
+								<!-- 刷新用户列表 -->
+								<a4j:jsFunction name="refreshUserList" action="#{dataProcessBean.loadUser}" reRender="userList,userScroller"/>
+								
+								<h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+								<h:inputHidden id="scrollerPage" value="#{dataProcessBean.userScrollerPage}"/>
+								<h:inputHidden id="userParamIds" value="#{dataProcessBean.userParamIds}"/>
+								
+								<br/><br/>
+								
+								<!-- 显示列表 -->
+								<rich:dataTable width="95%" id="userList" rows="#{dataProcessBean.pageSize}"
+						            value="#{dataProcessBean.firstDataModel}" var="orguser" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+						            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+						            <rich:column style="width:5px;">
+							            <f:facet name="header">
+											<input type="checkbox" onclick="selObjAll(this.checked,'user');"/>
+										</f:facet>
+										<input type="checkbox" name="user" value="#{orguser.userId};#{orguser.userName};#{orguser.unitId};#{orguser.orgIsvalid};#{orguser.modifyTime}" onclick="selObj(this,'user');"/>
+						            </rich:column>
+						            <rich:column style="width:10%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.userName}"/>
+						            </rich:column>
+						            <rich:column style="width:11%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.loginName}" />
+						            </rich:column>
+						            <rich:column style="width:4%;text-align:center;">
+						            	<f:facet name="header">
+						                        <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+								        </f:facet>
+								        <h:outputText rendered="#{orguser.gender=='M'}" value="#{msgs['baf.radioMankind']}"/>
+						                <h:outputText rendered="#{orguser.gender=='F'}" value="#{msgs['baf.radioFemale']}"/>
+						            </rich:column>
+						            <rich:column style="width:10%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.userType}" />
+						            </rich:column>
+						            <rich:column style="width:9%;text-align:center;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.officePhone}" />
+						            </rich:column>
+						            <rich:column style="width:9%;text-align:center;">
+						            	<f:facet name="header">
+						                    <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.mobilePhone}" />
+						            </rich:column>
+						            <rich:column style="width:9%;text-align:center;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.phs}" />
+						            </rich:column>
+						            <rich:column style="width:5%;text-align:center;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.isoauser']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.isOA == 'Y' ? msgs['baf.radioYes'] : msgs['baf.radioNo']}" />
+						            </rich:column>
+						            <rich:column style="width:13%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.dataprocess.quitedelete']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <center>
+							                <h:outputLabel value="#{orguser.modifyTime}">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+										</center>
+						            </rich:column>
+						            <rich:column style="width:20%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.post.parentUnit']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{orguser.unitName}" title="#{orguser.fullUnitNames}" style="cursor: pointer;"/>
+						                <h:outputText value="#{msgs['baf.leftBracket1']}#{msgs['baf.dataprocess.invalid']}#{msgs['baf.rightBracket1']}" style="color:red;" rendered="#{orguser.orgIsvalid == 'N'}"/>
+						            </rich:column>
+						        </rich:dataTable>
+						        <table width="95%">
+						            <tr>
+							            <td>
+											<rich:datascroller align="right" for="userList" fastStep="1" page="#{dataProcessBean.userScrollerPage}" id="userScroller" oncomplete="saveSelledObj('user');" reRender="scrollerPage"/>							
+										</td>
+									</tr>
+								</table>
+							</h:panelGroup>
+					    </a4j:form>	
+				    </center>	 	
+				</rich:tab>
+				
+				<!-- 业务 -->
+				<rich:tab id="business" label="#{msgs['baf.dataImport.optionalBusiness']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('business');">
+					<br/>
+					<center>
+			        	<a4j:form id="businessForm">
+			        		<h:panelGroup rendered="#{dataProcessBean.businessRendered}">
+				        		<!-- 查询Panel -->
+								<rich:panel style="width:95%;">				
+									<h:panelGrid id="businesspg" columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">	
+								        <h:panelGroup>
+											<h:outputText value="#{msgs['baf.business.name']}："/>
+					  						<h:inputText id="businessName" value="#{dataProcessBean.businessName}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+					  					</h:panelGroup>
+					  					
+					  					<rich:spacer width="5px"/>  
+					  					
+					  					<h:panelGroup>
+											<h:outputText value="#{msgs['baf.business.code']}："/>
+					  						<h:inputText id="businessCode" value="#{dataProcessBean.businessCode}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+					  					</h:panelGroup>
+					  					
+					  					<rich:spacer width="5px"/>  
+								        
+								        <h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+											<rich:calendar id="businessBeginTime"  value="#{dataProcessBean.businessStartTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+											</rich:calendar>
+										</h:panelGroup>
+										
+										<rich:spacer width="5px"/>  
+										
+										<h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+											<rich:calendar id="businessEndTime"  value="#{dataProcessBean.businessEndTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+											</rich:calendar>
+											
+											<rich:spacer width="5px"/> 
+											
+											<!-- 查询按钮 -->
+											<a4j:commandButton styleClass="rich-button" type="submit" id="searchBusiness" value="#{msgs['baf.calendar.select']}">
+												<a4j:actionparam name="searchType" value="business" assignTo="#{dataProcessBean.searchType}"/>
+												<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('business') == false) return false;ondisabled('business');" disabled="false" action="#{dataProcessBean.searchDataByConditions}" oncomplete="onSearchComplete('business');" reRender="businessList,businessScroller,searchBusiness" requestDelay="100"/>
+											</a4j:commandButton>
+											<rich:spacer width="5px"/>
+											<!-- 重置按钮 -->
+											<a4j:commandButton styleClass="rich-button" id="resetBusiness" value="#{msgs['buttonResetLable']}">
+												<a4j:support event="onclick" onsubmit="resetConditions('business'); return false;"/>
+											</a4j:commandButton>
+										</h:panelGroup>	
+									</h:panelGrid>	
+								</rich:panel>		
+						    	 
+								<br/>
+								<!-- 恢复到原始业务 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeOldBusiness" value="#{msgs['baf.dataprocess.resumeOld']}#{msgs['baf.dataImport.optionalBusiness']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('business','resumeold');if (beforeResumeOldParent('business')==false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeOldParentComplete('business');"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 恢复到指定业务 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeNewBusiness" value="#{msgs['baf.dataprocess.resumeNew']}#{msgs['baf.dataImport.optionalBusiness']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="showModalPanel('business'); return false;"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 彻底删除 -->
+								<a4j:commandButton styleClass="rich-button" id="deleteBusiness" value="#{msgs['baf.dataprocess.quitedelete']}" style="width: 75px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('business','delete');if(deleteAll('business') == false) return false;" action="#{dataProcessBean.delete}" oncomplete="onDeleteComplete('business');"/>
+								</a4j:commandButton>
+								
+								<!-- 刷新业务列表 -->
+								<a4j:jsFunction name="refreshBusinessList" action="#{dataProcessBean.loadBusiness}" reRender="businessList,businessScroller"/>
+								
+								<h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+								<h:inputHidden id="scrollerPage" value="#{dataProcessBean.businessScrollerPage}"/>
+								<h:inputHidden id="businessParamIds" value="#{dataProcessBean.businessParamIds}"/>
+								<br/><br/>
+								
+								<!-- 显示列表 -->
+								<rich:dataTable width="95%" id="businessList" rows="#{dataProcessBean.pageSize}"
+						            value="#{dataProcessBean.secondDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+						            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+						            <rich:column style="width:5px;">
+							            <f:facet name="header">
+											<input type="checkbox" onclick="selObjAll(this.checked,'business');"/>
+										</f:facet>
+										<input type="checkbox" name="business" value="#{item.businessid};#{item.businessname};#{item.parentbusinessid};#{item.parentisvalid};#{item.modifyTime}" onclick="selObj(this,'business');"/>
+						            </rich:column>
+						            <rich:column style="width:15%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText " value="#{msgs['baf.business.name']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.businessname}" />
+						            </rich:column>
+						            <rich:column style="width:15%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.business.code']}" style="font-weight:normal;"/>
+								        </f:facet>
+								        <h:outputText value="#{item.businesscode}" />
+						            </rich:column>
+						            <rich:column style="width:8%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.business.property']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{msgs['baf.specialty.mainYes']}" rendered="#{item.businessproperty == '1'}" />
+						                <h:outputText value="#{msgs['baf.specialty.mainNo']}" rendered="#{item.businessproperty == '0'}" />
+						                <h:outputText value="#{msgs['baf.specialty.service']}" rendered="#{item.businessproperty == '2'}" />
+						            </rich:column>
+						            <rich:column style="width:10%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.business.isBusinessProc']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.isbusinessprocess == 'Y' ? msgs['baf.radioYes'] : msgs['baf.radioNo']}" />
+						            </rich:column>
+						            <rich:column style="width:15%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.business.IsOrgViewFlag']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.isorgviewflag == 'Y' ? msgs['baf.radioYes'] : msgs['baf.radioNo']}" />
+						            </rich:column>
+						            <rich:column style="width:14%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.dataprocess.deleteTime']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <center>
+							                <h:outputLabel value="#{item.modifyTime}">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+										</center>
+						            </rich:column>
+						            <rich:column style="width:23%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.orgview.higherLlevel']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.parentbusinessname}" title="#{item.fullBusinessName}" style="cursor:pointer;"/>
+						                <h:outputText value="#{msgs['baf.leftBracket1']}#{msgs['baf.dataprocess.invalid']}#{msgs['baf.rightBracket1']}" style="color:red;" rendered="#{item.parentisvalid == 'N'}"/>
+						            </rich:column>
+						        </rich:dataTable>
+						        <table width="95%">
+						            <tr>
+							            <td>
+											<rich:datascroller align="right"  for="businessList" fastStep="1"  page="#{dataProcessBean.businessScrollerPage}" id="businessScroller" oncomplete="saveSelledObj('business');" reRender="scrollerPage"/>							
+										</td>
+									</tr>
+								</table>
+							</h:panelGroup>
+					    </a4j:form>	
+				    </center>	 	
+				</rich:tab>
+				
+				<!-- 局向 -->
+				<rich:tab id="bureau" label="#{msgs['baf.dataImport.optionalBurean']}" style="height:100%;width:100%;" onlabelclick="setTabRendered('bureau');">
+					<br/>
+					<center>
+			        	<a4j:form id="bureauForm">
+							<h:panelGroup rendered="#{dataProcessBean.bureauRendered}">		
+				        		<!-- 查询Panel -->
+								<rich:panel style="width:95%;">				
+									<h:panelGrid id="bureaupg" columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">	
+								        <h:panelGroup>
+											<h:outputText value="#{msgs['baf.bureau.bureauName']}："/>
+					  						<h:inputText id="bureauName" value="#{dataProcessBean.bureauName}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+					  					</h:panelGroup>
+					  					
+					  					<rich:spacer width="5px"/>  
+					  					
+					  					<h:panelGroup>
+											<h:outputText value="#{msgs['baf.bureau.bureauCode']}："/>
+					  						<h:inputText id="bureauCode" value="#{dataProcessBean.bureauCode}" style="width:120px;height:23px;" styleClass="rich-gradient-input"/>
+					  					</h:panelGroup>
+					  					
+					  					<rich:spacer width="5px"/>
+								        
+								        <h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+											<rich:calendar id="bureauBeginTime"  value="#{dataProcessBean.bureauStartTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+											</rich:calendar>
+										</h:panelGroup>
+										
+										<rich:spacer width="5px"/>  
+										
+										<h:panelGroup>
+											<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+											<rich:calendar id="bureauEndTime"  value="#{dataProcessBean.bureauEndTime}" 
+												datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+												inputStyle="width:120px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+											</rich:calendar>
+											
+											<rich:spacer width="5px"/> 
+											
+											<!-- 查询按钮 -->
+											<a4j:commandButton styleClass="rich-button" type="submit" id="searchBureau" value="#{msgs['baf.calendar.select']}">
+												<a4j:support event="onclick" onsubmit="if (checkQueryInputValues('bureau') == false) return false;ondisabled('bureau');" disabled="false" action="#{dataProcessBean.searchDataByConditions}" oncomplete="onSearchComplete('bureau');" reRender="bureauList,bureauScroller,searchBureau" requestDelay="100"/>
+											</a4j:commandButton>
+											<rich:spacer width="5px"/>
+											<!-- 重置按钮 -->
+											<a4j:commandButton styleClass="rich-button" id="resetBureau" value="#{msgs['buttonResetLable']}">
+												<a4j:support event="onclick" onsubmit="resetConditions('bureau'); return false;"/>
+											</a4j:commandButton>
+										</h:panelGroup>	
+									</h:panelGrid>	
+								</rich:panel>
+						    	 
+								<br/>
+								<!-- 恢复到原始局向 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeOldBureau" value="#{msgs['baf.dataprocess.resumeOld']}#{msgs['baf.dataImport.optionalBurean']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('bureau','resumeold');if (beforeResumeOldParent('bureau')==false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeOldParentComplete('bureau');"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 恢复到指定局向 -->
+								<a4j:commandButton styleClass="rich-button" type="submit" id="resumeNewBureau" value="#{msgs['baf.dataprocess.resumeNew']}#{msgs['baf.dataImport.optionalBurean']}" style="width: 115px">
+									<a4j:support event="onclick" onsubmit="showModalPanel('bureau'); return false;"/>
+								</a4j:commandButton>
+								<rich:spacer width="10px"/>
+								
+								<!-- 彻底删除 -->
+								<a4j:commandButton styleClass="rich-button" id="deleteBureau" value="#{msgs['baf.dataprocess.quitedelete']}" style="width: 75px">
+									<a4j:support event="onclick" onsubmit="getSelectedData('bureau','delete');if(deleteAll('bureau') == false) return false;" action="#{dataProcessBean.delete}" oncomplete="onDeleteComplete('bureau');"/>
+								</a4j:commandButton>
+								
+								<!-- 刷新局向列表 -->
+								<a4j:jsFunction name="refreshBureauList" action="#{dataProcessBean.loadBureau}" reRender="bureauList,bureauScroller"/>
+								
+								<h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+								<h:inputHidden id="scrollerPage" value="#{dataProcessBean.bureauScrollerPage}"/>
+								<h:inputHidden id="bureauParamIds" value="#{dataProcessBean.bureauParamIds}"/>
+								<br/><br/>
+								
+								<!-- 显示列表 -->
+								<rich:dataTable width="95%" id="bureauList" rows="#{dataProcessBean.pageSize}"
+						            value="#{dataProcessBean.thirdDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+						            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+						            <rich:column style="width:5px;">
+							            <f:facet name="header">
+											<input type="checkbox" onclick="selObjAll(this.checked,'bureau');"/>
+										</f:facet>
+										<input type="checkbox" name="bureau" value="#{item.bureauid};#{item.bureauname};#{item.parentbureauid};#{item.parentIsvalid};#{item.modifyTime}" onclick="selObj(this,'bureau');"/>
+						            </rich:column>
+						            <rich:column style="width:20%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText " value="#{msgs['baf.bureau.bureauName']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.bureauname}" />
+						            </rich:column>
+						            <rich:column style="width:10%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.bureauCode']}" style="font-weight:normal;"/>
+								        </f:facet>
+								        <h:outputText value="#{item.bureaucode}" />
+						            </rich:column>
+						            <rich:column style="width:10%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.bureauType']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.bureautypeName}" />
+						            </rich:column>
+						            <rich:column style="width:10%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.citycode']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.citycode}" />
+						            </rich:column>
+						            <rich:column style="width:10%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.longitude']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.longitude}" />
+						            </rich:column>
+						            <rich:column style="width:7%;text-align:center;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.latitude']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.latitude}" />
+						            </rich:column>
+						            <rich:column style="width:13%;">
+						            	<f:facet name="header">
+						                	<h:outputText styleClass="headerText" value="#{msgs['baf.dataprocess.deleteTime']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <center>
+							                <h:outputLabel value="#{item.modifyTime}">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+										</center>
+						            </rich:column>
+						            <rich:column style="width:20%;">
+						            	<f:facet name="header">
+								        	<h:outputText styleClass="headerText" value="#{msgs['baf.bureau.parentbureauName']}" style="font-weight:normal;"/>
+								        </f:facet>
+						                <h:outputText value="#{item.parentBureauName}" title="#{item.fullBureauName}" style="cursor:pointer;"/>
+						                <h:outputText value="#{msgs['baf.leftBracket1']}#{msgs['baf.dataprocess.invalid']}#{msgs['baf.rightBracket1']}" style="color:red;" rendered="#{item.parentIsvalid == 'N'}"/>
+						            </rich:column>
+						        </rich:dataTable>
+						        <table width="95%">
+						            <tr>
+							            <td>
+											<rich:datascroller align="right" for="bureauList" fastStep="1"  page="#{dataProcessBean.bureauScrollerPage}" id="bureauScroller" oncomplete="saveSelledObj('bureau');" reRender="scrollerPage"/>							
+										</td>
+									</tr>
+								</table>
+							</h:panelGroup>
+					    </a4j:form>	
+				    </center>	 	
+				</rich:tab>
+			</rich:tabPanel>
+			
+			<!-- 选择部门模态框 -->
+			<rich:modalPanel id="orgPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.dataprocess.selectorg']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+		   			<h:graphicImage value="/baf/images/icons/close.png" id="orghl" styleClass="hidelink"/>
+		    		<rich:componentControl for="orgPanel" attachTo="orghl" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<center>
+					<fieldset style="height:350px;width:100%;text-align:left;">
+		           		<legend><h:outputText value="#{msgs['baf.dataprocess.selectorg']}" /></legend>				           		
+		           		<rich:spacer height="1px;"/>	
+		           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+							<tr>
+								<td id="treeboxbox_orgtree" width="100%" height="100%"></td>
+							</tr>
+						</table>
+					</fieldset>
+					<br />
+					<h:form id="orgPanelForm">
+						<a4j:commandButton styleClass="rich-button" type="button" id="confirmOrg" value="#{msgs['baf.Confirm']}">
+							<a4j:support event="onclick" onsubmit="getSelectedData('org','resumenew');if(beforeResumeNewParent('org') == false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeNewParentComplete('org');"/>
+						</a4j:commandButton>
+						
+						<rich:spacer width="5px"/>
+					    <a4j:commandButton styleClass="rich-button" type="button" id="closeOrg" value="#{msgs['baf.Close']}" onclick="#{rich:component('orgPanel')}.hide();return false;"/>
+					    
+					    <h:inputHidden id="orgParamIds" value="#{dataProcessBean.orgParamIds}"/>
+					    <h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+				    </h:form>
+				</center>
+			</rich:modalPanel>
+			
+			<!-- 选择用户部门模态框 -->
+			<rich:modalPanel id="userOrgPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.dataprocess.selectorg']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+		   			<h:graphicImage value="/baf/images/icons/close.png" id="userorghl" styleClass="hidelink"/>
+		    		<rich:componentControl for="userOrgPanel" attachTo="userorghl" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<center>
+					<fieldset style="height:350px;width:100%;text-align:left;">
+		           		<legend><h:outputText value="#{msgs['baf.dataprocess.selectorg']}" /></legend>				           		
+		           		<rich:spacer height="1px;"/>	
+		           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+							<tr>
+								<td id="treeboxbox_userorgtree" width="100%" height="100%"></td>
+							</tr>
+						</table>
+					</fieldset>
+					<br />
+					<h:form id="userOrgPanelForm">
+						<a4j:commandButton styleClass="rich-button" type="button" id="confirmUser" value="#{msgs['baf.Confirm']}">
+							<a4j:support event="onclick" onsubmit="getSelectedData('user','resumenew');if(beforeResumeNewParent('user') == false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeNewParentComplete('user');"/>
+						</a4j:commandButton>
+						
+						<rich:spacer width="5px"/>
+					    <a4j:commandButton styleClass="rich-button" type="button" id="closeUser" value="#{msgs['baf.Close']}" onclick="#{rich:component('userOrgPanel')}.hide();return false;"/>
+					    
+					    <h:inputHidden id="userParamIds" value="#{dataProcessBean.userParamIds}"/>
+					    <h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+				    </h:form>
+				</center>
+			</rich:modalPanel>
+			
+			<!-- 选择业务模态框 -->
+			<rich:modalPanel id="businessPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.dataImport.selectSpeciality']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+		   			<h:graphicImage value="/baf/images/icons/close.png" id="businesshl" styleClass="hidelink"/>
+		    		<rich:componentControl for="businessPanel" attachTo="businesshl" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<center>
+					<fieldset style="height:350px;width:100%;text-align:left;">
+		           		<legend><h:outputText value="#{msgs['baf.dataImport.selectSpeciality']}" /></legend>				           		
+		           		<rich:spacer height="1px;"/>	
+		           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+							<tr>
+								<td id="treeboxbox_businesstree" width="100%" height="100%"></td>
+							</tr>
+						</table>
+					</fieldset>
+					<br />
+					<h:form id="businessPanelForm">
+						<a4j:commandButton styleClass="rich-button" type="button" id="confirmBusiness" value="#{msgs['baf.Confirm']}">
+							<a4j:support event="onclick" onsubmit="getSelectedData('business','resumenew');if(beforeResumeNewParent('business') == false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeNewParentComplete('business');"/>
+						</a4j:commandButton>
+						
+						<rich:spacer width="5px"/>
+					    <a4j:commandButton styleClass="rich-button" type="button" id="closeBusiness" value="#{msgs['baf.Close']}" onclick="#{rich:component('businessPanel')}.hide();return false;"/>
+					    
+					    <h:inputHidden id="businessParamIds" value="#{dataProcessBean.businessParamIds}"/>
+					    <h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+				    </h:form>
+				</center>
+			</rich:modalPanel>
+			
+			<!-- 选择局向模态框 -->
+			<rich:modalPanel id="bureauPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.dataImport.selectBuearu']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+		   			<h:graphicImage value="/baf/images/icons/close.png" id="bureauhl" styleClass="hidelink"/>
+		    		<rich:componentControl for="bureauPanel" attachTo="bureauhl" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<center>
+					<fieldset style="height:350px;width:100%;text-align:left;">
+		           		<legend><h:outputText value="#{msgs['baf.dataImport.selectBuearu']}" /></legend>				           		
+		           		<rich:spacer height="1px;"/>	
+		           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+							<tr>
+								<td id="treeboxbox_bureautree" width="100%" height="100%"></td>
+							</tr>
+						</table>
+					</fieldset>
+					<br />
+					<h:form id="bureauPanelForm">
+						<a4j:commandButton styleClass="rich-button" type="button" id="confirmBureau" value="#{msgs['baf.Confirm']}">
+							<a4j:support event="onclick" onsubmit="getSelectedData('bureau','resumenew');if(beforeResumeNewParent('bureau') == false) return false;" action="#{dataProcessBean.resumeToParent}" oncomplete="onResumeNewParentComplete('bureau');"/>
+						</a4j:commandButton>
+						
+						<rich:spacer width="5px"/>
+					    <a4j:commandButton styleClass="rich-button" type="button" id="closeBureau" value="#{msgs['baf.Close']}" onclick="#{rich:component('bureauPanel')}.hide();return false;"/>
+					    
+					    <h:inputHidden id="bureauParamIds" value="#{dataProcessBean.bureauParamIds}"/>
+					    <h:inputHidden id="searchType" value="#{dataProcessBean.searchType}"/>
+				    </h:form>
+				</center>
+			</rich:modalPanel>
+			
+			<!-- 正在操作模态框 -->	
+			<rich:modalPanel id="panel" width="350" height="100">
+		    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+		    </rich:modalPanel>
+		    
+		    <a4j:keepAlive beanName="dataProcessBean"/>
+		    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	    </div>
+	</body>
+	</f:view>
+</html>

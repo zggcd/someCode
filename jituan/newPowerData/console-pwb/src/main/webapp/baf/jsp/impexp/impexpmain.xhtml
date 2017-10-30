@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+			<script>
+			//<![CDATA[
+				var preMenuItemObj = null;
+				var currentColor = null;
+				
+				function openForm(url, id) {
+		          	orgworkarea.document.location.href = "${request.contextPath}" + url;		
+					var e = $('row_'+id);
+					if (preMenuItemObj != null) {
+						if (e != preMenuItemObj) {
+							preMenuItemObj.style.backgroundColor="";
+							preMenuItemObj = e;
+							e.style.backgroundColor=currentColor;
+						}
+					} else {
+						e.style.backgroundColor=currentColor;
+						preMenuItemObj = e;
+					} 		       
+				}
+				function init() {
+					var url = "/baf/jsp/impexp/importdata.xhtml";
+					orgworkarea.document.location.href = "${request.contextPath}" + url;	
+					var e = $('row_importdata');
+					var backgroundColor = $('tablehidemenuGroup').currentStyle.backgroundColor; 
+					currentColor = changeColor(backgroundColor);
+					e.style.backgroundColor= currentColor;
+					preMenuItemObj = e;						
+				}
+
+				function changeColor(color) {
+					var r = subColor(color.substr(1, 2));
+					var g = subColor(color.substr(3, 2));
+					var b = subColor(color.substr(5, 2));
+		
+					var value_r = r.toString(16);
+					var value_g = g.toString(16);
+					var value_b = b.toString(16);
+					return "#" + ((r<16) ? ("0"+value_r) : value_r) + ((g<16) ? ("0"+value_g) : value_g) + ((b<16) ? ("0"+value_b) : value_b); 
+				}
+
+				function subColor(subColor) {
+					var r = parseInt(subColor, 16);
+					r = r + 50;
+					if (r > 255 ) r = 255;
+					return r;
+				}				
+				//]]>
+			</script>
+		</head>
+		<body onload="init();">
+			<f:loadBundle basename="messages" var="msgs" />
+			<regaltec:viewPort ctCls="panel-bdColor">
+				<regaltec:viewPortPanel region="center" id="center-panel"
+										contentEl="center" />			
+				<regaltec:viewPortPanel region="east" id="eastpanel"
+										autoScroll="false" contentEl="east-panel" split="true" width="200"
+										minSize="200" maxSize="400" collapsible="true" margins="0 0 0 0"
+										layout="accordion" />
+			</regaltec:viewPort>
+			<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+				<iframe  name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+			</div>
+			<form  id="changeForm" target="orgworkarea" method="post"></form>			
+			<div id="east-panel">
+					<rich:panelMenu style="width:200px"  mode="none"
+       								iconExpandedGroup="disc" iconCollapsedGroup="disc" 
+        							iconExpandedTopGroup="chevronUp" iconGroupTopPosition="right" 
+        							iconCollapsedTopGroup="chevronDown" >
+           				<rich:panelMenuGroup id="menuGroup" label="#{msgs['baf.impexp.importexport']}" expanded="true">          
+            				<rich:panelMenuItem id="importdata" label="#{msgs['baf.impexp.dataimport']}" style="height:30;" onclick="openForm('/baf/jsp/impexp/importdata.xhtml', 'importdata');">
+               					<f:param name="import" value="#{msgs['baf.impexp.dataimport']}"/>
+            				</rich:panelMenuItem>
+	            			<rich:panelMenuItem id="exportdata" label="#{msgs['baf.impexp.dataexport']}" style="height:30;" onclick="openForm('/baf/jsp/impexp/exportdata.xhtml', 'exportdata');">
+	                			<f:param name="export" value="#{msgs['baf.impexp.dataexport']}"/>
+	            			</rich:panelMenuItem>
+	            			<rich:panelMenuItem id="userImportData" label="#{msgs['baf.impexp.userDataImport']}" style="height:30;" onclick="openForm('/baf/jsp/impexp/userImportData.xhtml', 'userImportData');">
+	                			<f:param name="export" value="#{msgs['baf.impexp.dataexport']}"/>
+	            			</rich:panelMenuItem>
+        				</rich:panelMenuGroup>
+    				</rich:panelMenu>
+			</div>
+		</body>
+		<script>
+	//<![CDATA[
+	  	   /*session超时显示错误信息*/
+		   A4J.AJAX.onExpired = function(loc,expiredMsg)
+		   {
+		      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+		   }
+		   /*显示数据提交到后台的错误信息*/
+		   A4J.AJAX.onError = function(req,status,message)
+		   {
+			   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+			   alert(report);
+		   }
+		 //]]>
+	  	</script>
+</f:view>
+</html>

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">     
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<title><h:outputText value="#{loginFrameBean.frameTitle}" transient="true" /></title>
+			<c:if test="#{skinBean.skin == 'DEFAULT' || skinBean.skin == 'classic'}">
+	        <link rel="stylesheet" type="text/css" href="${request.contextPath}/pwb/common/easyui/themes/gray/easyui.css" />
+	        </c:if>
+	        <c:if test="#{skinBean.skin == 'blueSky'}">
+	        <link rel="stylesheet" type="text/css" href="${request.contextPath}/pwb/common/easyui/themes/default/easyui.css" />
+	        </c:if>
+	        <link rel="stylesheet" type="text/css" href="${request.contextPath}/pwb/common/easyui/themes/icon.css" />
+	        <script type="text/javascript" src="${request.contextPath}/pwb/common/easyui/jquery.min.js"></script>
+	        <script type="text/javascript" src="${request.contextPath}/pwb/common/easyui/jquery.easyui.min.js"></script>
+	        <style>
+				.img_gray{
+				    width:32px;
+				    border:0;
+				    margin-top: 5px;
+				    -webkit-filter: grayscale(100%); 
+			        -moz-filter: grayscale(100%); 
+                    -ms-filter: grayscale(100%); 
+                    -o-filter: grayscale(100%); 
+                    filter: grayscale(100%); 
+                    filter: gray; 
+				}
+				.img_color{
+				     width:32px;
+				     border:0;
+				     margin-top: 5px;
+				     -webkit-filter: grayscale(0%); 
+			        -moz-filter: grayscale(0%); 
+                    -ms-filter: grayscale(0%); 
+                    -o-filter: grayscale(0%); 
+                    filter: grayscale(0%); 
+                    filter: none;
+                    -moz-box-shadow: 3px 3px 4px #000;
+                    -webkit-box-shadow: 3px 3px 4px #000;
+                    box-shadow: 3px 3px 4px #000;
+                    /* For IE 8 */
+                    -ms-filter: "progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000')";
+                    /* For IE 5.5 - 7 */
+                    filter: progid:DXImageTransform.Microsoft.Shadow(Strength=4, Direction=135, Color='#000000');
+					border-radius: 20px; 
+				} 
+				#titlebar a{
+					margin-top: 2px;
+				}
+	        </style>
+		</head>
+
+<body id="cc" class="easyui-layout" fit="true" style="padding:0px;" oncontextmenu="return false" onselectstart="return false">
+
+	      <div data-options="region:'north',border:false" class="panelbg" style="height:50px;    overflow: hidden;">	 
+		  <table style="width:100%;font-size: small;font-style: normal;">
+		  <tr><td style="text-align:left;padding-left:10px; width:51px;"><img src="${request.contextPath}/pwb/common/easyui/themes/chinamobile.png" style="height:46px;"/></td>
+		  <td><b style="color: #0D3A76;
+    text-shadow: 0px 1px 0px #c0c0c0, 0px 2px 0px #9BC086, 0px 3px 0px #a0a0a0, 0px 4px 0px #909090, 0px 5px 10px rgba(0, 0, 0, 0.6);
+}"><h:outputText value="#{loginFrameBean.frameTitle}"
+					transient="true" /></b></td>
+		  <td style="text-align:right;padding-right:10px;">
+		  
+		  <h:form id="iform" name="iform">
+		  <a4j:jsFunction name="logoutUser" action="#{userLoginBean.logout}"
+					oncomplete="onLogoutComplete()" />
+		  <a href="#" class="easyui-linkbutton"  onclick="logoutUser()" data-options="plain:true,iconCls:'icon-back'"><h:outputText value="#{msgs['logoutLabel']}用户：#{userLoginBean.currentUser.userName}"
+																escape="false" 
+																transient="true" /></a>							
+		 </h:form>
+		 <a4j:keepAlive beanName="shortCutBean" />
+		 <a4j:keepAlive beanName="loginFrameBean" />
+		 <a4j:keepAlive beanName="scrollMessageBean" /> 
+		 </td></tr></table>
+		</div>
+		<div data-options="region:'south'" style="height:30px">
+		 <center>©2016 <h:outputText value="  #{loginFrameBean.company}" /></center>
+		</div>
+		<div data-options="region:'west',split:true,collapsed:true,
+				hideExpandTool: true,
+				expandMode: null,
+				hideCollapsedContent: false,
+				collapsedSize: 50,
+				plain:true,
+				collapsedContent: function(){
+					return $('#titlebar');
+				}
+				" title="系统菜单" style="background-color: #ccc;width:200px;">
+				
+				<div id="treeboxbox_tree"></div>
+				<regaltec:dhtmlXtree id="treebox" imagePath="/baf/images/dhtmlxtree/"
+				contentEl="treeboxbox_tree"
+				loadXML="/baf/jsp/module/moduleNavigationXMLData.jsp"
+				xmlAutoLoading="/baf/jsp/module/moduleNavigationXMLData.jsp"
+				transient="true"   >
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+			</regaltec:dhtmlXtree>
+		</div>
+		<div region="center" border="false">
+			<div  id="mainTabs" class="easyui-tabs" data-options="fit:true,plain:false,border:false,onBeforeClose:mtabsBeforeColse" >
+					<div title="导航主页" style="padding:10px;">
+					<table class="easyui-datagrid"
+						data-options="url:'datagrid_data1.json',method:'get',border:false,singleSelect:true,fit:true,fitColumns:true">
+					    <thead>
+							<tr align="midde">
+								<th data-options="field:'itemid'" width="80">Item ID</th>
+								<th data-options="field:'productid'" width="100">Product ID</th>
+								<th data-options="field:'listprice',align:'right'" width="80">List Price</th>
+								<th data-options="field:'unitcost',align:'right'" width="80">Unit Cost</th>
+								<th data-options="field:'attr1'" width="150">Attribute</th>
+								<th data-options="field:'status',align:'center'" width="60">Status</th>
+							</tr>
+					   </thead>
+				   </table>
+				</div>
+			</div>
+	   </div>
+	
+	<div id="titlebar" style="padding:2px;text-align: center;">
+		<a href="javascript:void(0)" title="展开系统导入菜单" style="width:100%" data-options="iconCls:'layout-button-right'" onclick="$('#cc').layout('expand','west')">
+		<img  style="width:32px;border:0px;" src='${request.contextPath}/pwb/images/navicons/raster.png'/>
+		</a>
+        <a4j:repeat var="item" value="#{shortCutBean.shortCutList}" first="0" rows="#{shortCutBean.num}">
+       
+	            <a4j:region rendered ="#{item.linkTarget=='B'}">
+	            <a  href="#{item.moduleUrl}"  
+				   title="#{item.moduleName}" target="_blank">
+				<img  class="img_gray" onMouseOver="this.className = 'img_color';" onMouseOut="this.className ='img_gray';" src='${request.contextPath}/pwb/images/navicons/#{item.largeIcon}'/>
+				</a>
+				</a4j:region>
+                <a4j:region  rendered ="#{item.linkTarget=='M' || item.linkTarget=='W' }">
+				<a href="#"
+				 onclick="javascript:addTab('#{item.moduleId }','#{item.moduleName}','#{item.moduleUrl}')" 
+				   title="#{item.moduleName}">
+				<img  class="img_gray" onMouseOver="this.className = 'img_color';" onMouseOut="this.className ='img_gray';" src='${request.contextPath}/pwb/images/navicons/#{item.largeIcon}'/>
+				</a>
+				</a4j:region>								
+		</a4j:repeat>
+	</div>
+	
+</body>
+<script>
+//<![CDATA[
+var context_Path = "${request.contextPath}";
+function tabsSelect(title,index)
+{
+	var curTabs = $('#banner').tabs('getSelected');
+	if( curTabs )
+	{
+		 var curTab = curTabs[0];
+		//alert( "id:" +curTab.id + "  text:  "  + curTab.getAttribute("modualInfo"));
+		addTab(curTab.id, curTab.getAttribute("moduleName"),curTab.getAttribute("moduleURL") );
+	}
+}
+//在主工作区添加TAB页
+function addTab(id,title, url) { 
+	if (!$('#mainTabs').tabs('exists', title)) { 
+		$('#mainTabs').tabs('add', {
+			id:id, 
+			title: title, 
+			fit:true,
+			content: createFrame(url),
+			closable: true,
+			closed:true
+			}); 
+	} else { 
+		$('#mainTabs').tabs('select', title);
+		return; 
+	} 
+} 
+//创建IFRAME嵌套页面
+function createFrame(url) {
+	var s = '<iframe width="100%" height="100%" scrolling=auto frameborder=0 src=' + url + ' style="overflow-x:auto;overflow-y:auto;width:100%;height:100%;"></iframe>'; 
+	return s; 
+}
+
+//左边导航树形菜单单击事件处理
+function doOnClick()
+{
+	var itemId = this.getSelectedItemId();
+	if(itemId == "books"  ) return;
+	var url = this.getUserData(itemId,'url');
+    var title = this.getSelectedItemText();
+    var isLeaf = this.getUserData(itemId,'isLeaf');
+    var linktarget = this.getUserData(itemId,'linktarget');
+    
+    if( url == null || url=="/"|| url == "" || url.length == 0) return;       
+    if(isLeaf=="Y"){
+    	var appId = this.getUserData(itemId,'applicationId');
+    	//当模块链接到外部系统时，需要传递operID和hashCode两个参数
+    	if(appId!=null && appId!="" && appId!=undefined && appId!='${loginFrameBean.appCode}'){
+    		url = url + (url.indexOf("?")==-1?"?":"&")+"operID=${sessionScope.userLoginBean.currentUser.loginName}&hashCode=${loginFrameBean.ssoKey}";
+    	}
+    	if(linktarget=="B"){
+    		if(url.indexOf("/")==0){
+    			url = "${request.contextPath}" + url;
+    		}
+    		window.open(url);	
+        	//将打开的模块放入cookie中
+        	operateCookie(itemId,title,url);
+    	}else if(linktarget=="M" || linktarget=="W"){
+    	    var moduledesc = this.getUserData(itemId,'desc');
+    	    
+	       if(url !=null && url.toLowerCase().indexOf("http://") != 0)
+		{
+		     url = context_Path + url;
+		}
+    		addTab(itemId,title,url);
+    	}
+	}
+	//window.open("<%=request.getContextPath()%>"+url,"workarea");
+}
+
+
+//注销用户，销毁session之后跳转到登陆页面
+	function onLogoutComplete(){
+	
+	   if("Y"=="#{loginFrameBean.isSHLogin}"){
+	       window.close();
+	   }else{
+	    if(""=="#{loginFrameBean.customUrl}"||"Y"=="#{loginFrameBean.customUrl}"){
+	            window.location.href ="${request.contextPath}/baf/jsp/uiframe/login.xhtml";
+	         
+	        }else{
+	            window.location.href ="${request.contextPath}#{loginFrameBean.customUrl}";
+	        } 
+	       
+	   }
+	
+	}
+//tab关闭前触发事件
+function mtabsBeforeColse(title,index)
+{
+   
+	 
+}
+//页面初始化完成之后执行操作
+$(document).ready(function(){ 
+	//执行第一个图标click事件
+　$('#titlebar').find("a")[1].click();
+});
+//]]>
+</script>
+
+</f:view>
+</html>

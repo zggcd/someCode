@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<style>
+    .scrolls{
+        width:400px;
+        height:300px;
+        overflow:auto;
+    }
+   td.column1{
+   width:20%;
+   }	
+   td.column2{
+   width:70%;
+   text-align:left;
+   }	
+</style> 
+</head>
+<body>
+	<!-- 人员信息模态框  -->
+	<rich:modalPanel id="bureau_panel" style="margin-left:5px;margin-right:5px;margin-top:5px;" switchType="client" width="500" height="350">
+		<f:facet name="header">
+			<h:outputText value="#{msgs['baf.bureau.bureauBaseInfo']}"/>
+		</f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+		    <rich:componentControl for="bureau_panel" attachTo="hidelink" operation="hide" event="onclick" />
+		</h:panelGroup>
+		</f:facet>	
+		<fieldset id="burinfo" style="height:85%;width:100%" >			
+           <legend><h:outputText value="#{msgs['baf.bureau.bureauBaseInfo']}" /></legend>
+            <h:panelGrid id="org" columns="2" columnClasses="column1,column2" rendered="#{burBean.rendereds}" style="font-size:13px;width:100%;text-align:center;table-layout:fixed " styleClass=".rich-text-color-general">
+				
+				 <h:outputText value="#{msgs['baf.bureau.parentbureauName']}:"/>
+				 <h:inputText id="parentbureauname" style="width:90%;height:23px;" styleClass="rich-gradient-input" value="#{burBean.parentBurname}" disabled="true">
+				 </h:inputText>
+				 
+				<h:outputText value="#{msgs['baf.bureau.bureauCode']}:" />
+				<h:inputText id="bureaucode" style="width:90%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.bureaucode}" disabled="true">
+				</h:inputText>	
+				
+				<h:outputText value="#{msgs['baf.bureau.bureauName']}:" />
+				<h:inputText id="bureauname" style="width:90%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.bureauname}" disabled="true">
+				</h:inputText>
+				
+				<h:outputText value="#{msgs['baf.bureau.bureauType']}:" />
+					<h:selectOneMenu id="bureautype"   value="#{burBean.bureautype}"  style="width:90%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select" disabled="true">
+						<f:selectItems value="#{burBean.selectBureautype}"/>
+					</h:selectOneMenu>
+				
+				<h:outputText value="#{msgs['baf.bureau.citycode']}:" />
+				<h:inputText id="citycode" style="width:90%;height:23px;" styleClass="rich-gradient-input" value="#{burBean.citycode}" disabled="true">	
+				</h:inputText>
+
+				<h:outputText value="#{msgs['baf.bureau.latitude']}:" />
+				<h:inputText id="latitude" style="width:90%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.latitude}" disabled="true">
+				</h:inputText>
+			
+				<h:outputText value="#{msgs['baf.bureau.longitude']}:" />
+				<h:inputText id="longitude" style="width:90%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.longitude}" disabled="true">	
+				</h:inputText>
+				
+				<h:outputText value="#{msgs['baf.bureau.burDesc']}:" />
+				<h:inputTextarea id="bureaudesc" style="width:90%;height:23px;"  styleClass="rich-gradient-input" value="#{burBean.bureaudesc}" disabled="true">				
+				</h:inputTextarea>
+				
+			</h:panelGrid>
+           </fieldset>
+       	<center>
+			<h:commandButton type="button" id="modalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('bureau_panel')}.hide(); return false;"/>
+		</center>
+	</rich:modalPanel>	 
+	
+	<a4j:form>
+		<a4j:jsFunction name="bureauInfo" action="#{burBean.reflashBureau}" oncomplete="Richfaces.showModalPanel('bureau_panel');" reRender="bureau_panel">
+        	<a4j:actionparam name="bureauid" assignTo="#{burBean.bureauid}" />                
+        </a4j:jsFunction> 
+	</a4j:form>
+</body>
+</f:view>
+</html>

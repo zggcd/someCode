@@ -1,0 +1,540 @@
+[Warning] Fri Jul 02 04:27:58 GMT 2010 null 	 Build info: "IBM Corporation" "AUIML Toolkit" "5.2" "v5r2 driver 5060 (2005-01-31)"
+[Error] Fri Jul 02 04:27:58 GMT 2010 null 	 Log file: D:\java\jboss-4.2.3.GA\bin\.\IDSLogs\logs\IDS_07_02_2010.log
+[Error] Fri Jul 02 04:29:39 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:39 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 04:29:47 GMT 2010 Server is running in config mode so not all operations are available.
+[Error] Fri Jul 02 04:29:47 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:28 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:29 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:30 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:31 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:44:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:45:00 GMT 2010 Error in EditAttrBean.verifyChanges 3 iModrc is not 0
+[Error] Fri Jul 02 07:45:06 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:45:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:45:24 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:45:25 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:45:34 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:46:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:46:03 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:46:04 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:47:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:02 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:03 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:16 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:31 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:55:34 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:05 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:21 GMT 2010 Error in EditAttrBean.verifyChanges 3 iModrc is not 0
+[Error] Fri Jul 02 07:56:26 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:27 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:56:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:57:06 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:57:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:57:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:57:56 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:57:57 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:58:01 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:58:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 07:58:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:02:59 GMT 2010 No naming contexts returned
+[Warning] Fri Jul 02 08:05:49 GMT 2010 null 	 Build info: "IBM Corporation" "AUIML Toolkit" "5.2" "v5r2 driver 5060 (2005-01-31)"
+[Error] Fri Jul 02 08:05:49 GMT 2010 null 	 Log file: D:\java\jboss-4.2.3.GA\bin\.\IDSLogs\logs\IDS_07_02_2010.log
+[Error] Fri Jul 02 08:06:23 GMT 2010 Failed Login because IDSServerInfo object is null.
+[Error] Fri Jul 02 08:09:01 GMT 2010 Server is running in config mode. This task cannot be initialized.
+[Error] Fri Jul 02 08:14:16 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:14:16 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:14:18 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:14:22 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:16:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:16:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:16:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:16:13 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:16:14 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:17:10 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:17:52 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:17:52 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:17:52 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:03 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:03 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:18:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:20:05 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:21:06 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:21:33 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:26:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:26:46 GMT 2010 Server is running in config mode so not all operations are available.
+[Error] Fri Jul 02 08:26:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:26:47 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:26:48 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:48 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:53 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:53 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:32:53 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:33:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:38 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:38 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:41 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:41 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:36:57 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:14 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:22 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:23 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:28 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:34 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:51 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:51 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:37:55 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:38:09 GMT 2010 DrServletDskPageManager.sendPageOnCallingThread()
+ClientAbortException:  java.net.SocketException: Connection reset by peer: socket write error
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:319)
+	at org.apache.catalina.connector.OutputBuffer.flush(OutputBuffer.java:288)
+	at org.apache.catalina.connector.Response.flushBuffer(Response.java:542)
+	at org.apache.catalina.connector.ResponseFacade.flushBuffer(ResponseFacade.java:279)
+	at javax.servlet.ServletResponseWrapper.flushBuffer(ServletResponseWrapper.java:166)
+	at com.ibm.webnav.servlet.WnThreadedHttpServletResponseWrapper.flushBuffer(WnThreadedHttpServletResponseWrapper.java:247)
+	at com.ibm.mdr.DrServletDskPageManager.sendPageOnCallingThread(DrServletDskPageManager.java:502)
+	at com.ibm.mdr.DrServletTransaction.performCallback(DrServletTransaction.java:65)
+	at com.ibm.webnav.servlet.WnTransaction.pauseServletThread(WnTransaction.java:232)
+	at com.ibm.webnav.servlet.WnTransactionManager.processClientRequest(WnTransactionManager.java:256)
+	at com.ibm.webnav.servlet.WnServlet.processClientRequest(WnServlet.java:1066)
+	at com.ibm.webnav.servlet.WnServlet.doGet(WnServlet.java:1103)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:690)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+Caused by: java.net.SocketException: Connection reset by peer: socket write error
+	at java.net.SocketOutputStream.socketWrite0(Native Method)
+	at java.net.SocketOutputStream.socketWrite(SocketOutputStream.java:92)
+	at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
+	at org.apache.coyote.http11.InternalOutputBuffer.realWriteBytes(InternalOutputBuffer.java:737)
+	at org.apache.tomcat.util.buf.ByteChunk.flushBuffer(ByteChunk.java:434)
+	at org.apache.coyote.http11.InternalOutputBuffer.flush(InternalOutputBuffer.java:299)
+	at org.apache.coyote.http11.Http11Processor.action(Http11Processor.java:963)
+	at org.apache.coyote.Response.action(Response.java:183)
+	at org.apache.catalina.connector.OutputBuffer.doFlush(OutputBuffer.java:314)
+	... 31 more
+[Error] Fri Jul 02 08:38:10 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:31 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:39 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:39 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:39 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:50 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:51 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:47:55 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:48:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:48:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:48:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:48:11 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:50:06 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:50:06 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:50:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:50:09 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 08:59:08 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:02:51 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:03:04 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:03:20 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:03:20 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:03:20 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:04:07 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:04:22 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:04:37 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:04:38 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:06:55 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:07:11 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:07:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:07:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:07:17 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:07:32 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:08:42 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:08:43 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:12 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:22 GMT 2010 Server is running in config mode so not all operations are available.
+[Error] Fri Jul 02 09:09:22 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:37 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:38 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:44 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:59 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:09:59 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:10:00 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:10:03 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:12:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:12:45 GMT 2010 Server is running in config mode so not all operations are available.
+[Error] Fri Jul 02 09:12:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:12:45 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:12:46 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:13:23 GMT 2010 Server is running in config mode so not all operations are available.
+[Error] Fri Jul 02 09:13:23 GMT 2010 No naming contexts returned
+[Error] Fri Jul 02 09:14:54 GMT 2010 com.ibm.ldap.IDSCSAUserManagement.IDSCSAUser@94691f
+java.lang.ArrayIndexOutOfBoundsException: -1
+	at java.util.ArrayList.remove(ArrayList.java:392)
+	at javax.naming.ldap.LdapName.remove(LdapName.java:570)
+	at com.ibm.ldap.admin.dit.DITBean.refreshCacheAfterAdd(DITBean.java:1601)
+	at com.ibm.ldap.admin.dit.DITBean.onAdd(DITBean.java:1286)
+	at com.ibm.ldap.admin.dit.DITBean.actionPerformed(DITBean.java:836)
+	at com.ibm.ui.framework.UIRendererListener.actionPerformed(UIRendererListener.java:737)
+	at com.ibm.mdr.DrRenderer.fireActionPerformedEvent(DrRenderer.java:829)
+	at com.ibm.mdr.DrStateMgr.dequeueAndFireEvents(DrStateMgr.java:4051)
+	at com.ibm.mdr.DrStateMgr.eventFromUser(DrStateMgr.java:2263)
+	at com.ibm.mdr.DrRenderer.eventFromWeb(DrRenderer.java:2260)
+	at com.ibm.webnav.servlet.WnTransactionManager.processTransaction(WnTransactionManager.java:659)
+	at com.ibm.webnav.servlet.WnTransactionThread.run(WnTransactionThread.java:111)
+[Error] Fri Jul 02 09:15:07 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:15:16 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:15:22 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:15:38 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:16:02 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:16:10 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)
+[Error] Fri Jul 02 09:16:20 GMT 2010 javax.naming.AuthenticationException: [LDAP: error code 49 - Invalid Credentials]
+	at com.sun.jndi.ldap.LdapCtx.mapErrorCode(LdapCtx.java:2985)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2931)
+	at com.sun.jndi.ldap.LdapCtx.processReturnCode(LdapCtx.java:2732)
+	at com.sun.jndi.ldap.LdapCtx.connect(LdapCtx.java:2646)
+	at com.sun.jndi.ldap.LdapCtx.<init>(LdapCtx.java:283)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURL(LdapCtxFactory.java:175)
+	at com.sun.jndi.ldap.LdapCtxFactory.getUsingURLs(LdapCtxFactory.java:193)
+	at com.sun.jndi.ldap.LdapCtxFactory.getLdapCtxInstance(LdapCtxFactory.java:136)
+	at com.sun.jndi.ldap.LdapCtxFactory.getInitialContext(LdapCtxFactory.java:66)
+	at javax.naming.spi.NamingManager.getInitialContext(NamingManager.java:667)
+	at javax.naming.InitialContext.getDefaultInitCtx(InitialContext.java:247)
+	at javax.naming.InitialContext.init(InitialContext.java:223)
+	at javax.naming.ldap.InitialLdapContext.<init>(InitialLdapContext.java:134)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.initCtx(IDSLDAPConnect.java:547)
+	at com.ibm.ldap.IDSLDAPConnect.IDSLDAPConnect.getDirCtx(IDSLDAPConnect.java:349)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.authLDAPUser(IDSUserSecurity.java:342)
+	at com.ibm.ldap.IDSSecurity.IDSUserSecurity.validateUser(IDSUserSecurity.java:258)
+	at com.ibm.ldap.servlet.IDSHome.service(IDSHome.java:132)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:803)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:290)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.jboss.web.tomcat.filters.ReplyHeaderFilter.doFilter(ReplyHeaderFilter.java:96)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:235)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:206)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:230)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:175)
+	at org.jboss.web.tomcat.security.SecurityAssociationValve.invoke(SecurityAssociationValve.java:182)
+	at org.jboss.web.tomcat.security.JaccContextValve.invoke(JaccContextValve.java:84)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:127)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:102)
+	at org.jboss.web.tomcat.service.jca.CachedConnectionValve.invoke(CachedConnectionValve.java:157)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:109)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:262)
+	at org.apache.coyote.http11.Http11Processor.process(Http11Processor.java:844)
+	at org.apache.coyote.http11.Http11Protocol$Http11ConnectionHandler.process(Http11Protocol.java:583)
+	at org.apache.tomcat.util.net.JIoEndpoint$Worker.run(JIoEndpoint.java:446)
+	at java.lang.Thread.run(Thread.java:595)

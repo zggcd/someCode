@@ -1,0 +1,801 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script>	
+	    //<![CDATA[	
+	    //搜索
+	    function searchGroup(value) {
+	    	var url = '/baf/jsp/operRightGroup/operateGroupXMLData.jsp?nativenetGroupId=#{operRigGroupBean.nativenetGroupId}';
+	    	url += '&searchValue=' + encodeURIComponent(value);
+	    	groupTree_tree.deleteChildItems(0);
+	    	groupTree_tree.loadXML(url);
+	    	groupTree_tree.setXMLAutoLoading(url);
+	    }
+		    
+	       //单击树形节点触发事件
+	function doOnClick(){
+		var temp = document.getElementById("addEditGroupForm:temp").value;
+		var itemId = this.getSelectedItemId();		
+		var saveType = document.getElementById("addEditGroupForm:saveType").value;			
+		if(itemId=="null"){
+			addGroup();
+			document.getElementById("addEditGroupForm:saveType").value = "add";
+			return;
+		}
+		if(saveType=="add"){				
+			//当新增操作权限组的时候，保存之后刷新树，但不重新渲染表单
+			if((temp!="" && temp!=itemId) || window.event!=null){
+				g_Refresh(itemId);	
+			}
+			//当单次新增时，新增的节点位于第一个节点的位置时也要渲染表单,
+			var itemIndex = this.getIndexById(itemId);
+			var batchSave = document.getElementById("addEditGroupForm:isBatchAddSave");
+			if(temp!="" && temp==itemId && itemIndex==0){
+				if(batchSave.checked==false){   //是批量新增时不重新渲染表单
+					g_Refresh(itemId);
+				}
+			}
+		}else{
+			if(saveType=="" || window.event!=null){
+				g_Refresh(itemId);		
+			}
+		}		
+		//保存临时所选节点，和下次点击时做比较，用来判断是否渲染表单 
+		document.getElementById("addEditGroupForm:temp").value = itemId;
+		//定位到第一个tab页
+		RichFaces.switchTab('addEditGroupForm:tabPanel','addEditGroupForm:group','group');
+	}
+	
+	//新增完成触发事件
+	function onGroupAddComplete(data){
+		if(data!=null && data!=""){
+			//操作权限组编号已经存在！
+			alert("${msgs['baf.operRightGroup.alertMessage1']}");
+			return;
+		}
+		var dealFlag = document.getElementById("addEditGroupForm:dealFlag").value;
+		var groupId = dealFlag.split("#")[1];
+		var saveType = document.getElementById("addEditGroupForm:saveType").value;
+		//groupTree_tree.refreshItem("0");
+		//不刷新树，直接在树上添加新的节点
+		var groupName = document.getElementById("addEditGroupForm:groupName").value;
+		groupTree_tree.insertNewChild("0",groupId,groupName,"","box.gif","box.gif","box.gif","","0");
+		groupTree_tree.setItemText(groupId,groupName,groupName);
+		
+		var selectItemId = groupTree_tree.getSelectedItemId();
+		//当用户没有任何权限组时，新增第一个权限组之后要把初始化的节点从树上删掉
+		if(selectItemId == "null"){
+			groupTree_tree.deleteItem(selectItemId,"false");
+		}			
+		
+		//是否批量新增
+		var isBatchAddNew = document.getElementById("addEditGroupForm:isBatchAddSave");
+		if(isBatchAddNew.checked==false){
+			document.getElementById("addEditGroupForm:addOrEdit").value = "E";
+			var timeout = setTimeout("groupTree_tree.selectItem('"+groupId+"',0);", 800);	
+			//刷新表单，单次新增时若新增完之后删除时用到
+			g_Refresh(groupId);				
+		}		
+		
+		//默认选中第一个tab页
+		RichFaces.switchTab('addEditGroupForm:tabPanel','addEditGroupForm:group','group');
+	}
+	
+	//修改完成触发事件
+	function onGroupEditComplete(data){
+		if(data!=null && data!=""){
+			//操作权限组编号已经存在！
+			alert("${msgs['baf.operRightGroup.alertMessage1']}");
+			return;
+		}
+		var dealFlag = document.getElementById("addEditGroupForm:dealFlag").value;
+		if(dealFlag=="N"){
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			//return;
+		}
+		var groupId = document.getElementById("addEditGroupForm:groupID").value;		
+		var saveType = document.getElementById("addEditGroupForm:saveType").value;
+		//groupTree_tree.refreshItem("0");
+		//不刷新树，直接将节点文本改掉
+		var groupName = document.getElementById("addEditGroupForm:groupName").value;
+		groupTree_tree.setItemText(groupId,groupName,groupName);
+		
+		//默认选中第一个tab页
+		RichFaces.switchTab('addEditGroupForm:tabPanel','addEditGroupForm:group','group');
+	}
+	
+	//删除完成触发事件
+	function onRigGroupDeleteComplete(data) {
+		if(a4jcomplete()==false){
+ 			return;
+ 		}
+		var strs = data.split("#");
+		if (strs[0] == "N") {
+			//处理失败!
+			alert("${msgs['baf.dataRightFactor.AlertMessage1']}" );
+			return;
+		}
+		//groupTree_tree.refreshItem("0");
+		//不刷新树，直接将节点从树上删除，然后定位到第一个节点
+		groupTree_tree.deleteItem(strs[1],false);
+		var firstItemId = groupTree_tree.getItemIdByIndex("0",0);
+		//当删除最后一个节点之后，需要刷新树
+		if(firstItemId == undefined){
+			groupTree_tree.refreshItem();
+		}else{
+			groupTree_tree.selectItem(firstItemId,0);
+			g_Refresh(firstItemId);
+		}
+	}	
+	
+	//选择指定的节点
+	function setselectitem(id){
+		groupTree_tree.selectItem(id,1);
+	}
+	
+	//将编号转换为大写
+	function toUpper(code){
+		code.value = code.value.toUpperCase();
+	}
+	
+	//单击复选框事件
+	function clickCheck(checkId,checkState){
+		var parentID = rightTree_tree.getParentId(checkId);
+		if(checkState==0 && parentID!=0){
+			rightTree_tree.setCheck(parentID,"unsure");
+		}			
+	}
+	
+	//传递树的选中节点和全部展开的节点
+	function setCheckValue(){
+		var checkList = rightTree_tree.getAllCheckedBranches();
+		var uncheckList = rightTree_tree.getAllUnchecked();
+		document.getElementById("addEditGroupForm:checkedList").value = checkList;
+		document.getElementById("addEditGroupForm:allList").value = checkList + "," + uncheckList;
+		//设置焦点
+		setFocus("addEditGroupForm:groupName");
+		
+		//组织授权
+		var selectOrgIds = ORGTree_tree.getAllChecked();
+		if(selectOrgIds!="" && selectOrgIds!=null){
+			var ids = selectOrgIds.split(",");
+			var typeids = "";
+			var categorys = "";
+			for(var i=0;i<ids.length;i++){
+				if(typeids==""){
+					typeids = ORGTree_tree.getUserData(ids[i],"objectTypeID");
+					categorys = ORGTree_tree.getUserData(ids[i],"objectCategory");
+				}else{
+				 	typeids = typeids + "," + ORGTree_tree.getUserData(ids[i],"objectTypeID");
+				 	categorys = categorys + "," + ORGTree_tree.getUserData(ids[i],"objectCategory");
+				}
+			}
+			document.getElementById("addEditGroupForm:selectOrgIds").value = selectOrgIds;
+	  		document.getElementById("addEditGroupForm:selectOrgTypeIds").value = typeids;
+	  		document.getElementById("addEditGroupForm:selectOrgCategorys").value = categorys;
+		}
+	}
+	
+	//右键菜单新增事件
+	function addGroup(){		
+		rigGroupAdd();
+	}
+	
+	//右键菜单删除事件
+	function deleteGroup(){
+		//确定要删除吗？删除后将无法恢复！
+		if(confirm("${msgs['baf.dataRightFactor.DelConfirm']}")){
+			var groupId = groupTree_tree.getSelectedItemId();
+			rigGroupDelete(groupId);
+		}
+	}
+	
+	//显示右键菜单
+	function openContextMenu()
+ 	{
+   		try{
+	   		var objmenu = Ext.menu.MenuMgr.get("rightMenu");
+	   		var itemText = groupTree_tree.getSelectedItemText();
+	   		var currentLoginName = document.getElementById("addEditGroupForm:currentLoginName").value;
+	   		var currentUserId = document.getElementById("addEditGroupForm:currentUserId").value;
+	   		//任何人都不能对系统管理员进行修改和删除操作
+	   		var creatorId = document.getElementById("addEditGroupForm:creatorId").value;
+	   		if(currentLoginName=="sa"){  //sa除了系统管理员之外其他的都可以操作
+	   			//if(itemText=="系统管理员"){
+	   				//Ext.getCmp("delete").disable();
+	   			//}else{
+	   				Ext.getCmp("delete").enable();
+	   			//}
+	   		}else{
+	   			//if(itemText=="系统管理员" || currentUserId!=creatorId){
+	   			if(currentUserId!=creatorId){
+		   			Ext.getCmp("delete").disable();
+		   		}else{
+		   			Ext.getCmp("delete").enable();
+		   		}
+	   		}   		
+	   		var newid = this.getSelectedItemId();
+	   		if( newid == "null" ){
+ 	   			Ext.getCmp("delete").disable(); 	   			
+ 	   		} 	
+	   		
+	   		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+				var e = new Array(window.event.clientX,window.event.clientY);
+				objmenu.showAt(e);
+			}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+				var e = new Array(arguments[1].clientX,arguments[1].clientY);
+				objmenu.showAt(e);
+	 		}
+   		}catch(e){
+     		alert(e.description);
+   		}
+ 	} 	
+ 	
+ 	//刷新权限组树
+ 	function refresh(){
+ 		groupTree_tree.refreshItem("0");			
+ 	}
+ 	
+ 	//设置连续新增复选框显示
+ 	function showChk(gname){ 		
+ 		var group = document.getElementById(gname+"Group");
+ 		group.style.visibility = "visible";
+ 		var chk = document.getElementById(gname+"Save");
+ 		chk.checked = false;
+ 	}
+ 	
+ 	//判断是新增保存还是修改保存
+ 	function addOrEditGroup(data){ 	
+ 		if(a4jcomplete()==false){
+			document.getElementById("addEditGroupForm:rigGroupSave").disabled = "";
+ 			return;
+ 		}	
+ 		var addOrEdit = document.getElementById("addEditGroupForm:addOrEdit").value;
+ 		if(addOrEdit=="A"){
+ 			onGroupAddComplete(data);
+ 		}else{
+ 			onGroupEditComplete(data);
+ 		}
+ 	}
+ 	
+ 	//保存完组织授权完成事件
+ 	function onSaveRightComplete(){ 	
+ 		if(a4jcomplete()==false){
+			document.getElementById("addEditGroupForm:rightSave").disabled = "";
+ 			return;
+ 		}
+		document.getElementById("addEditGroupForm:rightSave").disabled = "";
+ 	}
+ 	
+ 	//组织授权时，点击树上的复选框触发事件
+ 	function clickOrgTreeCheck(checkId,checkState){
+ 		//获取该ID是否已经在数据库里选中
+		var isSelect = ORGTree_tree.getUserData(checkId, 'isSelect');
+		if (isSelect == "Y" && checkState == 0) {
+			//取消
+			saveCancelOrgIds(checkId);
+		} else if (isSelect == "Y" && checkState == 1) {
+			//如果是选中状态，检查下是否在取消里，如果有则删除。
+			deleteCancelOrgIds(checkId);
+		}		
+ 	}
+ 	
+ 	//将复选框以前选中现在取消的组织ID保存
+ 	function saveCancelOrgIds(cancelID) {
+	  	var cancelOrgIds = document.getElementById("addEditGroupForm:cancelOrgIds").value;
+	  	var cancelOrgTypeIds = document.getElementById("addEditGroupForm:cancelOrgTypeIds").value;
+	  	var cancelOrgCategorys = document.getElementById("addEditGroupForm:cancelOrgCategorys").value;
+	  	var save = "";
+	  	//处理
+	  	if (cancelOrgIds == "" || cancelOrgIds == null) {
+		 	save = cancelID;
+		 	cancelOrgTypeIds = ORGTree_tree.getUserData(cancelID,"objectTypeID");
+		 	cancelOrgTypeIds = ORGTree_tree.getUserData(cancelID,"objectCategory");
+	  	} else {
+		  	save = cancelOrgIds + "," + cancelID;
+		 	cancelOrgTypeIds = cancelOrgTypeIds + "," + ORGTree_tree.getUserData(cancelID,"objectTypeID");
+		 	cancelOrgCategorys = cancelOrgCategorys + "," + ORGTree_tree.getUserData(cancelID,"objectCategory");
+	  	}	  
+	 	document.getElementById("addEditGroupForm:cancelOrgIds").value = save;
+	 	document.getElementById("addEditGroupForm:cancelOrgTypeIds").value = cancelOrgTypeIds;
+	 	document.getElementById("addEditGroupForm:cancelOrgCategorys").value = cancelOrgCategorys;
+  	}
+  	
+  	//从保存复选框以前选中现在取消的组织ID的字符串中去掉现在又选中的
+  	function deleteCancelOrgIds(id) {
+	  	var cancelOrgIds = document.getElementById("addEditGroupForm:cancelOrgIds").value;
+	  	var cancelOrgTypeIds = document.getElementById("addEditGroupForm:cancelOrgTypeIds").value;
+	  	var cancelOrgCategorys = document.getElementById("addEditGroupForm:cancelOrgCategorys").value;
+	  	if (cancelOrgIds != null && cancelOrgIds != "") {
+	  		var ids = cancelOrgIds.split(",");
+	  		var typeids = cancelOrgIds.split(",");
+	  		var categorys = cancelOrgTypeIds.split(",");
+	  		cancelOrgIds = "";
+	  		cancelOrgTypeIds = "";
+	  		cancelOrgCategorys = "";
+	  		for(var i=0;i<ids.length;i++){
+	  			if(ids[i]!=id){
+	  				if(cancelOrgIds==""){
+	  					cancelOrgIds = ids[i];
+	  					cancelOrgTypeIds = typeids[i];
+	  					cancelOrgCategorys = categorys[i];
+	  				}else{
+	  					cancelOrgIds = cancelOrgIds + "," + ids[i];
+	  					cancelOrgTypeIds = cancelOrgTypeIds + "," + typeids[i];
+	  					cancelOrgCategorys = cancelOrgCategorys + "," + categorys[i];
+	  				}
+	  			}
+	  		}
+	  		document.getElementById("addEditGroupForm:cancelOrgIds").value = cancelOrgIds;
+	  		document.getElementById("addEditGroupForm:cancelOrgTypeIds").value = cancelOrgTypeIds;
+	  		document.getElementById("addEditGroupForm:cancelOrgCategorys").value = cancelOrgCategorys;
+	  	}
+  	}  	
+  	
+ 	//点击保存按钮时，对表单进行验证
+ 	function validate(formId){
+ 		var isSuccess = validateForm(formId);
+ 		if(isSuccess == true){
+			//将保存按钮置灰，防止多次提交表单
+	   		document.getElementById("addEditGroupForm:rigGroupSave").disabled = "true";
+ 		}
+ 		return isSuccess;
+ 	}
+ 	
+ 	//设置是否重新渲染tab页
+		function setTabRendered(tabId){
+			if(tabId == "user" && document.getElementById("addEditGroupForm:userviewRendered").value == "false"){
+				setTabContentRendered("user","userviewpg");
+				Richfaces.showModalPanel("panel");
+				
+			}
+			if(tabId == "org" && document.getElementById("addEditGroupForm:orgviewRendered").value == "false"){
+				setTabContentRendered("org","orgviewpg");
+				Richfaces.showModalPanel("panel");
+			}
+		}
+	//重置查询条件
+		function resetConditions(type){
+			if(type == "org"){
+				document.getElementById("addEditGroupForm:unitName").value = "";
+			}else{
+				document.getElementById("addEditGroupForm:userName").value = "";
+				document.getElementById("addEditGroupForm:loginName").value = "";
+			}
+		}
+		//按回车调用查询按钮的单击事件
+	function forSelect(type){
+		if(event.keyCode==13){
+			if(type == "user"){	
+				document.getElementById('addEditGroupForm:searchUser').onclick();
+			}else{
+				document.getElementById('addEditGroupForm:searchOrg').onclick();
+			}
+		}
+	}	
+	//点击查询按纽人员列表未渲染前置灰
+	function ondisabled(type){
+		if(type == "user"){
+		  	document.getElementById("addEditGroupForm:searchUser").disabled = true;
+	  	}else{
+	  		document.getElementById("addEditGroupForm:searchOrg").disabled = true;
+	  	}
+	}
+	    //]]>
+		</script>
+		<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }	
+       .column1{
+       		width:60%;
+       }
+       .column2{
+       		width:40%;
+       }
+       .column11{
+       		width:25%;
+       		text-align:right;
+       }
+       .column12{
+       		width:75%;
+       		text-align:right;
+       }
+       .backcolor{
+       		background:white;
+       }
+    </style>  
+    
+    <!--[if !IE]><!-->
+    <style>
+	    legend{
+	    	margin:5 5 5 5;
+	    }
+    </style>
+    <!--<![endif]-->
+    
+	</head>
+	<body background="white">
+	  <f:loadBundle basename="messages" var="msgs" />
+	  <f:view  contentType="text/html">
+	  <regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="east" id="west-panel"
+				autoScroll="true" contentEl="west" split="true" width="200"
+				collapsible="true" margins="0 0 0 0" layout="accordion"/>
+			<regaltec:viewPortPanel region="center" id="center-panel"
+				contentEl="center" autoScroll="true"/>
+		</regaltec:viewPort>
+		
+		<regaltec:extContextMenu id="rightMenu">
+	    	<regaltec:extContextMenuItem id="add" text="#{msgs['baf.operRightGroup.addGroup']}" handler="addGroup"/>
+	    	<regaltec:extContextMenuItem id="delete" text="#{msgs['baf.operRightGroup.deleteGroup']}" handler="deleteGroup" />
+	    	<regaltec:extContextMenuItem id="refresh" text="#{msgs['baf.operRightGroup.refresh']}" handler="refresh" />
+	    </regaltec:extContextMenu>
+		
+		<div id="west">
+			<table width="100%" height="100%" CELLSPACING="0" CELLPADDING="0">
+				<tr>
+					<td height="16" align="right" class="rich-gradient-tab" >
+						<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" />
+					</td>
+				</tr>		
+				<!-- 搜索框 -->
+				<tr style="display:none;">
+					<td>
+						<h:inputText id="searchInputText" value="" style="width:70%;height:23px;">
+							<rich:hotKey key="return" handler="document.getElementById('searchGroup').onclick(); return false;" />
+						</h:inputText>
+						<h:commandButton id="searchGroup" value="查询" onclick="searchGroup(document.getElementById('searchInputText').value); return false;" style="width:25%;height:23px;"/>
+					</td>										
+				</tr>
+				
+				<tr>
+					<td id="group_tree" width="100%" height="100%"></td>
+				</tr>
+			</table>
+			<regaltec:dhtmlXtree id="groupTree"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="group_tree"
+				loadXML="/baf/jsp/operRightGroup/operateGroupXMLData.jsp?nativenetGroupId=#{operRigGroupBean.nativenetGroupId}"
+				xmlAutoLoading="/baf/jsp/operRightGroup/operateGroupXMLData.jsp?nativenetGroupId=#{operRigGroupBean.nativenetGroupId}">
+				<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />				
+				<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+			</regaltec:dhtmlXtree>		
+		</div>
+		
+		<div id="center" style="background:white;height:100%;margin-top:0px;margin-bottom:0px;" align="center">
+			<rich:spacer height="10px;"/>
+			<a4j:form id="addEditGroupForm">
+				<rich:tabPanel id="tabPanel" style="width:98%;height:90%;" switchType="client" selectedTab="#{operRigGroupBean.selectTab}">
+					<rich:tab id="group" label="#{msgs['baf.operRightGroup.operRigGroupInfo']}">
+						<rich:spacer height="10px;"/>
+						<center style="height: 100%;">
+							<h:panelGrid columns="2" style="font-size:13px;height:90%;" cellspacing="10" width="95%" columnClasses="column1,column2" styleClass=".rich-text-color-general">
+								<h:panelGroup>
+									<fieldset style="height:100%;">
+						           		<legend><h:outputText value="#{msgs['baf.operRightGroup.operRigGroupInfo']}" /></legend>
+						            	<rich:spacer height="10px;"/>
+										<h:panelGrid id="list" columns="2" columnClasses="column11,column12" style="font-size:13px;width:97%;text-align:center;word-break:break-all;">
+											<h:outputText value="#{msgs['baf.operRightGroup.operRigGroupName']}:"/>
+											<h:inputText id="groupName" style="width:95%;height:23px;" value="#{operRigGroupBean.groupName}" styleClass="rich-gradient-input">
+												<s:commonsValidator type="required" arg="#{msgs['baf.operRightGroup.operRigGroupName']}" server="false" client="true"/>
+												<s:commonsValidator type="maxlength" maxLength="64" arg="#{msgs['baf.operRightGroup.operRigGroupName']}" server="false" client="true"/>	
+											</h:inputText>
+										
+											<h:outputText value="#{msgs['baf.operRightGroup.operRigGroupDesc']}:" />
+											<h:inputTextarea id="groupDesc" rows="3" style="width:95%;" value="#{operRigGroupBean.groupDesc}" styleClass="rich-gradient-input">
+												<s:commonsValidator type="maxlength" maxLength="128" arg="#{msgs['baf.operRightGroup.operRigGroupCode']}" server="false" client="true"/>
+											</h:inputTextarea>
+											
+										</h:panelGrid>
+									</fieldset>
+								</h:panelGroup>
+								
+								<h:panelGroup>				
+									<fieldset style="height:100%;width:100%;">
+						           		<legend><h:outputText value="#{msgs['baf.operRightGroup.operateRight']}" /></legend>				           		
+						           		<rich:spacer height="1px;"/>	
+										
+										<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+											<tr>
+												<td id="treeboxbox_tree" width="100%" height="100%"></td>
+											</tr>
+										</table>
+										
+										<regaltec:dhtmlXtree id="rightTree"
+											imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+											loadXML="/baf/jsp/operRightGroup/operateRightXMLData.jsp?groupid=#{operRigGroupBean.selectValue}"
+											xmlAutoLoading="/baf/jsp/operRightGroup/operateRightXMLData.jsp?groupid=#{operRigGroupBean.selectValue}">
+											<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+	      									<regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>										    	
+									    	<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="true"/> 						    	
+										</regaltec:dhtmlXtree>
+									</fieldset>
+								</h:panelGroup>
+							</h:panelGrid>	
+						</center>	
+					</rich:tab>
+				
+					<!-- 组织授权 -->
+					<rich:tab id="orgauth" label="#{msgs['baf.operRightGroup.orgAuthorize']}" style="text-align:center;">
+						<rich:spacer height="5px;"/>
+						<table width="95%" style="height:90%;" align="center">
+							<tr>
+								<td width="85%">
+									<fieldset style="height:90%;width:100%;text-align:left;">
+						           		<legend><h:outputText value="#{msgs['baf.operRightGroup.orgAuthorize']}" /></legend>				           		
+						           		<rich:spacer height="1px;"/>	
+						           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+											<tr>
+												<td id="treeboxbox_orgtree" width="100%" height="100%"></td>
+											</tr>
+										</table>
+										<regaltec:dhtmlXtree id="ORGTree"
+											imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_orgtree"
+											loadXML="/baf/jsp/operRightGroup/orgtree.jsp?groupId=#{operRigGroupBean.groupID}"
+											xmlAutoLoading="/baf/jsp/operRightGroup/orgtree.jsp?groupId=#{operRigGroupBean.groupID}">
+											<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+								    		<regaltec:setDxtEevntHandler eventName="onCheck" handler="clickOrgTreeCheck"/>
+										</regaltec:dhtmlXtree>  
+									</fieldset>
+								</td>
+								<td width="1%"></td>
+							<!-- 
+								<td width="50%">
+									<fieldset style="height:90%;width:100%;text-align:left;">
+						           		<legend><h:outputText value="#{msgs['baf.operRightGroup.authorizePreview']}" /></legend>				           		
+						           		<rich:spacer height="1px;"/>	
+						           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+											<tr>
+												<td id="treeboxbox_authorizePreviewTree" width="100%" height="100%"></td>
+											</tr>
+										</table>
+										<regaltec:dhtmlXtree id="authorizePreviewTree"
+											imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_authorizePreviewTree"
+											loadXML="/baf/jsp/operRightGroup/authorizePreview.jsp?groupId=#{operRigGroupBean.groupID}"
+											xmlAutoLoading="/baf/jsp/operRightGroup/authorizePreview.jsp?groupId=#{operRigGroupBean.groupID}">
+										</regaltec:dhtmlXtree>  
+									</fieldset>
+								</td>
+							 -->
+							</tr>
+						</table>
+						<center>
+							<a4j:commandButton styleClass="rich-button" type="submit" id="rightSave" value="#{msgs['baf.Save']}" style="#{operRigGroupBean.showSave=='hide' ? '' : 'display:none'};">
+								<a4j:support event="onclick" onsubmit="document.getElementById('addEditGroupForm:rightSave').disabled = 'true';setCheckValue(); if (1==2) return false;" action="#{operRigGroupBean.saveSelRight}" oncomplete="onSaveRightComplete();" reRender="addEditGroupForm"/>
+							</a4j:commandButton>
+						</center>
+						
+						<h:panelGroup id="tabRendered">
+							<!-- tab页内容是否渲染 -->
+							<h:inputHidden id="userviewRendered" value="#{operRigGroupBean.userViewTabRendered}"/>
+							<h:inputHidden id="orgviewRendered" value="#{operRigGroupBean.orgViewTabRendered}"/>
+						</h:panelGroup>
+					</rich:tab>
+					
+					<!--权限组织预览 -->
+					<rich:tab label="权限组织预览 " onlabelclick="setTabRendered('org');">
+						<br/>
+						<center>
+							<h:panelGroup id="orgviewpg">
+				        		<h:panelGroup rendered="#{operRigGroupBean.orgViewTabRendered}">
+				        			<!-- 查询Panel -->
+									<rich:panel style="width:95%;">				
+										<h:panelGrid id="orgpg" columns="5" style="font-size:13px;" styleClass=".rich-text-color-general">	
+									        <h:panelGroup>
+									        	<h:outputText value="#{msgs['baf.org.unit.orgName']}："/>
+			  									<h:inputText id="unitName" value="#{operRigGroupBean.unitName}" style="width:200px;;height:23px;" styleClass="rich-gradient-input"/>
+												<rich:hotKey key="return" handler="forSelect('org');"/>
+											</h:panelGroup>
+											<rich:spacer width="20px"/> 
+											<h:panelGroup>
+												<!-- 查询按钮 -->
+												<a4j:commandButton styleClass="rich-button" type="submit" id="searchOrg" value="#{msgs['baf.calendar.select']}" >
+													<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('panel');if (1==2) return false;ondisabled('org');" action="#{operRigGroupBean.loadOrg}" oncomplete="Richfaces.hideModalPanel('panel');" disabled="false" reRender="orgList,orgScroller,searchOrg" requestDelay="100"/>
+												</a4j:commandButton>
+												<rich:spacer width="5px"/>
+												<!-- 重置按钮 -->
+												<a4j:commandButton styleClass="rich-button" id="resetOrg" value="#{msgs['buttonResetLable']}">
+													<a4j:support event="onclick" onsubmit="resetConditions('org');return false;"/>
+												</a4j:commandButton>
+											</h:panelGroup>	
+										</h:panelGrid>	
+									</rich:panel>	
+									<br/><br/>
+									
+									<!-- 显示列表 -->
+									<rich:dataTable width="95%" id="orgList" rows="#{operRigGroupBean.pageSize}"
+							            value="#{operRigGroupBean.defaultDataModel}" var="item" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+							            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+							            <rich:column style="width:20%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.orgName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{item.orgname}" />
+							            </rich:column>
+							            <rich:column style="width:80%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.parentOrgName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{item.all_parent_name}"/>
+							            </rich:column>	
+							        </rich:dataTable>
+							        <table width="95%">
+							            <tr>
+								            <td>
+												<rich:datascroller align="right"  for="orgList" fastStep="1"  page="#{operRigGroupBean.orgScrollerPage}" id="orgScroller" />							
+											</td>
+										</tr>
+									</table>
+				        		</h:panelGroup>
+				        	</h:panelGroup>
+				        </center>
+					</rich:tab>
+					
+					<!--权限人员预览 -->
+					<rich:tab label="权限人员预览 " onlabelclick="setTabRendered('user');">
+						<br/>
+						<center>
+							<h:panelGroup id="userviewpg">
+				        		<h:panelGroup  rendered="#{operRigGroupBean.userViewTabRendered}">
+				        			<!-- 查询Panel -->
+									<rich:panel style="width:95%;">	
+										<h:panelGrid id="userpg" columns="7" style="font-size:13px;" styleClass=".rich-text-color-general">	
+											<h:panelGroup>
+						  						<h:outputText value="#{msgs['baf.org.user.userName']}："/>
+						  						<h:inputText id="userName" value="#{operRigGroupBean.userName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+												<rich:hotKey key="return" handler="forSelect('user');"/>
+											</h:panelGroup>
+											<rich:spacer width="5px"/> 
+											<h:panelGroup>
+												<h:outputText value="#{msgs['baf.org.user.loginName']}："/>
+						  						<h:inputText id="loginName" value="#{operRigGroupBean.loginName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+						  						<rich:hotKey key="return" handler="forSelect('user');"/>
+						  					</h:panelGroup>
+											<rich:spacer width="20px"/> 
+											<h:panelGroup>
+												<!-- 查询按钮 -->
+												<a4j:commandButton styleClass="rich-button" type="submit" id="searchUser" value="#{msgs['baf.calendar.select']}">
+													<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('panel');if (1==2) return false;ondisabled('user');" action="#{operRigGroupBean.loadUser}" oncomplete="Richfaces.hideModalPanel('panel');" disabled="false" reRender="userList,userScroller,searchUser" requestDelay="100"/>
+												</a4j:commandButton>
+												<rich:spacer width="5px"/>
+												<!-- 重置按钮 -->
+												<a4j:commandButton styleClass="rich-button" id="resetUser" value="#{msgs['buttonResetLable']}">
+													<a4j:support event="onclick" onsubmit="resetConditions('user');return false;"/>
+												</a4j:commandButton>
+											</h:panelGroup>	
+										</h:panelGrid>
+									</rich:panel>
+									<br/><br/>
+									
+									<!-- 显示列表 -->
+									<rich:dataTable width="95%" id="userList" rows="#{operRigGroupBean.pageSize}"
+							            value="#{operRigGroupBean.firstDataModel}" var="orguser" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+							            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+							            <rich:column style="width:15%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.userName}"/>
+							            </rich:column>
+							            <rich:column style="width:15%;">
+							            	<f:facet name="header">
+							                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.loginName}" />
+							            </rich:column>
+							            <rich:column style="width:70%;">
+							            	<f:facet name="header">
+							                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.post.parentUnit']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{orguser.fullUnitNames}"/>
+							            </rich:column>
+							        </rich:dataTable>
+							        <table width="95%">
+							            <tr>
+								            <td>
+												<rich:datascroller align="right" for="userList" fastStep="1" page="#{operRigGroupBean.userScrollerPage}" id="userScroller"/>							
+											</td>
+										</tr>
+									</table>
+				        		</h:panelGroup>
+				        	</h:panelGroup>
+						</center>
+					</rich:tab>
+				</rich:tabPanel>
+		
+				<h:panelGroup id="pg">
+					<h:inputHidden id="groupID" value="#{operRigGroupBean.groupID}" />
+					<h:inputHidden id="groupCode" value="#{operRigGroupBean.groupCode}" />
+					<h:inputHidden id="dealFlag" value="#{operRigGroupBean.dealFlag}" />
+					<h:inputHidden id="checkedList" value="#{operRigGroupBean.checked}"/>
+					<h:inputHidden id="allList" value="#{operRigGroupBean.all}"/>
+					<h:inputHidden id="saveType" value="#{operRigGroupBean.saveType}"/>
+					<h:inputHidden id="temp" value="#{operRigGroupBean.temp}"/>					
+					<h:inputHidden id="creatorId" value="#{operRigGroupBean.creatorID}"/>						
+					<h:inputHidden id="showSave" value="#{operRigGroupBean.showSave}" /> <!-- 标识 是否是新增，用来显示保存按钮 -->
+					<h:inputHidden id="addOrEdit" value="#{operRigGroupBean.isAddOrEdit}"/>
+					<h:inputHidden id="currentLoginName" value="#{operRigGroupBean.currentLoginName}" />
+					<h:inputHidden id="currentUserId" value="#{operRigGroupBean.currentUserId}" />
+					<h:inputHidden id="selectOrgIds" value="#{operRigGroupBean.selectOrgIds}" /><!-- 新选中的组织ID -->
+					<h:inputHidden id="cancelOrgIds" value="#{operRigGroupBean.cancelOrgIds}" /><!-- 数据库中已存在，现在取消的组织ID -->
+					<h:inputHidden id="selectOrgTypeIds" value="#{operRigGroupBean.selectOrgTypeIds}" /><!-- 新选中的组织类型 -->
+					<h:inputHidden id="cancelOrgTypeIds" value="#{operRigGroupBean.cancelOrgTypeIds}" /><!-- 数据库中已存在，现在取消的组织类型 -->
+					<h:inputHidden id="selectOrgCategorys" value="#{operRigGroupBean.selectOrgCategorys}" /><!-- 新选中的组织类别 -->
+					<h:inputHidden id="cancelOrgCategorys" value="#{operRigGroupBean.cancelOrgCategorys}" /><!-- 数据库中已存在，现在取消的组织类别 -->
+				</h:panelGroup>
+				
+				<br />
+				<center>
+					<h:panelGroup id="isBatchAddGroup" style="visibility:#{operRigGroupBean.groupVisible};">		
+						<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+						<h:selectBooleanCheckbox id="isBatchAddSave" />	
+					</h:panelGroup>												
+					<rich:toolTip for="isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>	
+					<rich:spacer width="5px"/>	
+				
+					<!-- 不能对系统管理员进行修改操作 -->
+					<a4j:commandButton styleClass="rich-button" type="submit" id="rigGroupSave" value="#{msgs['baf.Save']}" rendered="#{operRigGroupBean.showSave!='hide'}">
+						<a4j:support event="onclick" onsubmit="setCheckValue(); if (validate(document.getElementById('addEditGroupForm'))==false) return false;" data="#{operRigGroupBean.functionData}" 
+							oncomplete="document.getElementById('addEditGroupForm:dealFlag').value='#{operRigGroupBean.dealFlag}'; addOrEditGroup(data);" action="#{operRigGroupBean.addOrEditOperate}" reRender="addEditGroupForm"/>
+					</a4j:commandButton>
+				</center>
+				<s:validatorScript functionName="validateForm"/>		
+			</a4j:form>
+			
+			<a4j:form>
+		        <a4j:jsFunction name="g_Refresh" reRender="addEditGroupForm,tabRendered" action="#{operRigGroupBean.refresh}" oncomplete="setFocus('addEditGroupForm:groupName')">
+		        	<a4j:actionparam name="groupID" value="" />  
+		        	<a4j:actionparam name="orgViewRendered" value="false" assignTo="#{operRigGroupBean.orgViewTabRendered}"/>
+					<a4j:actionparam name="userViewRendered" value="false" assignTo="#{operRigGroupBean.userViewTabRendered}"/>          
+		        </a4j:jsFunction>   
+		        
+		        <!-- 新增权限组初始化数据 -->
+		        <a4j:jsFunction name="rigGroupAdd" action="#{operRigGroupBean.addRigGroupListener}" oncomplete="setCheckValue(); document.getElementById('addEditGroupForm:saveType').value='add';  showChk('addEditGroupForm:isBatchAdd');" reRender="addEditGroupForm"/>
+		        
+		        <!-- 删除权限组 -->
+		        <a4j:jsFunction name="rigGroupDelete" action="#{operRigGroupBean.deleteRigGroup}" data="#{operRigGroupBean.dealFlag}" oncomplete="onRigGroupDeleteComplete(data)">
+		        	<a4j:actionparam name="groupID" assignTo="#{operRigGroupBean.groupID}"/>   
+		        </a4j:jsFunction>
+	    	</a4j:form>
+	    	
+	    	<!-- 设置tab页内容渲染状态 -->
+		        <a4j:jsFunction name="setTabContentRendered" action="#{operRigGroupBean.setTabContentRendered}" oncomplete="Richfaces.hideModalPanel('panel');" reRender="#{operRigGroupBean.reRenderIds},tabRendered">
+		        	<a4j:actionparam name="tabId" value="" />
+		        	<a4j:actionparam name="reRenderIds" assignTo="#{operRigGroupBean.reRenderIds}"/>
+		        </a4j:jsFunction> 
+			
+	  		</div>
+	
+			<rich:toolTip for="helpicon" >
+			    <div style="width:300;">
+			      <h:outputText value="#{msgs['baf.dataRightFactor.helpMessage1']}"/><br />
+			      <h:outputText value="1、"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage5']}"/><br />
+			      <h:outputText value="2、"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage2']}"/><br />
+			      <h:outputText value="3、"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage3']}"/><br />
+			      <h:outputText value="4、"/><h:outputText value="#{msgs['baf.dataRightFactor.helpMessage4']}"/>
+			    </div>
+	   		</rich:toolTip>
+	   		
+	   		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+		<a4j:keepAlive beanName="operRigGroupBean"/>
+	  	</f:view>
+	  
+	  	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</html>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<a4j:include viewId="commonq.xhtml" />	
+<script>
+//<![CDATA[
+//更改高级面板的重复表格的disabled
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+function disabledBtn(btnId,flag){
+	if("1" == flag){
+		document.getElementById(btnId).disabled = true;
+	}else{
+		document.getElementById(btnId).disabled = false;
+	}
+}
+function init() {
+	var dis = document.getElementById("powerForm:prompt").value;
+	if('Y'==dis){
+		disabledBtn('powerForm:fireBtn','1')	
+	}
+}
+         //]]>
+</script>
+<style type="text/css">
+		 .scrolls{
+           overflow:auto;
+       }
+       td{
+       white-space:nowrap;
+       }
+
+</style>
+</head>
+
+<body onload="init();">
+     <f:loadBundle basename="messages" var="msgs" />
+     <h:form id="powerForm" name="powerForm">
+     <rich:tabPanel id="tabPanel">		
+		  <rich:tab id="tab1" name="tab1" label="任务开关">
+		  <!-- 
+		  <center><h1 style="color:red;">请谨慎操作，预防重复调度!</h1></center>
+		   -->
+		  <table width="80%" >
+		  	<tr>
+		     <td>当前的机器IP：<h:outputText styleClass="	rich-text-color-select"  value="#{machineBean.currentMachineIp}"/> , 应用服务器Server Name：<h:outputText styleClass="	rich-text-color-select"  value="#{machineBean.serverName}"/>。此IP与Server Name可以作为任务机器IP配置表的记录。
+		     </td>
+		   </tr>
+		   <tr></tr>
+		    <tr>
+		     <td><a4j:commandButton  onclick="disabledBtn('powerForm:fireBtn','1')" styleClass="rich-button" id="fireBtn"  value="开启" action="#{machineBean.fireTask}" rendered="#{machineBean.isFired==null}" reRender="powerForm" oncomplete="if(#{machineBean.prompt=='Y'}){alert('[温馨提示：当前机器不需要启动调度容器]');}"></a4j:commandButton>
+		     </td>
+		   </tr>
+		   <tr>
+			   <td><h:outputText styleClass="	rich-text-color-select" style="margin:0px 0px 0px 20px;" value="#{machineBean.currentQuartzNull}"/>
+			   </td>
+		   </tr>
+		   <tr>
+		     <td>
+		     <a4j:commandButton  styleClass="rich-button" id="offBtn"    value="关闭" action="#{machineBean.offTask}" reRender="powerForm" rendered="#{machineBean.isFired!=null}"></a4j:commandButton>
+		     </td>
+		    </tr>
+		  </table>
+		  <h:inputHidden id="id" value="#{machineBean.id}"></h:inputHidden>
+		  <h:inputHidden id="prompt" value="#{machineBean.prompt}"></h:inputHidden>
+		  </rich:tab>
+	 </rich:tabPanel>
+	 </h:form>
+     <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

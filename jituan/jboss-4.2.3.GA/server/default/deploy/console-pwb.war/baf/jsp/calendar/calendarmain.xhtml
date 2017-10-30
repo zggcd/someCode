@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<head>
+		<script>
+		//<![CDATA[
+			var preMenuItemObj = null;
+			var currentColor = null;
+			
+			function openForm(url, id) {
+	          	orgworkarea.document.location.href = "${request.contextPath}" + url;	
+				var e = $('row_'+id);
+				if (preMenuItemObj != null) {
+					if (e != preMenuItemObj) {
+						preMenuItemObj.style.backgroundColor="transparent";
+						preMenuItemObj = e;
+						e.style.backgroundColor=currentColor;
+					}
+				} else {
+					e.style.backgroundColor=currentColor;//"#EBF0F6";
+					preMenuItemObj = e;
+				}	          	          			
+			}
+			
+			function init() {
+				var url = "/baf/jsp/calendar/holidaysCfg.xhtml";
+				orgworkarea.document.location.href = "${request.contextPath}" + url;
+				var e = $('row_holidaysCfg');
+				var backgroundColor = $('tablehidemenuGroup').currentStyle.backgroundColor; 
+				currentColor = changeColor(backgroundColor);
+				e.style.backgroundColor= currentColor;
+				preMenuItemObj = e;					
+			}
+
+			function changeColor(color) {
+				var r = subColor(color.substr(1, 2));
+				var g = subColor(color.substr(3, 2));
+				var b = subColor(color.substr(5, 2));
+	
+				var value_r = r.toString(16);
+				var value_g = g.toString(16);
+				var value_b = b.toString(16);
+				return "#" + ((r<16) ? ("0"+value_r) : value_r) + ((g<16) ? ("0"+value_g) : value_g) + ((b<16) ? ("0"+value_b) : value_b); 
+			}
+
+			function subColor(subColor) {
+				var r = parseInt(subColor, 16);
+				r = r + 50;
+				if (r > 255 ) r = 255;
+				return r;
+			}
+			
+			//]]>
+		</script>
+	</head>
+	<body onload="setTimeout('init()', 300);">
+		<f:loadBundle basename="messages" var="msgs" />
+		<regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="east" id="eastpanel"
+									autoScroll="false" contentEl="east-panel" split="true" width="200"
+									minSize="200" maxSize="400" collapsible="true" margins="0 0 0 0"
+									layout="accordion" />		
+			<regaltec:viewPortPanel region="center" id="center-panel"
+									contentEl="center" />			
+		</regaltec:viewPort>
+		<div id="east-panel">
+			<rich:panelMenu style="width:200px"  mode="none"
+     				iconExpandedGroup="disc" iconCollapsedGroup="disc" 
+      				iconExpandedTopGroup="chevronUp" iconGroupTopPosition="right" 
+      				iconCollapsedTopGroup="chevronDown" >
+         		<rich:panelMenuGroup id="menuGroup" label="#{msgs['baf.calendar.calendars']}" expanded="true">          
+          			<rich:panelMenuItem id="holidaysCfg" label="#{msgs['baf.calendar.holidaysCfg']}" style="height:30px;" onclick="openForm('/baf/jsp/calendar/holidaysCfg.xhtml', 'holidaysCfg');">
+             			<f:param name="holidays" value="#{msgs['baf.calendar.holidaysCfg']}"/>
+          			</rich:panelMenuItem>
+	           		<rich:panelMenuItem id="worktimes" label="#{msgs['baf.calendar.worktimes']}" style="height:30px;" onclick="openForm('/baf/jsp/calendar/worktimeCfg.xhtml', 'worktimes');">
+	               		<f:param name="wordtimes" value="#{msgs['baf.calendar.worktimes']}"/>
+	           		</rich:panelMenuItem>
+	           		<rich:panelMenuItem id="changes" label="#{msgs['baf.calendar.changes']}" style="height:30px;" onclick="openForm('/baf/jsp/calendar/changeCfg.xhtml', 'changes');">
+	              	 	<f:param name="changes" value="#{msgs['baf.calendar.changes']}"/>
+	           		</rich:panelMenuItem>
+      			</rich:panelMenuGroup>
+  			</rich:panelMenu>
+		</div>		
+		<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+			<iframe  name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+		</div>
+		<form  id="changeForm" target="orgworkarea" method="post"></form>			
+	</body>
+	<script>
+		//<![CDATA[
+	  	   /*session超时显示错误信息*/
+		   A4J.AJAX.onExpired = function(loc,expiredMsg)
+		   {
+		      alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+		   }
+		   /*显示数据提交到后台的错误信息*/
+		   A4J.AJAX.onError = function(req,status,message)
+		   {
+			   var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+			   alert(report);
+		   }
+		   //]]>
+	  </script>
+</f:view>
+</html>

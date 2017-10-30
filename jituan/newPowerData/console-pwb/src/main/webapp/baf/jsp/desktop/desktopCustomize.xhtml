@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view  contentType="text/html">
+		<head>
+		<script type="text/javascript">		
+		//<![CDATA[		
+	  	var tools = [{
+		    id:'close',
+		    handler: function(e, target, panel){
+		        panel.ownerCt.remove(panel, true);
+		    }
+		}
+		];
+		
+		//获取桌面的面板及视图信息
+		function getDesktopInfo(){
+		 	//获取桌面面板实例集合返回对象是Ext.util.MixedCollection
+		  	var panels = Ext.getCmp('tabpanel').items;
+		  	var savevalue = "";
+		  	for(var i=0;i<panels.getCount();i++){
+		  		var panel = panels.get(i);
+		  		if(i==0){
+		  			savevalue = panel.id + "*";
+		  		}else{
+		  			savevalue = savevalue + "&" + panel.id + "*";
+		  		}
+		  		var k=0;
+		  		while(panel.items.get(k)!=null){
+		  			savevalue = savevalue + panel.items.get(k).id + "#";
+		  			k++;
+		  		}
+		  	}		  	
+		  	document.getElementById("modalForm:savevalues").value = savevalue;
+		}
+		
+		//保存桌面验证
+		function saveDesktop(formobj){	
+			var returnvalue = true;	   
+	   		returnvalue = validateForm(formobj);
+	   		if(returnvalue==true){
+				getDesktopInfo();
+				var savevalues = document.getElementById("modalForm:savevalues").value;
+				var desktopName = document.getElementById("modalDesktopForm:desktopName").value;
+				saveUserDesktop(savevalues,desktopName);
+			}
+			return returnvalue;
+		}
+
+		var addFlag = true;
+		
+		//往桌面添加视图
+		function addView(){
+			var rds = document.getElementsByName("panel");
+			var panelId = "";    //面板ID
+			if(rds!=null){
+				for(var i=0;i<rds.length;i++){
+					if(rds[i].checked){
+						panelId = rds[i].value;
+						break;
+					} 
+				}
+			}
+			if(panelId==""){
+				alert("${msgs['baf.desktop.selectPanel']}");
+				return;
+			}
+			
+			var oTable = document.all['modalForm:viewTable'];   
+			var num = 0;
+			var flag = 0;
+			if (oTable != null) {
+				for (var i = 1; i < oTable.rows.length; i++) {
+					var chb = oTable.rows(i).cells(0).children.item(0);
+					if (chb.id.indexOf("ch") >= 0 && chb.checked==true) {
+						flag = 1;
+						var array = chb.value.split("§№");
+						addViewPanel(panelId,array[0],array[1],array[2],array[3],array[4],array[5]);
+					}
+				}
+			}	
+			
+			if(flag==0){
+				alert("${msgs['baf.desktop.selectView']}");
+				return;
+			}
+			
+			var isrun = document.getElementById("modalForm:addView");
+			if(isrun.checked==false && addFlag == true){ 
+				document.getElementById("modalForm:hideModal").click();
+			}
+			clearChk();
+		} 
+		
+		//向面板中添加视图
+		function addViewPanel(panelId,viewId,viewName,viewHeight,viewType,viewUrl,viewContent){
+			//判断viewId视图在桌面上是否已经实例化,如果已经实例则不允许再创建
+		    if (Ext.getCmp(viewId) != null )
+		    {
+			    addFlag = false;
+				alert("${msgs['baf.desktop.viewTip']}'"+viewName+"'${msgs['baf.desktop.viewTip1']}");
+				return;
+		    }
+		    var p = new Ext.Panel();
+		    var h = Number(viewHeight);
+		    if(viewType=="L"){
+		    	p = new Ext.Panel({
+				    title: viewName,
+					id: viewId,
+					anchor: '100%',
+				    draggable:true,
+				    cls:'x-portlet',
+				    collapsible:true,
+				    autoScroll:true,
+					tools: tools,
+					height: h,
+				    html:'<iframe frameborder="0" width="100%" height="100%" src="${request.contextPath}'+viewUrl+'"></iframe>'         
+			    });
+		    }else{
+			    p = new Ext.Panel({
+				    title: viewName,
+					id: viewId,
+					anchor: '100%',
+				    draggable:true,
+				    cls:'x-portlet',
+				    collapsible:true,
+				    autoScroll:true,
+					tools: tools,
+					height: h,
+				    html:viewContent
+			    });
+		    }
+			Ext.getCmp(panelId).add(p);   
+		    Ext.getCmp(panelId).doLayout(); 
+		    addFlag = true;		    
+		}
+		
+		//返回：切换到选择对象和桌面页面
+		function selectObject(){
+			var objectId = document.getElementById("modalForm:objectId").value;
+			var objectType = document.getElementById("modalForm:objectType").value;
+			var templateId = document.getElementById("templateForm:existTemplate").value;
+			var desktopId = document.getElementById("modalForm:desktopId").value;
+			var objectName = encodeURIComponent(document.getElementById("modalForm:objectName").value);
+			//alert(document.getElementById("modalForm:objectName").value+"***"+objectName);
+			var templateName = encodeURIComponent(document.getElementById("modalForm:passTemplateName").value);//回传模版名称.
+			var finalTempId = document.getElementById("templateForm:finalTemplate").value;  //sa点击下一步之前选择的模板
+			if(objectId==""){
+				window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopManage.xhtml";
+			}else{
+				window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/deskCustomizeSet.xhtml?objectId="+objectId+"&objectType="+objectType+"&templateId="+finalTempId+"&templateName="+templateName+"&desktopId="+desktopId+"&objectName="+objectName;
+			}
+		}
+		
+		//保存完成触发事件
+		function onSaveComplete(data){
+			if(a4jcomplete()==false){
+			 	return;
+			}			
+			if(data!=null){
+				/*if(data=="N"){
+					alert("${msgs['baf.desktop.saveFail']}");
+					return;
+				}
+				if(data=="Y"){
+					alert("${msgs['baf.desktop.saveSuccess']}");
+				}*/
+				if(data=="E"){
+					alert("${msgs['baf.desktop.desktopNameExist']}");
+					return;
+				}
+			}
+			resetMethod();			
+		}
+		
+		//单击保存按钮事件
+		function save(){		
+			var panels = Ext.getCmp('tabpanel').items;
+			var count = panels.getCount();
+			if(count==0){
+				//您尚未定制桌面！
+				alert("${msgs['baf.desktop.nodesktop']}");
+				return;
+			}else{
+				var hasView = false;
+				for(var i=0;i<count;i++){
+					if(panels.get(i).items.getCount()>0){
+						hasView = true;
+						break;
+					}
+				}  	
+				if(hasView==false){
+					//请在桌面上添加视图！
+					alert("${msgs['baf.desktop.paddview']}");
+					return;
+				}
+			}			
+			getDesktopInfo();
+			var savevalues = document.getElementById("modalForm:savevalues").value;
+			saveUserDesktop(savevalues);
+		}
+		
+		//删除完成事件
+		function onDeleteComplete(data){
+			if(a4jcomplete()==false){
+			 	return;
+			}
+			if(data!=null){
+				/*if(data=="N"){
+					alert("${msgs['baf.Failure']}");
+					return;
+				}*/
+				if(data=="Y"){
+					//alert("${msgs['baf.Success']}");
+					if("${desktopCustomizeBean.currentLoginName}"=="sa" || "${desktopCustomizeBean.isAdmin}"=="Y"){
+						var objectId = document.getElementById("modalForm:objectId").value;
+						if(objectId==""){
+							window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopManage.xhtml";
+						}else{
+							window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/deskCustomizeSet.xhtml";
+						}
+					}else{
+						var objectId = document.getElementById("modalForm:objectId").value;
+						var objectType = document.getElementById("modalForm:objectType").value;
+						window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopCustomize.xhtml?objectId="+objectId+"&objectType="+objectType;
+					}
+				}
+			}
+		}
+		
+		//确认删除
+		function confirmDelete(){			
+			if(confirm("${msgs['baf.dataRightFactor.DelConfirm']}")){
+				return true;
+			}else{
+				return false;
+			}
+		}
+		
+		//重置：刷新页面
+		function resetMethod(){
+			var objectId = document.getElementById("modalForm:objectId").value;
+			var objectType = document.getElementById("modalForm:objectType").value;
+			//var templateId = document.getElementById("modalForm:templateId").value;
+			var templateId = document.getElementById("templateForm:finalTemplate").value;
+			var templateName = encodeURIComponent(document.getElementById("modalForm:passTemplateName").value);
+			var desktopId = document.getElementById("modalForm:desktopId").value;
+			var objectName = encodeURIComponent(document.getElementById("modalForm:objectName").value);//对中文进行转码
+			if("${desktopCustomizeBean.currentLoginName}"=="sa" || "${desktopCustomizeBean.isAdmin}"=="Y"){
+				window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopCustomize.xhtml?objectId="+objectId+"&objectType="+objectType+"&templateId="+templateId+"&objectName="+objectName+"&desktopId="+desktopId+"&stemplateId="+"&templateName="+templateName;
+			}else{
+				
+				window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopCustomize.xhtml?objectId="+objectId+"&objectType="+objectType;
+			}
+		}
+		
+		//清除复选框选中的值
+		function clearChk(){
+			var oTable = document.all['modalForm:viewTable'];
+			if (oTable != null) {
+				for (var i = 1; i < oTable.rows.length; i++) {
+					var chb = oTable.rows(i).cells(0).children.item(0);
+					if (chb.id.indexOf("ch") >= 0 && chb.checked==true) {
+						chb.checked = false;
+					}
+				}
+			}	
+		}
+
+		//给复选框赋值
+		function setChkValue(chk){
+			var txtId = chk.id.replace("chk","txt");
+			chk.value = document.getElementById(txtId).value;
+		}
+
+		//显示面板已选择的视图
+		function selectRadioValue(rad){
+			var panelId = rad.value;
+			var panel = Ext.getCmp(panelId);
+			var selectValue = "";
+			var k=0;
+	  		while(panel.items.get(k)!=null){
+	  			selectValue = selectValue + panel.items.get(k).id + "#";
+	  			k++;
+	  		}
+		}
+
+		//选择完桌面触发事件
+		function setDesktop(desktopId){			
+			var objectId = document.getElementById("modalForm:objectId").value;
+			var objectType = document.getElementById("modalForm:objectType").value;
+			var templateId = document.getElementById("modalForm:templateId").value;
+			var objectName = document.getElementById("modalForm:objectName").value;
+			var templateName = document.getElementById("modalForm:passTemplateName").value;
+			var desktopId1 = document.getElementById("templateForm:desktopId").value;
+			var ids = document.getElementById("desktopForm:desktopId").value.split(",");
+			var dtId = ids[0];
+			var lId = ids[1];
+			if(desktopId!=""){
+				dtId = desktopId;
+			}
+			var finalTempId = document.getElementById("templateForm:finalTemplate").value;
+			window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopCustomize.xhtml?objectId="+objectId+"&objectType="+objectType+"&objectName="+objectName+"&sdesktopId="+dtId+"&templateId="+lId+"&templateName="+templateName+"&desktopId="+desktopId1+"&etempId="+templateId+"&finalTempId="+finalTempId;
+		}
+
+		//选择完模板触发事件
+		function setTemplate(layoutId){
+			var templateId = document.getElementById("templateForm:templateId").value;
+			var desktopId = document.getElementById("desktopForm:desktopId").value;
+			var templateName = document.getElementById("templateForm:templateName").value;
+			if(layoutId!=""){
+				templateId = layoutId;
+			}
+			if(templateId!="" || desktopId!=""){
+				//更换模板需要重新配置视图！是否继续？
+				if(confirm("${msgs['baf.desktop.confirmMes1']}")){
+					window.location.href = "${request.contextPath}"+"/baf/jsp/desktop/desktopCustomize.xhtml?templateId="+templateId+"&templateName="+templateName+"&gtem=";
+				}
+			}			
+		}
+
+		//添加视图按钮事件
+		function onAddViewClick(){
+			var panels = Ext.getCmp('tabpanel').items;
+			var count = panels.getCount();
+			if(count==0){
+				//请先选择模板或者桌面！
+				alert("${msgs['baf.desktop.selDesktopOrTemplate']}");
+			}else{
+				Richfaces.showModalPanel('viewModalPanel'); 
+			}
+		}
+
+		//设置选中单选按钮的样式
+		function templateChked(){
+			var table = document.getElementById("templateForm:dtableTemplate");
+			var rds = document.getElementsByName("rd");
+			var over = "";
+			var out = "";
+			for(var i=1;i<table.rows.length;i++){
+				if(table.rows[i+1].onmouseover!=""){
+					over = table.rows[i+1].onmouseover;
+					out = table.rows[i+1].onmouseout;
+					break;
+				}
+			}
+			for(var i=0;i<table.rows.length;i++){
+				if(rds[i].checked==true){
+					table.rows[i+1].style.backgroundColor="#CCCCCC";				
+					table.rows[i+1].onmouseover="";
+					table.rows[i+1].onmouseout="";
+				}else{
+					table.rows[i+1].style.backgroundColor="";
+					if(table.rows[i+1].onmouseover==""){
+						table.rows[i+1].onmouseover = over;
+						table.rows[i+1].onmouseout = out;
+					}
+				}
+			}		
+		}
+
+		//响应模版单选按钮的单击事件.
+		function selectedTemplate(deskTemplateId,deskTemplateName){
+			document.getElementById("templateForm:templateId").value = deskTemplateId;
+			document.getElementById("templateForm:templateName").value = deskTemplateName;
+			changeValues(deskTemplateId,deskTemplateName);
+		}
+
+		function setTempName(){
+			alert(document.getElementById("templateForm:templateNameSet").value);
+			var lId = document.getElementById("modalForm:templateId").value;
+			alert(lId);
+			setTemName(lId);
+		}
+		function ondisabled(){
+		  	document.getElementById("customizeForm:saveDeploy").disabled = true;
+		}
+		//]]>
+		</script>
+		<style type="text/css">
+		.column1{
+			width:80%;
+		}
+		.column2{
+			width:20%;
+		}
+		.column3{
+			width:10%;
+			text-align:center;
+		}
+		.column4{
+			width:30%;
+		}
+		</style>
+		</head>
+		<body>	
+			<f:loadBundle basename="messages" var="msgs" />		
+			<h:panelGroup id="fg">
+			<regaltec:viewPort ctCls="panel-bdColor">
+				<regaltec:viewPortPanel region="east" id="west-panel"
+					autoScroll="true" contentEl="west" split="false" width="100"
+					collapsible="true" margins="0 0 0 0" layout="accordion"/>					
+				<regaltec:viewPortPanel id="center-tabpanel" region="center" autoScroll="true" items="#{desktopCustomizeBean.viewPortTabPanelItems}"/>
+			</regaltec:viewPort>	</h:panelGroup>
+			
+			<div id="west">
+				<table width="100%"  CELLSPACING="0" CELLPADDING="0" style="font-size:13px;">
+					<tr><td height="16" align="right" class="rich-gradient-tab" ><h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" ></h:graphicImage></td></tr>
+				</table>
+				
+				<h:form id="customizeForm">
+					<h:panelGrid columns="1" width="100%" style="text-align:center;" styleClass=".rich-text-color-general" cellspacing="5px">
+						<a4j:commandButton id="selDesktop" styleClass="rich-button" value="#{msgs['baf.desktop.selectDesktop']}" style="width:80px" title="#{msgs['baf.desktop.customize.btntitle1']}">
+							<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('desktopModal'); return false;"/>
+						</a4j:commandButton>
+						<a4j:commandButton id="selTemplate" styleClass="rich-button" value="#{msgs['baf.desktop.selectTemplate']}" style="width:80px" rendered="#{desktopCustomizeBean.currentLoginName!='sa' &amp;&amp; desktopCustomizeBean.isAdmin=='N'}">
+							<a4j:support event="onclick" onsubmit="Richfaces.showModalPanel('templateModal'); return false;"/>
+						</a4j:commandButton>
+						<a4j:commandButton id="addView" styleClass="rich-button" value="#{msgs['baf.desktop.addView']}" style="width:80px" title="#{msgs['baf.desktop.customize.btntitle2']}">
+							<a4j:support event="onclick" onsubmit="onAddViewClick(); return false;"/>
+						</a4j:commandButton>
+						<a4j:commandButton id="saveDeploy" styleClass="rich-button" value="#{msgs['baf.desktop.saveAndDeploy']}" style="width:80px" onclick="save();ondisabled();" disabled="false" title="#{msgs['baf.desktop.customize.btntitle3']}" reRender="saveDeploy" />
+						<a4j:commandButton id="reset" styleClass="rich-button" value="#{msgs['baf.desktop.reset']}" style="width:80px" onclick="resetMethod();" title="#{msgs['baf.desktop.customize.btntitle4']}"/>
+						<a4j:commandButton id="delete" styleClass="rich-button" value="#{msgs['baf.desktop.delete']}" style="width:80px" title="#{msgs['baf.desktop.customize.btntitle5']}">
+							<a4j:support event="onclick" onsubmit="if(confirmDelete()==false) return false;" action="#{desktopCustomizeBean.deleteDesktop}" data="#{desktopCustomizeBean.dealFlag}" oncomplete="onDeleteComplete(data);"/>
+						</a4j:commandButton>
+						<a4j:commandButton id="return" styleClass="rich-button" value="#{msgs['baf.desktop.btnReturn']}" style="width:80px" onclick="selectObject();" rendered="#{desktopCustomizeBean.currentLoginName=='sa' || desktopCustomizeBean.isAdmin=='Y'}" title="#{msgs['baf.desktop.customize.btntitle6']}"/>
+					</h:panelGrid>
+				</h:form>
+			</div>
+			<h:form id="modalForm">			
+			<!-- 添加视图页面 -->
+			<rich:modalPanel id="viewModalPanel" autosized="false" keepVisualState="false" width="550" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.desktop.customize.addView']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+				    <rich:componentControl for="viewModalPanel" attachTo="hidelink" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				
+				<fieldset style="font-size:13px;font-weight:normal;width:100%;height:300px">			
+           		<legend><h:outputText value="#{msgs['baf.desktop.selView']}" /></legend>
+           		<rich:spacer height="5px"/>
+				<h:panelGroup  style="width:100%;text-align:center;">   
+				<rich:dataTable width="95%" id="viewTable" rows="#{desktopCustomizeBean.pageSize}" columnClasses="column3,column4,,column4,column4" 
+		            value="#{desktopCustomizeBean.secondDataModel}" var="viewList" style="font-size:13px;font-weight:normal;" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">
+		            <h:column>
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.select']}" style="font-weight:normal;"/>
+				        </f:facet>				        
+		                <h:selectBooleanCheckbox id="chk" onclick="setChkValue(this);" />
+		                <h:inputText id="txt" value="#{viewList.viewId}§№#{viewList.viewName}§№#{viewList.viewHeight}§№#{viewList.viewType}§№#{viewList.viewUrl}§№#{viewList.content}" style="display:none;"/>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.viewname']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText id="name" value="#{viewList.viewName}"/>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+		                	<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.define.viewtype']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText rendered="#{viewList.viewType=='L'}" value="#{msgs['baf.desktop.define.linktype']}"/>
+		                <h:outputText rendered="#{viewList.viewType=='C'}" value="#{msgs['baf.desktop.define.manualentry']}"/>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+		                	<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.define.viewheight']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{viewList.viewHeight}" />
+		            </h:column>		            
+		        </rich:dataTable>
+		        <table width="95%">
+		            <tr>
+			            <td>
+							<rich:datascroller align="right"  for="viewTable" fastStep="1"  page="#{desktopCustomizeBean.scrollerPage2}" id="sc" />
+							<a4j:keepAlive beanName="desktopCustomizeBean"/>
+						</td>
+					</tr>
+				</table>					
+		        </h:panelGroup>
+		        </fieldset>
+		        
+		        <h:inputHidden id="savevalues" value=""/>
+		        <h:inputHidden id="flag" value="#{desktopCustomizeBean.flag}"/>
+		        <h:inputHidden id="objectId" value="#{desktopCustomizeBean.objectId}"/>
+		        <h:inputHidden id="objectType" value="#{desktopCustomizeBean.objectType}"/>
+		        <h:inputHidden id="templateId" value="#{desktopCustomizeBean.templateId}"/>
+		        <h:inputHidden id="passTemplateName" value="#{desktopCustomizeBean.templateName}"/>
+		        <h:inputHidden id="desktopId" value="#{desktopCustomizeBean.desktopId}"/>
+		        <h:inputHidden id="objectName" value="#{desktopCustomizeBean.objectName}"/>
+		        
+		        <rich:spacer height="5px"/>
+		        <fieldset style="font-size:13px;font-weight:normal;width:100%;height:40px">			
+           		<legend><h:outputText value="#{msgs['baf.desktop.selPanel']}" /></legend>
+           		<center>
+           			<a4j:repeat var="panelList" value="#{desktopCustomizeBean.panelList}">
+						<input type="radio" id="panel" name="panel" value="${panelList.panelId}"/><h:outputText value="#{panelList.desktopPanelName}"/><rich:spacer width="10px"/>
+					</a4j:repeat>
+				</center>
+				</fieldset>
+				<rich:spacer height="5px"/>		      
+				
+				<center>
+					<h:panelGroup id="addViewGroup">		
+						<h:outputLabel value="#{msgs['baf.desktop.continueAdd']}" style="font-size:13px;"  styleClass="rich-text-color-general"/>
+						<h:selectBooleanCheckbox id="addView"/>	
+					</h:panelGroup>												
+					<rich:toolTip for="addView" value="#{msgs['baf.desktop.continueAdd']}"/>	
+					<rich:spacer width="10px"/>
+					<h:commandButton type="button" id="viewModalPanelConfirm" styleClass="rich-button" value="#{msgs['baf.desktop.Append']}" onclick="addView()"/><rich:spacer width="10px"/>
+					<h:commandButton type="button" id="viewModalPanelClose" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('viewModalPanel')}.hide(); return false;"/>
+					<a4j:commandButton type="button" id="hideModal" style="display:none;" value="#{msgs['baf.Cancel']}" styleClass="rich-button">
+						<a4j:support event="onclick" onsubmit="if(1!=1) return false;" action="#{desktopCustomizeBean.hideModal}" reRender="viewModalPanel"/>
+					</a4j:commandButton>
+				</center>
+			</rich:modalPanel>			
+			</h:form>
+			
+			<!-- 选择模板 -->
+			<rich:modalPanel id="templateModal" autosized="false" keepVisualState="false" width="550" height="400">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.desktop.selectTemplate']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink1" styleClass="hidelink"/>
+				    <rich:componentControl for="templateModal" attachTo="hidelink1" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<a4j:form id="templateForm">
+				<fieldset style="font-size:13px;font-weight:normal;width:100%;text-align:center;height:310px;">			
+           		<legend><h:outputText value="#{msgs['baf.desktop.templateList']}" /></legend>
+				<rich:dataTable width="95%" id="dtableTemplate" rows="#{desktopCustomizeBean.pageSize}" columnClasses="col"  style="text-align:center;"
+		            value="#{desktopCustomizeBean.thirdDataModel}" var="currTemplate" onRowDblClick="setTemplate('#{currTemplate.layoutId}');" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" title="#{msgs['baf.desktop.onRowdbclick']}">
+		            <rich:column id="optionalClum" width="10%" style="text-align:center;">
+				        <f:facet name="header">
+				        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.customize.selectTip']}" style="font-weight:normal;"/>
+				        </f:facet>
+		               	<h:outputLabel rendered="#{desktopCustomizeBean.layoutIdSelected==currTemplate.layoutId}" onclick="selectedTemplate('#{currTemplate.layoutId}','#{currTemplate.layoutName}');">
+	    					<input type="radio" id="rd" name="rd" value="${currTemplate.layoutId}" checked="checked"/><rich:spacer width="5px"/>
+	    				</h:outputLabel>    		
+	    				<h:outputLabel rendered="#{desktopCustomizeBean.layoutIdSelected!=currTemplate.layoutId}" onclick="selectedTemplate('#{currTemplate.layoutId}','#{currTemplate.layoutName}');">
+	    					<input type="radio" id="rd" name="rd" value="${currTemplate.layoutId}"/><rich:spacer width="5px"/>
+	    				</h:outputLabel>
+			        </rich:column>	  
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.customize.templateName']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText value="#{currTemplate.layoutName}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.customize.PanelNum']}" style="font-weight:normal;"/>
+				        </f:facet>
+				        <h:outputText value="#{currTemplate.panelAmount}" />
+		            </h:column>
+		        </rich:dataTable>
+		        <table width="95%">
+		            <tr>
+			            <td>
+							<rich:datascroller align="right"  for="dtableTemplate" fastStep="1"  page="#{desktopCustomizeBean.templateScrollerPage}" id="templateScroller"/>							
+						</td>
+					</tr>
+				</table>
+				<!-- 
+				<h:panelGroup id="templatePGroup" style="font-size:13px;color:black;width:98%;height:30;text-align:left;" styleClass=".rich-text-color-general"> 	   		
+		 	   		<h:outputText escape="false" value="#{msgs['baf.desktop.customize.currSelectDeskTemplate']}"/>
+		 	   		<b><h:outputLabel id="templateNameSet" value="#{desktopCustomizeBean.templateNamePass}" /></b>
+		       </h:panelGroup>
+		        -->
+				</fieldset>
+				<h:inputHidden id="templateId" value="#{desktopCustomizeBean.layoutIdSelected}"/>
+				<h:inputHidden id="desktopId" value="#{desktopCustomizeBean.desktopId}"/>
+				<h:inputHidden id="templateName" value="#{desktopCustomizeBean.layoutNameSelected}"/>
+				<h:inputHidden id="existTemplate" value="#{desktopCustomizeBean.existLayoutId}"/>
+				<h:inputHidden id="finalTemplate" value="#{desktopCustomizeBean.finalTempId}"/>
+				<rich:spacer height="5px"/>
+				<center>
+					<a4j:commandButton id="btnConfirm" type="button" styleClass="rich-button" value="#{msgs['baf.Confirm']}" onclick="setTemplate('');"/><rich:spacer width="10px"/>
+					<h:commandButton id="btnCancel" type="button" styleClass="rich-button" value="#{msgs['baf.Cancel']}" onclick="#{rich:component('templateModal')}.hide(); return false;"/>
+				</center>
+				<s:validatorScript functionName="validateForm"/>
+			</a4j:form>
+			</rich:modalPanel>
+			
+			<!-- 选择桌面 -->
+			<rich:modalPanel id="desktopModal" autosized="false" keepVisualState="false" width="550" height="450">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.desktop.selectDesktop']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink2" styleClass="hidelink"/>
+				    <rich:componentControl for="desktopModal" attachTo="hidelink2" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	 
+				
+				<a4j:form id="desktopForm">
+				<fieldset style="font-size:13px;font-weight:normal;width:100%;text-align:center;height:360px;">			
+           		<legend><h:outputText value="#{msgs['baf.desktop.desktopList']}" /></legend>
+           		<rich:spacer height="5px"/>
+					<rich:dataTable width="95%" id="desktopTable" rows="#{desktopCustomizeBean.pageSize}" columnClasses="col"  style="font-size:13px;"
+		            value="#{desktopCustomizeBean.defaultDataModel}" var="desktopList" onRowDblClick="setDesktop('#{desktopList.desktopId}');" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" title="#{msgs['baf.desktop.onRowdbclick']}">
+		            <h:column>
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.select']}" style="font-weight:normal;"/>
+				        </f:facet>				        
+		                <input type="radio" id="rdd" name="rdd" value="${desktopList.desktopId}" onclick="document.getElementById('desktopForm:desktopId').value='${desktopList.desktopId},#{desktopList.layoutId}';"/>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+				        	<h:outputText styleClass="headerText " value="#{msgs['baf.desktop.name']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText id="name" value="#{desktopList.desktopName}"/>
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+		                	<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.object']}" style="font-weight:normal;"/>
+				        </f:facet>
+				        <h:outputText value="#{desktopList.objectName}" />
+		            </h:column>
+		            <h:column>
+		            	<f:facet name="header">
+		                	<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.objectType']}" style="font-weight:normal;"/>
+				        </f:facet>
+		                <h:outputText rendered="#{desktopList.objectType=='O'}" value="#{msgs['baf.org.Organize']}"/>
+		                <h:outputText rendered="#{desktopList.objectType=='P'}" value="#{msgs['baf.org.Post']}"/>
+		            </h:column>		        
+		        </rich:dataTable>
+		        <table width="95%">
+		            <tr>
+			            <td>
+							<rich:datascroller align="right"  for="desktopTable" fastStep="1"  page="#{desktopCustomizeBean.scrollerPage1}" id="desktopScroller"/>							
+						</td>
+					</tr>
+				</table>
+				</fieldset>
+				<h:inputHidden id="templateId" value="#{desktopCustomizeBean.existLayoutId}"/>
+				<h:inputHidden id="desktopId" value=""/>
+				<br />
+				<center>
+					<a4j:commandButton id="btnConfirm" type="button" styleClass="rich-button" value="#{msgs['baf.Confirm']}" onclick="setDesktop('');"/><rich:spacer width="10px"/>
+					<h:commandButton id="btnCancel" type="button" styleClass="rich-button" value="#{msgs['baf.Cancel']}" onclick="#{rich:component('desktopModal')}.hide(); return false;"/>
+				</center>
+				</a4j:form>
+			</rich:modalPanel>
+						
+			<a4j:form>
+				<a4j:jsFunction name="saveUserDesktop" action="#{desktopCustomizeBean.saveDesktop}" data="#{desktopCustomizeBean.dealFlag}" oncomplete="onSaveComplete(data);">
+					<a4j:actionparam name="values" value=""></a4j:actionparam>
+				</a4j:jsFunction>
+				
+				<a4j:jsFunction name="changeValues" action="#{desktopCustomizeBean.refreshTemplateIdName}"  reRender="templateNameSet,templateId,templateName"  oncomplete="templateChked();">
+		        	<a4j:actionparam name="currLayoutId" value="" />   
+		        	<a4j:actionparam name="currLayoutName" value="" />                     
+		        </a4j:jsFunction>
+		        
+		        <a4j:jsFunction name="setTemName" action="#{desktopCustomizeBean.setTemName}" reRender="templateNameSet">
+		        	<a4j:actionparam name="templateId" value="" />               
+		        </a4j:jsFunction>
+			</a4j:form> 
+			
+			<rich:toolTip for="helpicon" >
+		    <div style="width:300;">
+			    <h:outputText value="#{msgs['baf.dataRightFactor.helpMessage1']}"/><br />
+		      	1、<h:outputText value="#{msgs['baf.dataImport.helpMessage1']}"/><br />
+		      	2、<h:outputText value="#{msgs['baf.dataImport.helpMessage2']}"/>
+		    </div>
+		    </rich:toolTip>
+		    
+		    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

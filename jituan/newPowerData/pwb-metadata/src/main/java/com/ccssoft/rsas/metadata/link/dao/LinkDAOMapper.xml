@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.link.dao.LinkDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.link.model.LinkVO">
+		<id column="FDULINKID" jdbcType="VARCHAR" property="linkID" />
+		<result column="FDCLINKNAME" jdbcType="VARCHAR" property="LinkName" />
+		<result column="FDILINKTYPE" jdbcType="INTEGER" property="linkType" />
+		<result column="FDUDBTYPEID" jdbcType="VARCHAR" property="databaseTypeID" />
+		<result column="FDISETMODE" jdbcType="INTEGER" property="setMode" />
+		<result column="FDCURL" jdbcType="VARCHAR" property="URL" />
+		<result column="FDCHOST" jdbcType="VARCHAR" property="host" />
+		<result column="FDIPORT" jdbcType="INTEGER" property="port" />
+		<result column="FDCUSERNAME" jdbcType="VARCHAR" property="userName" />
+		<result column="FDCPASSWORD" jdbcType="VARCHAR" property="password" />
+		<result column="FDCDATABASENAME" jdbcType="VARCHAR" property="databaseName" />
+		<result column="FDCSID" jdbcType="VARCHAR" property="SID" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addLink" parameterType="com.ccssoft.rsas.metadata.link.model.LinkVO">
+		insert into TBLINK (FDULINKID, FDCLINKNAME, FDILINKTYPE, 
+		FDUDBTYPEID, FDISETMODE, FDCURL, FDCHOST, FDIPORT, 
+		FDCUSERNAME, FDCPASSWORD, FDCDATABASENAME, FDCSID, FDCDESC)
+		values (#{linkID,jdbcType=VARCHAR}, #{LinkName,jdbcType=VARCHAR}, 
+		#{linkType,jdbcType=INTEGER}, #{databaseTypeID,jdbcType=VARCHAR}, 
+		#{setMode,jdbcType=INTEGER}, #{URL,jdbcType=VARCHAR}, 
+		#{host,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER}, 
+		#{userName,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+		#{databaseName,jdbcType=VARCHAR}, #{SID,jdbcType=VARCHAR}, 
+		#{desc,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateLink" parameterType="com.ccssoft.rsas.metadata.link.model.LinkVO">
+		update TBLINK 
+		set FDCLINKNAME = #{LinkName,jdbcType=VARCHAR}, 
+		FDILINKTYPE = #{linkType,jdbcType=INTEGER}, 
+		FDUDBTYPEID = #{databaseTypeID,jdbcType=VARCHAR}, 
+		FDISETMODE = #{setMode,jdbcType=INTEGER}, 
+		FDCURL = #{URL,jdbcType=VARCHAR}, 
+		FDCHOST = #{host,jdbcType=VARCHAR}, 
+		FDIPORT = #{port,jdbcType=INTEGER}, 
+		FDCUSERNAME = #{userName,jdbcType=VARCHAR}, 
+		FDCPASSWORD = #{password,jdbcType=VARCHAR}, 
+		FDCDATABASENAME = #{databaseName,jdbcType=VARCHAR}, 
+		FDCSID = #{SID,jdbcType=VARCHAR}, 
+		FDCDESC = #{desc,jdbcType=VARCHAR}
+		where FDULINKID = #{linkID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delLink" parameterType="java.lang.String">
+		delete from TBLINK
+		where FDULINKID = #{linkID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getLink" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDULINKID, FDCLINKNAME, FDILINKTYPE, 
+		FDUDBTYPEID, FDISETMODE, FDCURL, FDCHOST, FDIPORT, 
+		FDCUSERNAME, FDCPASSWORD, FDCDATABASENAME, FDCSID, FDCDESC
+		from TBLINK
+		where FDULINKID = #{linkID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getLinks" resultMap="BaseResultMap">
+		select FDULINKID, FDCLINKNAME, FDILINKTYPE, 
+		FDUDBTYPEID, FDISETMODE, FDCURL, FDCHOST, FDIPORT, 
+		FDCUSERNAME, FDCPASSWORD, FDCDATABASENAME, FDCSID, FDCDESC
+		from TBLINK
+	</select>
+</mapper>

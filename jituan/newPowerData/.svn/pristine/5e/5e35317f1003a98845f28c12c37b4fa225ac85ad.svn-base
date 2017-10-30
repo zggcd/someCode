@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+ 
+<f:loadBundle basename="messages" var="msgs" />
+<f:view  contentType="text/html">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script>
+	//<![CDATA[	
+	    //响应对象选择树节单击事件
+    	function doOnNodeClick(){
+    		var assginObjId="";//指定对象值.  
+    		var objId="";//映射对象Id值.
+     		var gotObjOptional = document.getElementsByName("dataImportForm:assginObj");
+  			if(gotObjOptional != "" && gotObjOptional != undefined){
+   	  			for(var i=0;i<gotObjOptional.length;i++){
+	   				if(gotObjOptional[i].checked==true){
+						assginObjId = gotObjOptional[i].value;
+						break;
+					}
+       			}
+  			}
+  			if(assginObjId == "01"){
+           		objId = orgObjsTree_tree.getSelectedItemId();
+       		}else if(assginObjId == "02"){
+       	    	objId = buearu0bjsTree_tree.getSelectedItemId();
+       		}else{
+       	    	objId = specObjsTree_tree.getSelectedItemId();
+       		}
+    	  	
+    	  	//对象类型值  	 
+    	  	var objType=""; 	
+   	  		var gotTypeOptional = document.getElementsByName("dataImportForm:importObj");
+   	  		if(gotTypeOptional != "" && gotTypeOptional != undefined){
+       	  		for(var i=0;i<gotTypeOptional.length;i++){
+					if(gotTypeOptional[i].checked==true){
+						objType = gotTypeOptional[i].value;
+						break;
+					}
+           		}
+   	  		}
+   	  		
+   	  		if(objId != "" && objId != undefined){
+    	 		setAllObjIdTypeValue(assginObjId,objId,objType);
+    	    }else{
+    	     	alert("${msgs['baf.dataImport.selectObjIdNodeTip']}");
+    		    return;   
+    	    }
+    	}
+    	    	//判断是否选择了一个树节点及对象原始Id值是否为空.
+    	function beforeBtnSubmit(){
+   	        var assginObjId="";//指定对象值.  
+    		var objId="";//映射对象Id值.
+     		var gotObjOptional = document.getElementsByName("dataImportForm:assginObj");
+  			if(gotObjOptional != "" && gotObjOptional != undefined){
+   	  			for(var i=0;i<gotObjOptional.length;i++){
+	   				if(gotObjOptional[i].checked==true){
+						assginObjId = gotObjOptional[i].value;
+						break;
+					}
+       			}
+  			}
+  			if(assginObjId == "01"){
+           		objId = orgObjsTree_tree.getSelectedItemId();
+       		}else if(assginObjId == "02"){
+       	    	objId = buearu0bjsTree_tree.getSelectedItemId();
+       		}else{
+       	    	objId = specObjsTree_tree.getSelectedItemId();
+       		}
+           	if(objId != "" && objId != undefined){
+    	 		return true;
+    	    }else{
+    	     	alert("${msgs['baf.dataImport.selectObjIdNodeTip']}");
+    		    return false;   
+    	    }
+    	}
+    	
+    	//导入日志查询按钮onSubmit事件.
+    	function checkQueryInputValues(){
+   	        var beginDay=document.getElementById("logForm:beginTimeInputDate").value;
+			var endDay=document.getElementById("logForm:endTimeInputDate").value;
+			var returnValue = false;
+			if(beginDay=="" || endDay==""){
+				returnValue = true;
+			}else{
+				returnValue = inputSeachTimeCheck(beginDay,endDay)
+			}
+			return returnValue;
+    	}
+    	
+    	//导入数据文件上传过程出现异常处理.
+    	function importFileError(){
+    		alert("${msgs['baf.dataImport.uploadFileExceptionTip']}");
+    		return;
+    	}  	
+    	//导入数据文件格式不对.
+    	function fileSuffixAllowedError(){
+    	    alert("${msgs['baf.dataImport.uploadFileSuffixErrorTip']}");
+    		return;
+    	}
+    	
+    	//根据对象类别选择决定显示哪个对象树模态框.
+    	function whichModelToShow(){
+ 	  		var gotObjOptional = document.getElementsByName("dataImportForm:assginObj");
+    	  	var objId = "";
+    	  	if(gotObjOptional != "" && gotObjOptional != undefined){
+        	  	for(var i=0;i<gotObjOptional.length;i++){
+					if(gotObjOptional[i].checked==true){
+						objId = gotObjOptional[i].value;
+						break;
+					}
+            	}
+    	  		showIt(objId);
+    	  	}else{
+    	  		alert("${msgs['baf.dataImport.chkOneOptional']}");
+    	  		return;
+    	  	}    
+    	}
+    	
+    	function showIt(optionalId)
+        {
+           //alert();
+           var type="";
+           type = optionalId;
+           if(type == "01"){
+              Richfaces.showModalPanel("assginOrgObj");
+           }else if(type == "02"){
+           	  Richfaces.showModalPanel("assginBuearuObj");
+           }else{
+           	  Richfaces.showModalPanel("assginSpecialityObj");
+           }
+        } 
+        
+        //表单校验扩展
+		function validateAll(formobj)
+		{
+		  	var returnvalue = true;	   
+		   	returnvalue = validateForm(formobj);
+		   	return returnvalue;
+		}
+		function dataFileChecked(){
+			var fileName = document.getElementById("tempform:uploadFile").value;
+			if(fileName==""){
+				alert("${msgs['baf.dataImport.selectDataFile']}");
+				return false;
+			}else{
+				document.getElementById('panel').component.show();
+				return true;
+			}
+		}
+		
+		//建立对象映射关系后响应事件.
+		function onObjMapping(data){
+			if(data != "N"){			
+			  	if(data=="EM"){   //映射关系已存在
+				  	alert("${msgs['baf.dataImport.isExistMap']}");
+			   	}
+			   	if(data=="Y"){   //映射关系建立成功			   		
+				  	alert("${msgs['baf.dataImport.mapSuccess']}");
+			   	}
+		   		var gotObjOptional = document.getElementsByName("dataImportForm:assginObj");
+    	  		var objId = "";
+    	  		if(gotObjOptional != "" && gotObjOptional != undefined){
+        	  		for(var i=0;i<gotObjOptional.length;i++){
+						if(gotObjOptional[i].checked==true){
+							objId = gotObjOptional[i].value;
+							break;
+						}
+            		}
+    	  		}
+    	  		if(objId == "01"){
+    	  			document.getElementById("orgModelForm:objOrgPrimeId").value = "";    
+    	  			orgObjsTree_tree.refreshItem("0");
+                	Richfaces.hideModalPanel("assginOrgObj");
+            	}else if(objId == "02"){
+    	  			document.getElementById("buearaModelForm:objBuearuPrimeId").value = "";    
+    	  			buearu0bjsTree_tree.refreshItem("0");
+            	    Richfaces.hideModalPanel("assginBuearuObj");
+            	}else{
+    	  			document.getElementById("specModelForm:objSpecPrimeId").value = "";    
+    	  			specObjsTree_tree.refreshItem("0");
+            	    Richfaces.hideModalPanel("assginSpecialityObj"); 
+            	}	    	
+		  	}else{
+		     	alert("${msgs['baf.system.exceptionTip']}");//系统繁忙,请稍后再试.
+    	  	 	return;   
+		  	}
+		}
+		
+		//一次数据导入完成之后.
+		function onDataImportEnd(resultMsg){
+			document.getElementById('panel').component.hide();
+		  	alert(resultMsg);
+			window.location.href = "${request.contextPath}/baf/jsp/impexp/importdata.xhtml";
+		}
+		
+    	//清除上传文件事件
+        function clearUploadFile(){
+        	clearFile();
+        }
+        
+        //查询日志,日期验证.
+		//开始日期不能大于结束日期,如果大于则返回FALSE
+		function inputSeachTimeCheck(beginDay,endDay){
+			var beginDate = beginDay.split(" ");
+			var arr1 = beginDate[0].split("-");
+			var begin = new Date(arr1[0],arr1[1],arr1[2]);
+			var beginDaytime = begin.getTime();
+			var hour1 = beginDate[1].split(":")[0];
+			var mini1 = beginDate[1].split(":")[1];
+
+			var endDate = endDay.split(" ");
+			var arr2 = endDate[0].split("-");
+			var end = new Date(arr2[0],arr2[1],arr2[2]);
+			var endDayTime = end.getTime();
+			var hour2 = endDate[1].split(":")[0];
+			var mini2 = endDate[1].split(":")[1];
+
+			if(beginDaytime >= endDayTime)
+			{
+				if(beginDaytime > endDayTime){
+					alert("${msgs['baf.dataImport.dateCompare']}");
+					return false;
+				}else{
+					if(hour1>hour2 || (hour1==hour2 && mini1>mini2)){
+						alert("${msgs['baf.dataImport.dateCompare']}");
+						return false;
+					}else{
+						return true;
+					}
+				}
+			}else{
+				return true;
+			}
+		}
+		
+	    /*session超时显示错误信息*/
+		A4J.AJAX.onExpired = function(loc,expiredMsg){
+		   alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+		}
+		
+		/*显示数据提交到后台的错误信息*/
+		A4J.AJAX.onError = function(req,status,message){
+			var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}\n" + message;
+			alert(report);
+		}
+		
+		//重置查询条件
+		function reset(){
+			document.getElementById("logForm:beginTime").value = "";
+			document.getElementById("logForm:endTime").value = "";
+		}
+		
+		//屏蔽退格键的事件监听
+		function forCheck(){
+			if(event.keyCode == 8){
+			    event.returnValue   =   false;
+			}
+		}
+	
+	//]]>
+	</script>
+	<style type="text/css">
+	.column1{
+		width:25%;
+		text-align:right;
+	}
+	.column2{
+		width:55%;
+		text-align:left;
+	}
+	.column3{
+		width:20%;
+		text-align:left;
+	}
+	.clearButton{
+		display:none;
+	}
+	</style>
+	</head>
+	<body> 
+		<!-- 组织 -->
+		<regaltec:dhtmlXtree id="orgObjsTree"
+			imagePath="/baf/images/dhtmlxtree/" contentEl="objsTdOrg"
+			loadXML="/baf/jsp/impexp/chkOrgTreeXMLData.jsp"
+			xmlAutoLoading="/baf/jsp/impexp/chkOrgTreeXMLData.jsp">
+			<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnNodeClick" />	
+		</regaltec:dhtmlXtree>
+		
+		 <!-- 局向 -->
+		<regaltec:dhtmlXtree id="buearu0bjsTree"
+			imagePath="/baf/images/dhtmlxtree/" contentEl="objsTdBuearu"
+			loadXML="/baf/jsp/impexp/chkBureauTreeXMLData.jsp"
+			xmlAutoLoading="/baf/jsp/impexp/chkBureauTreeXMLData.jsp">
+			<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnNodeClick" />	
+		</regaltec:dhtmlXtree>		
+			
+		<!-- 业务 -->
+		<regaltec:dhtmlXtree id="specObjsTree"
+			imagePath="/baf/images/dhtmlxtree/" contentEl="objsTdSpec"
+			loadXML="/baf/jsp/impexp/chkBusinessTreeXMLData.jsp"
+			xmlAutoLoading="/baf/jsp/impexp/chkBusinessTreeXMLData.jsp">
+			<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnNodeClick" />	
+		</regaltec:dhtmlXtree>	
+		
+		<!-- 指定对象选择   -->
+        <!-- 组织对象 -->
+		<rich:modalPanel id="assginOrgObj" autosized="false" keepVisualState="false" width="400" height="450">		
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataImport.selectOrg']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkOrg" styleClass="hidelink"/>
+	    		<rich:componentControl for="assginOrgObj" attachTo="hidelinkOrg" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="orgModelForm">	
+			<fieldset style="width:98%;height:370px">
+      			<legend><h:outputText value="#{msgs['baf.dataImport.selectionsLabel']}" /></legend>				           		
+     			<table style="font-size:13px;width:100%;height:99%;overflow-x:auto;overflow-y:auto;" cellpadding="10px">
+    				<tr style="width:100%;height:90%;" align="left"><td colspan="2" id="objsTdOrg"></td></tr>
+    				<tr style="width:100%;height:10%;" align="left">
+    					<td style="width:40%" align="left"><h:outputText value="#{msgs['baf.dataImport.objPrimitiveId']}" /></td>
+    					<td style="width:60%" align="left">
+			         		<h:inputText id="objOrgPrimeId" styleClass="rich-gradient-input"  value="#{importBean.primitiveOrgId}">
+				         		<s:commonsValidator type="required" arg="#{msgs['baf.dataImport.objPrimitiveId']}" server="false" client="true"/>
+				         		<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dataImport.objPrimitiveId']}" maxLength="32"  server="false" client="true"/>	
+			          		</h:inputText>
+    					</td>
+    				</tr>
+    			</table>
+     		</fieldset>
+			<center>
+				<a4j:commandButton type="button" id="assginOrgModelSure" styleClass="rich-button" value="#{msgs['baf.dataImport.btnMap']}" style="width:90px;text-align:center;">
+					<a4j:support event="onclick" onsubmit="if(validateAll(document.getElementById('orgModelForm'))==false) return false;if(beforeBtnSubmit()==false) return false;" action="#{importBean.buildMapping}" data="#{importBean.objOrgMapFlag}" oncomplete="onObjMapping(data);"/>
+				</a4j:commandButton><rich:spacer width="5px"/>
+		        <a4j:commandButton styleClass="rich-button" type="button" id="assginOrgModelCancle" value="#{msgs['baf.dataImport.modelCancleLable']}" onclick="#{rich:component('assginOrgObj')}.hide();return false;"/>
+			</center>
+     		<s:validatorScript functionName="validateForm"/>	
+	        </a4j:form>	
+		 </rich:modalPanel>
+		 
+		<!-- 局向对象 -->
+		  <rich:modalPanel id="assginBuearuObj" autosized="false" keepVisualState="false" width="400" height="450">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataImport.selectBuearu']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkBuearu" styleClass="hidelink"/>
+	    		<rich:componentControl for="assginBuearuObj" attachTo="hidelinkBuearu" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="buearaModelForm">
+			<fieldset style="width:98%;height:370px">				
+      				<legend><h:outputText value="#{msgs['baf.dataImport.selectionsLabel']}" /></legend>	
+      				<table style="font-size:13px;width:100%;height:99%;overflow-x:auto;overflow-y:auto;" cellpadding="10px">
+     					<tr style="width:100%;height:90%;" align="left"><td colspan="2" id="objsTdBuearu"></td></tr>
+     					<tr style="width:100%;height:10%;" align="left">
+     					  <td style="width:40%" align="left"><h:outputText value="#{msgs['baf.dataImport.objPrimitiveId']}" /></td>
+     					  <td style="width:60%" align="left">
+			         	<h:inputText id="objBuearuPrimeId" styleClass="rich-gradient-input"  value="#{importBean.primitiveBuearuId}">
+				         	<s:commonsValidator type="required" arg="#{msgs['baf.dataImport.objPrimitiveId']}" server="false" client="true"/>
+				         	<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dataImport.objPrimitiveId']}" maxLength="32"  server="false" client="true"/>	
+			         	</h:inputText>
+     					  </td>
+     					</tr>
+     				</table>
+     			</fieldset>
+			<center>
+				<a4j:commandButton type="button" id="assginBuearuModelSure" styleClass="rich-button" value="#{msgs['baf.dataImport.btnMap']}" style="width:90px;text-align:center;">
+					<a4j:support event="onclick" onsubmit="if(validateAll(document.getElementById('buearaModelForm'))==false) return false;if(beforeBtnSubmit()==false) return false;" action="#{importBean.buildMapping}" data="#{importBean.objBurMapFlag}" oncomplete="onObjMapping(data);"/>
+				</a4j:commandButton><rich:spacer width="5px"/>
+		        <a4j:commandButton styleClass="rich-button" type="button" id="assginBuearuModelCancle" value="#{msgs['baf.dataImport.modelCancleLable']}" onclick="#{rich:component('assginBuearuObj')}.hide();return false;"/>
+			</center>
+     			<s:validatorScript functionName="validateForm"/>		
+			</a4j:form>	
+		 </rich:modalPanel>	 	
+	
+		<!-- 业务对象 -->
+		<rich:modalPanel id="assginSpecialityObj" autosized="false" keepVisualState="false" width="400" height="450">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataImport.selectSpeciality']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkSpec" styleClass="hidelink"/>
+	    		<rich:componentControl for="assginSpecialityObj" attachTo="hidelinkSpec" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="specModelForm">
+			<fieldset style="width:98%;height:370px">
+      				<legend><h:outputText value="#{msgs['baf.dataImport.selectionsLabel']}" /></legend>		
+      				<table style="font-size:13px;width:100%;height:99%;overflow-x:auto;overflow-y:auto;" cellpadding="10px">
+     					<tr style="width:100%;height:90%;" align="left"><td colspan="2" id="objsTdSpec"></td></tr>
+     					<tr style="width:100%;height:10%;" align="left">
+     					  <td style="width:40%" align="left"><h:outputText value="#{msgs['baf.dataImport.objPrimitiveId']}" /></td>
+     					  <td style="width:60%" align="left">
+			         	<h:inputText id="objSpecPrimeId" styleClass="rich-gradient-input"  value="#{importBean.primitiveSpecId}">
+				         	<s:commonsValidator type="required" arg="#{msgs['baf.dataImport.objPrimitiveId']}" server="false" client="true"/>
+				         	<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dataImport.objPrimitiveId']}" maxLength="32"  server="false" client="true"/>	
+			          	</h:inputText>
+     					  </td>
+     					</tr>
+     				</table>	
+			</fieldset>
+			<center>
+				<a4j:commandButton type="button" id="assginSpecModelSure" styleClass="rich-button" value="#{msgs['baf.dataImport.btnMap']}" style="width:90px;text-align:center;">
+					<a4j:support event="onclick" onsubmit="if(validateAll(document.getElementById('specModelForm'))==false) return false;if(beforeBtnSubmit()==false) return false;" action="#{importBean.buildMapping}" data="#{importBean.objSpeMapFlag}" oncomplete="onObjMapping(data);"/>
+				</a4j:commandButton><rich:spacer width="5px"/>
+		        <a4j:commandButton styleClass="rich-button" type="button" id="assginSpecModelCancle" value="#{msgs['baf.dataImport.modelCancleLable']}" onclick="#{rich:component('assginSpecialityObj')}.hide();return false;"/>
+			</center>
+     			<s:validatorScript functionName="validateForm"/>		
+	        </a4j:form>	
+		 </rich:modalPanel>	
+		 
+		<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="100%" height="100%" switchType="client" >
+			<!-- 数据导入tab -->
+			<rich:tab id="impTab" name="impTab" label="#{msgs['baf.dataImport.importTabLable']}" style="height:98%;width:100%;">
+				<center>
+				<h:form id="dataImportForm1">
+				<rich:spacer height="10px"/>
+				<fieldset style="height:90%;width:80%;" >			
+                <legend><h:outputText value="#{msgs['baf.dataImport.importModuleDownload']}" /></legend>			
+					<h:panelGrid id="downloadGrid" columns="3" columnClasses="column1,column2,column3" style="font-size:13px;width:100%;" styleClass=".rich-text-color-general">					 						
+						
+						<h:outputText value="#{msgs['baf.dataImport.assignModuleObject']}:" />
+						<h:selectOneRadio id="downloadObj" style="font-size:13px"
+							value="#{importBean.assginObj}">
+							<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalOragnization']}" itemValue="01" />
+							<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBurean']}" itemValue="02" />
+							<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBusiness']}" itemValue="03" />
+						</h:selectOneRadio>
+						<h:commandButton styleClass="rich-button"  id="downloadCmd" value="#{msgs['baf.dataImport.download']}" actionListener="#{importBean.downloadModule}">
+				        	
+						</h:commandButton>	
+					</h:panelGrid>				  
+				</fieldset>		
+				</h:form>
+					<h:form id="dataImportForm">
+						<rich:spacer height="30px"/>
+						<fieldset style="height:90%;width:80%;" >			
+		                	<legend><h:outputText value="#{msgs['baf.dataImport.importTabLable']}" /></legend>			
+							<h:panelGrid id="impGrid" columns="3" columnClasses="column1,column2,column3" style="font-size:13px;width:100%;" styleClass=".rich-text-color-general">					 						
+								
+								<h:outputText value="#{msgs['baf.dataImport.assginObject']}:" />
+								<h:selectOneRadio id="assginObj" style="font-size:13px"
+									value="#{importBean.assginObj}">
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalOragnization']}" itemValue="01" />
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBurean']}" itemValue="02" />
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBusiness']}" itemValue="03" />
+								</h:selectOneRadio>
+								<a4j:commandButton styleClass="rich-button" type="submit" id="assginObjCmd" value="#{msgs['baf.dataImport.assginCmd']}">
+						        	<a4j:support event="onclick" onsubmit="whichModelToShow(); return false;"/>
+								</a4j:commandButton>
+						
+								<h:outputText value="#{msgs['baf.dataImport.importObject']}:"/>
+								<h:selectOneRadio id="importObj" style="font-size:13px"
+									value="#{importBean.mapingObjType}">
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalOragnization']}" itemValue="O" />
+								    <f:selectItem itemLabel="#{msgs['baf.dataImport.optionalPost']}" itemValue="P" />
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalEmployer']}" itemValue="E" />
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBurean']}" itemValue="B" />
+									<f:selectItem itemLabel="#{msgs['baf.dataImport.optionalBusiness']}" itemValue="S" />
+								</h:selectOneRadio>
+						        <h:outputText value=""></h:outputText>
+						        
+							    <h:outputText value="#{msgs['baf.dataImport.dataFile']}:"/>	
+							    <rich:fileUpload
+									listWidth="100%"
+									listHeight="60px"
+									immediateUpload="true"
+									required="true"
+									maxFilesQuantity="1"
+									progressLabel="#{msgs['baf.dataImport.fileUploadProcessLabel']}"
+									addControlLabel="#{msgs['baf.dataImport.fileuploadAddLabel']}"
+									clearControlLabel="#{msgs['baf.dataImport.fileuploadCancleLabel']}"							
+									noDuplicate="true"
+									doneLabel="#{msgs['baf.dataImport.fileUploadDoneTip']}"
+									acceptedTypes="xls"
+									sizeErrorLabel="#{msgs['baf.dataImport.fileUploadSizeOverflowLable']}"
+									onerror="importFileError();"
+									ontyperejected="fileSuffixAllowedError();"
+									style="rich-gradient-input;font-size:13px"
+									fileUploadListener="#{importBean.uploadListener}" id="fileUpload" onclear="clearUploadFile();" cleanButtonClass="clearButton">	
+									<a4j:support event="onfileuploadcomplete" reRender="uploadFile"/>				
+								</rich:fileUpload>	
+								<h:outputText value=""></h:outputText>
+							</h:panelGrid>	
+						</fieldset>		
+						<br /><br />			
+						<rich:spacer height="20px"/>	
+						<a4j:commandButton styleClass="rich-button" type="submit" id="importCmd" value="#{msgs['baf.dataImport.importCmd']}" >
+							<a4j:support event="onclick" onsubmit="if(dataFileChecked()==false) return false;" 
+								action="#{importBean.importData}" data="#{importBean.dataImpMS}" oncomplete="onDataImportEnd(data);"/>
+						</a4j:commandButton>
+					</h:form>
+				</center>
+			</rich:tab>
+			
+			<h:form id="tempform">
+				<h:inputHidden id="uploadFile" value="#{importBean.fileName}"/>
+			</h:form>
+			
+			<!-- 导入操作日志tab -->
+			<rich:tab id="logTab" name="logTab" label="#{msgs['baf.dataImport.logTabLable']}" style="text-align:center;height:98%;width:100%;">
+				<br /><br />
+				<center>
+		        	<a4j:form id="logForm">
+						<rich:panel style="width:95%;">				
+							<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	
+						        <h:panelGroup>
+									<h:outputText value="#{msgs['baf.dataImport.logBeginTimeLabel']}："/>
+									<rich:calendar id="beginTime"  value="#{importBean.logStartTime}" 
+										datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" showFooter="true" oninputkeydown="forCheck();"  
+										inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="00:00">
+										<s:commonsValidator type="required" arg="#{msgs['baf.dataImport.logBeginTimeLabel']}" server="false" client="true"/>
+									</rich:calendar>
+								</h:panelGroup>
+								
+								<rich:spacer width="10px"/> 
+								
+								<h:panelGroup>
+									<h:outputText value="#{msgs['baf.dataImport.logEndTimeLabel']}："/>
+									<rich:calendar id="endTime"  value="#{importBean.logEndTime}" 
+										datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" 
+										inputStyle="width:150px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input" defaultTime="23:59">
+										<s:commonsValidator type="required" arg="#{msgs['baf.dataImport.logEndTimeLabel']}" server="false" client="true"/>
+									</rich:calendar>
+									<rich:spacer width="20px"/> 
+									<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.calendar.select']}">
+										<a4j:support event="onclick" onsubmit="if (checkQueryInputValues()==false) return false;" action="#{importBean.searchImpLogByTime}" limitToList="true" reRender="impLogLists,itemScroller" requestDelay="100"/>
+									</a4j:commandButton><rich:spacer width="10px"/>
+									<a4j:commandButton styleClass="rich-button" type="submit" id="itemForReset" value="#{msgs['buttonResetLable']}" onclick="reset()"/>
+								</h:panelGroup>	
+							</h:panelGrid>	
+						</rich:panel>
+						<s:validatorScript functionName="validateForm"/>
+						
+    					<!-- jsFunction函数 -->
+						<a4j:jsFunction name="setAllObjIdTypeValue" action="#{importBean.setCurrObjTypeId}">
+					     	<a4j:actionparam name="assginObjId" value=""/>
+						 	<a4j:actionparam name="objId" value=""/>
+						 	<a4j:actionparam name="objType" value=""/>
+					   	</a4j:jsFunction>
+					   	
+				    	<a4j:jsFunction name="clearFile" action="#{importBean.clearUploadFile}" reRender="fileUpload,uploadFile">	    	
+				    	</a4j:jsFunction>
+				    </a4j:form>		 				 
+				    
+					<rich:spacer height="10px"/>
+					
+					<!-- 显示列表 -->
+					<rich:dataTable width="95%" id="impLogLists" rows="#{importBean.pageSize}" columnClasses="col" 
+			            value="#{importBean.defaultDataModel}" var="impLogItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 
+			            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">  		            
+			            <h:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText " value="#{msgs['baf.dataImport.importObject']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{impLogItem.logCategory}" /></center>
+			            </h:column>
+			            <h:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.impOperResult']}" style="font-weight:normal;"/>
+					        </f:facet>
+					        <center><h:outputText value="#{impLogItem.logLevel}" /></center>
+			            </h:column>
+			            <h:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.impErrorReason']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{impLogItem.logDesc}" /></center>
+			            </h:column>
+			            <h:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dataImport.impOperTime']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center>
+				                <h:outputLabel value="#{impLogItem.logTime}">
+									<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+								</h:outputLabel>
+							</center>
+			            </h:column>
+			        </rich:dataTable>
+			        <table width="95%">
+			            <tr>
+				            <td>
+				            <h:form>
+								<rich:datascroller align="right"  for="impLogLists" fastStep="1"  page="#{importBean.scrollerPage}" id="itemScroller"/>							
+							</h:form>
+							</td>
+						</tr>
+					</table>
+					<a4j:keepAlive beanName="importBean"/>
+				</center>	
+			</rich:tab> 	
+		</rich:tabPanel>		
+		
+		<rich:modalPanel id="dataPanel" autosized="false" keepVisualState="false" width="400" height="300">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataImport.errorDataMess']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hl" styleClass="hidelink"/>
+	    		<rich:componentControl for="dataPanel" attachTo="hl" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<center>
+				<rich:panel style="width:95%;height:210px;text-align:center;">
+					<h:inputTextarea id="logData" value="#{importBean.errorData}" style="width:95%;height:190px;"/>
+				</rich:panel>
+				<br />
+			    <a4j:commandButton styleClass="rich-button" type="button" id="dataPanelClose" value="#{msgs['baf.Close']}" onclick="#{rich:component('dataPanel')}.hide();return false;"/>
+			</center>
+		</rich:modalPanel>
+		
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+	</body>
+	</f:view>
+</html>

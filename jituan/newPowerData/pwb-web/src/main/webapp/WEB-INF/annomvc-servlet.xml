@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+    xmlns="http://www.springframework.org/schema/beans" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+    http://www.springframework.org/schema/context 
+    http://www.springframework.org/schema/context/spring-context-2.5.xsd
+    http://www.springframework.org/schema/mvc
+	http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+ 	
+ 	<mvc:annotation-driven />
+ <!-- 使用@ResponseBody 输出乱码，加入此配置 -->
+  <bean  class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter" >     
+    <property name="messageConverters">     
+         <list>     
+             <bean class = "org.springframework.http.converter.StringHttpMessageConverter">     
+               <property name = "supportedMediaTypes">     
+                     <list>     
+                         <value>text/html;charset=UTF-8</value>     
+                     </list>     
+                </property>     
+             </bean>     
+         </list>     
+    </property>     
+</bean>  
+    <context:component-scan base-package="com.regaltec.bbs.data.ui.control" />
+	<context:component-scan base-package="com.ccssoft.rsas.**.control"  />
+    <context:component-scan base-package="com.ccssoft.rsas.**.bo"  />
+     <bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
+     <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"/>
+     <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor" />
+    <bean id="multipartResolver"  
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">  
+       <!-- set the max upload size100MB -->  
+        <property name="maxUploadSize">  
+            <value>104857600</value>  
+        </property>  
+        <property name="maxInMemorySize">  
+            <value>4096</value>  
+        </property>  
+    </bean>  
+    
+   
+   
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" 
+        p:prefix="/" p:suffix=".jsp"/>
+</beans>

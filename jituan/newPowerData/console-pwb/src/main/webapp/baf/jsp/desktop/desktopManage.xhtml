@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+		<script type="text/javascript">
+		//<![CDATA[
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		
+		function openAddForm(url) {
+        	desktopForm.document.location.href = "${request.contextPath}" + url;		
+		}
+		
+		function openEditForm(url) {
+			var desktopId = document.getElementById("desktopForm:desktopIdArray").value;
+			url = url + "?desktopId=" + desktopId;
+        	desktopForm.document.location.href = "${request.contextPath}" + url		
+		}
+		
+		function onDbclickEditDesktop(desktopId){
+			url = "/baf/jsp/desktop/desktopCustomize.xhtml" + "?desktopId=" + desktopId;
+			desktopForm.document.location.href = "${request.contextPath}" + url
+		}
+		
+		 //响应check点击事件
+		function checkBoxClick(object, value) {	
+			var desktopIdArray = document.getElementById("desktopForm:desktopIdArray").value;
+			if (desktopIdArray == null || desktopIdArray == "") {
+				if (object.checked == true) {							
+					desktopIdArray = value;
+				} 
+			} else {
+				if (object.checked == true) {
+					desktopIdArray = desktopIdArray + "~" + value;	 			
+				} else {
+					var index = desktopIdArray.indexOf(value);
+					if (index >= 0) {																
+						var str = "";
+						if(index>0){
+							str = "~"+value;
+						} else {
+							if(index==0 && desktopIdArray.indexOf("~")!=-1){
+								str = value + "~";
+							} else {
+								str = value;
+							}
+						}
+						desktopIdArray = desktopIdArray.replace(str, "");
+					}
+				}
+			}
+			//保存勾选的桌面ID值， 格式为 id~id~id
+			document.getElementById("desktopForm:desktopIdArray").value = desktopIdArray;
+		}
+				
+		//判断是否选择单行或者多行
+		function checkSelectRow() {					
+			var oTable = document.getElementById("desktopForm:table");
+			//获取当前页码数
+			var pageNum = document.getElementById("desktopForm:pageNum").value;
+			if (pageNum <= 0) pageNum = 1;
+			//获取每页数据个数
+			var pageSize = document.getElementById("desktopForm:pageSize").value;					
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+				for (var i=0; i<size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("desktopForm:table:"+realNum+":selectFlag");							
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount <= 0) {
+					//请勾选需要删除的数据
+					alert("${msgs['baf.desktop.warningCheckRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		//判断是否选择了一行
+		function checkSelectOneRow() {										
+			var oTable = document.getElementById("desktopForm:table");
+			//获取当前页码数
+			var pageNum = document.getElementById("desktopForm:pageNum").value;
+			if (pageNum <= 0) pageNum = 1;
+			//获取每页数据个数
+			var pageSize = document.getElementById("desktopForm:pageSize").value;
+			var size = oTable.rows.length - 1; //去除列头一行
+			var selectCount = 0;
+			if (size != null) {
+				for (var i=0; i<size; i++) {
+					var realNum = (pageNum-1)*pageSize + i;
+					var e = document.getElementById("desktopForm:table:"+realNum+":selectFlag");						
+					if (e != null && e.checked) {
+						selectCount ++;
+					}
+				}
+				if (selectCount != 1) {
+					//请勾选一行需要编辑的数据
+					alert("${msgs['baf.org.WarningEditOneRow']}");
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		//查询桌面信息
+		function onSearchComplete(data){
+			if (data == "N") {
+				//查询失败
+				alert("${msgs['baf.org.WarningSearchFailure']}");
+			}
+			//清除勾选的checkbox值 
+			document.getElementById("desktopForm:desktopIdArray").value = "";				
+		}
+		
+		//删除桌面信息完成
+		function onDesktopDeleteComplete(data) {
+			if(a4jcomplete()==false){
+ 				return;
+ 			}
+			if (data == "N") {
+				//处理失败
+				alert("${msgs['baf.org.WarningHandleFailure']}");
+			}			
+		}
+		
+		//发布或禁止完成
+		function onPublishOrDisableComplete(data){
+			if(a4jcomplete()==false){
+	 			return;
+	 		}
+			if (data == "N"){
+				//处理失败
+				alert("${msgs['baf.org.WarningHandleFailure']}");
+			}
+		}
+		//点击查询按纽列表未渲染前置灰
+		function ondisabled(type){
+			if(type == "sea"){
+				document.getElementById("desktopForm:diskSearch").disabled = true;
+			}else if(type == "pub"){
+				document.getElementById("desktopForm:publishOrDisable").disabled = true;
+		  	}
+		}
+		//]]>
+		</script>
+		</head>
+		<body>
+			<f:loadBundle basename="messages" var="msgs" />
+			<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+			
+			
+			<rich:tabPanel id="tabPanel" style="margin-left:0;margin-right:0;margin-top:5px;margin-bottom:5px;" width="100%" height="98%" switchType="client" >
+				<rich:tab id="changes" name="holidays" label="#{msgs['baf.desktop.manage']}" >
+					<a4j:form id="desktopForm">
+						<table cellspacing="0" cellpadding="0" border="0" width="100%" height="100%" style="font-size:13px;table-layout:fixed">
+				            <tr>
+				            	<td width="69%" height="100%" >
+						            <fieldset id="tablist" style="height:100%;">		
+						            	<legend><h:outputText value="#{msgs['baf.desktop.desktopList']}" /></legend> 
+						            	<rich:spacer height="1px"/>           
+										<rich:dataTable  align="center"  width="100%" id="table" rowKeyVar="row" rows="#{desktopManageBean.pageSize}" columnClasses="col"
+					  						value="#{desktopManageBean.defaultDataModel}" var="cap" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" title="#{msgs['baf.org.dataTableTip']}" onRowDblClick="onDbclickEditDesktop('#{cap.desktopId}')"> 		
+								        	<rich:column >
+										        <f:facet name="header">
+													<h:outputText styleClass="headerText " value="#{msgs['baf.desktop.define.select']}" style="font-weight:normal;"/>
+												</f:facet>
+												<h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{cap.desktopId}');this.value='#{cap.desktopId}'"/>
+									        </rich:column>				        	
+								        	<rich:column visible="false">
+								        		<f:facet name="header">
+									        		<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.name']}" style="font-weight:normal;"/>
+									        	</f:facet>
+								            	<h:outputText id="desktopid" value="#{cap.desktopId}"/>
+								        	</rich:column>				        		
+								        	<rich:column >
+								        		<f:facet name="header">
+									        		<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.name']}" style="font-weight:normal;"/>
+									        	</f:facet>
+								            	<h:outputText id="desktopName" value="#{cap.desktopName}"/>
+								        	</rich:column>
+								        	<rich:column >
+								        		<f:facet name="header">
+									        		<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.object']}" style="font-weight:normal;"/>
+									        	</f:facet>
+								            	<h:outputText id="objectId" value="#{cap.objectName}"/>
+								        	</rich:column>
+								        	<rich:column >
+								        		<f:facet name="header">
+									        		<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.objectType']}" style="font-weight:normal;"/>
+									        	</f:facet>
+								            	<h:outputText id="objectType" value="#{cap.objectType}"/>
+								        	</rich:column>
+								        	<rich:column >
+								        		<f:facet name="header">
+									        		<h:outputText styleClass="headerText" value="#{msgs['baf.desktop.isPublished']}" style="font-weight:normal;"/>
+									        	</f:facet>
+								            	<h:outputText id="isPublished" value="#{cap.isPublished}"/>
+								        	</rich:column>
+								        </rich:dataTable>
+								        
+								        <h:inputHidden id="dataTableSize" value="#{desktopManageBean.dataTableSize}"/>	
+								        <h:inputHidden id="pageSize" value="#{desktopManageBean.pageSize}"/>
+										<h:inputHidden id="pageNum" value="#{desktopManageBean.scrollerPage}"/>
+										<h:inputHidden id="desktopIdArray" value=""/>
+										<h:inputHidden id="checkedDesktopId" value=""/>
+								        
+								        <rich:datascroller id="scroller" align="right" for="table" selectedStyle="background-color:#FFB93F;" page="#{desktopManageBean.scrollerPage}" fastStep="1" maxPages="#{desktopManageBean.maxPages}" reRender="dataTableSize, pageNum" oncomplete="document.getElementById('desktopForm:desktopIdArray').value=''; "/>
+				           			</fieldset>
+								</td>
+								
+								<td width="1%">
+									<h:outputText/>
+								</td>
+								
+								<td width="30%" height="100%" align="right">
+									<fieldset style="height:40%;">
+									<legend><h:outputText value="#{msgs['baf.desktop.define.search']}" /></legend>
+									<h:panelGrid id="right1"  columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">
+									<h:outputText value="#{msgs['baf.desktop.parentDesktopName']}:"/>
+										<h:inputText id="s_objectName" value="#{desktopManageBean.search_objectName}" style="width:100px">
+										</h:inputText>
+									<h:outputText value="#{msgs['baf.desktop.name']}:"/>
+										<h:inputText id="s_desktopName" value="#{desktopManageBean.search_desktopName}" style="width:100px;">
+										</h:inputText>
+									</h:panelGrid>
+									<center>
+										<rich:spacer height="40px"/>
+										<a4j:commandButton id="diskSearch" value="#{msgs['baf.desktop.define.search']}" type="submit" styleClass="rich-button" style="width:80px" onclick="ondisabled('sea');" disabled="false"
+											action="#{desktopManageBean.search}" data="#{desktopManageBean.data}" oncomplete="onSearchComplete(data)" reRender="desktopForm,diskSearch">
+										</a4j:commandButton>					
+									</center>
+									</fieldset>
+									<fieldset style="height:60%;">
+										<legend><h:outputText value="#{msgs['baf.desktop.layoutOperate']}" /></legend>
+										<center>
+											<rich:spacer height="30px" />
+											<a4j:commandButton value="#{msgs['baf.desktop.define.add']}" type="submit" styleClass="rich-button" style="width:80px">
+												<a4j:support event="onclick" onsubmit="openAddForm('/baf/jsp/desktop/deskCustomizeSet.xhtml')"/>
+											</a4j:commandButton>
+											<br/>
+											<rich:spacer height="30px" />
+											<a4j:commandButton value="#{msgs['baf.desktop.define..update']}" type="submit" styleClass="rich-button" style="width:80px">
+												<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==true) {openEditForm('/baf/jsp/desktop/desktopCustomize.xhtml')}"/>
+											</a4j:commandButton>
+											<br/>
+											<rich:spacer height="30px" />
+											<a4j:commandButton id="deleteDesktop" value="#{msgs['baf.desktop.define.del']}" type="button" styleClass="rich-button" style="width:80px">
+												<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('deletePanel')}.show();} return false;"/>
+											</a4j:commandButton>
+											<br/>
+											<rich:spacer height="30px" />
+											<a4j:commandButton id="publishOrDisable" value="#{msgs['baf.desktop.publishOrdisable']}" type="submit" styleClass="rich-button" style="width:80px">
+												<a4j:support event="onclick" onsubmit="if (checkSelectRow()==false) {return false;};ondisabled('pub');" disabled="false" data="#{desktopManageBean.data}" oncomplete="onPublishOrDisableComplete(data)" action="#{desktopManageBean.publishOrDisable}" reRender="desktopForm,publishOrDisable"/>
+											</a4j:commandButton>
+										
+										</center>
+									</fieldset>
+								</td>
+							</tr>
+						</table>
+						
+						<!-- 删除确认modalPanel -->
+						<rich:modalPanel id="deletePanel" autosized="true" width="300">
+					        <f:facet name="header">
+					            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+					                style="padding-right:15px;" />
+					        </f:facet>
+							<!-- 关闭按钮 -->
+							<f:facet name="controls">
+							<h:panelGroup>
+							    <h:graphicImage value="/baf/images/icons/close.png"
+							        id="hidelinkDelete" styleClass="hidelink"/>
+							    <rich:componentControl for="deletePanel" attachTo="hidelinkDelete"
+							        operation="hide" event="onclick" />
+								</h:panelGroup>
+							</f:facet>	
+				        	<center>
+				                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+				                 	data="#{desktopManageBean.data}"
+				                    action="#{desktopManageBean.deleteDesktop}"
+				                    oncomplete="#{rich:component('deletePanel')}.hide();onDesktopDeleteComplete(data);"
+				                    reRender="desktopForm" />
+								<rich:spacer width="40px"/>
+				                <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+				                    onclick="#{rich:component('deletePanel')}.hide();return false;" />
+							</center>
+					    </rich:modalPanel>
+					</a4j:form>	
+				</rich:tab>
+			</rich:tabPanel>				
+								
+			
+		</div>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>	
+	</body>
+</f:view>
+</html>

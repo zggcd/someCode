@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<title><h:outputText value="#{msgs['modifyPassword']}" />
+			</title>
+			<style type="text/css">
+.column1 {
+	width: 20%;
+	text-align: right;
+}
+
+.column2 {
+	width: 35%;
+	text-align: left;
+}
+
+.column3 {
+	width: 45%;
+}
+</style>
+			<script type="text/javascript">  
+    //<![CDATA[
+    var img="<img src='${request.contextPath}/baf/images/icons/error.png' style='vertical-align: middle'/>";
+    
+    //获取选中的所有值
+    function getSelProfilePost(){
+    	
+    	var values  = this.getAllCheckedBranches();
+    	var canValues=this.getAllUnchecked();
+	    var bcitemsobj = document.getElementById("profilePost:selProfilePost");
+	    var canobj = document.getElementById("profilePost:canProfilePost");
+	    bcitemsobj.value = values; 
+	    canobj.value = canValues; 
+    }
+    //点击保存按钮时，对表单进行验证
+ 	function validate(formId){
+ 		var isSuccess = validateForm(formId);
+ 		if(isSuccess == true){
+			//将保存按钮置灰，防止多次提交表单
+	   		document.getElementById("profilePost:btnSave").disabled = "true";
+ 		}
+ 		return isSuccess;
+ 	}
+ 	
+ 	function saveOncomplete(data){
+ 		a4jcomplete();
+ 	}
+    
+    //]]>
+    </script>
+		</head>
+
+		<body style="overflow-x: hidden; overflow-y: hidden;"
+			onload="">
+			<div id="center"
+				style="height: 100%; margin-top: 0px; margin-bottom: 0px;"
+				>
+			<a4j:form name="profilePost" id="profilePost">
+				<rich:tabPanel id="tabPanel" style="width:100%;height:90%;"
+					switchType="client">
+					<rich:tab id="profilePostTab" label="#{msgs['baf.org.user.profilePostConfig']}"
+						>
+						<fieldset style="height: 100%">
+							<legend><h:outputText value="#{msgs['baf.org.user.PostInfo']}"/></legend>
+							<center>
+								<rich:spacer height="1px;"/>		               			
+			            		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="profilePost_tree" width="100%" height="100%"></td>
+									</tr>
+								</table>
+								
+								<regaltec:dhtmlXtree id="profilePost"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="profilePost_tree"
+									loadXML="/baf/jsp/org/profilePost/profilePostTree.jsp"
+									xmlAutoLoading="/baf/jsp/org/profilePost/profilePostTree.jsp">
+									<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+									<regaltec:setDxtEevntHandler eventName="onCheck" handler="getSelProfilePost" />
+								</regaltec:dhtmlXtree>	
+							</center>
+						</fieldset>
+					</rich:tab>
+				</rich:tabPanel>
+				<h:inputHidden id="selProfilePost" value="#{profilePostBean.selProfilePost}" />
+				<h:inputHidden id="canProfilePost" value="#{profilePostBean.canProfilePost}" />
+			<CENTER>
+			
+			<a4j:commandButton styleClass="rich-button" type="submit" id="businessSaveOrEdit" value="#{msgs['baf.Save']}">
+						<a4j:support event="onclick"  action="#{profilePostBean.saveProfilePost}" data="#{profilePostBean.dealFlag}" oncomplete="saveOncomplete(data)" reRender="tabPanel"/>
+						</a4j:commandButton> 
+		</CENTER>
+	 </a4j:form>
+			</div>
+
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+		</body>
+	</f:view>
+</html>
+
+
+

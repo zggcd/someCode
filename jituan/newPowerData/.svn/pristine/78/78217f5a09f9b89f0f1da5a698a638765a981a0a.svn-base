@@ -1,0 +1,33 @@
+body. {
+	background-color: #CCCCCC;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: 24px;
+	color: #333333;
+}
+/*设置超级链接颜色与下划线*/
+a. {
+    
+	color: #0033FF;
+	list-style-type: square;
+	border: none;
+	font-size: 12px;
+	text-decoration: none;
+}
+a:hover{
+color:FF0000;
+
+
+}
+/*设置button按钮样式*/
+button. {
+	background-color: #CCFF99;
+	color: #FF0000;
+	text-decoration: underline;
+}
+
+.input {
+	color: #006600;
+	background-color: #EFEEE2;
+	border: 1px solid;
+}

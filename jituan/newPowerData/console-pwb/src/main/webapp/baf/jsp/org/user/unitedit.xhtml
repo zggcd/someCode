@@ -1,0 +1,2003 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+	<script>
+	//<![CDATA[
+	var tabIndex="";
+	
+	function setIndex(index){
+	   tabIndex=index;
+	}
+	
+	function initTabIndex(){
+
+	   if(tabIndex!="1"){
+	      
+	      	RichFaces.switchTab('unitForm:tabPanel','unitForm:orgunit','orgunit');
+	      	
+	      	tabIndex="1";
+	   }
+	       
+	}
+	  
+	/*设置选中的业务配置数据项到一个隐藏域，保障用户已选的业务配置项提交到后台*/
+	function setSelectBusinessConfigItems()
+	{
+	    var values  = this.getAllCheckedBranches();
+	    var bcitemsobj = document.getElementById("unitForm:businessConfigItems");
+	    bcitemsobj.value = values; 
+	}
+	
+	
+	  
+	//点击权限因子树触发事件
+	function doOnClick(){	
+		var itemId = rightTree_tree.getSelectedItemId();
+		var oldRid = document.getElementById("unitForm:rid").value;
+		var cancleId = document.getElementById("unitForm:cancelDataRight").value;
+		var oldType = rightTree_tree.getUserData(oldRid,"type");
+		var sign = document.getElementById("unitForm:sign").value;
+		//只有切换节点或者点击保存按钮的时候才处理
+		if(itemId==oldRid && sign==""){
+			return;
+		}		
+		document.getElementById("unitForm:sign").value = "";
+		var itemType = rightTree_tree.getUserData(itemId,"type");
+		var allChecked = dataRightTree_tree.getAllChecked();	
+		var list = allChecked.split(",");
+		//查询所有选中节点的父节点（向上级联）
+		var parentIds = "";
+		for(var i=0;i<list.length;i++){
+			var pid = dataRightTree_tree.getParentId(list[i]);
+			while(pid!=0){		
+				if(parentIds==""){
+					parentIds = pid;
+				}else{
+					parentIds = parentIds + "," + pid;
+				}
+				pid = dataRightTree_tree.getParentId(pid);
+			}
+		}
+		
+		//点这次点击的是权限因子类型时，只用加载刷新树，不用传递参数
+		if(itemType=="T"){
+			if(oldType=="R"){	//上次点击的是权限因子的话，则要对权限因子的权限进行保存
+				d_Refresh(oldRid,allChecked,cancleId,parentIds,"");
+			}else{
+				dataRightTree_tree.setXMLAutoLoading("${request.contextPath}"+"/baf/jsp/org/unit/datatree.jsp");	
+				dataRightTree_tree.refreshItem("0");
+			}
+		}else{	
+			if(oldType=="R"){	
+				d_Refresh(oldRid,allChecked,cancleId,parentIds,itemId);
+			}else{
+				d_Refresh("","","","",itemId);				
+			}						
+		}
+		document.getElementById("unitForm:rid").value = itemId;
+	}
+	
+	//刷新数据权限树
+	function dRefresh(data){
+		var itemId = rightTree_tree.getSelectedItemId();
+		var itemType = rightTree_tree.getUserData(itemId,"type");
+		var sarray = data.split("|");  //array为是js关键字， 变量命名不应使用该关键字
+		
+		var rightFactorId = sarray[0];
+		var checkedIds = sarray[1];
+		var parentIds = sarray[2];
+		var cancleIds = sarray[3];
+		var orgId = document.getElementById("unitForm:orgID").value;
+		if(itemType=="T"){
+			dataRightTree_tree.setXMLAutoLoading("${request.contextPath}"+"/baf/jsp/org/unit/datatree.jsp");
+		}else{
+			var url = "${request.contextPath}"+"/baf/jsp/org/unit/datatree.jsp?rightFactorId="+rightFactorId+"&itemType="+itemType+"&checkedRight="+checkedIds+"&cancleRight="+cancleIds+"&parentIds="+parentIds+"&orgID="+orgId;
+			dataRightTree_tree.setXMLAutoLoading(url);
+			document.getElementById("unitForm:url").value = url;
+		}			
+		dataRightTree_tree.refreshItem("0");				
+		document.getElementById("userForm:cancelDataRight").value = "";
+	}
+	
+	//在查询出来的权限树上点击checkbox框触发事件 
+  	function clickCheck(checkId,checkState) {	  
+		//获取该ID是否已经在数据库里选中
+		var isSelect = this.getUserData(checkId, 'isSelect');
+		if (isSelect == "Y" && checkState == 0) {
+			//取消
+			saveCancelDataRight(checkId);
+		} else if (isSelect == "Y" && checkState == 1) {
+			//如果是选中状态，检查下是否在取消里，如果有则删除。
+			deleteCancelDataRight(checkId);
+		}		
+		
+		//取消复选框选中状态，则要进行判断是否要取消父节点的字体加粗
+		if(checkState == 0){
+			cancelStyle(checkId);	
+		}else if(checkState==1){	//设置所有父节点字体加粗
+			setStyle(checkId);
+		}
+  	}
+  	
+  	//设置节点所有父节点字体加粗
+  	function setStyle(checkId){
+  		var parentId = dataRightTree_tree.getParentId(checkId);  	
+  		if(parentId=="0"){
+  			return;
+  		} 	
+  		dataRightTree_tree.setItemStyle(parentId,"font-weight:bold;");
+  		if(parentId!=0){
+  			setStyle(parentId);
+  		}
+  	}
+  	
+  	//将节点字体由加粗设为普通
+  	function cancelStyle(checkId){
+  		var parentId = dataRightTree_tree.getParentId(checkId);
+  		if(parentId=="0"){
+  			return;
+  		} 
+  		var children = dataRightTree_tree.getAllSubItems(parentId).split(",");
+  		var hasChecked = "N";   //指定节点下是否有复选框选中的，Y：有  N：无
+  		var temp = 0;			//指定节点下是否有是权限路径的，0：无  1：有
+  		for(var i=0;i<children.length;i++){
+  			var isAuthPath = dataRightTree_tree.getUserData(children[i],"isAuthPath");
+  			var checkstate = dataRightTree_tree.isItemChecked(children[i]);
+  			if(checkstate==1){
+  				hasChecked = "Y";
+  				break;
+  			}
+  			if(isAuthPath=="Y"){
+  				temp = 1 ;
+  				break;
+  			}
+  		}
+  		if(hasChecked=="N" && temp==0){  //当该节点下既没有选中的节点，也没有是权限路径的节点，则取消字体加粗
+  			dataRightTree_tree.setItemStyle(parentId,"font-weight:normal;");
+  			dataRightTree_tree.setUserData(parentId,"isAuthPath","N");
+  			if(parentId!="0"){
+  				cancelStyle(parentId);
+  			}
+  		}
+  	}
+	
+  	function saveCancelDataRight(cancelID) {
+	  	var cancelDataRight = document.getElementById("unitForm:cancelDataRight").value;
+	  	var save = "";
+	  	//处理
+	  	if (cancelDataRight == "" || cancelDataRight == null) {
+		 	save = cancelID;
+	  	} else {
+		  	save = cancelDataRight + "," + cancelID;
+	  	}	  
+	 	document.getElementById("unitForm:cancelDataRight").value = save;
+  	}
+  	
+  	function deleteCancelDataRight(id) {
+	  	var cancelDataRight = document.getElementById("unitForm:cancelDataRight").value;
+	  	if (cancelDataRight != null && cancelDataRight != "") {
+			var index = cancelDataRight.indexOf(id);
+			if (index >= 0) {
+				//找到需要删除的数据
+				var str = "";
+				if(index > 0){
+					str = ","+id;
+				} else {
+					if(cancelDataRight.indexOf(",")!=-1){
+						str = id + ",";
+					} else {
+						str = id;
+					}			
+				}
+				document.getElementById("unitForm:cancelDataRight").value = cancelDataRight.replace(str, "");
+			}
+	  	}
+  	}
+		
+	//权限树节点展开/合拢前触发事件
+	function openStart(id,openState){		
+		if(openState==0){ //0:无子节点   1：展开   -1：合拢
+			var hasCheckbox = dataRightTree_tree.getUserData(id,"hasCheckbox");
+			document.getElementById("unitForm:hasCheckbox").value = hasCheckbox;
+			var url = document.getElementById("unitForm:url").value;
+			dataRightTree_tree.setXMLAutoLoading(url+"&hasCheckbox="+hasCheckbox);
+		}
+		return true;
+	}
+	
+	
+	
+	/*表单校验扩展*/
+	function validateAll(formobj)
+	{
+		
+	   var returnvalue = true;	
+	   //保存操作权限组
+	   if(#{organizationBean.orgOpeRigOperate}){
+           var allCheckedGroupId = operGroupTree_tree.getAllChecked();
+           document.getElementById("unitForm:allCheckGroupIds").value = allCheckedGroupId;
+	   }
+	   returnvalue = validateForm(formobj);
+	   //判断模板名称是否为空
+	   returnvalue = validateTemplateName(returnvalue);
+	   if(returnvalue==true){
+	   	    //将保存按钮置灰，防止多次提交表单
+	   		document.getElementById('unitForm:btnSave').disabled = 'true';
+	   		//向后台保存数据权限
+		   //document.getElementById('unitForm:sign').value='a';
+		   //doOnClick();
+		    if(#{organizationBean.orgDataRigOperate})
+		       onSaveDataRight();
+		   //保存业务配置
+		    if(#{organizationBean.orgBusRigOperate})
+		        onSaveBussiness();
+		    
+		    var showBusinessTab="#{organizationBean.showBusinessTab}";
+		    var isShowBusiness=document.getElementById('unitForm:showBusiness').value;
+		    
+		    if(isShowBusiness=="10" && showBusinessTab=="Y")
+		   		onSaveProBusiness();
+		   	var orgId="#{organizationBean.orgID}";
+		   	if(orgId.length>0 && showBusinessTab=="Y")
+		   		onSaveCrewAndBusiness();
+		   	//保存之前先把当前配置的字典条目保存到组织缓存
+		   	var isShowDicConfig="#{organizationBean.isShowDicConfig}"; 
+		   	if(isShowDicConfig=='Y')
+		   		onSaveConfigItem();
+	   }
+	   return returnvalue;
+	}
+	
+	//判断模板名称是否为空
+	function validateTemplateName(returnvalue){
+		var chk = document.getElementById("unitForm:saveToTemplate");	
+	    var tname = document.getElementById("unitForm:saveTemplateName").value;
+	    if(chk.checked==true && tname=="" && returnvalue==true){
+	   	    alert("${msgs['baf.org.tnameMessage']}");
+	   	    initTabIndex();	   	   
+	   	    document.getElementById("unitForm:saveTemplateName").focus();
+	   	    returnvalue = false;
+	    }
+	    return returnvalue;
+	}
+	
+	//保存点击保存之前选中的权限因子和对应勾选的权限，因为这次的没有保存到后台
+  	function onSaveDataRight() {
+ 
+	  	document.getElementById("unitForm:allDataRight").value = "";
+	  	var itemId = rightTree_tree.getSelectedItemId();
+	  	var itemType = rightTree_tree.getUserData(itemId,"type");
+	  	if (itemType == "R") {	  	
+			var allChecked = dataRightTree_tree.getAllChecked();	
+			var list = allChecked.split(",");
+			//查询所有选中节点的父节点（向上级联）
+			var parentIds = "";
+			for(var i=0;i<list.length;i++){
+				var pid = dataRightTree_tree.getParentId(list[i]);
+				while(pid!=0){		
+					if(parentIds==""){
+						parentIds = pid;
+					}else{
+						parentIds = parentIds + "," + pid;
+					}
+					pid = dataRightTree_tree.getParentId(pid);
+				}
+			}
+		  	//取消数据ID
+		  	var cancelDataRight = document.getElementById("unitForm:cancelDataRight").value;	
+		  	document.getElementById("unitForm:allDataRight").value = itemId + "#" + allChecked + "|" + parentIds + "|" + cancelDataRight;
+		}
+  	}
+  	
+	//保存业务配置
+	function onSaveBussiness(){
+	    var checkList = bcontreeObj_tree.getAllCheckedBranches();
+		var uncheckList = bcontreeObj_tree.getAllUnchecked();
+	    document.getElementById("unitForm:checked").value = checkList;
+	    document.getElementById("unitForm:unchecked").value = uncheckList;  
+	}
+	
+	function onSaveProBusiness(){
+		var checkList = noProfessionalObj_tree.getAllCheckedBranches();
+		var uncheckList = noProfessionalObj_tree.getAllUnchecked();
+	    document.getElementById("unitForm:proChecked").value = checkList;
+	    document.getElementById("unitForm:proUnchecked").value = uncheckList;
+	}
+	
+	function onSaveCrewAndBusiness(){
+		var itemId = firstDispTree_tree.getSelectedItemId();
+		var crewId=crewTree_tree.getAllChecked();
+		document.getElementById("unitForm:professionId").value = itemId;
+	    document.getElementById("unitForm:crewId").value = crewId;
+	}
+	
+	//将选择的组织模板数据渲染给当前组织对象
+	function doOnTemplateClick(){
+		var itemId = this.getSelectedItemId();
+		var itemText = this.getSelectedItemText();
+		setTemplateValue(itemId,itemText);
+	}
+	
+	//保存完成触发事件
+	function onSaveComplete(data){
+		var validPhone=data.split("#")[0];
+		if("N"==validPhone){
+			var content="";
+			var nameAndPhone=data.split("#")[1];
+			var valid=nameAndPhone.split(";");
+			for(var i=0;i<valid.length;i++){
+				var v=valid[i].split(",");
+				content=content+"#{msgs['baf.org.phoneNum']}："+v[1]+"#{msgs['baf.org.inUnit']}："+v[0]+"#{msgs['baf.org.unitConfig']}\n";
+			}
+			alert(content);
+			return;
+		}
+		//保存成功后清空字典的缓存
+   		var isShowDicConfig="#{organizationBean.isShowDicConfig}";
+   		if(isShowDicConfig=='Y'){
+   			deleteToCache();//清除字典配置的缓存
+   		}
+   		if(a4jcomplete()==false){
+	   		document.getElementById('unitForm:btnSave').disabled = '';
+ 			return;
+ 		} 
+   		var chk = document.getElementById("unitForm:saveToTemplate");
+   		chk.checked = false;	   		
+		document.getElementById("unitForm:saveTemplateName").value = "";		
+   		document.getElementById("unitForm:tid").style.display = "none";
+   		//if(data.indexOf("#")>-1)
+   			var orgId = data.split("#")[1];  //新增完之后定位到新增的部门
+   		curSelUserAddArray = new Array;
+   		
+   		refreshTreeItem(orgId);
+   		//设置焦点 
+   		//setFocus("unitForm:orgName");
+   		//setTimeout("alert(1);", 100);
+   		document.getElementById('tForm:reftree').value = false;
+   		
+   		//设置请求状态已完成
+   		parent.setRequestStatus("N");
+   		
+   }  
+   
+    //存为模板复选框选中状态变化
+	function chkchange(){
+		var chk = document.getElementById("unitForm:saveToTemplate");		
+		if(chk.checked==true){
+			initTabIndex();
+			document.getElementById("unitForm:tid").style.display = "block";
+			document.getElementById("unitForm:saveTemplateName").focus();
+		}else{
+			document.getElementById("unitForm:tid").style.display = "none";
+			document.getElementById("unitForm:saveTemplateName").value = "";			
+		}
+		document.getElementById("unitForm:saveToTemplate").blur();
+	}
+	
+	//切换tab页时对基本信息进行验证
+	function tabValidate(){
+		var isSuccess = true;
+		if(event.srcElement.id !='unitForm:orgunit_lbl'){
+			isSuccess = validateForm(unitForm);
+		}
+		if(isSuccess==false){
+			return isSuccess;
+		}
+		if(event.srcElement.id!="unitForm:orgunit_lbl"){
+	     	//判断模板名称是否为空
+	     	isSuccess = validateTemplateName(isSuccess);
+	     	
+	     	return isSuccess ;
+     	}
+	}
+	
+	//领导信息
+	function getSelectValue(id,value){
+	   var strs = document.getElementById("unitForm:leaderTypeMapList").value;
+	   if(strs == null || strs == ""){
+	   		document.getElementById("unitForm:leaderTypeMapList").value = id+":"+value + ",";
+	   }else{
+	   		if(strs.indexOf(id) >= 0){
+	   			var s = strs.substring(strs.indexOf(id),parseInt(strs.indexOf(id)+10));
+   				if(value == ""){
+	   				strs = strs.replace(s,"");
+		   		}else{
+		   			if(strs.replace(s,"") == ""){
+		   				strs = id + ":" + value + ",";
+		   			}else{
+		   				strs = strs.replace(s,"") + id + ":" + value + ",";
+		   			}
+		   		}
+	   			document.getElementById("unitForm:leaderTypeMapList").value = strs;
+	   		}else{
+	   			document.getElementById("unitForm:leaderTypeMapList").value = strs +id+":"+value + ",";
+	   		}
+	   }
+	}
+	
+	function resetleaderTypeMapList(){
+		document.getElementById("unitForm:leaderTypeMapList").value="";
+	}
+	//领导信息中选择部门，传回当前被选择部门ID
+	function leaderOrgInfo(){
+		var itemId = ORGModuleTree_tree.getSelectedItemId();
+		document.getElementById("leaForm:leader_orgID").value = itemId;
+		
+	}
+	
+	function refreshTree(){   	
+		//ORGModuleTree_tree.refreshItem("0"); 
+		refleshLeadTree();
+	}
+	
+	function showOrgPanel(){
+		refleshUnitTree();
+	}
+	
+	//领导信息中,onclick返回 当前部门操作
+	function returnOrg(){
+	   var pageSize=document.getElementById("unitForm:pageSize").value ;
+	  
+	   for(var i=0;i<pageSize;i++){
+	    if(document.getElementsByName("unitForm:userLeaderList:"+i+":LType")[0]){
+	        document.getElementsByName("unitForm:userLeaderList:"+i+":LType")[0].value="";
+	    }
+	   
+	   }
+		document.getElementById("leaForm:leader_orgID").value = document.getElementById("unitForm:orgID").value;
+	
+	}
+	
+	
+	function afteRL(data){
+	     document.getElementById("unitForm:leaderTypeMapList").value=data;
+	    var pageSize=document.getElementById("unitForm:pageSize").value ;
+	    var a=data.split(",");
+	   for(var i=0;i<pageSize;i++){
+	    if(document.getElementsByName("unitForm:userLeaderList:"+i+":LType")[0]){
+	        var uid= document.getElementsByName("unitForm:userLeaderList:"+i+":uid")[0].value;
+	        for(var j=0;j<a.length;j++){
+	         if(a[j]!=""){
+	            var id=a[j].split(":")[0];
+	            if(id==uid){
+	              document.getElementsByName("unitForm:userLeaderList:"+i+":LType")[0].value=a[j].split(":")[1];
+	            }
+	         }
+	          
+	        }  
+	    }
+	   
+	   }
+	   
+	}
+	//删除非本部门下人员的领导信息
+	function reflashOrgLeaderUser(data){
+	    if(a4jcomplete()==false){
+	      return;
+	    }
+	    if (data == "N") {
+			//处理失败
+			alert("${msgs['baf.org.WarningHandleFailure']}");
+		}else{
+			reflashLleader();
+		}
+	}
+	
+	//标识当前是点击查询按钮执行的查询
+	function checkQueryInputValues(){
+	   document.getElementById("unitForm:flagId").value = "Y";
+	   return true;
+	}
+	
+	//打开部门派工关系Tab页
+	function openUnitDispatching(){
+		var orgId = document.getElementById("unitForm:orgID").value;
+		var orgName = document.getElementById("unitForm:orgName").value;
+		var url = "#{organizationBean.orgDispatchingURL}";
+		if(url.indexOf("?") == -1){
+			url = url + "?dispatchObjectId=" + orgId;
+		}else{
+			url = url + "&dispatchObjectId=" + orgId;
+		}
+		parent.parent.addTab(orgId, "【" + orgName + "】#{msgs['baf.org.unit.dispObj']}", url);
+	}	
+	//点击查询按纽列表未渲染前置灰
+	function ondisabled(){
+	  	document.getElementById("unitForm:itemForSearch").disabled = true;
+	}
+
+	//批量选中的对象列表
+	var curSelUserAddArray = new Array;
+	var objIdArray = new Array;	     	//对象ID集合
+	var objNameArray = new Array;	    //对象Name集合
+	var unitid="";
+
+     //往对象数组中加减数据
+	function selObj(obj){
+	    var orgId=document.getElementById("unitForm:orgID").value;
+           if(unitid==""){
+              unitid=orgId;
+           }else{
+               if(unitid==orgId){
+               }else{
+                unitid=orgId;
+                 curSelUserAddArray=new Array;
+               }
+           }
+		var curSelObjArray = curSelUserAddArray;
+		var v = obj.value;
+		if(obj.checked && curSelObjArray.indexOf(v)==-1){
+			curSelObjArray.push(v);
+		}else if(!obj.checked && curSelObjArray.indexOf(v)>-1){
+			curSelObjArray.remove(v);
+		}
+	}
+	
+	//全选复选框
+	function selObjAll(checked,domName) {
+        var orgId=document.getElementById("unitForm:orgID").value;
+        if(unitid==""){
+           unitid=orgId;
+        }else{
+            if(unitid==orgId){
+            }else{
+               unitid=orgId;
+              curSelUserAddArray=new Array;
+            }
+        }
+		var curSelObjArray =  curSelUserAddArray;
+		$A(document.getElementsByName(domName)).each(function(ch){
+			ch.checked = checked;
+			var v = ch.value;
+			if(v != undefined){
+				if(checked && curSelObjArray.indexOf(v)==-1){
+					curSelObjArray.push(v);
+				}else if(!checked && curSelObjArray.indexOf(v)>-1){
+					curSelObjArray.remove(v);
+				}
+			}
+		});
+	}
+	function uncheck(){
+	   $A(document.getElementsByName('addUser')).each(function(ch){
+			ch.checked = false;
+		
+		});
+	}
+	function afterDele(data){
+	   
+	   if(data=="Y"){
+	   if(a4jcomplete()==false){
+	      return;
+	    }
+	    var orgId=document.getElementById("unitForm:orgID").value;
+	    var scrollerPage=document.getElementById("unitForm:pagenum").value;
+	      listOrgPostUser(orgId,scrollerPage);
+	      curSelUserAddArray = new Array;
+	   }else if(data=="ND"){
+	      alert("${msgs['baf.org.checkdata']}");
+	   }else if(data=="N"){
+	      if(a4jcomplete()==false){
+	      return;
+	    }
+	   }else{
+	      alert(data);
+	   }
+	   
+	}
+	
+	function afterGetAllOrgIds(){
+	    var orgId=document.getElementById("unitForm:orgID").value;
+        if(unitid==""){
+          curSelUserAddArray=new Array;
+        }else{
+            if(unitid==orgId){
+            }else{
+              curSelUserAddArray=new Array;
+            }
+        }
+        if(curSelUserAddArray.length==0){
+           alert("${msgs['baf.org.selectUser']}");
+           return false;
+        }
+       
+        objIdArray = new Array;	     	//对象ID集合	
+		objNameArray = new Array;	    //对象Name集合
+		for(var i = 0;i <curSelUserAddArray.length;i++){
+			var v = curSelUserAddArray[i].split(";");
+			objIdArray.push(v[0]);
+			objNameArray.push(v[1]);
+		}
+		     refleshOrgTree();
+	   return true;
+	}
+	
+	//点击复选框时，若树上已勾选复选框，则取消以前勾选的
+	function cancelOldChecked(itemId, checkstate){
+		var checkedId = ORGTree_tree.getAllChecked();
+		if(checkedId.indexOf(",") != -1){
+			var oldCheckedId = checkedId.replace(itemId,"").replace(",","");
+			ORGTree_tree.setCheck(oldCheckedId, "0");
+		}
+	}
+			
+	function beforeImportToNewUnit(){
+	   	var checkedId = ORGTree_tree.getAllChecked();
+		if(checkedId == ""){
+			//请选择一个部门！
+			alert("#{msgs['baf.other.selectUnit']}");
+			return false;
+		}else{ 
+			var text = ORGTree_tree.getItemText(checkedId);
+			//是否将数据导入到指定的部门下面
+			if(!confirm("#{msgs['baf.other.confirmImport']} '"+ objNameArray.join("、") +"' #{msgs['baf.other.importTo']} '" + text + "' #{msgs['baf.dataprocess.message5']}#{msgs['baf.questionMark']}")){
+				return false;
+			}
+			//弹出模态框时，将类型存放到了人员新增tab页的隐藏域中，这里获取之前存放的类型
+				document.getElementById("panelForm:selectedItemIds").value = objIdArray.join(",");
+				document.getElementById("panelForm:selectedUnitId").value = checkedId;
+			   Richfaces.hideModalPanel("orgPanel");
+		}
+		return true;
+	}
+			
+	function onImportNewUnitComplete(data){	
+		
+        var trip=data.split(";");
+        if(trip[0]=="W"){
+          alert(trip[1]);//提示部门人数超出
+          return;
+        }else{
+         if(a4jcomplete()==false){
+            return;
+         }
+          Richfaces.hideModalPanel("panel");
+		  curSelUserAddArray = new Array;	
+ 		   Richfaces.hideModalPanel("orgPanel");
+        }
+ 	}
+			 
+		function deleUser(userid){
+ 	  if(confirm("#{msgs['baf.org.deleTip']}")){
+ 	    deleteUser(userid);
+ 	    curSelUserAddArray = new Array;
+ 	   
+ 	  }
+ 	}		
+ 	
+ 		function refleshComplete(){
+	 
+	   parent.setRequestStatus('N');
+	   curSelUserAddArray = new Array;
+	  var timeout = setTimeout(" initTabIndex();", 80);
+	   tabIndex='';
+	} 
+	
+	
+	function isShowCrew(obj){
+		var objectTypeID=obj.value;
+  	  	var showTab="#{organizationBean.showBusinessTab}";
+  	  	if(objectTypeID=="10"){
+  	  	  	if(showTab=="Y"){
+  	  	  		showBusiness("Y",objectTypeID);
+  	  	  	}
+  	  	  	
+  	  	}else{
+  	  		var objvalue=document.getElementById("unitForm:showBusiness").value;
+  	  		if(objvalue=="10" && showTab=="Y"){
+  	  			showBusiness("N",objectTypeID);
+  	  		}
+  	  	}
+	}
+	
+	function doOnClickFirstDisp(){
+		var itemId = firstDispTree_tree.getSelectedItemId();
+		
+		var type=firstDispTree_tree.getUserData(itemId,"type");
+		if("0".indexOf(type)<0){
+			document.getElementById("unitForm:oldBusinessId").value = itemId;
+			return;
+		}
+		var orgId = document.getElementById("unitForm:orgID").value;
+		var oldBusinessId = document.getElementById("unitForm:oldBusinessId").value;
+		//只有切换节点或者点击保存按钮的时候才处理
+		if(itemId==oldBusinessId){
+			return;
+		}	
+		crewTree_tree.setXMLAutoLoading("${request.contextPath}"+"/baf/jsp/org/unit/crewTree.jsp?objectType=W&orgId="+orgId+"&businessId="+itemId);	
+		crewTree_tree.refreshItem("0");
+		document.getElementById("unitForm:oldBusinessId").value = itemId;
+		a4jCompleteDealing();//延长1秒锁屏时间
+	}
+	
+	function setoldCrewId(){
+		var oldCrewId=crewTree_tree.getAllChecked();
+		document.getElementById("unitForm:oldCrewId").value=oldCrewId;
+	}
+	
+	//点击复选框时，若树上已勾选复选框，则取消以前勾选的
+	function cancelOldSelect(itemId, checkstate){
+		
+	}
+	function changeStatus(type){
+		var orgId=document.getElementById("unitForm:orgID").value
+		
+		noProfessionalObj_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/org/unit/businessNoProXmlData.jsp?objectType="+type+"&requestId="+orgId);	
+		noProfessionalObj_tree.refreshItem("0");
+	}
+//====================字典配置功能====================================
+	//批量选中条目列表，设置一个保存选中条目的数组
+	var curSelItemArray = new Array;
+	//点击字典树获取条目
+	function dicOnClick(){
+		//切换节点时，清除查询条件
+		document.getElementById("unitForm:sitemCode").value="";
+		document.getElementById("unitForm:sitemName").value="";
+		
+		var cateId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID
+		var dictionId=document.getElementById("unitForm:dictionIdSign").value;//获取前一个id
+		if(cateId==dictionId)return false;//如果连续点击不加载
+		var type= dicTree_tree.getUserData(dictionId,"type");//判断前一个是字典类型还是字典		
+		if(type=="dicCategory")dictionId="";
+		//先把当前选中的条目保存到缓存，再获取新的
+		//alert(dictionId+"|"+curSelItemArray.join(":")+"|"+cateId);
+		setItemToCache(curSelItemArray.join("::"),dictionId);//dictionId不为空才可以保存缓存
+			//setOrgItemToCache(curSelItemArray.join(":"),dictionId);//dictionId不为空才可以保存缓存
+		//如果是字典类型，不把数据保存缓存，
+		//curSelItemArray=new Array;		
+		//var objectId=document.getElementById("unitForm:orgID").value;
+		//setDictionaryId(cateId,objectId);
+		//document.getElementById("unitForm:dictionIdSign").value=cateId;
+	}
+	
+	//把前一个数据保存到字典缓存成功后执行
+	function onSetItemToCacheComp(data){
+		if("Y"==data){
+			var cateId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID	
+			var dictionId=document.getElementById("unitForm:dictionIdSign").value;//获取前一个id
+			setOrgItemToCache(curSelItemArray.join("::"),dictionId);
+			
+		}
+		
+	}
+	//把前一个数据保存到组织缓存成功后执行
+	function onSetOrgItemToCacheComp(data){
+		if("Y"==data){
+			//如果是字典类型，不把数据保存缓存，
+			curSelItemArray=new Array;
+			var cateId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID			
+			var objectId=document.getElementById("unitForm:orgID").value;
+			setDictionaryId(cateId,objectId);
+		}
+	}
+	
+	//点击查询条目
+	function checkQueryItem(){
+	   document.getElementById("unitForm:itemFlagId").value = "Y";
+	   var code =document.getElementById("unitForm:sitemCode").value;
+	   var name =document.getElementById("unitForm:sitemName").value;
+	   var code =document.getElementById("unitForm:itemCode").value=code;
+	   var name =document.getElementById("unitForm:itemName").value=name;
+	   
+	   var dictionId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID	
+	   setItemToCache_search(curSelItemArray.join("::"),dictionId);//点击查询前先把当前的配置保存到字典缓存
+	   
+	   return true;
+	}
+	//查询时把当前的值保存到缓存
+	function onSetItemToCache_search(data){
+		if("Y"==data){
+			var dictionId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID	
+			setOrgItemToCache_search(curSelItemArray.join("::"),dictionId);
+		}
+	}
+	
+	//分页 页数变化时把当前的值保存到缓存
+	function onSetItemToCache_Page(){
+		var dictionId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID	
+		var cur=curSelItemArray.join("::");
+		setItemToCache_page(cur,dictionId);
+		var msgPanel =document.getElementById('operating_panel');
+	 	msgPanel.component.show();
+	 	window.setTimeout('document.getElementById(\'operating_panel\').component.hide()', 400);
+		
+	}
+	
+	//往条目数组中加减数据
+	function sel(obj){	
+		var v = obj.value;
+		if(obj.checked && curSelItemArray.indexOf(v)==-1){//如果选中，且数组中没有数据就添加
+			curSelItemArray.push(v);
+		}else if(!obj.checked && curSelItemArray.indexOf(v)>-1){//移除数据
+			curSelItemArray.remove(v);
+		}
+	}
+	
+	//全选复选框
+	function selAll(checked,domName) {
+		$A(document.getElementsByName(domName)).each(function(ch){
+			ch.checked = checked;
+			var v = ch.value;
+			if(checked && curSelItemArray.indexOf(v)==-1){
+				curSelItemArray.push(v);
+			}else if(!checked && curSelItemArray.indexOf(v)>-1){
+				curSelItemArray.remove(v);
+			}
+		});
+	}
+	//在每次分页的时候，记忆查询结果列表中选中的对象
+	function saveSelledObj(domName){
+		$A(document.getElementsByName(domName)).each(function(ch){
+			if(curSelItemArray.indexOf(ch.value)>-1){
+				ch.checked = true;
+			}
+		});
+	}
+	
+	//把已选中的值保存在页面(点击树节点)
+	function setSelArray(){
+		var cateId = dicTree_tree.getSelectedItemId();    //树上选择的类别ID		
+		document.getElementById("unitForm:dictionIdSign").value=cateId;
+		curSelItemArray=new Array;
+		var items=document.getElementById("unitForm:itemConfigItem").value;
+		if(null!=items&&items.length>0){
+			var itemArray=items.split("::");
+			curSelItemArray=itemArray;
+			
+		}
+	}
+	//把已选中的值保存在页面(查询)
+	function itemSearchOnComplete(){
+		curSelItemArray=new Array;
+		var items=document.getElementById("unitForm:itemConfigItem").value;
+		if(null!=items&&items.length>0){
+			var itemArray=items.split("::");
+			curSelItemArray=itemArray;
+			
+		}
+	}
+	
+	function onSaveConfigItem(){
+		document.getElementById("unitForm:dictionIdSign").value="";
+		document.getElementById("unitForm:configItem").value=curSelItemArray.join("::");
+		var cateId = dicTree_tree.getSelectedItemId();
+		//setOrgItemToCache_save(curSelItemArray.join("::"),cateId);//把当前的值保存组织缓存
+		document.getElementById("unitForm:dictionaryId").value=cateId;
+	}
+	function onDicSave(){
+		//deleteToCache();//清空字典里的缓存
+		var cateId = dicTree_tree.getSelectedItemId();
+		document.getElementById("unitForm:dictionaryId").value=cateId;
+	}
+//=========================字典配置功能 ===========================================
+	function a4jCompleteDealing(){
+		var msgPanel =document.getElementById('operating_panel');
+	 	msgPanel.component.show();
+	 	window.setTimeout('document.getElementById(\'operating_panel\').component.hide()', 1000);
+	 	return true;
+	}
+	
+	
+	//]]>
+	</script>
+	
+	<style type="text/css">
+		.column1{
+			width:25%;
+			text-align:right;
+		}
+		.column2{
+			width:45%;
+			text-align:right;
+		}
+		.column3{
+			width:30%;
+		}
+		.column4{
+			width:30%;
+		}
+		.column5{
+			width:70%;
+		}
+		.footer{
+			background:#F8F8F8;
+			font-size:13px;
+			font-weight:normal;
+			text-align:center;
+		}
+		
+	</style>
+</head>
+<body onload="initTabIndex();">
+<a4j:form id="ajForm">
+<h:outputText id="isOrgTree" rendered="#{organizationBean.orgTreeRed}">
+					<regaltec:dhtmlXtree id="ORGTree" imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_orgtree"
+			loadXML="/baf/jsp/org/unit/orgtree.jsp"
+			xmlAutoLoading="/baf/jsp/org/unit/orgtree.jsp">
+			<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>	
+			<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldChecked" />
+		</regaltec:dhtmlXtree>
+		</h:outputText>
+	 <h:inputHidden id="ttt" value="#{organizationBean.orgTreeRed}"></h:inputHidden>	
+	</a4j:form>	
+	<h:form id="tform">
+		<h:outputText id="orgLeadersTree" rendered="#{organizationBean.treeRendered}">
+			<regaltec:dhtmlXtree id="ORGModuleTree" imagePath="/baf/images/dhtmlxtree/" contentEl="ORGModuleTree_tree"
+				loadXML="/baf/jsp/org/unit/orgtree.jsp"
+				xmlAutoLoading="/baf/jsp/org/unit/orgtree.jsp">
+			</regaltec:dhtmlXtree>
+		</h:outputText>
+		<h:inputHidden id="reftree" value="#{organizationBean.treeRendered}"/>	
+	</h:form>
+	<a4j:form id="unitForm"> <!--  onsubmit="return validateAll(this);"> -->
+	
+	    <regaltec:dhtmlXtree id="bcontreeObj"
+				imagePath="/baf/images/dhtmlxtree/" contentEl="bcontree"
+				loadXML="/baf/jsp/org/unit/bussinessTreeXMLData.jsp?objectType=O&amp;requestId=#{organizationBean.orgID}"
+				xmlAutoLoading="/baf/jsp/org/unit/bussinessTreeXMLData.jsp?objectType=O&amp;requestId=#{organizationBean.orgID}"
+				 rendered="#{organizationBean.orgBusRigOperate}">
+	      	<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"></regaltec:setDxtEnable>
+	      	<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"></regaltec:setDxtEnable>
+	      	<regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>	
+	      	<regaltec:setDxtEevntHandler eventName="onCheck" handler="setSelectBusinessConfigItems" />
+		</regaltec:dhtmlXtree> 
+		
+		
+		<rich:tabPanel id="tabPanel" ontabchange="return tabValidate();" style="margin-left:5px;margin-right:5px;margin-top:5px;"  width="99%" height="90%" switchType="client" >
+			<!-- 部门基本信息 -->
+			<rich:tab id="orgunit" label="#{msgs['baf.org.unit.tab.orgunit']}" onlabelclick="setIndex('1');"  >
+				<h:inputHidden id="orgID" value="#{organizationBean.orgID}" />
+				<h:inputHidden id="parentOrgID" value="#{organizationBean.parentOrgID}" />
+				<fieldset style="height:100%" >			
+		            <legend>
+		            	<h:outputText value="#{msgs['baf.org.unit.tab.orgunit']}" />
+		            	<h:outputText value="#{msgs['baf.leftBracket1']}ID : #{organizationBean.orgID}#{msgs['baf.rightBracket1']}" style="color:red;" rendered="#{organizationBean.orgID != null}"/>
+		            </legend>
+		           
+					<h:panelGrid id="org" columns="3" columnClasses="column1,column2,column3"   style="font-size:13px;width:100%;word-break:break-all;" styleClass=".rich-text-color-general">
+						<h:outputText value="#{msgs['baf.org.unit.parentOrgName']}:"/>
+						<h:inputText id="parentOrgName" style="width:95%;height:23px;" readonly="true" styleClass="rich-gradient-input" value="#{organizationBean.parentOrgNames}" title="#{organizationBean.parentOrgNames}"/>
+						<h:outputText value=""/>
+						
+						<h:outputText value="#{msgs['baf.org.unit.orgName']}:" />
+						<h:panelGroup >						
+							<c:if test="#{organizationBean.isOA=='N' || organizationBean.isOA==null}">
+								<h:inputText id="orgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.orgName}">
+									<s:commonsValidator type="required" arg="#{msgs['baf.org.unit.orgName']}" server="false" client="true"/>
+									<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.unit.orgName']}" maxLength="64"  server="false" client="true"/>				 
+								</h:inputText>
+							</c:if>
+							<c:if test="#{organizationBean.isOA=='Y'}">
+								<h:inputText id="orgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.orgName}" disabled="true"/>
+							</c:if>
+						</h:panelGroup>
+						<h:outputText value=""/>
+					
+						<h:outputText value="#{msgs['baf.org.unit.orgType']}:" />
+						<h:selectOneMenu style="width:95%;height:23px;" id="objectTypeID"	value="#{organizationBean.objectTypeID}" styleClass="rich-box-border-color-control-select rich-text-control-select" disabled="#{organizationBean.disabled}" onchange="isShowCrew(this)">
+							<f:selectItems value="#{organizationBean.orgTypeMap}" />
+						</h:selectOneMenu>
+						<h:outputText value=""/>
+						
+						<c:if test="#{organizationBean.isoaInfo &amp;&amp; organizationBean.orgID != null}">
+							<h:outputText value="#{msgs['baf.org.unit.isoa']}:" />
+							<h:selectOneMenu style="width:95%;height:23px;" id="isOaOrg" value="#{organizationBean.isOA}" disabled="#{organizationBean.disabled}">
+								<f:selectItems value="#{organizationBean.isOAMap}" />
+							</h:selectOneMenu>
+							<h:outputText value=""/>
+						</c:if>
+					
+						
+					<h:outputText value="#{msgs['baf.org.unit.allowFenwickLogin']}:" rendered="#{organizationBean.decenAuthFlag}"/>
+							<h:selectOneMenu style="width:95%;height:23px;" id="isSingleLogin" value="#{organizationBean.isSingleLogin}"  rendered="#{organizationBean.decenAuthFlag}">
+								<f:selectItems value="#{organizationBean.isOAMap}" />
+							</h:selectOneMenu>
+							<h:outputText value="" rendered="#{organizationBean.decenAuthFlag}"/>
+						
+				
+					<c:if test="#{userBean.osSysSwitch}">
+						<h:outputText value="#{msgs['baf.org.TemplateName']}:" />
+						<h:inputText id="templateName" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()" value="#{organizationBean.templateName}" title="#{msgs['baf.org.templateName']}"/>
+						<a4j:commandButton type="button" styleClass="rich-button" style="width:70px;"  value="#{msgs['baf.org.unit.selectTemplate']}">
+						<a4j:support event="onclick"
+											onsubmit="Richfaces.showModalPanel('unitForm:templateModalPanel'); return false;" />
+						</a4j:commandButton>					
+					</c:if>
+						
+						<h:outputText value="#{msgs['baf.org.unit.phone']}:" />
+						<h:inputText id="phone" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.phone}" >	
+							<s:commonsValidator type="maxlength"  maxLength="512" arg="#{msgs['baf.org.unit.phone']}" server="false" client="true"/>				 			
+						</h:inputText>
+						<h:outputText value=""/>
+				
+						<h:outputText value="#{msgs['baf.org.unit.fax']}:" />
+							<h:inputText id="fax" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.fax}">	
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.unit.fax']}" maxLength="16"  server="false" client="true"/>			
+						</h:inputText>
+						<h:outputText value=""/>
+						
+						<h:outputText value="#{msgs['baf.org.unit.email']}:" />
+						<h:inputText id="email" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.email}" >
+							<s:commonsValidator type="email" arg="#{msgs['baf.org.unit.email']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.unit.email']}" maxLength="255"  server="false" client="true"/>				
+						</h:inputText>
+						<h:outputText value=""/>
+		
+						<h:outputText value="#{msgs['baf.org.unit.orgDes']}:" />
+						<h:inputTextarea id="orgDes" style="width:95%;height:50px;word-break:break-all;resize:none;" styleClass="rich-gradient-input" value="#{organizationBean.orgDes}">				
+						<s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.unit.orgDes']}" maxLength="128"  server="false" client="true"/>
+						</h:inputTextarea>
+						<h:outputText value=""/>				
+						
+						<h:inputHidden id="orgTemplateId" value="#{organizationBean.orgTemplateID}"/>
+						<h:inputHidden id="orgCode" value="#{organizationBean.orgCode}"/>
+						
+					</h:panelGrid>
+			
+					<rich:spacer height="50px"/>
+					<rich:panel id="tid" header="#{msgs['baf.org.inputTname']}" style="text-align:left;width:40%;display:none;">			
+						<h:panelGrid id="torg" columns="2" columnClasses="column4,column5" style="font-size:13px;width:90%;" styleClass=".rich-text-color-general">
+							<h:outputText value="#{msgs['baf.org.TemplateName']}" />
+							<h:inputText id="saveTemplateName" style="width:100%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.saveTemplateName}">
+								<s:commonsValidator type="maxlength" arg="#{msgs['baf.org.TemplateName']}" maxLength="64" server="false" client="true"/>
+							</h:inputText>
+						</h:panelGrid>
+					</rich:panel>
+			
+				</fieldset>
+			</rich:tab>
+			
+			<!-- 业务配置 -->
+			<rich:tab id="businessConfig" label="#{msgs['baf.org.unit.tab.businessConfig']}" switchType="client" onlabelclick="setIndex('0');"  rendered="#{organizationBean.orgBusRigOperate}">
+				<h:inputHidden id="businessConfigItems" value="#{organizationBean.businessConfigItems}"></h:inputHidden>
+				<fieldset style="height:100%" >
+		            <legend><h:outputText value="#{msgs['baf.org.unit.tab.businessConfig']}" /></legend>
+					<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+						<tr>
+							<td id="bcontree" width="100%" height="100%"></td>
+						</tr>
+					</table>
+            	</fieldset>
+			</rich:tab>
+			
+			<!-- 操作权限组配置 -->
+			<rich:tab id="authorizationGroup" label="#{msgs['baf.org.user.tab.operateAuthorConfig']}" switchType="client"  onlabelclick="setIndex('2');" rendered="#{organizationBean.orgOpeRigOperate}">
+				<table width="100%" height="100%" cellpadding="3%">
+					<tr>
+	                	<td width="100%">
+	               			<fieldset style="height:100%" >
+			            		<legend><h:outputText value="#{msgs['baf.org.user.tab.operateGroupConfig']}"/></legend>      
+			            		<rich:spacer height="1px;"/>		               			
+			            		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="operGroupTree_tree" width="100%" height="100%"></td>
+									</tr>
+								</table>
+								
+								<regaltec:dhtmlXtree id="operGroupTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="operGroupTree_tree"
+									loadXML="/baf/jsp/org/unit/operateGroupXMLData.jsp?unitId=#{organizationBean.orgID}&amp;nativenetGroupId=#{operRigGroupBean.nativenetGroupId}"
+									xmlAutoLoading="/baf/jsp/org/unit/operateGroupXMLData.jsp?unitId=#{organizationBean.orgID}&amp;groupId=&amp;nativenetGroupId=#{operRigGroupBean.nativenetGroupId}">
+									<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+								</regaltec:dhtmlXtree>
+				          </fieldset>
+	               		</td>
+               		</tr>
+               	</table>
+			</rich:tab>
+			
+			<!-- 数据权限配置 -->
+			<rich:tab id="dataAuthorization" label="#{msgs['baf.org.unit.tab.dataAuthorization']}" switchType="client" style="text-align:center;" onlabelclick="setIndex('3');" rendered="#{organizationBean.orgDataRigOperate}">
+            	<table width="100%" height="100%">
+                	<tr>
+                		<td width="50%">
+							<fieldset style="height:98%">
+				           		<legend><h:outputText value="#{msgs['baf.org.unit.dataRight']}" /></legend>				           		
+				           		<rich:spacer height="1px;"/>	
+				           		<table width="100%" height="92%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="treeboxbox_tree" width="100%" height="100%"></td>
+									</tr>
+								</table>
+								
+								<regaltec:dhtmlXtree id="rightTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+									loadXML="/baf/jsp/org/unit/rightFactorTreeXMLData.jsp"
+									xmlAutoLoading="/baf/jsp/org/unit/rightFactorTreeXMLData.jsp">
+									<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />	
+								</regaltec:dhtmlXtree>		
+							</fieldset>
+                       </td>
+                       <td width="50%">
+							<fieldset style="height:98%;" id="right">
+				           		<legend><h:outputText value="#{msgs['baf.org.unit.dataRightTreeTitle']}" /></legend>           	
+								<rich:spacer height="1px;"/>
+								<table width="100%" height="92%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="dataright_tree" width="100%" height="92%"></td>
+									</tr>
+								</table>
+								<regaltec:dhtmlXtree id="dataRightTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="dataright_tree"
+									loadXML="/baf/jsp/org/unit/datatree.jsp"
+									xmlAutoLoading="/baf/jsp/org/unit/datatree.jsp">
+									<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>										
+				    				<regaltec:setDxtEevntHandler eventName="onCheck" handler="clickCheck"/> 
+									<regaltec:setDxtEevntHandler eventName="onOpenStart" handler="openStart" />	
+								</regaltec:dhtmlXtree>								
+							</fieldset>
+						</td>
+					</tr>						
+				</table>
+			</rich:tab>
+			
+			<!-- 部门/岗位/人员列表 -->
+			<rich:tab id="orguser" label="#{msgs['baf.org.Employee']}" switchType="client" style="text-align:center;" rendered="#{organizationBean.orgID != null &amp;&amp; organizationBean.orgID != ''&amp;&amp;organizationBean.orgUsersOperate}" onlabelclick="setIndex('4');">
+	        	<rich:spacer height="1%"/>
+	        	<div id="list" style="height:99%;overflow-x:auto;overflow-y:auto;">
+					<!-- 子部门列表 -->
+					<h:panelGroup  style="height:30%;width:100%;" rendered="false">
+						<rich:dataTable width="95%" id="orgList" rows="#{organizationBean.pageSize}" columnClasses="col" 
+				            value="#{organizationBean.defaultDataModel}" var="orgunit">
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.unit.orgName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgunit.orgname}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.orgType']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgunit.objecttypename}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.phone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgunit.phone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.email']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgunit.email}" />
+				            </h:column>
+				        </rich:dataTable>
+				        <table width="95%">
+				            <tr>
+					            <td>
+									<rich:datascroller align="right"  for="orgList" fastStep="1"  page="#{organizationBean.scrollerPage1}" id="sc1" />
+									<a4j:keepAlive beanName="organizationBean"/>
+								</td>
+							</tr>
+						</table>
+					</h:panelGroup>
+			        <rich:spacer height="1%"/>
+			        
+					<!-- 岗位列表 -->
+					<h:panelGroup  style="height:30%;width:100%;" rendered="false" >			
+				        <rich:dataTable width="95%;" id="postList" rows="#{organizationBean.pageSize}" columnClasses="col" 
+				            value="#{organizationBean.firstDataModel}" var="orgpost" style="font-size:13px;font-weight:normal;">
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.post.postName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgpost.orgname}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.post.phone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orgpost.phone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.post.authDataFlag']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText rendered="#{orgpost.authdataflag=='Y'}" value="#{msgs['baf.radioYes']}" />
+				                <h:outputText rendered="#{orgpost.authdataflag=='N'}" value="#{msgs['baf.radioNo']}" />
+				            </h:column>
+				        </rich:dataTable>
+				        <table width="95%">
+				            <tr>
+					            <td>
+									<rich:datascroller align="right"  for="postList" fastStep="1"  page="#{organizationBean.scrollerPage2}" id="sc2" />
+									<a4j:keepAlive beanName="organizationBean"/>
+								</td>
+							</tr>
+						</table>	
+					</h:panelGroup>
+				    <rich:spacer height="1%"/>
+			        
+			        <!-- 人员列表 -->
+			        <h:panelGroup  style="height:30%;width:100%;">       
+					    <rich:dataTable width="95%" id="userList" footerClass="footer" rows="#{organizationBean.pageSize}" columnClasses="col" 
+				            value="#{organizationBean.secondDataModel}" var="orguser" style="font-size:13px;font-weight:normal;">
+				            	<rich:column width="4%" style="text-align:center;">
+							        <f:facet name="header">
+										<input type="checkbox" onclick="selObjAll(this.checked,'addUser');"/>
+									</f:facet>
+									<input type="checkbox" value="#{orguser.userId};#{orguser.userName}" name="addUser" onclick="selObj(this);"/>
+						        </rich:column>	
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+						        </f:facet>
+						     
+				                <h:outputText value="#{orguser.userName}"/>
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                        <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <h:outputText rendered="#{orguser.gender=='M'}" value="#{msgs['baf.radioMankind']}"/>
+				                <h:outputText rendered="#{orguser.gender=='F'}" value="#{msgs['baf.radioFemale']}"/>
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.loginName}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.userType}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.officePhone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                    <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.mobilePhone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.phs}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.email']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.email}" />
+				            </h:column>
+				            
+				            <c:if test="#{organizationBean.isoaInfo }">
+					            <h:column>
+					            	<f:facet name="header">
+					                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.isoauser']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{orguser.isOA}" />
+					            </h:column>
+				            </c:if>
+				            <rich:column style="text-align:center;">
+							        <f:facet name="header">
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.operating']}" style="font-weight:normal;"/>
+									</f:facet>
+									  <h:outputLink styleClass="headerText" onclick="deleUser('#{orguser.userId}');return false;">
+									<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.remove']}" style="font-weight:normal;"/>
+									</h:outputLink>
+						        </rich:column>	
+				        </rich:dataTable>    
+				        <table width="95%">
+				            <tr>
+					            <td>
+					            <!-- 保存按钮 -->
+									<a4j:commandButton id="btnChoose" value="#{msgs['baf.dataImport.assginCmd']}" styleClass="rich-button" align="left" onclick="if(!afterGetAllOrgIds())return false;" reRender="panelForm" >
+									</a4j:commandButton>
+									<rich:datascroller align="right"  for="userList" fastStep="1"  page="#{organizationBean.scrollerPage3}" id="sc3" />
+									<a4j:keepAlive beanName="organizationBean"/>
+								</td>
+							</tr>
+						</table>		
+					</h:panelGroup>
+				</div>
+				
+			</rich:tab>
+	
+			<!-- 领导信息 -->
+			<rich:tab id="orgleader" label="#{msgs['baf.org.unit.leader.info']}" switchType="client" rendered="#{organizationBean.orgID != null &amp;&amp; organizationBean.orgID != ''&amp;&amp;organizationBean.orgLeaderOperate}" onlabelclick="setIndex('5');"  >
+				<fieldset style="height:100%" >
+					<legend><h:outputText value="#{msgs['baf.org.unit.leader.info']}"/></legend>
+					<rich:spacer height="10px"/>
+					<h:panelGroup  style="height:30%;width:100%;">
+			           	<rich:spacer width="15px"/> 
+			           	<h:panelGroup style="width:100%;">
+				        	<h:outputText value="#{msgs['baf.org.user.leaderUserName']}: "/>
+							<h:inputText id="luserName" value="#{organizationBean.search_userName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+							<rich:spacer width="5px"/> 
+							<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.calendar.select']}"  action="#{organizationBean.loadLeader}"  onclick="if (checkQueryInputValues()==false) return false; ondisabled();" disabled="false" limitToList="true" reRender="userLeaderList,scl3,itemForSearch" />
+							<rich:spacer width="5px"/> 
+							<a4j:commandButton styleClass="rich-button" type="button" id="itemForUnit" value="#{msgs['baf.org.unit.leader.itemForUnit']}" onclick="showOrgPanel();" />
+							<rich:spacer width="5px"/> 
+								<a4j:commandButton styleClass="rich-button" type="button" id="reItemForUnit" value="#{msgs['baf.org.unit.leader.reItemForUnit']}" disabled="#{organizationBean.isDisabled}" onclick="returnOrg();"
+						 action="#{organizationBean.reflashLeader}" data="#{organizationBean.leaderTypeMapList}"  oncomplete="afteRL(data)" reRender="userLeaderList,scl3,leaderTypeMapList,reItemForUnit,LType" >
+						<a4j:actionparam name="leaderOrgID" assignTo="#{organizationBean.leader_orgID}"  value=""/>
+					
+					     </a4j:commandButton>	
+							<rich:spacer width="5px"/>
+							<a4j:commandButton styleClass="rich-button" type="button" id="leaderOrg" value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}" onclick="Richfaces.showModalPanel('leaderModalPanelCancel'); " action="#{organizationBean.loadOtherLeader}" reRender="userLeaderLists,scls3" />
+						</h:panelGroup>
+						<rich:spacer width="15px"/>
+						<center>
+				        	<rich:dataTable width="95%" id="userLeaderList" footerClass="foor" rows="#{organizationBean.pageSize}" columnClasses="col" 
+			            	value="#{organizationBean.fourDataModel}" var="orgleaderuser" style="font-size:13px;font-weight:normal;"  rowKeyVar="index">
+					             <rich:column  style="text-align:center;width: 20%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.leaderUserName']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        
+							        <h:inputHidden id="uid"  name="uid" value="#{orgleaderuser.userId}"></h:inputHidden>
+					                <h:outputText id="uname" value="#{orgleaderuser.userName}" />
+					            </rich:column>
+					              <rich:column style="text-align:center;width: 50%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.legend.userUnit']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText id="unit" value="#{orgleaderuser.fullUnitNames}" title="#{orgleaderuser.fullUnitNames}"/>
+					            </rich:column>
+					            <rich:column style="width: 35%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.unit.leader.leadertype']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <center>
+					                	<h:selectOneMenu style="width:45%;height:23px;" id="LType" name="LType" value="#{orgleaderuser.leaderType}" onchange="getSelectValue('#{orgleaderuser.userId}',this.value);" styleClass="rich-box-border-color-control-select rich-text-control-select">
+										 	<f:selectItems value="#{organizationBean.leaderTypeMap}"/>
+										</h:selectOneMenu>
+									</center>
+					            </rich:column>
+				        	</rich:dataTable> 
+				        	<rich:spacer height="10px"/>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="unitForm:userLeaderList" fastStep="1"  page="#{organizationBean.scrollerPage3}" id="scl3" reRender="pagenum,pagesize"/>
+										<a4j:keepAlive beanName="organizationBean"/>
+									</td>
+								</tr>
+							</table>
+			            </center>	
+	            	</h:panelGroup>
+				</fieldset>
+			</rich:tab>
+			
+			<!-- 部门扩展属性 -->
+			<rich:tab id="orgunitext" label="#{msgs['baf.org.unit.tab.orgextunit']}" switchType="client" rendered="#{organizationBean.unitDefineList!=null}" onlabelclick="setIndex('6');">
+				<fieldset style="height:100%" >
+		           <legend><h:outputText value="#{msgs['baf.org.unit.tab.orgextunit']}"/></legend>
+		           <rich:spacer height="10px"/>
+		           <center>	            
+			           <h:panelGrid columns="2" style="font-size:13px;word-break:break-all;" width="60%" dir="ltr" columnClasses="column1,column2">
+							<c:forEach var="ext" items="#{organizationBean.unitDefineList}" step="1">
+				            	<h:outputText value="#{ext.propertyName}:"/>
+				            	
+				            	<h:panelGroup>
+					            	<h:inputText value="#{organizationBean.unitExtVO[ext.fieldName]}" style="width:95%;height:23px;" styleClass="rich-gradient-input" rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='S'}">
+										<s:commonsValidator type="maxlength" arg="#{ext.propertyName}" maxLength="512"  server="false" client="true"/>
+				           			</h:inputText>
+				           			<h:inputText value="#{organizationBean.unitExtVO[ext.fieldName]}" style="width:95%;height:23px;" styleClass="rich-gradient-input" rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='N'}">
+										<s:commonsValidator type="integer" arg="#{ext.propertyName}" server="false" client="true"/>
+				           			</h:inputText>
+				           			<c:if test="#{ext.isNullAble=='Y'}">
+				           				<regaltec:dictionary type="dictionary" regionId="#{organizationBean.regionId}"  dicCode="#{ext.dataFrom}" optValueType="itemValue" emptText="==请选择==" emptValue="" value="#{organizationBean.unitExtVO[ext.fieldName]}" style="width:95%;height:23px;" rendered="#{ext.controlType=='COMBO'}"/>
+				           			</c:if>
+				           			<c:if test="#{ext.isNullAble == 'N'}">
+				           				<regaltec:dictionary type="dictionary" regionId="#{organizationBean.regionId}"  dicCode="#{ext.dataFrom}" optValueType="itemValue"  value="#{organizationBean.unitExtVO[ext.fieldName]}" style="width:95%;height:23px;" rendered="#{ext.controlType=='COMBO'}"/>
+				           			</c:if>
+				           			
+				          		</h:panelGroup>	
+			          			
+			          		</c:forEach>
+			          	</h:panelGrid>		        
+		        	</center>
+		    	</fieldset>
+			</rich:tab>
+			
+			<!--专业配置-->
+			<rich:tab id="pConfig"  label="#{msgs['baf.org.unit.tab.proBusinessConfig']}" switchType="client" onlabelclick="setIndex('8');"  rendered="#{organizationBean.isShowBusiness=='Y' &amp;&amp; organizationBean.showBusinessTab =='Y'}">
+				<fieldset style="height:100%" >
+		            <legend><h:outputText value="#{msgs['baf.org.unit.tab.proBusinessConfig']}" /></legend>
+					<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+						<tr><td align="center">
+						<h:outputText value="#{msgs['baf.org.barrierType']}:" />
+						<h:selectOneMenu style="width:20%;" id="faultType"
+									value="#{organizationBean.faultType}"
+									onchange="changeStatus(this.value);"
+									styleClass="rich-box-border-color-control-select rich-text-control-select">
+									<f:selectItems value="#{organizationBean.faultTypeList}" />
+							 </h:selectOneMenu></td></tr>
+						<tr>
+							<td id="noProfessionalTree" width="100%" height="100%" ></td>
+						</tr>
+					</table>
+					
+					<regaltec:dhtmlXtree id="noProfessionalObj"
+						imagePath="/baf/images/dhtmlxtree/" contentEl="noProfessionalTree"
+						loadXML="/baf/jsp/org/unit/businessNoProXmlData.jsp?objectType=#{organizationBean.faultType}&amp;requestId=#{organizationBean.orgID}"
+						xmlAutoLoading="/baf/jsp/org/unit/businessNoProXmlData.jsp?objectType=#{organizationBean.faultType}&amp;requestId=#{organizationBean.orgID}">
+						<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"></regaltec:setDxtEnable>
+	      				<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"></regaltec:setDxtEnable>
+					</regaltec:dhtmlXtree> 
+            	</fieldset>
+			</rich:tab>
+			
+			<!--首派配置-->
+			<rich:tab id="isFirstDispTab" label="#{msgs['baf.org.first']}" switchType="client" style="text-align:center;" onlabelclick="setIndex('9');"  rendered="#{organizationBean.orgID!=null &amp;&amp; organizationBean.showBusinessTab =='Y'}">
+            	<table width="100%" height="100%">
+                	<tr>
+                		<td width="50%">
+							<fieldset style="height:98%">
+				           		<legend><h:outputText value="#{msgs['baf.org.specialty']}" /></legend>				           		
+				           		<rich:spacer height="1px;"/>	
+				           		<table width="100%" height="92%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="firstDispTree" width="100%" height="100%"></td>
+									</tr>
+								</table>
+								
+								<regaltec:dhtmlXtree id="firstDispTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="firstDispTree"
+									loadXML="/baf/jsp/org/unit/businessNoProXmlData.jsp?objectType=W&amp;requestId=#{organizationBean.orgID}&amp;isFirstDisp=Y"
+									xmlAutoLoading="/baf/jsp/org/unit/businessNoProXmlData.jsp?objectType=W&amp;requestId=#{organizationBean.orgID}&amp;isFirstDisp=Y">
+									<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClickFirstDisp" />
+								</regaltec:dhtmlXtree>	
+							</fieldset>
+                       </td>
+                       <td width="50%">
+							<fieldset style="height:98%;" id="right">
+				           		<legend><h:outputText value="#{msgs['baf.org.crew']}" /></legend>           	
+								<rich:spacer height="1px;"/>
+								<table width="100%" height="92%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="crewTree" width="100%" height="92%"></td>
+									</tr>
+								</table>
+								 <regaltec:dhtmlXtree id="crewTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="crewTree"
+									loadXML="/baf/jsp/org/unit/crewTree.jsp?"
+									xmlAutoLoading="/baf/jsp/org/unit/crewTree.jsp">
+									<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"></regaltec:setDxtEnable>
+	      							<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"></regaltec:setDxtEnable>
+									<regaltec:setDxtEevntHandler eventName="onCheck" handler="cancelOldSelect" />
+								</regaltec:dhtmlXtree> 
+															
+							</fieldset>
+						</td>
+					</tr>						
+				</table>
+			</rich:tab>
+			
+			<!--字典配置-->
+			<rich:tab id="dicConfig" label="#{msgs['baf.org.dicConfig']}" switchType="client" style="text-align:center;" onlabelclick="setIndex('10');" rendered="#{organizationBean.isShowDicConfig=='Y'}" >
+            	<table width="100%" height="100%">
+                	<tr>
+                		<td width="30%">
+							<fieldset style="height:98%">
+				           		<legend><h:outputText value="#{msgs['baf.org.dic']}" /></legend>				           		
+				           		<rich:spacer height="1px;"/>	
+				           		<table width="100%" height="92%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+									<tr>
+										<td id="dicTree_tree" width="100%" height="100%"></td>
+									</tr>
+								</table>
+								
+								<regaltec:dhtmlXtree id="dicTree"
+									imagePath="/baf/images/dhtmlxtree/" contentEl="dicTree_tree"
+									loadXML="/baf/jsp/org/unit/dictCategoryXMLData.jsp"
+									xmlAutoLoading="/baf/jsp/org/unit/dictCategoryXMLData.jsp">
+									<regaltec:setDxtEevntHandler eventName="onClick" handler="dicOnClick" />	
+								</regaltec:dhtmlXtree>		
+							</fieldset>
+                       </td>
+                       <td width="70%">
+                       		<a4j:keepAlive beanName="dictItemBean"/>
+							<fieldset style="height:98%;" id="right">
+				           		<legend><h:outputText value="#{msgs['baf.org.itemList']}" /></legend>           	
+								<rich:spacer height="1px;"/>
+								<center>
+								<rich:panel style="width:95%;">				
+									<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	
+										<h:panelGroup>
+										<h:outputText value="#{msgs['baf.dict.itemCode']}："/>
+										<h:inputText id="sitemCode"  style="width:160px;height:23px;" styleClass="rich-gradient-input" /><rich:spacer width="5px"/>
+										</h:panelGroup>
+										
+										<h:panelGroup>
+										<h:outputText value="#{msgs['baf.dict.itemName']}："/>
+										<h:inputText id="sitemName"  style="width:160px;height:23px;" styleClass="rich-gradient-input"/><rich:spacer width="5px"/>
+										</h:panelGroup>
+										
+										<a4j:commandButton styleClass="rich-button" type="submit" id="itemSearch" value="#{msgs['baf.org.btnSearch']}"  action="#{dictItemBean.searchItemBYCodeOrName}"  
+											onclick="if (checkQueryItem()==false) return false; ondisabled();" disabled="false" limitToList="true" reRender="itemLists,itemScroller,itemSearch,itemConfigItem,dictionId" oncomplete="itemSearchOnComplete()"/>
+									</h:panelGrid>
+									
+								</rich:panel>
+								<rich:spacer width="5px"/>		 				 
+								<h:panelGroup id="panelGroupItem" style="width:100%;">
+									<rich:dataTable width="95%" id="itemLists" rows="#{dictItemBean.pageSize}" style="white-space:inherit;word-break:break-all;"
+							            value="#{dictItemBean.thirdDataModel}" var="currItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8';" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+							            title="#{msgs['baf.dict.dataTable.ItemEditTip']}"  >
+							            <rich:column width="5%" style="text-align:center;">
+									        <f:facet name="header">
+									        	<h:selectBooleanCheckbox id="selectAll" onclick="selAll(this.checked,'item');"/>
+									        </f:facet>
+									        <h:panelGrid rendered="#{currItem.ischecked == currItem.itemCode}">
+									        	<input type="checkbox" name="item" id="selectedItem" checked="checked" value="#{currItem.itemCode};#{currItem.itemValue}" onclick="sel(this);"/>
+									        </h:panelGrid>
+								            <h:panelGrid rendered="#{currItem.ischecked == 'N'}">
+									        	<input type="checkbox" name="item" id="selectedItem"  value="#{currItem.itemCode};#{currItem.itemValue}" onclick="sel(this);"/>
+									        </h:panelGrid>
+								        	
+								        	
+								        </rich:column>	  
+							            
+							            <rich:column style="width:30%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText " value="#{msgs['baf.dict.itemName']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{currItem.itemName}" />
+							            </rich:column>
+							            <rich:column style="width:30%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.itemCode']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{currItem.itemCode}" />
+							            </rich:column>
+							            <rich:column style="width:35%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.itemValue']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{currItem.itemValue}" title="#{currItem.itemValue}"/>
+							            </rich:column>
+							            <!--  
+							            <rich:column style="width:12%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.toDict']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{currItem.dictionaryName}" />
+							            </rich:column>
+							            <rich:column style="width:15%;">
+							            	<f:facet name="header">
+									        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.area']}" style="font-weight:normal;"/>
+									        </f:facet>
+							                <h:outputText value="#{msgs['baf.dict.bureauName']}" rendered="#{currItem.bureauName==null}"/>
+							                <h:outputText value="#{currItem.bureauName}" rendered="#{currItem.bureauName!=null}"/>
+							            </rich:column>
+							            -->
+							        </rich:dataTable>
+							        <table width="95%">
+							            <tr>
+								            <td>
+												<rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{dictItemBean.scrollerPage}" id="itemScroller" reRender="pageNo" onpagechange="onSetItemToCache_Page()"  oncomplete="saveSelledObj('item')" />
+												<a4j:keepAlive beanName="dictItemBean"/>
+											</td>
+										</tr>
+									</table>
+								</h:panelGroup>				
+								<h:inputHidden id="pageNo" value="#{dictItemBean.scrollerPage}"/>
+								<h:inputHidden id="itemPageSize" value="#{dictItemBean.pageSize}"/>	
+								<h:inputHidden id="gotItemIdValues" value="#{dictItemBean.selectedItemIds}" />
+								<h:inputHidden id="itemChecked" value="#{dictionaryExpBean.itemChecked}" />
+							    <h:inputHidden id="itemCode" value="#{dictItemBean.itemCodeForQuery}" />
+								<h:inputHidden id="itemName" value="#{dictItemBean.itemNameForQuery}" />
+							    <h:inputHidden id="itemFlagId" value="#{dictItemBean.searchFlag}" />
+							    <h:inputHidden id="itemConfigItem" value="#{dictItemBean.configItem}" />
+							    <h:inputHidden id="dictionId" value="#{dictItemBean.dictionId}" />
+							    <h:inputHidden id="dictionIdSign"/>
+							    
+							    
+							  </center>							
+							</fieldset>
+						</td>
+					</tr>						
+				</table>
+			</rich:tab>
+			
+			<!-- 部门派工关系 -->
+			<rich:tab disabled="true" rendered="#{organizationBean.showDispatching == 'Y' &amp;&amp; organizationBean.orgID != null}" onlabelclick="setIndex('7');">
+				<f:facet name="label">
+					<h:panelGroup>
+						<a href="#" onclick="openUnitDispatching();">
+							<h:outputText value="#{msgs['baf.org.unit.relationdepartmentDispatching']}" />
+	                 	</a>
+                 	</h:panelGroup>
+				</f:facet>
+			</rich:tab>
+		</rich:tabPanel>
+	
+		<h:inputHidden id="rid" value=""/>		
+		<h:inputHidden id="hasCheckbox" value=""/>
+		<h:inputHidden id="url" value=""/>
+		<h:inputHidden id="cancelDataRight" value=""/>
+		<h:inputHidden id="allDataRight" value="#{organizationBean.allDataRight}"/>
+		<h:inputHidden id="sign" value=""/>
+		<h:inputHidden id="checked" value="#{organizationBean.checked}"/>
+		<h:inputHidden id="unchecked" value="#{organizationBean.unchecked}"/>
+		<h:inputHidden id="allCheckGroupIds" value="#{organizationBean.allCheckGroupIds}"/>
+		<h:inputHidden id="leaderTypeMapList" value="#{organizationBean.leaderTypeMapList}"/>
+		<h:inputHidden id="flagId" value="#{organizationBean.searchFlag}" />
+		<h:inputHidden id="pagenum" value="#{organizationBean.scrollerPage3}"/>
+		<h:inputHidden id="showBusiness"  value="#{organizationBean.oldObjectId}"/>
+		<h:inputHidden id="oldBusinessId" value=""/>
+		<h:inputHidden id="oldCrewId" value="#{organizationBean.oldCrewId}"/>
+		<h:inputHidden id="professionId" value="#{organizationBean.professionId}"/>
+		<h:inputHidden id="crewId" value="#{organizationBean.crewId}"/>
+		
+		<h:inputHidden id="proChecked" value="#{organizationBean.proChecked}"/>
+		<h:inputHidden id="proUnchecked" value="#{organizationBean.proUnchecked}"/>
+		
+		<h:inputHidden id="pageSize" value="#{organizationBean.pageSize}"/>
+		<h:inputHidden id="configItem" value="#{organizationBean.configItem}"/>
+		<h:inputHidden id="dictionaryId" value="#{organizationBean.dictionaryId}"/>
+		
+		<h:inputHidden id="isExistPhone" value="N"/>
+		
+		<rich:spacer height="1px" />
+		
+		
+			<!-- 选择组织 模板   -->
+					<rich:modalPanel id="templateModalPanel" autosized="false"
+						keepVisualState="false" width="450" height="400" rendered="#{userBean.osSysSwitch}">
+						<f:facet name="header">
+							<h:outputText
+								value="#{msgs['baf.org.unit.select']}#{msgs['baf.org.unit.orgTemplate']}" />
+						</f:facet>
+						<!-- 关闭按钮 -->
+						<f:facet name="controls">
+							<h:panelGroup>
+								<h:graphicImage value="/baf/images/icons/close.png"
+									id="hidelink" styleClass="hidelink" />
+								<rich:componentControl for="templateModalPanel"
+									attachTo="hidelink" operation="hide" event="onclick" />
+							</h:panelGroup>
+						</f:facet>
+						<fieldset style="height: 90%;">
+							<legend>
+								<h:outputText value="#{msgs['baf.org.unit.orgTemplate']}" />
+							</legend>
+							<rich:spacer height="1px;" />
+							<table
+								style="width: 100%; height: 92%; overflow-x: auto; overflow-y: auto;">
+								<tr>
+									<td id="template_tree"></td>
+								</tr>
+							</table>
+
+							<regaltec:dhtmlXtree id="templateTree"
+								imagePath="/baf/images/dhtmlxtree/" contentEl="template_tree"
+								loadXML="/baf/jsp/org/unit/orgTemplateXMLData.jsp?category=O"
+								xmlAutoLoading="/baf/jsp/org/unit/orgTemplateXMLData.jsp?category=O">
+								<regaltec:setDxtEevntHandler eventName="onClick"
+									handler="doOnTemplateClick" />
+							</regaltec:dhtmlXtree>
+							</fieldset>
+						<center>
+							<h:commandButton type="button" id="templateModalPanelCancel"
+								styleClass="rich-button" value="#{msgs['baf.Close']}"
+								onclick="#{rich:component('templateModalPanel')}.hide(); return false;" />
+						</center>
+					</rich:modalPanel>
+	
+		<CENTER>
+			<!-- 存为模板 -->
+			<h:panelGroup id="saveToTemplateGroup" style="display: none;">		
+				<h:selectBooleanCheckbox id="saveToTemplate" onclick="chkchange();" value="#{organizationBean.chkstate}"/>	
+				<h:outputLabel value="#{msgs['baf.org.saveToTemplate']}" style="font-size:13px;"  styleClass="rich-text-color-general"/>
+			</h:panelGroup>												
+			<rich:toolTip for="saveToTemplate" value="#{msgs['baf.org.saveToTemplateTip']}"/>	
+			<rich:spacer width="10px" />	
+			
+			<!-- 连续新增 -->
+			<h:panelGroup id="isBatchAddGroup" rendered="true" style="display: none;">
+				<h:selectBooleanCheckbox id="isBatchAddSave" value="#{organizationBean.batchAddChkState}"/>			
+				<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}" style="font-size:13px;"  styleClass="rich-text-color-general"/>
+				<rich:toolTip for="isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>
+				<rich:spacer width="10px"/>
+			</h:panelGroup>	
+														
+			<!-- 保存按钮 -->
+			<a4j:commandButton id="btnSave" value="#{msgs['baf.org.unit.save']}" styleClass="rich-button" disabled="#{organizationBean.orgID != null &amp;&amp; sessionScope.currentUser.loginName != 'sa' &amp;&amp; organizationBean.editOrgOperate == false}">
+				<a4j:actionparam name="handleType" value="save" />
+				<a4j:support event="onclick" onsubmit="parent.setRequestStatus('Y');if(validateAll(document.getElementById('unitForm'))==false)return false;" action="#{organizationBean.save}" data="#{organizationBean.dealFlag}" oncomplete="onSaveComplete(data);" reRender="unitForm,orgPanel,tform" />
+			</a4j:commandButton>
+		</CENTER>
+	 
+		<s:validatorScript functionName="validateForm"/>
+		<a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('unitForm:panel').component.show()" onstop="document.getElementById('unitForm:panel').component.hide()">
+		</a4j:status>
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>	    
+	    
+	</a4j:form>
+	
+	 <!-- 选择部门模板   -->
+		<rich:modalPanel id="orgTempModalPanelCancel" autosized="false" keepVisualState="false" width="450" height="400">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.module.select']}#{msgs['baf.org.unit']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="hidelinks" styleClass="hidelink"/>
+			    <rich:componentControl for="orgTempModalPanelCancel" attachTo="hidelinks" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<fieldset style="width:100%;height:90%">
+	       		<table style="width:100%;height:92%;overflow-x:auto;overflow-y:auto;">
+	      			<tr><td id="ORGModuleTree_tree"></td></tr>
+	      		</table>
+			</fieldset>
+			<a4j:form id="leaForm">
+			<center>	
+				<a4j:commandButton id="corgTempModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.desktop.define.ok']}" onclick="leaderOrgInfo();" action="#{organizationBean.reflashLeader}" oncomplete="refreshTree(); #{rich:component('orgTempModalPanelCancel')}.hide(); return false;" reRender="reItemForUnit,userLeaderList,scl3,leaderTypeMapList"/>
+			</center>
+			<h:inputHidden id="leader_orgID" value="#{organizationBean.leader_orgID}"/>
+			</a4j:form>
+		</rich:modalPanel>
+		
+		<rich:modalPanel id="leaderModalPanelCancel" autosized="false" keepVisualState="false" width="650" height="400">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="leaderModalPanelCancel" attachTo="hidelink" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<a4j:form >
+			<fieldset style="width:100%;height:90%">
+	       		<legend><h:outputText value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}" /></legend>				           		
+	       		<rich:spacer height="1px;"/>
+		      				<rich:dataTable width="100%" id="userLeaderLists" footerClass="foor" rows="#{organizationBean.pageSize}" columnClasses="col" 
+			            	value="#{organizationBean.fiveDataModel}" var="orgleaderuser" style="font-size:13px;font-weight:normal;" >
+					             <rich:column  style="text-align:center;width: 15%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.leaderUserName']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <h:inputHidden id="uid" value="#{orgleaderuser.userId}"></h:inputHidden>
+					                <h:outputText id="uname" value="#{orgleaderuser.userName}" />
+					            </rich:column>
+					            <rich:column style="text-align:center;width: 40%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.legend.userUnit']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText id="unit" value="#{orgleaderuser.fullUnitNames}" title="#{orgleaderuser.fullUnitNames}"/>
+					            </rich:column>
+					            <rich:column style="width: 30%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.unit.leader.leadertype']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <center>
+					                	<h:outputText id="ltype" value="#{orgleaderuser.leaderTypeName}" />
+					                </center>
+					            </rich:column>
+					             <rich:column style="text-align:center;width: 15%;">
+							        <f:facet name="header">
+										<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.operating']}" style="font-weight:normal;"/>
+									</f:facet>
+									  <h:outputLink styleClass="headerText" onclick="delLeaderUser('#{orgleaderuser.userId}','#{orgleaderuser.unitId}');return false;">
+									<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.remove']}" style="font-weight:normal;"/>
+									</h:outputLink>
+						        </rich:column>	
+				        	</rich:dataTable> 
+				        	<rich:spacer height="10px"/>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="userLeaderLists" fastStep="1"  page="#{organizationBean.scrollerPage3}" id="scls3" reRender="pagenum,pagesize"/>
+										<a4j:keepAlive beanName="organizationBean"/>
+									</td>
+								</tr>
+							</table>
+				
+			</fieldset>
+			<center>
+			<a4j:commandButton id="colleaderModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="returnOrg();#{rich:component('leaderModalPanelCancel')}.hide(); return false;" />
+			</center>
+			</a4j:form>
+		</rich:modalPanel>
+	
+		<!-- 选择部门模态框 -->
+		<rich:modalPanel id="orgPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.dataprocess.selectorg']}"/>
+			</f:facet>
+		
+			<f:facet name="controls">
+			<h:panelGroup>
+	   			<h:graphicImage value="/baf/images/icons/close.png" id="hl" styleClass="hidelink"/>
+	    		<rich:componentControl for="orgPanel" attachTo="hl" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<center>
+				<fieldset style="height:350px;width:100%;text-align:left;">
+	           		<legend><h:outputText value="#{msgs['baf.dataprocess.selectorg']}" /></legend>				           		
+	           		<rich:spacer height="1px;"/>	
+	           		<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+						<tr>
+							<td id="treeboxbox_orgtree" width="100%" height="100%"></td>
+						</tr>
+					</table>
+				</fieldset>
+				<br />
+				<h:form id="panelForm">
+				<!-- 确定按钮 -->
+						<a4j:commandButton styleClass="rich-button" type="button" id="orgPanelConfirm" value="#{msgs['baf.Confirm']}" onclick="#{rich:component('orgPanel')}.hide();return false;">
+						<a4j:support event="onclick" onsubmit="if(beforeImportToNewUnit() == false) return false;" action="#{organizationBean.importToNewUnit}" oncomplete="onImportNewUnitComplete(data);" data="#{organizationBean.dealFlag}" reRender="userList,scl3"/>
+					</a4j:commandButton>					
+					<rich:spacer width="5px"/>
+					 <h:inputHidden id="selectedItemIds" value="#{organizationBean.selectedItemIds}"/>
+					<h:inputHidden id="selectedUnitId" value="#{organizationBean.selectedUnitId}"/>
+					<!-- 关闭按钮 -->
+				    <a4j:commandButton styleClass="rich-button" type="button" id="orgPanelClose" value="#{msgs['baf.Close']}" onclick="#{rich:component('orgPanel')}.hide();return false;"/>
+				
+				</h:form>		
+			</center>
+		</rich:modalPanel>   
+		
+	<a4j:form>
+	    <a4j:jsFunction name="reflashUnit" limitToList="true"  action="#{organizationBean.reflashUnit}" oncomplete="refleshComplete();" reRender="unitForm,orgPanel,ajForm">
+	        <a4j:actionparam name="orgId" assignTo="#{organizationBean.orgID}"  />    
+            <a4j:actionparam name="scrollerPage1"  value="1" assignTo="#{organizationBean.scrollerPage1}"  />  
+            <a4j:actionparam name="scrollerPage2"  value="1" assignTo="#{organizationBean.scrollerPage2}"  />  
+            <a4j:actionparam name="scrollerPage3"  value="1" assignTo="#{organizationBean.scrollerPage3}"  />                 
+	    </a4j:jsFunction>
+	
+        <a4j:jsFunction name="d_Refresh"  data="#{organizationBean.data}" actionListener="#{organizationBean.selectItem}" oncomplete="dRefresh(data)" >
+        	<a4j:actionparam name="rightFactorId" value="" />    <!-- 上次选中的节点Id -->
+        	<a4j:actionparam name="checkedRightIds" value="" />     <!-- 所有选中的数据权限 -->        	
+        	<a4j:actionparam name="cancleRightIds" value="" />     <!-- 数据库中存在现在取消的数据权限 -->
+        	<a4j:actionparam name="parentIds" value="" />       	<!-- 需要展开的数据权限的父节点 -->
+        	<a4j:actionparam name="itemId" value="" />   <!-- 当前选中的节点Id -->
+        </a4j:jsFunction>  
+        
+        <a4j:jsFunction name="setTemplateValue" action="#{organizationBean.saveTemplate}" reRender="org,templateModalPanel">
+        	<a4j:actionparam name="templateId" value="" />    <!-- 选中的模板Id -->
+        	<a4j:actionparam name="templateName" value="" />    <!-- 选中的模板Name -->
+        </a4j:jsFunction> 
+        
+        <!-- 刷新部门页面中的人员列表 -->
+        <a4j:jsFunction name="listOrgPostUser" limitToList="true"  action="#{organizationBean.reflash}" reRender="userList,userLeaderList,scl3">
+            <a4j:actionparam name="unitId" assignTo="#{organizationBean.orgID}"  />
+            <a4j:actionparam name="scrollerPage"  value="1" assignTo="#{organizationBean.scrollerPage}" />                  
+        </a4j:jsFunction>
+        
+
+        <!--移除人员 -->
+        <a4j:jsFunction name="deleteUser" action="#{organizationBean.deleteUser}" data="#{organizationBean.dealFlag}"  oncomplete="afterDele(data)" reRender="userList,scl3" >
+        	<a4j:actionparam name="deleId" assignTo="#{organizationBean.deleId}"/>    <!-- 选中的模板Id -->
+        </a4j:jsFunction> 
+
+         <a4j:jsFunction name="reflashLeaderOrg"  limitToList="true"  action="#{organizationBean.reflashLeader}" data="#{organizationBean.leaderTypeMapList}"  oncomplete="afteRL(data)" reRender="reItemForUnit,LType,userLeaderList,scl3,leaderTypeMapList" >
+
+        	 <a4j:actionparam name="leaderOrgID" assignTo="#{organizationBean.leader_orgID}"  />
+        </a4j:jsFunction>
+
+		<!--移除非本部门领导信息人员 -->
+        <a4j:jsFunction name="delLeaderUser" action="#{organizationBean.delOrgUserLeader}" data="#{organizationBean.dealFlag}"  oncomplete="reflashOrgLeaderUser(data)" reRender="userLeaderLists,scls3" >
+        	<a4j:actionparam name="deleId" assignTo="#{organizationBean.deleId}"/>    <!-- 选中的模板Id -->
+        	<a4j:actionparam name="oldOrgID" assignTo="#{organizationBean.oldOrgID}"/>    <!-- 人员所属原部门-->
+        </a4j:jsFunction>
+        
+		<a4j:jsFunction name="refleshUnitTree" action="#{organizationBean.refresh}" reRender="tform,reftree,orgTempModalPanelCancel" oncomplete="Richfaces.showModalPanel('orgTempModalPanelCancel');"/>
+		<a4j:jsFunction name="reflashLleader" action="#{organizationBean.loadOtherLeader}" reRender="userLeaderLists,scls3" />
+		<a4j:jsFunction name="refleshOrgTree" action="#{organizationBean.refleshOrgTree}" reRender="ajForm,orgPanel" oncomplete="Richfaces.showModalPanel('orgPanel');"/>
+		<a4j:jsFunction name="refleshLeadTree" action="#{organizationBean.refleshLeadTree}" reRender="tform,orgTempModalPanelCancel" />
+		
+		<a4j:jsFunction name="showBusiness" action="#{organizationBean.getIsShowBusiness}" reRender="unitForm" >
+        	<a4j:actionparam name="isShowBusiness" assignTo="#{organizationBean.isShowBusiness}"  />
+        	<a4j:actionparam name="objectTypeID" assignTo="#{organizationBean.objectTypeID}"  />
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="setDictionaryId" action="#{dictItemBean.getDictionId}" reRender="itemLists,itemScroller,itemConfigItem,dictionId,itemCode,itemName" oncomplete="setSelArray()">
+            <a4j:actionparam name="ditionaryId" assignTo="#{dictItemBean.dictionId}"  />  
+            <a4j:actionparam name="objectId" assignTo="#{dictItemBean.objectId}"  /> 
+            <a4j:actionparam name="dictScrlPage"  value="1" assignTo="#{dictItemBean.scrollerPage}"  />
+            <a4j:actionparam name="itemNameForQuery"  value="" assignTo="#{dictItemBean.itemNameForQuery}"  />
+            <a4j:actionparam name="itemCodeForQuery"  value="" assignTo="#{dictItemBean.itemCodeForQuery}"  />
+            <a4j:actionparam name="itemCount"  value="0" assignTo="#{dictItemBean.itemCount}"  />
+            <a4j:actionparam name="objectType"  value="O" assignTo="#{dictItemBean.objectType}"  />
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="setItemToCache" data="#{dictItemBean.data}" action="#{dictItemBean.setItemToCache}" oncomplete="onSetItemToCacheComp(data)" >
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+        <a4j:jsFunction name="setItemToCache_page" data="#{dictItemBean.data}" action="#{dictItemBean.setItemToCache}">
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+        <a4j:jsFunction name="setItemToCache_search" data="#{dictItemBean.data}" action="#{dictItemBean.setItemToCache}" oncomplete="onSetItemToCache_search(data)" >
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+        <a4j:jsFunction name="setOrgItemToCache" data="#{organizationBean.itemData}" action="#{organizationBean.setOrgItemToCache}" oncomplete="onSetOrgItemToCacheComp(data)" >
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+         <a4j:jsFunction name="setOrgItemToCache_search" data="#{organizationBean.itemData}" action="#{organizationBean.setOrgItemToCache}" >
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+        <a4j:jsFunction name="setOrgItemToCache_save" action="#{organizationBean.setOrgItemToCache}" oncomplete="onDicSave()" >
+            <a4j:actionparam name="selItemArray" /> 
+            <a4j:actionparam name="dictionId" /> 
+        </a4j:jsFunction>
+        <a4j:jsFunction name="deleteToCache" action="#{dictItemBean.deleteToCache}" >            
+        </a4j:jsFunction>
+        
+        <!-- 验证手机号码 -->
+        <a4j:jsFunction name="validPhoneNum" data="#{organizationBean.validPhoneNum}" action="#{organizationBean.validPhone}" oncomplete="onCompleteValidPhone(data)" >
+            <a4j:actionparam name="orgId" /> 
+            <a4j:actionparam name="checked" /> 
+            <a4j:actionparam name="unchecked" /> 
+            <a4j:actionparam name="phone" /> 
+        </a4j:jsFunction>
+   	</a4j:form>
+	   	
+	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	  	
+	<script>   
+	//<![CDATA[
+	/*刷新父窗口树某一个节点*/
+	function refreshTreeItem(orgID)
+	{
+
+		var parentObjId = document.getElementById("unitForm:parentOrgID").value;
+	   	if( parentObjId == "" || parentObjId == null)
+	   	{
+	      	parentObjId = "0";
+	   	}
+	   	parent.refreshTreeItem(parentObjId);
+	   
+	   	var orgId = "";
+	   	//orgID为空时是修改，不为空时是新增
+	   	if(orgID==""){
+			orgId = document.getElementById("unitForm:orgID").value;
+	   	}else{
+	   	 	orgId = orgID;
+	   	}
+	 
+	 	if(orgId!=""){
+	 	
+		 	var timeout = setTimeout("parent.selectItem('"+orgId+"');", 800);
+		 	parent.listOrgUser(orgId);
+		 	
+		 	
+	 	}
+	 	var timeout = setTimeout(" initTabIndex();", 800);
+	}
+	
+
+	//]]>
+	</script> 
+  
+</body>
+</f:view>
+</html>
+ 

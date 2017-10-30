@@ -1,0 +1,74 @@
+<?xml version='1.0' encoding='gbk'?>
+<tree id="0">
+	<item text="组件演示" id="books" open="1" call="0" select="1" tooltip="书刊号">
+		<item text="richfaces组件" id="mystery"  tooltip ="mystery">
+			<item text="综合" id="lb" tooltip="ddddddd">
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/component-test.jsf]]></userdata>
+			</item>
+			<item text="菜单" id="rc" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/menu.jsf]]></userdata>
+			</item>
+			<item text="面板" id="11" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/panel.jsf]]></userdata>
+			</item>
+			<item text="树型" id="12" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/tree.jsf]]></userdata>
+			</item>
+			<item text="表格" id="13" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/orderingList.jsf]]></userdata>
+			</item>
+			<item text="表单" id="14" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/formValidtion.jsf]]></userdata>
+			</item>
+			<item text="表单-2" id="14-1" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/richFacesform.jsf]]></userdata>
+			</item>
+			<item text="模态面板" id="15" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/modalPanel.jsf]]></userdata>
+			</item>
+			<item text="表格2" id="16" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/datatablecolumns.jsf]]></userdata>
+			</item>
+			<item text="样式方案" id="17" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/style.jsf]]></userdata>
+			</item>
+			<item text="jsf-RichFaces封装EXT组件" id="19" >
+			<userdata name="url"><![CDATA[/bap/jsp/componentdemo/component.jsf]]></userdata>
+			</item>
+			
+		</item>
+		<item text="History" id="history" >
+			<item text="John Mack Faragher" id="jmf" ></item>
+			<item text="Jim Dwyer" id="jd" ></item>
+			<item text="Larry Schweikart" id="ls" ></item>
+			<item text="R. Lee Ermey" id="rle" ></item>
+		</item>
+		<item text="Horror" id="horror" open="1" >
+			<item text="Stephen King" id="sk" ></item>
+			<item text="Dan Brown" id="db" ></item>
+			<item text="Mary Janice Davidson" id="mjd" ></item>
+			<item text="Katie Macalister" id="km" ></item>
+		</item>
+		<item text="Science Fiction &amp; Fantasy" id="fantasy" >
+			<item text="Audrey Niffenegger" id="af" ></item>
+			<item text="Philip Roth" id="pr" ></item>
+		</item>
+		<item text="Sport" id="sport" >
+			<item text="Bill Reynolds" id="br" ></item>
+		</item>
+		<item text="Teens" id="teens" >
+			<item text="Joss Whedon" id="jw" ></item>
+			<item text="Meg Cabot" id="mc" ></item>
+			<item text="Garth Nix" id="gn" ></item>
+			<item text="Ann Brashares" id="ab" ></item>
+		</item>
+	</item>
+	<item text="系统管理" id="magazines" open="1">
+		<item text="模块管理" id="mag_sp">
+		<!-- 
+		<userdata name="url"><![CDATA[/bap/jsp/componentdemo/style.jsf]]></userdata>
+		 -->
+		<userdata name="url"><![CDATA[/bap/jsp/module/moduleform.jsf]]></userdata>
+		</item>
+	</item>
+</tree> 

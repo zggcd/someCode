@@ -1,0 +1,939 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+        <f:view  contentType="text/html">
+		<head>
+        <style type="text/css">
+        .column1{
+        border: 1px ridge #1E1E1E;
+        font-size:13px;
+        }
+		.ptd{
+		    border-right-width: 1px;
+			border-bottom-width: 1px;
+			border-top-style: none;
+			border-right-style: solid;
+			border-bottom-style: solid;
+			border-left-style: none;
+			border-color:#999999;
+		}
+		 .scrolls{
+           overflow:auto;
+       }
+        </style> 
+        <script type="text/javascript">
+        //<![CDATA[
+         /*
+	           单击事件，将Td内容更新为一个Div，其中装载了一个Text，用于用户输入新的Td的值，
+	           一个确定按钮，一个取消按钮，用于保存或取消用户的输入内容。
+	           一个Hidden，保存用户输入新值前的Td的值，以便用户取消时恢复。
+        */
+        function AddObjOfText(obj)
+        {
+   
+             //获取数组
+             var Hname=document.getElementsByName("Hname");
+             var Hheight=document.getElementsByName("Hheight");
+             var Hscale=document.getElementsByName("Hscale");
+             var Horder=document.getElementsByName("Horder");
+             var Hmode=document.getElementsByName("Hmode");
+             
+         	//显示添加布局面板的面板
+             document.getElementById("newPan").style.display="";
+             document.getElementById("addForm:p_panelName").value=Hname[obj.rowIndex-1].value;
+             
+            //获取视图高度和面板比例             
+			if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+             document.getElementsByName('addForm:p_widthScale')[1].value=Hscale[obj.rowIndex-1].value;
+				document.getElementsByName('addForm:p_viewHeight')[1].value=Hheight[obj.rowIndex-1].value;
+			}else{	//Firefox浏览器下
+             document.getElementsByName('addForm:p_widthScale')[0].value=Hscale[obj.rowIndex-1].value;
+				document.getElementsByName('addForm:p_viewHeight')[0].value=Hheight[obj.rowIndex-1].value;
+			}
+           	 document.getElementById('addForm:p_alignMode').value=Hmode[obj.rowIndex-1].value;
+             document.getElementById('addForm:p_sortOrder').value=Horder[obj.rowIndex-1].value;
+             document.getElementById('edit').value=obj.rowIndex;
+             
+             //设置焦点
+             setFocus('addForm:p_panelName');
+        }
+        function ChangeTdText()
+        {
+             var txtId=document.getElementById("txtId");
+             var tdid=document.getElementById("tdcag").parentNode;
+             tdid.innerText=txtId.value;
+        }
+		//触发事件
+		function onObjectFireMouseEvent(obj, eventname) { 					
+			if (document.all) {
+			//IE
+				obj.fireEvent(eventname);
+			} else {
+			//firefox						
+				var name = eventname.replace("on", "");
+				var evtObj = document.createEvent('MouseEvents');     
+				evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+				obj.dispatchEvent(evtObj);
+			}
+		}
+		//显示添加布局面板的面板
+        function showNewPan(){
+        	//清空新增布局面板的面板上的信息
+        clearPanel();
+        sortAddPP();
+        document.getElementById("newPan").style.display="";
+        }
+        //实现排列顺序加一
+        function sortAddPP(){
+        	var Horder=document.getElementsByName("Horder");
+        	if(Horder!=null){
+        	   if(Horder.length>0){
+                   var num=eval(Number(Horder[Horder.length-1].value)+1);
+                   if(num<=5){
+                      document.getElementById("addForm:p_sortOrder").value=num;
+                   }
+        	   }
+        	   else{
+        		   document.getElementById("addForm:p_sortOrder").value=1;
+        	   }
+        	}
+        }
+        //隐藏添加布局面板的面板
+        function hideNewPan(){
+        	//清空新增布局面板的面板上的信息
+        	clearPanel();
+        	document.getElementById("newPan").style.display="none";
+        }
+        //把新添加的信息插进表格  
+     
+    function addnewpanel(){ 
+    	var index;
+    	var editvalue=document.getElementById("edit").value;
+        //编辑
+    	if(editvalue!=""){
+    		
+            index = document.getElementById('addForm:panLists').insertRow(editvalue);
+    	}
+    	//新增
+    	else{
+    		index = document.getElementById('addForm:panLists').insertRow(-1); 
+    	}
+    	index.className="rich-table-row";  
+        var td_1 = document.createElement("td");   
+        var td_2 = document.createElement("td");   
+        var td_3 = document.createElement("td");
+        var td_4 = document.createElement("td"); 
+        var td_5 = document.createElement("td"); 
+        var td_6 = document.createElement("td"); 
+        /*
+        td_1.className="ptd";
+        td_2.className="ptd";
+        td_3.className="ptd";
+        td_4.className="ptd";
+        td_5.className="ptd";
+        td_6.className="ptd";
+        */
+        td_1.className="rich-table-cell";
+        td_2.className="rich-table-cell";
+        td_3.className="rich-table-cell";
+        td_4.className="rich-table-cell";
+        td_5.className="rich-table-cell";
+        td_6.className="rich-table-cell";
+        var p_panelName=document.getElementById('addForm:p_panelName').value; 
+        
+        //获取视图高度和面板比例             
+		var p_widthScale = "", p_viewHeight = "";
+		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			p_widthScale = document.getElementsByName("addForm:p_widthScale")[1].value;
+			p_viewHeight = document.getElementsByName("addForm:p_viewHeight")[1].value;
+		}else{	//Firefox浏览器下
+			p_widthScale = document.getElementsByName("addForm:p_widthScale")[0].value;
+			p_viewHeight = document.getElementsByName("addForm:p_viewHeight")[0].value;
+		}
+        p_viewHeight=(p_viewHeight==""?"0":p_viewHeight);
+        var p_alignMode=document.getElementById('addForm:p_alignMode').value;
+        var p_sortOrder=document.getElementById('addForm:p_sortOrder').value; 
+          
+        td_1.innerHTML = '<input type="checkbox" name="selectCheck" />';      
+        td_2.innerHTML = '<span>'+p_panelName+'</span><input type="hidden" name="Hname" value="'+p_panelName+'" />';   
+        td_3.innerHTML = '<span>'+p_viewHeight+'</span><input type="hidden" name="Hheight" value="'+p_viewHeight+'" />';      
+        td_4.innerHTML = '<span>'+p_widthScale+'</span><input type="hidden" name="Hscale" value="'+p_widthScale+'" />';   
+        td_5.innerHTML = '<span>'+p_sortOrder+'</span><input type="hidden" name="Horder" value="'+p_sortOrder+'" />';     
+
+        var str="";
+        if(p_alignMode=="V"){
+           str="${msgs['baf.desktop.alignV']}"; 
+        }
+        else
+            if(p_alignMode=="H"){
+            	str="${msgs['baf.desktop.alignH']}"; 
+            }
+        td_6.innerHTML = '<span>'+str+'</span><input type="hidden" name="Hmode" value="'+p_alignMode+'" />';   
+        index.appendChild(td_1);   
+        index.appendChild(td_2);   
+        index.appendChild(td_3);
+        index.appendChild(td_4);
+        index.appendChild(td_5);  
+        index.appendChild(td_6); 
+        index.onclick=function() {
+        	AddObjOfText(index);
+        };
+        index.title='${msgs['baf.org.dataTableTip']}';
+        sortAddPP();
+        
+        //添加之后清空数据
+        clearPanel();
+    }    
+    //del   
+    function del(){ 
+        var c = document.getElementsByName("selectCheck");   
+        var checked = new Array();   
+        for(i=0;i<c.length;i++){   
+            if(c[i].checked){   
+                checked.push(i+1);   
+            }   
+        }   
+        for(i=0;i<checked.length;i++){      
+            document.getElementById("addForm:panLists").deleteRow(checked[i]-i);   
+        }   
+    }     
+	//处理布局面板的信息，把他们赋值给隐藏域
+	function setHiddenValue(){
+		 var c = document.getElementsByName("selectCheck"); 
+		 if(c!=null&&c.length>0){
+         var panelNameArr=document.getElementById("addForm:panelNameArr");
+         var viewHeightArr=document.getElementById("addForm:viewHeightArr");
+         var alignModeArr=document.getElementById("addForm:alignModeArr");
+         var widthScaleArr=document.getElementById("addForm:widthScaleArr");
+         var sortOrderArr=document.getElementById("addForm:sortOrderArr");
+
+         //清空
+         panelNameArr.value="";
+         viewHeightArr.value="";
+         alignModeArr.value="";
+         widthScaleArr.value="";
+         sortOrderArr.value="";
+         //获取数组
+         var Hname=document.getElementsByName("Hname");
+         var Hheight=document.getElementsByName("Hheight");
+         var Hscale=document.getElementsByName("Hscale");
+         var Horder=document.getElementsByName("Horder");
+         var Hmode=document.getElementsByName("Hmode");
+
+         for(i=0;i<Hname.length-1;i++){
+        	 panelNameArr.value+=Hname[i].value+"~";
+         }
+         panelNameArr.value=panelNameArr.value+Hname[Hname.length-1].value;
+         for(i=0;i<Hheight.length-1;i++){
+        	 viewHeightArr.value+=Hheight[i].value+"~";
+         } 
+         viewHeightArr.value=viewHeightArr.value+Hheight[Hname.length-1].value;
+         for(i=0;i<Hscale.length-1;i++){
+        	 widthScaleArr.value+=Hscale[i].value+"~";
+         }
+         widthScaleArr.value=widthScaleArr.value+Hscale[Hname.length-1].value;
+         for(i=0;i<Horder.length-1;i++){
+        	 sortOrderArr.value+=Horder[i].value+"~";
+         }   
+         sortOrderArr.value=sortOrderArr.value+Horder[Hname.length-1].value;
+         for(i=0;i<Hmode.length-1;i++){
+        	 alignModeArr.value+=Hmode[i].value+"~";
+         } 
+         alignModeArr.value=alignModeArr.value+Hmode[Hmode.length-1].value;                     
+		 }
+	}      
+
+	function onSelectALlItems(){
+		var oTable = document.getElementById("layoutForm:itemLists");
+		var oChkAll = document.getElementById("layoutForm:itemLists:selectAll"); 
+		//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+	    if (!oChkAll.checked){
+	      document.getElementById("layoutForm:gotItemIdValues").value = "";
+	    }
+	    
+		//获取当前页码数
+		var pageNum = document.getElementById("layoutForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		
+		//获取每页数据个数
+		var pageSize = document.getElementById("layoutForm:pageSize").value;             	
+		if (oTable != null && oChkAll != null) {
+			for (j = 0; j < oTable.rows.length -1; j++) {
+				var realNum = (pageNum-1)*pageSize + j;
+				var e = document.getElementById("layoutForm:itemLists:"+realNum+":selectFlag");
+				if (e.id.indexOf("selectFlag") >= 0) {   
+					//触发CheckBox onclick事件，用来设置itemid
+					if (document.all) {
+						//IE
+						var oldValue= e.checked;
+						e.checked = oChkAll.checked;
+						if (!oldValue && e.checked) {
+							onObjectFireMouseEvent(e, "onclick");
+						}
+					} else {
+						//firefox
+						if (oChkAll.checked) {
+							var oldValue= e.checked;
+							if (!oldValue)
+								onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+				}
+		 	}
+	}
+	//响应check点击事件
+	function checkBoxClick(object, value) {	
+	   var itemIdsArr = document.getElementById("layoutForm:gotItemIdValues").value;
+	   if (itemIdsArr == null || itemIdsArr == "") {
+	   	 if (object.checked == true) {							
+			itemIdsArr = value;
+		 } 
+	   } else {
+		    if (object.checked == true) {
+				itemIdsArr = itemIdsArr + "#" + value;	 			
+			} 
+			else { //去掉取消选中的值
+				var index = itemIdsArr.indexOf(value);
+				if (index >= 0) {																
+					var str = "";
+					if(index>0){
+						str = "#"+value;
+					} else {
+						if(index==0 && itemIdsArr.indexOf("#")!=-1){
+							str = value + "#";
+						} else {
+							str = value;
+						}
+					}
+				itemIdsArr = itemIdsArr.replace(str, "");
+				}
+			}
+		}
+		//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+		document.getElementById("layoutForm:gotItemIdValues").value = itemIdsArr;
+	}
+	//清除空格
+	String.prototype.Trim = function() 
+	{ 
+	return this.replace(/(^\s*)|(\s*$)/g, ""); 
+	}
+	
+	function beforeQuery(){
+		var search_name=document.getElementById("queryForm:search_name");
+		search_name.value=(search_name.value).Trim();
+		var search_num=document.getElementById("queryForm:search_num");
+		search_num.value=(search_num.value).Trim();
+	}   
+	
+	//判断是否选择单行或者多行
+	function checkSelectRow() {	
+		 				
+		var oTable = document.getElementById("layoutForm:itemLists");
+		//获取当前页码数
+		var pageNum = document.getElementById("layoutForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		
+		//获取每页数据个数
+		var pageSize = document.getElementById("layoutForm:pageSize").value;					
+		var size = oTable.rows.length - 1; //去除列头一行
+		var selectCount = 0;
+		if (size != null) {
+	    	for (var i=0; i<size; i++) {
+				var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("layoutForm:itemLists:"+realNum+":selectFlag");							
+				if (e != null && e.checked) {
+					selectCount ++;
+				}
+			}
+			if (selectCount <= 0) {
+				//请勾选需要删除的数据
+				alert("${msgs['baf.org.WarningDeleteRow']}");
+				return false;
+			}
+		}
+		return true;
+	}        
+	//判断是否选择了一行
+	function checkSelectOneRow() {										
+		var oTable = document.getElementById("layoutForm:itemLists");
+		//获取当前页码数
+		var pageNum = document.getElementById("layoutForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		
+		//获取每页数据个数
+		var pageSize = document.getElementById("layoutForm:pageSize").value;
+		
+		var size = oTable.rows.length - 1; //去除列头一行
+		var selectCount = 0;
+		if (size != null) {
+			for (var i=0; i<size; i++) {
+				var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("layoutForm:itemLists:"+realNum+":selectFlag");						
+				if (e != null && e.checked) {
+					selectCount ++;
+				}
+			}
+			if (selectCount != 1) {
+				//请勾选一行需要编辑的数据
+				alert("${msgs['baf.org.WarningEditOneRow']}");
+				return false;
+			}
+		}
+		return true;
+	}	
+	//获取布局模板
+	function getTemplate(){
+		getLayout(document.getElementById("layoutForm:gotItemIdValues").value);
+	}
+	//清空新增面板的数据
+	function clearPanel(){
+		document.getElementById("addForm:p_panelName").value="";
+		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			document.getElementsByName("addForm:p_widthScale")[1].value = "20";
+			document.getElementsByName("addForm:p_viewHeight")[1].value = "300";
+		}else{	//Firefox和google浏览器下
+			document.getElementsByName("addForm:p_widthScale")[0].value = "20";
+			document.getElementsByName("addForm:p_viewHeight")[0].value = "300";
+		}
+	}
+	//自动更改面板数量
+	function autoChangePaneNum(){
+        var numObj=document.getElementById("addForm:panelAmount");
+        var nameArr=document.getElementsByName("Hname");
+        if(nameArr==null){
+           numObj.value=0;
+        }
+        else{
+           numObj.value=nameArr.length;
+        }
+	}
+	/*
+	function numberOnly(obj) {
+	    if (! ( ( (window.event.keyCode >= 48) && (window.event.keyCode <= 57)) )) {
+			window.event.keyCode = 0;
+		}
+		checkNotInt(obj);
+	}*/
+	//检查输入字符是否为数字,如果有非数字就返回true
+	function checkNotInt(obj){
+			var num="0123456789.";
+			var str=obj.value;
+			var ch;
+			if(str!=null){
+			for(i=0;i<str.length;i++){
+			ch=str.charAt(i);
+			if(num.indexOf(ch)==-1){
+				alert("${msgs['baf.bureau.WaringNotInt']}");
+				obj.value="";
+				//obj.focus();
+				return true;
+			}
+			}
+			}
+			return false;
+	}
+	//如果存在非法输入，返回false
+	function exitErr(){
+		var editvalue=document.getElementById("edit").value;
+		//如果面板名称为空，返回false
+		if(document.getElementById("addForm:p_panelName").value==""){
+           alert("${msgs['baf.desktop.panelNameNotNull']}");
+           return false;
+		}  
+		//获取视图高度和面板比例             
+		var widthScale = "", viewHeight = "";
+		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			widthScale = document.getElementsByName("addForm:p_widthScale")[1].value;
+			viewHeight = document.getElementsByName("addForm:p_viewHeight")[1].value;
+		}else{	//Firefox浏览器下
+			widthScale = document.getElementsByName("addForm:p_widthScale")[0].value;
+			viewHeight = document.getElementsByName("addForm:p_viewHeight")[0].value;
+		}		
+		if(widthScale=="" || widthScale=="0"){
+              alert("${msgs['baf.desktop.widthNotNull']}");
+	          return false;
+		} 
+		if(document.getElementById("addForm:p_sortOrder").value==""||document.getElementById("addForm:p_sortOrder").value=="0"){
+              alert("${msgs['baf.desktop.sortNotNull']}");
+	          return false;
+		} 
+		if(document.getElementById("addForm:p_alignMode").value==""){
+              alert("${msgs['baf.desktop.alignNotNull']}");
+	          return false;
+		}
+		//面板数量不能超过5个
+		if(document.getElementById("addForm:panelAmount").value>=5&&editvalue==""){
+			  alert("${msgs['baf.desktop.panelNumNotFive']}");
+	          return false;
+		}
+		//不能输入非整数 
+		if(checkNotInt(viewHeight)||
+		   checkNotInt(widthScale)||
+		   checkNotInt(document.getElementById("addForm:p_sortOrder"))){
+        return false;
+		}
+		//不能有重复排序
+		if(!isDuplicateSort(editvalue)){
+            return false;
+		}
+		//比例和不能超过100
+		if(!notOut100(editvalue)){
+            return false;
+		}
+		//如果是编辑的话，先删除选定的表格行数据
+		if(editvalue!=""){
+		    document.getElementById("addForm:panLists").deleteRow(editvalue);
+		}
+        return true;
+	}
+	//检查是否存在重复的排列顺序,如果重复，返回false;
+	function isDuplicateSort(trowIndex){
+		trowIndex=Number(trowIndex)-1;
+		var Horder=document.getElementsByName("Horder");
+		var sort=document.getElementById("addForm:p_sortOrder").value;
+		if(Horder!=null){
+           for(i=0;i<Horder.length;i++){
+               if(trowIndex==i){
+                  continue;
+               }
+               if(sort==Horder[i].value){
+            	   alert("${msgs['baf.desktop.sortNotDup']}");
+        		   return false;
+               }
+           }                         
+		}
+		return true;
+	}
+	//检查比例总和有没有超过100，超过了返回FALSE
+	function notOut100(trowIndex){
+		var Hscale=document.getElementsByName("Hscale");
+		trowIndex=Number(trowIndex)-1;
+		if(Hscale!=null){
+		   var total=0;
+           for(i=0;i<Hscale.length;i++){
+        	   if(trowIndex==i){
+                   continue;
+                }
+        	   eval(total+=parseInt(Hscale[i].value));
+           }
+           var widthScale = "";
+		   if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+			   widthScale = document.getElementsByName("addForm:p_widthScale")[1].value;
+		   }else{	//Firefox浏览器下
+			   widthScale = document.getElementsByName("addForm:p_widthScale")[0].value;
+		   }
+           eval(total+=parseInt(widthScale));
+           if(total>100){
+        	   alert("${msgs['baf.desktop.scapNot100']}");
+ 	           return false;
+           }          
+		}
+		return true;       		
+	}
+	//如果存在非法输入，返回false
+	function checkLayout(){
+		if(document.getElementById("addForm:panelAmount").value==""||document.getElementById("addForm:panelAmount").value=="0"){
+              alert("${msgs['baf.desktop.panelNumNotNull']}");
+	          return false;
+		}	                                                                                          		
+		return true;
+	}
+	//改变批量新增复选框的样式  
+	function changeBatchDisplay(obj){
+        if(obj!=null){
+           if(obj.id=="addLayoutBtn"){
+        	  document.getElementById("addForm:isBatchSave").checked=false;
+              getBatchDisplay("show","false");
+           }
+           else if(obj.id=="addForm:layoutSave"&&document.getElementById('addForm:isBatchSave').checked){
+        	   getBatchDisplay("show","true");
+           }
+           else {
+        	   document.getElementById("addForm:isBatchSave").checked=false;
+        	   getBatchDisplay("hidde","false");
+           }
+        }
+        //把编辑的标志清空
+        document.getElementById("edit").value="";
+	}
+	//提示用户操作是否成功
+	function showTip(data){
+	    if(data=="Y"){
+	       alert("${msgs['baf.operate.sucessful']}");
+	    }else{
+	       alert("${msgs['baf.operate.fail']}");
+	    }
+	}
+	 //显示处理状态面板 
+	 function showStutusPanel(){
+           document.getElementById('layoutForm:panel').component.show();
+           setTimeout("document.getElementById('layoutForm:panel').component.hide()",250);
+     }
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+     //按回车提交表单
+    function enterQuery(){
+	   if(event.keyCode==13){
+	        document.getElementById('queryForm:queryBtn').onclick();
+	    }
+    }
+    
+    //点击修改按钮完成事件
+    function onEditBtnClick(data){
+    	if(data != "" && data != "undefinde"){
+    		alert("'" + data + "'#{msgs['baf.desktop.operateTip']}");
+    	}else{
+    		Richfaces.showModalPanel("addPanel");
+    		setFocus('addForm:layoutName');
+    	}
+    }
+    
+    //删除模板完成事件
+    function onDeleteComplete(data){
+    	if(data != "" && data != "undefinde"){
+    		alert("'" + data + "'#{msgs['baf.desktop.operateTip']}");
+    	}else{
+    		Richfaces.hideModalPanel("deletePanel");
+	    	document.getElementById('layoutForm:gotItemIdValues').value='';
+    	}
+    }
+    //点击查询按纽列表未渲染前置灰
+	function ondisabled(){
+	  	document.getElementById("queryForm:queryBtn").disabled = true;
+	}
+	     //]]>
+        </script>
+		</head>
+		<body >
+		
+		<f:loadBundle basename="messages" var="msgs" />
+		<div id="center" style="background:white;height:1000;width:100%;margin-top:0px;margin-bottom:0px;">
+			<rich:tabPanel id="tabPanel" style="margin-left:0;margin-right:0;margin-top:5px;margin-bottom:5px;" width="100%" height="450" switchType="client" >
+				<rich:tab id="changes" name="holidays" label="#{msgs['baf.desktop.templateLabel']}" >
+	            <table cellspacing="0" cellpadding="0" border="0" width="100%" height="100%" style="font-size:13px;table-layout:fixed">
+	            <tr>
+	            <td width="61%" height="100%" >
+	            <fieldset id="tablist" style="height:100%;">
+	                <legend><h:outputText value="#{msgs['baf.desktop.templateList']}"/></legend>
+	                <h:form id="layoutForm">
+	                	<a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('layoutForm:panel').component.show()" onstop="document.getElementById('layoutForm:panel').component.hide()">
+	                    </a4j:status>
+						<rich:modalPanel id="panel" width="350" height="100">
+			            <h:graphicImage  value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+			            </rich:modalPanel>
+			            <rich:dataTable width="100%" id="itemLists" rows="#{layoutBean.pageSize}" columnClasses="col"  style="text-align:center;"
+				            value="#{layoutBean.defaultDataModel}" var="temList" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+				            onRowDblClick="getLayout('#{temList.layoutId}')" title="#{msgs['baf.org.dataTableTip']}">
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+						        </f:facet>
+					            <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{temList.layoutId}');"/>
+				            </h:column>	  
+				            <h:column>
+				            	<f:facet name="header">
+						        <h:outputText styleClass="headerText " value="#{msgs['baf.desktop.layoutName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{temList.layoutName}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutNum']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <h:outputText value="#{temList.panelAmount}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutRate']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{temList.panelScale}" >
+				                </h:outputText>
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+						        <h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutDesc']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{temList.layoutDesc}" >
+				                </h:outputText>
+				            </h:column>
+				        </rich:dataTable>
+				        <table width="95%">
+					    	<tr>
+					            <td>
+									<rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{layoutBean.scrollerPage}" id="itemScroller" reRender="layoutForm" oncomplete="document.getElementById('layoutForm:gotItemIdValues').value=''; "/>							
+								</td>
+							</tr>
+						</table>
+	        
+				        <h:inputHidden id="pageNo" value="#{layoutBean.scrollerPage}"/>
+					    <h:inputHidden id="pageSize" value="#{layoutBean.pageSize}"/>
+					    <h:inputHidden id="dataTableSize" value="#{layoutBean.dataTableSize}"/>
+					    <h:inputHidden id="gotItemIdValues" value="#{layoutBean.selectedItemIds}" /> 
+				        <input type="hidden" id="rowindex" value="0"/>
+				        <a4j:keepAlive beanName="layoutBean"/>
+				           
+				        <rich:modalPanel id="deletePanel" autosized="true" width="300">
+					        <f:facet name="header">
+					            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+					            style="padding-right:15px;" />
+					        </f:facet>
+							<!-- 关闭按钮 -->
+							<f:facet name="controls">
+							<h:panelGroup>
+							    <h:graphicImage value="/baf/images/icons/close.png"
+							    id="hidelinkDelete" styleClass="hidelink"/>
+							    <rich:componentControl for="deletePanel" attachTo="hidelinkDelete"
+							    operation="hide" event="onclick" />
+								</h:panelGroup>
+							</f:facet>	
+				        	<center>
+				                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+			                    action="#{layoutBean.deleteLayout}" data="#{layoutBean.layoutIsUsed}"
+			                    oncomplete="onDeleteComplete(data)"
+			                    reRender="layoutForm" />
+								<rich:spacer width="40px"/>
+				                <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+				                onclick="#{rich:component('deletePanel')}.hide();return false;" />
+							</center>
+					    </rich:modalPanel>	
+	        
+	        		</h:form>
+	            </fieldset>
+	            </td>
+    			
+    			<td width="1%"></td>
+    			
+				<td width="38%" height="100%" align="center">
+					<fieldset style="height:40%;">
+						<legend><h:outputText value="#{msgs['baf.Select']}"/></legend>
+						<h:form id="queryForm">
+							<h:panelGrid id="right1"  columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">
+								<h:outputText value="#{msgs['baf.desktop.layoutName']}:" />
+								<h:inputText id="search_name" value="#{layoutBean.searchName}" style="width:100px;">
+									<rich:hotKey key="return" handler="enterQuery();"/>
+								</h:inputText>
+								
+								<h:outputText value="#{msgs['baf.desktop.layoutNum']}:" />
+								<h:selectOneMenu id="search_num"   value="#{layoutBean.searchNum}"  style="width:100px;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+									<f:selectItems value="#{layoutBean.num}"/>
+								</h:selectOneMenu>
+							</h:panelGrid>
+							<center>
+								<rich:spacer height="40px"></rich:spacer>
+								<a4j:commandButton value="#{msgs['baf.Select']}" id="queryBtn" type="button" onclick="beforeQuery();ondisabled();" disabled="false" styleClass="rich-button" action="#{layoutBean.queryLayout}" reRender="layoutForm,queryBtn">
+								</a4j:commandButton>
+							</center>
+						</h:form>
+		            </fieldset>
+		            
+		            <fieldset style="height:60%;font-size:13px;">
+						<legend ><h:outputText value="#{msgs['baf.desktop.layoutOperate']}"/></legend>
+			            <center >
+				            <rich:spacer height="30px"></rich:spacer>
+				            <h:commandButton value="#{msgs['baf.Add']}" id="addLayoutBtn" type="button"  styleClass="rich-button" onclick="changeBatchDisplay(this);l_layout('');">
+							</h:commandButton>
+							<br/>
+				            <rich:spacer height="30px"></rich:spacer>
+				            <h:commandButton value="#{msgs['baf.Edit']}" type="button" styleClass="rich-button" onclick="if (checkSelectOneRow()==true) {getTemplate();}" >
+							</h:commandButton>
+							<br/>
+				            <rich:spacer height="30px"></rich:spacer>
+				            <h:commandButton  styleClass="rich-button" type="button" id="ChangeDelete" value="#{msgs['baf.Delete']}" onclick="if (checkSelectRow()==true){#{rich:component('deletePanel')}.show();}" > 		
+							</h:commandButton>
+			            </center>
+			            
+			        </fieldset>
+				</td>
+	            </tr>
+	            
+	            </table>			
+				</rich:tab>
+			</rich:tabPanel>
+		</div>
+
+		<rich:modalPanel id="addPanel" autosized="true" keepVisualState="false" width="550" height="450">			
+		<f:facet name="header">
+			<h:outputText value="#{msgs['baf.desktop.layoutEditWindow']}"/>
+		</f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		    <h:graphicImage value="/baf/images/icons/close.png"
+		    id="hidelink" styleClass="hidelink" onclick="changeBatchDisplay(this);hideNewPan();"/>
+		    <rich:componentControl for="addPanel" attachTo="hidelink"
+		    operation="hide" event="onclick" />
+			</h:panelGroup>
+		</f:facet>
+		<div id="mainDiv" class="scrolls" style="width:550;height:440;">				
+		<a4j:form id="addForm" onsubmit="if (validateForm(document.getElementById('addForm'))==false) return false;">			
+		<center>
+		<fieldset>
+		<table id="addTop" cellspacing="0" cellpadding="2" border="0" width="100%"  style="font-size:13px;" class=".rich-text-color-general"> 	 									
+			<tr>
+			<td align="right">	
+			<h:outputText value="#{msgs['baf.desktop.customize.templateName']}:" />
+			</td>
+			<td >
+			<h:inputText id="layoutName" style="width:150px;height:23px;" value="#{layoutBean.layoutName}" styleClass="rich-gradient-input" maxlength="20">
+				<s:commonsValidator type="required" arg="#{msgs['baf.desktop.customize.templateName']}" server="false" client="true"/>
+			</h:inputText>
+               </td>
+               <td align="right">
+			<h:outputText value="#{msgs['baf.desktop.layoutNum']}:" />
+			</td>
+			<td>
+			<h:inputText id="panelAmount" style="width:150px;height:23px;" value="#{layoutBean.panelAmount}" onfocus="this.blur()" styleClass="rich-gradient-input">
+			</h:inputText>
+            </td>
+            </tr>
+            <tr>
+			<td align="right" valign="top">
+			<h:outputText value="#{msgs['baf.desktop.layoutDesc']}:" />
+			</td>
+			<td colspan="3">
+			<h:inputTextarea id="layoutDesc"  rows="3" cols="76" styleClass="rich-gradient-input" onkeypress="strMaxLength(120,this.value)" value="#{layoutBean.layoutDesc}">				
+				<s:commonsValidator type="maxlength"  arg="#{msgs['baf.desktop.layoutDesc']}" maxLength="124"  server="false" client="true"/>
+			</h:inputTextarea>
+               </td>            
+			</tr>
+		</table>
+		</fieldset>
+		<br/>
+		<fieldset>
+		<table  cellspacing="0"  cellpadding="2" border="0" width="100%"  style="font-size:13px;" class=".rich-text-color-general" > 	 									
+		<tr>
+		<td rowspan="4" valign="top">
+        	<table cellspacing="0" id="addForm:panLists" class="rich-table" cellpadding="0" border="0" width="100%" style="text-align:center;font-size:13px;background-color:${a4jSkin.tableBackgroundColor}" >
+        	   <tr class="rich-table-subheader">
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText " value="#{msgs['baf.desktop.layoutChoice']}" style="font-weight:normal;"/></th>
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText " value="#{msgs['baf.desktop.layoutPanelName']}" style="font-weight:normal;"/></th>
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText" value="#{msgs['baf.desktop.viewHeight']}" style="font-weight:normal;"/></th>
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutRate']}" style="font-weight:normal;"/></th>
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText" value="#{msgs['baf.desktop.layoutPanelSort']}" style="font-weight:normal;"/></th>
+        	    <th class="rich-table-subheadercell"><h:outputText styleClass="headerText" value="#{msgs['baf.desktop.alignMode']}" style="font-weight:normal;"/></th>
+        	   </tr>
+        	   <c:forEach items="${layoutBean.panelList}" var="panles">
+		     <tr class="rich-table-row" onMouseOver="this.style.backgroundColor='#F8F8F8'" ondblclick="AddObjOfText(this)" title="${msgs['baf.org.dataTableTip']}">
+		        <td class="rich-table-cell"><input type="checkbox" id="selectCheck"/></td>
+		        <td class="rich-table-cell"><span>${panles.panelName}</span><input type="hidden" name="Hname" value="${panles.panelName}" /></td>
+		        <td class="rich-table-cell"><span>${panles.viewHeight}</span><input type="hidden" name="Hheight" value="${panles.viewHeight}" /></td>
+		        <td class="rich-table-cell"><span>${panles.widthScale}</span><input type="hidden" name="Hscale" value="${panles.widthScale}" /></td>
+		        <td class="rich-table-cell"><span>${panles.sortOrder}</span><input type="hidden" name="Horder" value="${panles.sortOrder}" /></td>
+		        <td class="rich-table-cell"><span>${panles.chineseAlignMode}</span><input type="hidden" name="Hmode" value="${panles.alignMode}" /></td>
+		     </tr>
+		     </c:forEach>
+        	</table>
+		</td>		
+		<td align="center">
+			<a4j:commandButton value="#{msgs['baf.desktop.layoutPanelAdd']}" id="saveLayoutBtn" type="button" onclick="showNewPan();document.getElementById('edit').value='';setFocus('addForm:p_panelName');return false;"  styleClass="rich-button">
+			</a4j:commandButton>
+			<input type="hidden" name="edit" id="edit" value=""/>
+		</td>
+		</tr>
+		<tr>
+		<td align="center">
+            <a4j:commandButton value="#{msgs['baf.desktop.layoutPanelDel']}" id="cancelLayoutBtn" type="button" onclick="del();autoChangePaneNum();document.getElementById('edit').value='';return false;" styleClass="rich-button">
+			</a4j:commandButton>
+		</td>
+		</tr>	
+		<tr>
+		<td><rich:spacer width="2px"/>
+		</td>
+		</tr>
+		<tr>
+		<td><rich:spacer width="2px"/>
+		</td>
+		</tr>
+		</table>
+		<br/>
+		
+		<fieldset id="newPan" style="width:100%;height:100px;display:none;" >
+		<h:panelGrid columns="6" width="100%" style="font-size:13px;" styleClass=".rich-text-color-general">
+		<h:outputText value="#{msgs['baf.desktop.panelName']}"></h:outputText>
+		<h:inputText id="p_panelName"  style="width:80px;" maxlength="8">
+		</h:inputText>
+		<h:outputText value="#{msgs['baf.desktop.viewHeight']}"></h:outputText>
+		<rich:inputNumberSpinner id="p_viewHeight" value="300" step="10" maxValue="9999" inputSize="7"/>
+		<h:outputText value="#{msgs['baf.desktop.layoutRate']}"></h:outputText>
+		<rich:inputNumberSpinner id="p_widthScale" value="20" step="10" maxValue="100" inputSize="7" />
+		<h:outputText value="#{msgs['baf.desktop.alignMode']}"></h:outputText>
+		<h:selectOneMenu id="p_alignMode"   style="width:80px;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+			<f:selectItems value="#{layoutBean.selectBureautype}"/>
+		</h:selectOneMenu>
+		<h:outputText value="#{msgs['baf.desktop.layoutPanelSort']}"></h:outputText>
+		<h:selectOneMenu id="p_sortOrder"   style="width:80px;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+			<f:selectItems value="#{layoutBean.selectSort}"/>
+		</h:selectOneMenu>
+		</h:panelGrid>
+		<center>
+		 <h:commandButton value="#{msgs['baf.desktop.addPanel']}" type="button" onclick="if(!exitErr()){return false;}addnewpanel();autoChangePaneNum();showStutusPanel();return false;" styleClass="rich-button" >
+		 </h:commandButton>
+		 <rich:spacer width="10px;"></rich:spacer>
+		 <h:commandButton value="#{msgs['baf.desktop.hidePanel']}" type="button" onclick="hideNewPan();return false;" styleClass="rich-button" >
+		 </h:commandButton>
+		</center>
+		</fieldset>
+		</fieldset>
+		
+
+		<h:panelGroup id="isBatchSaveGroup" style="#{layoutBean.batchDisplay}">	
+           <h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+           <h:selectBooleanCheckbox id="isBatchSave" value="#{layoutBean.selected}"/>
+        </h:panelGroup>
+        <rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+        </rich:toolTip>						 
+		<a4j:commandButton styleClass="rich-button"  type="submit"  id="layoutSave"  value="#{msgs['baf.org.Save']}"  onclick="setHiddenValue();if(!checkLayout()){return false;}" data="#{layoutBean.dealFlag}"
+		oncomplete="if(!(document.getElementById('addForm:isBatchSave').checked)&amp;a4jcomplete()){#{rich:component('addPanel')}.hide();}changeBatchDisplay(this);" action="#{layoutBean.saveLayout}" reRender="layoutForm">	  
+		</a4j:commandButton> <rich:spacer width="2px"/>
+		<a4j:commandButton styleClass="rich-button" type="button" id="layoutCancel" value="#{msgs['baf.org.Cancel']}" onclick="changeBatchDisplay(this);clearPanel();#{rich:component('addPanel')}.hide();hideNewPan(); return false;"/>
+		</center>
+		<s:validatorScript functionName="validateForm"/> 
+		
+		
+		<h:inputHidden id="panelNameArr" value="#{layoutBean.panelNameArr}"></h:inputHidden>
+		<h:inputHidden id="viewHeightArr" value="#{layoutBean.viewHeightArr}"></h:inputHidden>
+		<h:inputHidden id="alignModeArr" value="#{layoutBean.alignModeArr}"></h:inputHidden>
+		<h:inputHidden id="widthScaleArr" value="#{layoutBean.widthScaleArr}"></h:inputHidden>
+		<h:inputHidden id="sortOrderArr" value="#{layoutBean.sortOrderArr}"></h:inputHidden>
+		<h:inputHidden id="layoutId" value="#{layoutBean.layoutId}"></h:inputHidden>
+		 	
+		</a4j:form>	
+		</div>
+		</rich:modalPanel>
+				
+		<a4j:form id="a4jform">
+		<a4j:jsFunction name="getLayout" reRender="addForm" action="#{layoutBean.getLayout}" data="#{layoutBean.layoutIsUsed}" oncomplete="onEditBtnClick(data)">
+			<a4j:actionparam name="selectedItemIds" assignTo="#{layoutBean.selectedItemIds}"></a4j:actionparam>
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction name="l_layout" reRender="addForm" action="#{layoutBean.refresh}" oncomplete="#{rich:component('addPanel')}.show();setFocus('addForm:layoutName');">
+			<a4j:actionparam name="par" value=""></a4j:actionparam>
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction name="getBatchDisplay" reRender="addForm" action="#{layoutBean.getBatchDisplay}" >
+			<a4j:actionparam name="btnFlag" assignTo="#{layoutBean.btnFlag}"></a4j:actionparam>
+			<a4j:actionparam name="isChecked" assignTo="#{layoutBean.selected}"></a4j:actionparam>
+		</a4j:jsFunction>
+		
+		</a4j:form>
+        <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+	</f:view>
+	</html>

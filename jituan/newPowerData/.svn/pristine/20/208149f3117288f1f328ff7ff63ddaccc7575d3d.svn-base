@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+		
+			<script type="text/javascript" >
+			//<![CDATA[
+			//重置按钮
+			function resetCondition(){
+				document.getElementById('queryForm:search_title').value = "";
+			}
+			function openDetailPage(id){
+				window.location.href="${request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId="+id+"&amp;type=visi";
+			}
+			function searchTopic(){
+				var condition = document.getElementById('queryForm:search_title').value;
+				if(condition != ""){
+				 	window.location.href="${request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?searchTitle="+condition;
+				}else{
+					alert("${msgs['baf.bbs.mustSearchTitle']}");
+					setFocus('queryForm:search_title');
+				}
+			}
+			
+			//按回车调用查询按钮的单击事件
+			function forSelect(){
+				if(event.keyCode==13){
+					
+					document.getElementById('queryForm:selectLink').onclick();
+				}
+			}
+
+			 //]]>
+			</script>
+			<style type="text/css">
+				.listItem{width:98%;float:left;border-bottom: 1px #9F9F9F dotted;margin-bottom: 10px;}
+				.itemContent{width: 100%;height: 25px;overflow:hidden;}
+				.itemTitle a {font-size: 12px;}
+				.itemTitle img {vertical-align: middle;}
+				.itemInfo{color:#7F7F7F;}
+			</style>
+		</head>
+		<body>
+		<f:loadBundle basename="messages" var="msgs" />
+		<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;">
+		<a4j:form id="queryForm">
+		<rich:spacer height="2px"/>
+			<table border="0" style="width: 95%;height: 98%;" align="center">
+				<tr style="height: 8%;">
+					<td>
+						<table border="0" width="98%">
+							<tr>
+								<td align="center" width="4%"><h:outputText value="#{msgs['baf.bbs.S_title']}: " style="font-size:13px;" /></td>
+								<td width="25%"><h:inputText id="search_title" value="#{topicBean.title}" style="width:200px;height:23px;font-size:13px;" styleClass="rich-gradient-input"/></td>
+								<td align="center" width="3%"><h:commandLink id="selectLink" value="#{msgs['baf.bbs.selectLink']}" onclick="searchTopic();return false;" style="font-size:13px;" /><rich:hotKey key="return" handler="forSelect();"/></td>
+								<td align="left" width="8%"><h:commandLink id="reset" value="#{msgs['baf.calendar.reset']}" onclick="resetCondition();return false;" style="font-size:13px;"/><rich:hotKey key="return" handler="forSelect();"/></td>	
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td align="center">
+					<rich:spacer height="1px"/>
+					<rich:tabPanel id="subtabPanel" switchType="client" style="height:100%;width:97%" >
+						<rich:tab id="new_bbs" label="#{msgs['baf.bbs.new_bbs']}" style="background: white;font-size:13px;">
+							<rich:spacer height="10px"/>
+							<h:panelGroup id="panelGroupItem_1" style="width:100%;">
+							<rich:dataTable width="100%" align="center" id="new_List" rows="#{topicBean.pageSize}" columnClasses="col" style="border: 0;"
+					            value="#{topicBean.newList}" var="vo" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+					        	<rich:column style="border: 0;">
+					        		<div class="listItem">
+									<div class="itemTitle">
+										<h:commandLink value="#{vo.title}" onclick="openDetailPage('#{vo.topicId}');return false;"  style="font-size:13px;font-weight:normal;"/>
+									</div>
+									<div class="itemInfo" >
+									<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:**** #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='Y'}"/>
+										<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:#{vo.userName} #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='N'}"/>
+										<rich:spacer width="5"/>
+										
+										<h:outputLabel value="#{msgs['baf.bbs.createDate']}:"  style="font-weight:normal;font-size:13px;"/>
+						                 <h:outputLabel value="#{vo.createTime}" style="font-weight:normal;font-size:13px;">
+											<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+										</h:outputLabel>
+										
+										<h:outputLabel value="#{msgs['baf.bbslastRetime']}:"  style="font-weight:normal;font-size:13px;"/>
+										<h:outputLabel value="#{vo.lastRetime}" style="font-weight:normal;font-size:13px;">
+											<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+										</h:outputLabel>
+										
+										
+									</div>
+									<div class="itemContent">
+										<h:outputLabel value="#{vo.content}" escape="false"  style="font-weight:normal;font-size:13px;"/>
+									</div>
+								</div>
+					        	</rich:column>
+					        </rich:dataTable>
+             				</h:panelGroup>
+						</rich:tab>
+						
+						<rich:tab id="digest_bbs" label="#{msgs['baf.bbs.digest_bbs']}" style="background: white;font-size:13px;">
+							<rich:spacer height="10px"/>
+							<h:panelGroup id="panelGroupItem_2" style="width:100%;">
+							<rich:dataTable width="100%" align="center" id="digest_List" rows="#{topicBean.pageSize}" columnClasses="col" style="border: 0;"
+					            value="#{topicBean.digestList}" var="vo" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+					        	<rich:column style="border: 0;">
+					        		<div class="listItem">
+										<div class="itemTitle">
+											<h:commandLink value="#{vo.title}" onclick="openDetailPage('#{vo.topicId}');return false;"  style="font-size:13px;font-weight:normal;"/>
+										</div>
+										<div class="itemInfo" >
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:**** #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='Y'}"/>
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:#{vo.userName} #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='N'}"/>
+											<rich:spacer width="5"/>
+											
+											<h:outputLabel value="#{msgs['baf.bbs.createDate']}:"  style="font-weight:normal;font-size:13px;"/>
+							                 <h:outputLabel value="#{vo.createTime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+											</h:outputLabel>
+											
+											<h:outputLabel value="#{msgs['baf.bbslastRetime']}:"  style="font-weight:normal;font-size:13px;"/>
+											<h:outputLabel value="#{vo.lastRetime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+											
+											
+										</div>
+										<div class="itemContent">
+											<h:outputLabel value="#{vo.content}" escape="false"  style="font-weight:normal;font-size:13px;"/>
+										</div>
+									</div>
+					        	</rich:column>
+					        </rich:dataTable>
+             				</h:panelGroup>
+						</rich:tab>
+						
+						<rich:tab id="moods_bbs" label="#{msgs['baf.bbs.moods_bbs']}" style="background: white;font-size:13px;">
+						<rich:spacer height="10px"/>
+							<h:panelGroup id="panelGroupItem_3" style="width:100%;">
+							<rich:dataTable width="100%" align="center" id="moods_List" rows="#{topicBean.pageSize}" columnClasses="col" style="border: 0;"
+					            value="#{topicBean.moodsList}" var="vo" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+					        	<rich:column style="border: 0;">
+					        		<div class="listItem">
+										<div class="itemTitle">
+											<h:commandLink value="#{vo.title}" onclick="openDetailPage('#{vo.topicId}');return false;"  style="font-size:13px;font-weight:normal;"/>
+										</div>
+										<div class="itemInfo" >
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:**** #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='Y'}"/>
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:#{vo.userName} #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-size:13px;font-weight:normal;" rendered="${vo.isAnonymous=='N'}"/>
+											<rich:spacer width="5"/>
+											
+											<h:outputLabel value="#{msgs['baf.bbs.createDate']}:"  style="font-weight:normal;font-size:13px;"/>
+							                 <h:outputLabel value="#{vo.createTime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+											</h:outputLabel>
+											
+											<h:outputLabel value="#{msgs['baf.bbslastRetime']}:"  style="font-weight:normal;font-size:13px;"/>
+											<h:outputLabel value="#{vo.lastRetime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+										
+										</div>
+										<div class="itemContent">
+											<h:outputLabel value="#{vo.content}" escape="false"  style="font-weight:normal;font-size:13px;"/>
+										</div>
+									</div>
+					        	</rich:column>
+					        </rich:dataTable>
+             				</h:panelGroup>
+						</rich:tab>
+						
+						<rich:tab id="commentsmost_bbs" label="#{msgs['baf.bbs.commentsmost_bbs']}" style="background: white;font-size:13px;">
+						<rich:spacer height="10px"/>
+							<h:panelGroup id="panelGroupItem_4" style="width:100%;">
+							<rich:dataTable width="100%" align="center" id="topicCom_List" rows="#{topicBean.pageSize}" columnClasses="col" style="border: 0;"
+					            value="#{topicBean.topicComList}" var="vo" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" >
+					        	<rich:column style="border: 0;">
+					        		<div class="listItem">
+										<div class="itemTitle">
+											<h:commandLink value="#{vo.title}" onclick="openDetailPage('#{vo.topicId}');return false;"  style="font-weight:normal;font-size:13px;"/>
+										</div>
+										<div class="itemInfo" >
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:**** #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-weight:normal;font-size:13px;" rendered="${vo.isAnonymous=='Y'}"/>
+											<h:outputLabel value="#{msgs['baf.bbs.cateUserName']}:#{vo.userName} #{msgs['baf.bbs.visitTotal']}:#{vo.visitTotal} #{msgs['baf.bbs.revertTotal']}:#{vo.revertTotal}"  style="font-weight:normal;font-size:13px;" rendered="${vo.isAnonymous=='N'}"/>
+											<rich:spacer width="5"/>
+											
+											<h:outputLabel value="#{msgs['baf.bbs.createDate']}:"  style="font-weight:normal;font-size:13px;"/>
+							                 <h:outputLabel value="#{vo.createTime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+											</h:outputLabel>
+											
+											<h:outputLabel value="#{msgs['baf.bbslastRetime']}:"  style="font-weight:normal;font-size:13px;"/>
+											<h:outputLabel value="#{vo.lastRetime}" style="font-weight:normal;font-size:13px;">
+												<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+											</h:outputLabel>
+									
+										</div>
+										<div class="itemContent">
+											<h:outputLabel value="#{vo.content}" escape="false"  style="font-weight:normal;font-size:13px;"/>
+										</div>
+									</div>
+					        	</rich:column>
+					        </rich:dataTable>
+             				</h:panelGroup>
+						</rich:tab>
+					</rich:tabPanel>
+					<a4j:keepAlive beanName="topicBean"/>
+					<s:validatorScript functionName="validateForm"/> 
+					<a4j:keepAlive beanName="boardBean"/>
+					</td>
+				</tr>
+			</table>
+		</a4j:form>
+		
+		</div>
+	    
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    </rich:modalPanel>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

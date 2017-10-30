@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+
+<f:view  contentType="text/html">
+	<head>
+		<script>
+		//<![CDATA[		
+		var preMenuItemObj = null;
+		var currentColor = null;
+		
+		function openForm(url, id) {
+        	orgworkarea.document.location.href = "${request.contextPath}" + url;		
+			var e = $('row_'+id);
+			if (preMenuItemObj != null) {
+				if (e != preMenuItemObj) {
+					preMenuItemObj.style.backgroundColor="transparent";
+					preMenuItemObj = e;
+					e.style.backgroundColor=currentColor;
+				}
+			} else {
+				e.style.backgroundColor=currentColor;
+				preMenuItemObj = e;
+			}        			
+		}
+		function init(loginName,isAdmin) {
+			var url = "";
+			if(loginName=="sa" || isAdmin=="Y"){
+				url = "/baf/jsp/desktop/deskCustomizeSet.xhtml";
+			}else{
+				url = "/baf/jsp/desktop/desktopCustomize.xhtml";
+			}			
+			orgworkarea.document.location.href = "${request.contextPath}" + url;	
+			var e = $('row_customize');
+			var backgroundColor = $('tablehidemenuGroup').currentStyle.backgroundColor; 
+			currentColor = changeColor(backgroundColor);
+			e.style.backgroundColor= currentColor;
+			preMenuItemObj = e;				
+		}
+
+		function setUrl(loginName,id,isAdmin){			
+			if(loginName=="sa" || isAdmin=="Y"){
+				openForm("/baf/jsp/desktop/deskCustomizeSet.xhtml", id);
+			}else{
+				openForm("/baf/jsp/desktop/desktopCustomize.xhtml", id);
+			}
+		}
+
+		function changeColor(color) {
+			var r = subColor(color.substr(1, 2));
+			var g = subColor(color.substr(3, 2));
+			var b = subColor(color.substr(5, 2));
+
+			var value_r = r.toString(16);
+			var value_g = g.toString(16);
+			var value_b = b.toString(16);
+			return "#" + ((r<16) ? ("0"+value_r) : value_r) + ((g<16) ? ("0"+value_g) : value_g) + ((b<16) ? ("0"+value_b) : value_b); 
+		}
+
+		function subColor(subColor) {
+			var r = parseInt(subColor, 16);
+			r = r + 50;
+			if (r > 255 ) r = 255;
+			return r;
+		}		
+		//]]>
+		</script>
+	</head>
+	<body onload="init('${desktopCustomizeBean.currentLoginName}','${desktopCustomizeBean.isAdmin}');">
+		<f:loadBundle basename="messages" var="msgs" />
+		<regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="center" id="center-panel" contentEl="center" />			
+			<regaltec:viewPortPanel region="east" id="eastpanel" autoScroll="false" contentEl="east-panel" split="true" width="200"
+				minSize="200" maxSize="400" collapsible="true" margins="0 0 0 0" layout="accordion" />
+		</regaltec:viewPort>
+		<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+			<iframe name="orgworkarea" src="about:blank" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+		</div>
+		<form id="changeForm" target="orgworkarea" method="post"></form>			
+		<div id="east-panel">
+				<rich:panelMenu style="width:200px"  mode="none" iconExpandedGroup="disc" iconCollapsedGroup="disc" 
+       					iconExpandedTopGroup="chevronUp" iconGroupTopPosition="right" iconCollapsedTopGroup="chevronDown">
+          			<rich:panelMenuGroup id="menuGroup" label="#{msgs['baf.desktop.desktopmenu']}" expanded="true">          
+           				<rich:panelMenuItem id="templateLabel" rendered="#{desktopCustomizeBean.currentLoginName=='sa' || desktopCustomizeBean.isAdmin=='Y'}" label="#{msgs['baf.desktop.templateLabel']}" style="height:30px;" onclick="openForm('/baf/jsp/desktop/desktopTemplate.xhtml', 'templateLabel');">
+              				<f:param name="template" value="#{msgs['baf.desktop.templateLabel']}"/>
+           				</rich:panelMenuItem>
+            			<rich:panelMenuItem id="viewLabel" rendered="#{desktopCustomizeBean.currentLoginName=='sa' || desktopCustomizeBean.isAdmin=='Y'}" label="#{msgs['baf.desktop.viewLabel']}" style="height:30px;" onclick="openForm('/baf/jsp/desktop/desktopView.xhtml', 'viewLabel');">
+                			<f:param name="view" value="#{msgs['baf.desktop.viewLabel']}"/>
+            			</rich:panelMenuItem>
+            			<rich:panelMenuItem id="customize" label="#{msgs['baf.desktop.customize']}" style="height:30px;" onclick="setUrl('#{desktopCustomizeBean.currentLoginName}','customize','#{desktopCustomizeBean.isAdmin}');">
+               	 			<f:param name="customize" value="#{msgs['baf.desktop.customize']}"/>
+            			</rich:panelMenuItem>
+            			<rich:panelMenuItem id="manage" rendered="#{desktopCustomizeBean.currentLoginName=='sa' || desktopCustomizeBean.isAdmin=='Y'}" label="#{msgs['baf.desktop.manage']}" style="height:30px;" onclick="openForm('/baf/jsp/desktop/desktopManage.xhtml', 'manage');">
+               	 			<f:param name="manage" value="#{msgs['baf.desktop.manage']}"/>
+            			</rich:panelMenuItem>
+       				</rich:panelMenuGroup>
+   				</rich:panelMenu>
+		</div>
+	</body>
+</f:view>
+</html>

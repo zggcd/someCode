@@ -1,0 +1,1381 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+           
+/*session超时显示错误信息*/
+A4J.AJAX.onExpired = function(loc,expiredMsg)
+{
+   alert(expiredMsg+"${msgs['baf.sessionOvertime']}");
+}
+/*显示数据提交到后台的错误信息*/
+A4J.AJAX.onError = function(req,status,message)
+{
+ var report =  "${msgs['baf.A4J.AJAX.onError.Prefix']}" + message;
+ alert(report);
+}
+	              
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+/*
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}*/
+
+//************************************************************
+//****************模块树拖动完成处理*********************
+//************************************************************
+function onDrag(srcID, destID) {
+	var srctext = moduleTree_tree.getItemText(srcID);
+	var desttext = moduleTree_tree.getItemText(destID);
+	if(window.confirm("${msgs['baf.module.WarningDrag5']}'"+srctext+"'${msgs['baf.module.WarningDrag6']}'"+desttext+"'?")){
+		var srctype = moduleTree_tree.getUserData(srcID,'type');	
+		var desttype = moduleTree_tree.getUserData(destID,'type');
+		//元素可以拖动 2009-08-17
+		if (srctype == "E") {
+			//元素拖动
+			if (destID == "0") {
+				//元素不能拖动到顶级!			
+				alert("${msgs['baf.module.WarningDrag1']}");
+				return false;
+			}
+	
+			//目标与父节点相同，不拖动
+			var parentID = moduleTree_tree.getParentId(srcID);
+			if (destID == parentID) {
+				return false;		
+			}
+			
+			var moduleCode = "";
+			if (desttype == "M") {
+				var isLeaf = moduleTree_tree.getUserData(destID,'isLeaf');
+				if (isLeaf != "Y"){
+					//目标模块下已经包含子模块，不能拖动!
+					alert("${msgs['baf.module.WarningDrag2']}");
+					return false;
+				}
+				moduleCode = moduleTree_tree.getUserData(destID, 'moduleCode');
+			}
+			e_moveTree(srcID, destID, desttype, moduleCode);
+		}
+	
+		if (srctype == "M") {
+			//模块拖动
+			if (desttype == "E") {
+				//模块不能拖动到元素下!
+				alert("${msgs['baf.module.WarningDrag3']}");
+				return false;
+			}
+			//目标与父节点相同，不拖动
+			var parentID = moduleTree_tree.getParentId(srcID);
+			if (parentID == destID) {
+				return false;
+			}
+			
+			if (desttype == "M"){	
+				var isLeaf = moduleTree_tree.getUserData(destID,'isLeaf');
+				if (isLeaf == "Y"){
+					if(this.hasChildren(destID)){
+						//目标模块下已经包含元素，不能拖动!
+						alert("${msgs['baf.module.WarningDrag4']}");
+						return false;
+					}
+				}
+			}
+			
+			//0为顶级节点
+			if (destID == "0") 
+				destID = "";
+			m_moveTree(srcID, destID);		
+		}
+		return true;
+	}
+}
+
+//刷新树的例子，可以参考
+function e_onMoveTreeComplete(data) {
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	if (data != null && data != "") {
+		var idarray = data.split(",");
+		//处理结果 Y或者N，原父节点ID，拖动元素ID，目的节点ID
+		//拖动后，判断处理结果，成功则不用刷新树，树本身已经做了刷新 ，失败则需要刷新树
+		var flag = idarray[0];
+		if (flag == "N") {
+			//拖动处理失败!
+			alert("${msgs['baf.module.WarningMoveFailure']}");
+			var destID = idarray[3];
+			if (destID != null) {
+				//如果目标是顶级，则不用刷新整个树，直接删除，这样就可以选中原始拖动模块。
+				if (destID == "" || destID == "0") {
+					var elementID = idarray[2];
+					if (elementID != null && elementID != "" && elementID != "0")
+						moduleTree_tree.deleteItem(elementID,false);
+				} else {
+					moduleTree_tree.refreshItem(destID);
+				}						
+			}
+			var parentID = idarray[1];
+			if (parentID != null) {
+				if (parentID == "")
+					parentID = "0";
+				var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentID+"')", 300);
+				var elementID = idarray[2];
+				if (elementID != null) {	
+					var timeout = setTimeout("setselectitem('"+elementID+"')", 800);
+				}
+			}
+		}
+	}
+}
+
+function m_onMoveTreeComplete(data) {
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	if (data != null && data != "") {
+		var idarray = data.split(",");
+		//处理结果 Y或者N，原父节点模块ID，拖动模块ID，目的节点模块ID
+		//拖动后，判断处理结果，成功则不用刷新树，树本身已经做了刷新 ，失败则需要刷新树
+		var flag = idarray[0];
+		if (flag == "N") {
+			//拖动处理失败!
+			alert("${msgs['baf.module.WarningMoveFailure']}");
+			var destModuleID = idarray[3];
+			if (destModuleID != null) {
+				//如果目标是顶级，则不用刷新整个树，直接删除，这样就可以选中原始拖动模块。
+				if (destModuleID == "" || destModuleID == "0") {
+					var moduleID = idarray[2];
+					if (moduleID != null && moduleID != "" && moduleID != "0")
+						moduleTree_tree.deleteItem(moduleID,false);
+				} else {
+					moduleTree_tree.refreshItem(destModuleID);
+				}						
+			}
+			var parentModuleID = idarray[1];
+			if (parentModuleID != null) {
+				if (parentModuleID == "")
+					parentModuleID = "0";
+				var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentModuleID+"')", 300);
+				var moduleID = idarray[2];
+				if (moduleID != null) {	
+					var timeout = setTimeout("setselectitem('"+moduleID+"')", 800);
+				}
+			}
+		} else {
+			var destModuleID = idarray[3];
+			var moduleID = idarray[2];
+			var parentModuleID = idarray[1];
+			var srctype = moduleTree_tree.getUserData(moduleID,'type');	
+			var desttype = moduleTree_tree.getUserData(destModuleID,'type');
+			if (desttype == "M"){
+				if (srctype == "M"){
+					var destIsleaf = moduleTree_tree.getUserData(destModuleID,'isLeaf')
+					if (destIsleaf == "Y"){
+						moduleTree_tree.setUserData(destModuleID,'isLeaf','N');	
+					}
+					if (!moduleTree_tree.hasChildren(parentModuleID)){
+						moduleTree_tree.setUserData(parentModuleID,'isLeaf','Y');
+					}
+				}
+			}
+		}
+	}
+}
+
+//************************************************************
+//****************模块树形菜单单击事件处理*********************
+//************************************************************
+function doOnClick()
+{
+	var itemId = this.getSelectedItemId();
+	var url = this.getUserData(itemId,'url');
+	var type = this.getUserData(itemId,'type');	
+	
+	//alert(type);
+	if (type == "M") {
+		m_Refresh(itemId, "module");
+	}
+	if (type == "E") {
+		e_Refresh(itemId, "element");
+	}	
+	
+}
+
+function onDeleteChildren(){
+	var id = moduleTree_tree.getSelectedItemId()
+	var num = moduleTree_tree.hasChildren(id);
+ 	if(num >= 1){
+		alert("包含有子模块，请先将子模块删除.");	
+		document.getElementById('moduleForm:modalPanelCancelBtn').onclick();
+		return false;		
+	}
+	return true;
+}
+
+function onModuleDeleteComplete() {
+	if(a4jcomplete()==false){
+ 		return;
+ 	}	
+ 	var preId=document.getElementById("moduleForm:parentModule").value;	
+	var dealFlag=document.getElementById("moduleForm:dealFlag").value;
+	if (dealFlag == "N") {
+		//处理失败
+		alert("${msgs['baf.module.WarningHandleFailure']}");
+		return;
+	}
+	moduleTree_tree.refreshItem(preId);
+	var timeout = setTimeout("setselectitem('"+preId+"')", 800);	
+}
+
+function onModuleAddOrEditComplete(data){	
+	var m_isAddOrEdit = document.getElementById("moduleForm:m_isAddOrEdit").value;
+	if (m_isAddOrEdit == "E"){
+		onModuleEditComplete(data);
+	}else{
+		onModuleAddComplete(data);
+	}
+}
+
+function onModuleAddComplete(data) {
+	if (data != null && data != "") {
+	//如果不为空，则是验证模块编号或者权限编号不唯一
+		var idarray = data.split(",");
+		if (idarray.length >= 3) {
+			//模块编号和权限编号已经存在!
+			alert("${msgs['baf.module.WarningElementCodeAndRightCodeAlreadyExist']}");			
+			return;
+		} else {
+			var flag = idarray[0];
+			if (flag == "M"){ 
+				//模块编号已经存在!
+				alert("${msgs['baf.module.WarningModuleCodeAlreadyExist']}");
+				return;
+			}
+			if (flag == "R"){
+				//权限编号已经存在!
+				alert("${msgs['baf.module.WarningRightCodeAlreadyExist']}");
+				return;
+			}
+		}
+	}
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+ 	
+ 	var parentModuleID = document.getElementById("moduleForm:parentModule").value;	
+	var moduleID = document.getElementById("moduleForm:moduleID").value;
+	var dealFlag = document.getElementById("moduleForm:dealFlag").value;
+	//判断是否批量新增操作
+	var isBatchAddNew = document.getElementById("moduleForm:m_isBatchSave");
+	if (isBatchAddNew.checked) {
+		//批量操作选中
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.module.WarningHandleFailure']}");
+			return;
+		}	
+		moduleTree_tree.refreshItem(parentModuleID);	
+	} else {
+		//没有选中批量操作
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.module.WarningHandleFailure']}");
+			return;
+		}
+		moduleTree_tree.refreshItem(parentModuleID);
+		var timeout = setTimeout("setselectitem('"+moduleID+"')", 800);		
+	}
+}
+
+function onModuleEditComplete(data) {
+	if (data != null && data != "") {
+		//如果不为空，则是验证模块编号或者权限编号不唯一
+		var idarray = data.split(",");
+		if (idarray.length >= 3) {
+			//模块编号和权限编号已经存在!
+			alert("${msgs['baf.module.WarningElementCodeAndRightCodeAlreadyExist']}");
+			return;
+		} else {
+			var flag = idarray[0];
+			if (flag == "M"){ 
+				//模块编号已经存在!
+				alert("${msgs['baf.module.WarningModuleCodeAlreadyExist']}");
+				return;
+			}
+			if (flag == "R"){
+				//权限编号已经存在!
+				alert("${msgs['baf.module.WarningRightCodeAlreadyExist']}");
+				return;
+			}
+			if (flag == "C"){
+				//上级模块不能为其子模块!
+				alert("${msgs['baf.module.WarningIsChildModule']}");
+				return;
+			}
+			if (flag == "E"){
+				//上级模块不能包含子元素!
+				alert("${msgs['baf.module.WarningIsExistElement']}");			
+				return;
+			}
+		}
+	}
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	//add by lsh 2009-09-25 模块界面的父节点不能修改，简化代码
+	if (true) {
+		var parentModuleID = document.getElementById("moduleForm:parentModule").value;	
+		var moduleID = document.getElementById("moduleForm:moduleID").value;
+		var dealFlag = document.getElementById("moduleForm:dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败  
+			alert("${msgs['baf.module.WarningHandleFailure']}");
+			return;
+		}
+
+		moduleTree_tree.refreshItem(parentModuleID);	
+		var timeout = setTimeout("setselectitem('"+moduleID+"')", 400);
+		return;
+	}
+	
+	var parentModuleIDDummy = document.getElementById("moduleForm:parentModuleIDDummy").value;
+	var parentModuleID = document.getElementById("moduleForm:parentModule").value;	
+	var moduleID = document.getElementById("moduleForm:moduleID").value;
+	var dealFlag = document.getElementById("moduleForm:dealFlag").value;
+	if (dealFlag == "N") {
+		//处理失败
+		alert("${msgs['baf.module.WarningHandleFailure']}");  
+		return;
+	}
+	//判断原始父节点是否更改。
+	if (parentModuleID == parentModuleIDDummy) {
+		moduleTree_tree.refreshItem(parentModuleID);	
+	} else {
+		//原始父节点更改，则需要刷新原始父节点，和新的父节点
+		var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentModuleIDDummy+"')", 200);
+		var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentModuleID+"')", 400);
+	}
+	
+	var timeout = setTimeout("setselectitem('"+moduleID+"')", 800);
+	document.getElementById("moduleForm:parentModuleIDDummy").value = "";	
+}
+
+function setselectitem(id){
+	moduleTree_tree.selectItem(id,1);
+}
+
+//************************************************************
+//****************获取SelectOneMenu值内容方法*****************
+//************************************************************
+/*
+function showSelectOnMenu(obj) {
+    var selectedLabel=obj.options[obj.selectedIndex].text;
+    alert(selectedLabel);
+    var selectedbValue=obj.value;
+    alert(selectedbValue);
+}*/
+
+//************************************************************
+//****************以下是元素的按钮方法*************************
+//************************************************************
+function onElementAdd() {
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var isLeaf = moduleTree_tree.getUserData(itemId,'isLeaf');
+	var type = moduleTree_tree.getUserData(itemId,'type');
+	document.getElementById("elementForm:module_type").value = moduleTree_tree.getUserData(itemId,'type');
+	if (type == "M" && isLeaf != "Y") {
+		//模块不是叶子节点，不能在该模块下添加元素!
+		alert("${msgs['baf.module.WarningElementAdd']}");		
+		return false;
+	}
+	
+	var e_moduleid = document.getElementById("elementForm:e_moduleId").value;
+	if (e_moduleid == null || e_moduleid == "") {
+		var id=document.getElementById("moduleForm:moduleID").value;
+		var code=document.getElementById("moduleForm:moduleCode").value;
+		document.getElementById("elementForm:e_moduleId").value = id;	
+		document.getElementById("elementForm:e_moduleCode").value = code;
+	}
+}
+
+function onElementAddOrEditComplete(data){
+	var e_isAddOrEdit = document.getElementById("elementForm:e_isAddOrEdit").value;
+	if (e_isAddOrEdit == "E"){
+		onElementEditComplete(data);
+	}else{
+		onElementAddComplete(data);
+	}
+}
+
+function onElementAddComplete(data) {
+	if (data != null && data != "") {
+	//如果不为空，则是验证元素编号或者权限编号不唯一
+		var idarray = data.split(",");
+		if (idarray.length >= 3) {
+			//元素编号和权限编号已经存在!
+			alert("${msgs['baf.module.WarningElementCodeAndRightCodeAlreadyExist']}");			
+			return;
+		} else {
+			var flag = idarray[0];
+			if (flag == "E"){ 
+				//元素编号已经存在!
+				alert("${msgs['baf.module.WarningElementCodeAlreadyExist']}");				
+				return;
+			}
+			if (flag == "R"){
+				//权限编号已经存在!
+				alert("${msgs['baf.module.WarningRightCodeAlreadyExist']}");				
+				return;
+			}
+		}
+	}
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	//判断是否批量新增操作
+	var isBatchAddNew = document.getElementById("elementForm:e_isBatchSave");
+	if (isBatchAddNew.checked) {
+		//选中，只刷新父节点即可
+		var parentElementID = document.getElementById("elementForm:parentElementID").value;
+		var moduleid = document.getElementById("elementForm:e_moduleId").value;
+		var dealFlag=document.getElementById("elementForm:e_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.module.WarningHandleFailure']}");			
+			return;
+		}
+		if (parentElementID != null && parentElementID != "") {
+			//说明有父元素,刷新该父元素
+			moduleTree_tree.refreshItem(parentElementID);			
+		} else {
+			//父节点是模块
+			moduleTree_tree.refreshItem(moduleid);
+		}
+	} else {
+		//没有选中
+		var moduleid = document.getElementById("elementForm:e_moduleId").value;
+		var parentElementID = document.getElementById("elementForm:parentElementID").value;
+		var id=document.getElementById("elementForm:elementId").value;
+		var dealFlag=document.getElementById("elementForm:e_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.module.WarningHandleFailure']}");
+			return;
+		}
+		if (parentElementID == null || parentElementID == "") {
+			moduleTree_tree.refreshItem(moduleid);
+			var timeout = setTimeout("setselectitem('"+id+"')", 800);
+		} else {
+			moduleTree_tree.refreshItem(parentElementID);
+			var timeout = setTimeout("setselectitem('"+id+"')", 800);
+		}
+	}		
+}
+
+function onElementEditComplete(data) {
+	if (data != null && data != "") {
+	//如果不为空，则是验证元素编号或者权限编号不唯一
+		var idarray = data.split(",");
+		if (idarray.length >= 3) {
+			//元素编号和权限编号已经存在!
+			alert("${msgs['baf.module.WarningElementCodeAndRightCodeAlreadyExist']}");			
+			return;
+		} else {
+			var flag = idarray[0];
+			if (flag == "E"){ 
+				//元素编号已经存在!
+				alert("${msgs['baf.module.WarningElementCodeAlreadyExist']}");				
+				return;
+			}
+			if (flag == "R"){
+				//权限编号已经存在!
+				alert("${msgs['baf.module.WarningRightCodeAlreadyExist']}");				
+				return;
+			}
+			if (flag == "C"){
+				//上级元素不能为其子元素!
+				alert("${msgs['baf.module.WarningIsChildElement']}");				
+				return;
+			}
+		}
+	}
+	if(a4jcomplete()==false){
+ 		return;
+ 	}	
+	//add by lsh 2009-09-25  元素不能直接在界面上修改父节点，简化代码
+	if (true) {
+		var moduleid = document.getElementById("elementForm:e_moduleId").value;
+		var parentElementID = document.getElementById("elementForm:parentElementID").value;
+		var id=document.getElementById("elementForm:elementId").value;
+		var dealFlag=document.getElementById("elementForm:e_dealFlag").value;
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.module.WarningHandleFailure']}");			
+			return;
+		}
+
+		if (parentElementID != null && parentElementID != "") {
+			//父节点是元素
+			moduleTree_tree.refreshItem(parentElementID);
+			var timeout = setTimeout("setselectitem('"+id+"')", 400);
+		} else {
+			//父节点是模块
+			moduleTree_tree.refreshItem(moduleid);
+			var timeout = setTimeout("setselectitem('"+id+"')", 400);
+		}
+		return;	
+	}
+	
+	var moduleid = document.getElementById("elementForm:e_moduleId").value;
+	var parentModuleIdDummy = document.getElementById("elementForm:parentModuleIdDummy").value;	//原始父模块ID 
+	var parentElementID = document.getElementById("elementForm:parentElementID").value;
+	var parentElementIdDummy = document.getElementById("elementForm:parentElementIdDummy").value; //原始父元素ID
+	var id=document.getElementById("elementForm:elementId").value;
+	var dealFlag=document.getElementById("elementForm:e_dealFlag").value;
+	if (dealFlag == "N") {
+		//处理失败
+		alert("${msgs['baf.module.WarningHandleFailure']}");
+		return;
+	}
+
+	if (parentElementID == null || parentElementID == "") {
+		if (parentModuleIdDummy != moduleid) {
+			//父模块改变
+			moduleTree_tree.refreshItem(parentModuleIdDummy);			
+		}		
+		var timeout = setTimeout("moduleTree_tree.refreshItem('"+moduleid+"')", 400);
+		var timeout = setTimeout("setselectitem('"+id+"')", 800);
+	} else {
+		if (parentModuleIdDummy != moduleid) {
+			//父模块改变
+			moduleTree_tree.refreshItem(parentModuleIdDummy);			
+		}			
+		if (parentElementIdDummy == null || parentElementIdDummy == ""){
+			var timeout = setTimeout("moduleTree_tree.refreshItem('"+moduleid+"')", 200);
+		}else {
+			if (parentElementIdDummy != parentElementID)
+				var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentElementIdDummy+"')", 200);
+		}		
+		var timeout = setTimeout("moduleTree_tree.refreshItem('"+parentElementID+"')", 400);
+		var timeout = setTimeout("setselectitem('"+id+"')", 800);
+	}
+	document.getElementById("elementForm:parentElementIdDummy").value = "";
+	document.getElementById("elementForm:parentModuleIdDummy").value = "";
+}
+
+function onElementDeleteComplete() {
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	var moduleid = document.getElementById("elementForm:e_moduleId").value;
+	var parentElementID = document.getElementById("elementForm:parentElementID").value;
+	var dealFlag=document.getElementById("elementForm:e_dealFlag").value;
+	if (dealFlag == "N") {
+		//处理失败
+		alert("${msgs['baf.module.WarningHandleFailure']}");
+		return;
+	}
+	if (parentElementID == null || parentElementID == "") {
+		moduleTree_tree.refreshItem(moduleid);
+		var timeout = setTimeout("setselectitem('"+moduleid+"')", 800);	
+	} else {
+		moduleTree_tree.refreshItem(parentElementID);
+		var timeout = setTimeout("setselectitem('"+parentElementID+"')", 800);
+	}	
+}
+
+
+function onElementRefreshComplete() {
+	//设置元素类型操作数据的已选CheckBox的value值为operateid
+	var oTable = document.getElementById("elementForm:table");
+	//var oTable = document.all['elementForm:table'];
+	if (oTable != null) {
+		//长度包含标题和字段头2个。
+		for (j = 0; j < oTable.rows.length - 2; j++) {
+			var e = document.getElementById("elementForm:table:"+j+":selectFlag");
+			//var e = oTable.rows(j).cells(0).children.item(0);//获取CHECKBOX的引用
+			if (e.id.indexOf("selectFlag") >= 0) {   
+				//已经被 选中，触发CheckBox onclick事件，用来设置operateid
+				if (document.all) {
+					//ie
+					if (e.checked) {
+						onObjectFireMouseEvent(e,"onclick");
+					}
+				} else {
+					//firefox
+					if (e.checked) {
+						//先取消然后模拟鼠标点击，设置selectFlag 的value值为ID
+						e.checked = !e.checked;
+						onObjectFireMouseEvent(e,"onclick");
+					}
+				}
+			}
+		}
+	}
+
+	//
+}
+	
+//************************************************************
+//****************设置保存按钮是否可用方法*****************
+//************************************************************
+function onDisableButton(type, flag) {
+	if (type == "M") {
+		var dealFlag = document.getElementById("moduleForm:dealFlag").value;
+		//如果是禁用按钮，但是处理失败，不进行禁用按钮
+		if (dealFlag == "N" && flag == "true")
+			return;
+		document.getElementById("moduleForm:moduleSave").disabled = flag;
+	} else if (type == "E") {
+		var dealFlag = document.getElementById("elementForm:e_dealFlag").value;
+		//如果是禁用按钮，但是处理失败，不进行禁用按钮
+		if (dealFlag == "N" && flag == "true")
+			return;
+		document.getElementById("elementForm:elementSave").disabled = flag;
+	} else {
+		//错误类型
+		alert("${msgs['baf.module.WarningErrorType']}");		
+	}
+}
+
+//*************************************************************
+//**************菜单树上右键显示菜单**********************
+//*************************************************************
+function openContextMenu(){
+  try
+  { 
+  	var itemId = this.getSelectedItemId();
+	if( itemId == "null" ) return;
+	this.selectItem(itemId,false);
+	var objmenu = Ext.menu.MenuMgr.get("opmenu");		
+	var type = this.getUserData(itemId,'type');		
+	var isLeaf = document.getElementById("moduleForm:isLeaf").value;
+	if (type == "M"){
+		//顺序调整		
+		Ext.getCmp("menuItemOrder").enable();			
+		if (isLeaf == "Y") {
+			//如果是叶子节点，那么判断是否有下级元素			
+			if (this.hasChildren(itemId)) {
+				//有元素
+				Ext.getCmp("menuItemAddModule").disable();
+				Ext.getCmp("menuItemAddElement").enable();
+			} else {
+				//无元素
+				Ext.getCmp("menuItemAddModule").enable();
+				Ext.getCmp("menuItemAddElement").enable();
+			}
+		} else {
+			//不是叶子节点
+			Ext.getCmp("menuItemAddModule").enable();
+			Ext.getCmp("menuItemAddElement").disable();
+		}
+	}
+	if (type == "E"){
+		Ext.getCmp("menuItemAddModule").disable();
+		Ext.getCmp("menuItemAddElement").enable();
+		//元素顺序调整		
+		Ext.getCmp("menuItemOrder").enable();
+	}	
+	
+	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		var e = new Array(window.event.clientX,window.event.clientY);
+		objmenu.showAt(e);
+	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+		var e = new Array(arguments[1].clientX,arguments[1].clientY);
+		objmenu.showAt(e);
+	}
+  }
+  catch(e)
+  {
+    alert(e.description);
+  }
+}
+
+//右键新增顶级模块
+function addNewTopModule(){	
+	m_AddTopNew("module");	
+}
+
+//右键新增模块
+function addNewModule(){	
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var itemText = moduleTree_tree.getItemText(itemId);
+ 			
+	m_AddNew(itemId, itemText, "module");	
+}
+
+//右键新增元素
+function addNewElement(){	
+	var e = document.getElementById("elementForm:elementAdd");
+	onObjectFireMouseEvent(e,"onclick");
+}
+
+//右键删除模块或是元素
+function deleteMEItem(){
+	var itemId = moduleTree_tree.getSelectedItemId();	
+	var type = moduleTree_tree.getUserData(itemId,'type');
+	if (type == "M"){
+		//设置删除ID
+		document.getElementById("moduleForm:m_deleteID").value = itemId;
+		var e = document.getElementById("moduleForm:moduleDelete");		
+		onObjectFireMouseEvent(e,"onclick");
+	}
+	if (type == "E"){
+		//设置删除ID
+		document.getElementById("elementForm:e_deleteID").value = itemId;		
+		var e = document.getElementById("elementForm:elementDelete");
+		onObjectFireMouseEvent(e,"onclick");
+	}
+}
+
+//调整模块顺序
+function orderItem() {
+    var itemId = moduleTree_tree.getSelectedItemId();
+	var parentID = moduleTree_tree.getParentId(itemId);
+	var type = moduleTree_tree.getUserData(itemId,'type');
+	if (type == "M"){
+		if (parentID == "0")
+			parentID = "";
+		//模块排序
+		m_refreshOrderForm(parentID);
+	}else{
+		var ptype = moduleTree_tree.getUserData(parentID,'type');
+		//元素排序
+		getElements(parentID,ptype);
+	}
+}
+
+//元素调整完成
+function onSaveEOrderComplete(data){
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+ 	var itemId = moduleTree_tree.getSelectedItemId();
+	moduleTree_tree.refreshItem(data);
+	Richfaces.hideModalPanel("orderElementPanel");
+	var timeout = setTimeout("setselectitem('"+itemId+"')", 800);
+}
+
+//模块调整完成
+function onSaveOrderComplete(data) {
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	if (data == "N") {
+		//处理失败
+		alert("${msgs['baf.module.WarningHandleFailure']}");		
+		return;
+	}
+
+	//刷新父节点
+	var itemId = moduleTree_tree.getSelectedItemId(); 
+	var parentID = moduleTree_tree.getParentId(itemId);
+	moduleTree_tree.refreshItem(parentID);
+	var timeout = setTimeout("setselectitem('"+itemId+"')", 800);
+}
+
+//设置模块小图标
+function setIcon(picName){
+	document.getElementById('moduleForm:smallIcon').value = picName;
+	Richfaces.hideModalPanel('iconPanel');
+}
+//]]>
+</script>
+</head>
+
+<body >
+
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+			
+    </style>  
+	
+	<regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel region="east" id="eastpanel" 
+			autoScroll="false" contentEl="east-panel" split="true" width="200"   minSize="200" maxSize="400" 
+			collapsible="true" margins="0 0 0 0" layout="accordion" />		
+		<regaltec:viewPortPanel region="center" id="center-panel"
+			contentEl="center" />
+		
+	</regaltec:viewPort>
+
+  	<div id="east-panel">   
+	<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+		<tr>
+			<td height="16" align="right" class="rich-gradient-tab" >
+			<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" >
+			</h:graphicImage>
+			</td>
+		</tr>
+		<tr>
+			<td height="100%" id="treeboxbox_tree" >
+			</td>
+		</tr>
+  	</table>  
+  	</div>
+	
+	<regaltec:extContextMenu id="opmenu">
+		<regaltec:extContextMenuItem id="menuItemAddTopModule" text="#{msgs['baf.module.NewTopModule']}" handler="addNewTopModule"/>
+	   	<regaltec:extContextMenuItem id="menuItemAddModule" text="#{msgs['baf.module.NewMoudle']}" handler="addNewModule" />
+	   	<regaltec:extContextMenuItem id="menuItemAddElement" text="#{msgs['baf.module.NewElement']}" handler="addNewElement" />
+	   	<regaltec:extContextMenuItem id="menuItemDelete" text="#{msgs['baf.module.btnDelete']}" handler="deleteMEItem" />
+	   	<regaltec:extContextMenuItem id="menuItemOrder" text="#{msgs['baf.module.ordertext']}" handler="orderItem" />
+   	</regaltec:extContextMenu>
+    	
+	<regaltec:dhtmlXtree id="moduleTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+		loadXML="/baf/jsp/module/moduleTreeXMLData.jsp"
+		xmlAutoLoading="/baf/jsp/module/moduleTreeXMLData.jsp">
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+		<regaltec:setDxtEnable enableFunction="enableDragAndDrop" parameter="1"/>
+		<regaltec:setDxtEevntHandler eventName="Drag" handler="onDrag"/>
+	</regaltec:dhtmlXtree>
+	
+	<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="99%" height="98%" switchType="client" selectedTab="#{elementBean.tabPanel}">
+			<rich:tab id="module" name="module" label="#{msgs['baf.module.moduleBaseInfo']}" style="#{elementBean.moduleDisplayStyle}">
+				<center><a4j:form id="moduleForm">		
+				<rich:spacer height="2px"/>				
+					<h:panelGrid id="m_panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">					 
+						<h:outputText value="#{msgs['baf.module.parentModuleName']}:" />
+						<h:inputText id="parentModuleName" style="width:300px;height:23px;"  onfocus="this.blur()"
+							value="#{moduleBean.parentModuleName}" styleClass="rich-gradient-input">							
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.parentModuleName']}" server="false" client="true" maxLength="64"/>						
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.module.moduleName']}:" />
+						<h:inputText id="moduleName" style="width:300px;height:23px;"
+							value="#{moduleBean.moduleName}" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.moduleName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.moduleName']}" server="false" client="true" maxLength="64"/>					
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.moduleCode']}:" />
+						<h:inputText id="moduleCode" style="width:300px;height:23px;" title="#{msgs['baf.module.moduleCodeTips']}"
+							value="#{moduleBean.moduleCode}" styleClass="rich-gradient-input" >					
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.moduleCode']}" server="false" client="true"/>							
+							<s:commonsValidator type="mask" arg="#{msgs['baf.module.moduleCode']}" server="false" client="true" mask="^IDM_.{1,}$"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.moduleCode']}" server="false" client="true" maxLength="64"/>							
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.largeIcon']}:" />
+						<h:inputText id="largeIcon" value="#{moduleBean.largeIcon}"
+							style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.largeIcon']}" server="false" client="true" maxLength="256"/>							
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.smallIcon']}:" />
+						<h:panelGroup>
+							<h:inputText id="smallIcon" value="#{moduleBean.smallIcon}"
+								style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+								<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.smallIcon']}" server="false" client="true" maxLength="256"/>							
+							</h:inputText>
+							<a href="#" onclick="Richfaces.showModalPanel('iconPanel');"><h:outputText value="#{msgs['baf.module.select']}"/></a>
+						</h:panelGroup>
+
+						<h:outputText value="#{msgs['baf.module.isPermission']}:" />
+						<h:selectOneRadio id="isPermission" style="font-size:13px"
+							value="#{moduleBean.isPermission}" >
+							<f:selectItem itemLabel="#{msgs['baf.module.radioYes']}" itemValue="Y" />
+							<f:selectItem itemLabel="#{msgs['baf.module.radioNo']}" itemValue="N" />
+						</h:selectOneRadio>
+
+						<h:outputText value="#{msgs['baf.module.isShowedInNavigation']}:" />
+						<h:selectOneRadio id="isShowedInNavigation" style="font-size:13px"
+							value="#{moduleBean.isShowedInNavigation}">
+							<f:selectItem itemLabel="#{msgs['baf.module.radioYes']}" itemValue="Y" />
+							<f:selectItem itemLabel="#{msgs['baf.module.radioNo']}" itemValue="N" />
+						</h:selectOneRadio>
+
+						<h:outputText value="#{msgs['baf.module.moduleUrl']}:" />
+						<h:inputText id="moduleUrl" value="#{moduleBean.moduleUrl}" title="#{msgs['baf.module.moduleUrlTips']}"
+							style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.moduleUrl']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.moduleUrl']}" server="false" client="true" maxLength="256"/>																						
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.applicationId']}:" />
+						<h:inputText id="applicationId"
+							value="#{moduleBean.applicationId}"
+							style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.applicationId']}" server="false" client="true" maxLength="32"/>							
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.linkTarget']}:" />
+						<h:selectOneRadio id="linkTarget" value="#{moduleBean.linkTarget}"
+							style="font-size:13px">
+							<f:selectItem itemLabel="#{msgs['baf.module.radioNewWindow']}" itemValue="B" />
+							<f:selectItem itemLabel="#{msgs['baf.module.radioNavAndMainWorkSpace']}" itemValue="M" />
+							<f:selectItem itemLabel="#{msgs['baf.module.radioMainWorkSpace']}" itemValue="W" />
+						</h:selectOneRadio>
+
+						<h:outputText value="#{msgs['baf.module.requestMethod']}:" />
+						<h:selectOneRadio id="requestMethod"
+							value="#{moduleBean.requestMethod}" style="font-size:13px;">
+							<f:selectItem itemLabel="POST" itemValue="P" />
+							<f:selectItem itemLabel="GET" itemValue="G" />
+						</h:selectOneRadio>
+
+						<h:outputText value="#{msgs['baf.module.clientType']}:" />
+						<h:selectOneMenu style="width:300px;height:23px;" id="clientType"
+							value="#{moduleBean.clientType}" styleClass="rich-box-border-color-control-select rich-text-control-select">
+							<f:selectItems value="#{moduleBean.clientTypeMap}" />
+						</h:selectOneMenu>
+
+						<h:outputText value="#{msgs['baf.module.rightCode']}:" />
+						<h:inputText id="rightCode" value="#{moduleBean.rightCode}" title="#{msgs['baf.module.rightCodeTips']}"
+							style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.rightCode']}" server="false" client="true"/>													
+							<s:commonsValidator type="mask" arg="#{msgs['baf.module.rightCode']}" server="false" client="true" mask="^IDR_.{1,}$"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.rightCode']}" server="false" client="true" maxLength="64"/>												
+						</h:inputText>
+
+						<h:outputText value="#{msgs['baf.module.menuDescription']}:" />
+						<h:inputTextarea value="#{moduleBean.moduleDescription}"
+							id="menuDescription" style="width:300px;height:50px;"
+							styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.menuDescription']}" server="false" client="true" maxLength="128"/>							
+						</h:inputTextarea>								
+						
+					<h:inputHidden id="m_isAddOrEdit" value="#{moduleBean.isAddOrEdit}"/>
+					<h:inputHidden id="parentModule" value="#{moduleBean.parentModule}" />
+					<h:inputHidden id="parentModuleIDDummy" value="#{moduleBean.parentModuleDummy}" />
+					<h:inputHidden id="moduleID" value="#{moduleBean.moduleID}" />
+					<h:inputHidden id="dealFlag" value="#{moduleBean.dealFlag}" />
+					<h:inputHidden id="isLeaf" value="#{moduleBean.isLeaf}"/>
+                    <h:inputHidden id="m_deleteID" value=""/>
+					</h:panelGrid>	
+																				
+					<center>	
+					<h:panelGroup id="m_isBatchAddGroup" style="visibility:hidden;">
+					<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+					<h:selectBooleanCheckbox id="m_isBatchSave" />		
+					</h:panelGroup>
+							
+					<rich:toolTip for="m_isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+					</rich:toolTip>		
+																												
+					<a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="moduleAddTop" value="#{msgs['baf.module.NewTopModule']}">
+						<a4j:support event="onclick"  actionListener="#{moduleBean.addTopModuleListener}" reRender="moduleForm"/> <!-- oncomplete="document.getElementById('moduleForm:m_isBatchAddGroup').style.visibility='visible';" -->    
+					</a4j:commandButton>  					
+					<a4j:commandButton styleClass="rich-button" type="submit" id="moduleSaveOrEdit" value="#{msgs['baf.module.btnSave']}">
+						<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('moduleForm'))==false) return false;" data="#{moduleBean.functionData}" oncomplete="onModuleAddOrEditComplete(data)" action="#{moduleBean.addOrEditModule}" reRender="m_panelGrid"/>
+					</a4j:commandButton> 			
+					<a4j:commandButton style="display:none;" styleClass="rich-button" type="submit" id="moduleSave" value="#{msgs['baf.module.btnSave']}">
+						<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('moduleForm'))==false) return false;" data="#{moduleBean.functionData}" oncomplete="onModuleAddComplete(data)" actionListener="#{moduleBean.addModule}" reRender="m_panelGrid"/>
+					</a4j:commandButton>
+					<a4j:commandButton style="display:none;" styleClass="rich-button" type="submit" id="moduleEdit" value="#{msgs['baf.module.btnEdit']}">
+						<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('moduleForm'))==false) return false;" data="#{moduleBean.functionData}" oncomplete="onModuleEditComplete(data)" actionListener="#{moduleBean.editModule}" reRender="m_panelGrid"/>
+					</a4j:commandButton>
+					<a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="moduleDelete" value="#{msgs['baf.module.btnDelete']}" onclick="if (validateForm(document.getElementById('moduleForm'))==true) {#{rich:component('m_deletePanel')}.show();} return false;"/>
+					</center>
+					
+					<s:validatorScript functionName="validateForm"/>
+					<rich:modalPanel id="m_deletePanel" autosized="true" width="300">
+			        <f:facet name="header">
+			            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+			                style="padding-right:15px;" />
+			        </f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					        id="hidelinkDelete" styleClass="hidelink"/>
+					    <rich:componentControl for="m_deletePanel" attachTo="hidelinkDelete"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>	
+		        	<center>		        	      	
+		                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button" >
+		                    	<a4j:support event="onclick" onsubmit="if(onDeleteChildren()==false)return false;" action="#{moduleBean.deleteModule}" oncomplete="#{rich:component('m_deletePanel')}.hide();onModuleDeleteComplete();" reRender="m_panelGrid" />
+		                    </a4j:commandButton>
+						<rich:spacer width="40px"/>
+		                <a4j:commandButton id="modalPanelCancelBtn" value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                    onclick="#{rich:component('m_deletePanel')}.hide();return false;" />
+					</center>
+			    </rich:modalPanel>			    
+				</a4j:form></center>
+			</rich:tab>
+			<!-- 如果第一次进入元素Tab，则触发elementForm:elementType的onchange事件，用来渲染元素类型操作权限表格 -->
+			<rich:tab id="element" name="element" label="#{msgs['baf.module.elementBaseInfo']}" style="#{elementBean.elementdisplayStyle}">
+				<center>
+					<a4j:form id="elementForm">
+					 <rich:spacer height="2px"/>			
+						<h:panelGrid id="e_panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">				
+						<h:outputText value="#{msgs['baf.module.parentElementID']}:" />
+						<h:inputText id="parentElementName" value="#{elementBean.parentElementName}" style="width:300px;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.parentElementID']}" server="false" client="true" maxLength="64"/>							
+						</h:inputText>						
+												
+						<h:outputText value="#{msgs['baf.module.elementName']}:" />
+						<h:inputText id="elementName" value="#{elementBean.elementName}" style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.elementName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.elementName']}" server="false" client="true" maxLength="64"/>							
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.module.elementCode']}:" />
+						<h:inputText id="elementCode" title="#{msgs['baf.module.elementCodeTips']}" value="#{elementBean.elementCode}" style="width:300px;height:23px;" styleClass="rich-gradient-input" >							
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.elementCode']}" server="false" client="true"/>
+							<s:commonsValidator type="mask" arg="#{msgs['baf.module.elementCode']}" server="false" client="true" mask="^IDE_.{1,}$"/>		
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.elementCode']}" server="false" client="true" maxLength="64"/>								
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.module.elementType']}:" />
+						<h:selectOneMenu style="width:300px;height:23px;" title="#{msgs['baf.module.elementTypeTips']}" id="elementType" 
+							value="#{elementBean.elementTypeId}" styleClass="rich-box-border-color-control-select rich-text-control-select">
+							<f:selectItems value="#{elementBean.elementTypeMap}"  />
+							<a4j:support event="onchange" ajaxSingle="true"  reRender="table"/>		
+						</h:selectOneMenu>
+												
+						<h:outputText value="#{msgs['baf.module.elementIconName']}:" />
+						<h:inputText id="elementIconName" value="#{elementBean.elementIconName}" style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.elementIconName']}" server="false" client="true" maxLength="256"/>							
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.module.funcName']}:" />
+						<h:inputText id="funName" value="#{elementBean.funName}" style="width:300px;height:23px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.funcName']}" server="false" client="true" maxLength="64"/>						
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.module.funcContent']}:" />
+						<h:inputTextarea id="funContent" value="#{elementBean.funContent}" style="width:300px;height:50px;" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.funcContent']}" server="false" client="true" maxLength="4000"/>							
+						</h:inputTextarea>
+										
+						<h:outputText value="#{msgs['baf.module.isPermission']}:" />
+						<h:selectOneRadio id="e_isProtected" style="font-size:13px"
+							value="#{elementBean.isProtected}" >
+							<f:selectItem itemLabel="#{msgs['baf.module.radioYes']}" itemValue="Y" />
+							<f:selectItem itemLabel="#{msgs['baf.module.radioNo']}" itemValue="N" />
+						</h:selectOneRadio>
+									
+						<h:outputText value="#{msgs['baf.module.rightCode']}:" />
+						<h:inputText id="e_rightCode" value="#{elementBean.rightCode}" title="#{msgs['baf.module.rightCodeTips']}"
+							style="width:300px;height:23px;" styleClass="rich-gradient-input">	
+							<s:commonsValidator type="required" arg="#{msgs['baf.module.rightCode']}" server="false" client="true"/>							
+							<s:commonsValidator type="mask" arg="#{msgs['baf.module.rightCode']}" server="false" client="true" mask="^IDR_.{1,}$"/>	
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.module.rightCode']}" server="false" client="true" maxLength="64"/>															
+						</h:inputText>						
+						
+						<h:inputHidden id="e_isAddOrEdit" value="#{elementBean.isAddOrEdit}" />
+						<h:inputHidden id="elementId" value="#{elementBean.elementId}" />
+						<h:inputHidden id="e_moduleId" value="#{elementBean.moduleId}" />
+						<h:inputHidden id="e_moduleCode" value="#{elementBean.moduleCode}" />
+						<h:inputHidden id="e_dealFlag" value="#{elementBean.dealFlag}" />
+						<h:inputHidden id="elementTypeCode" value="#{elementBean.elementTypeCode}" />
+						<h:inputHidden id="parentElementID" value="#{elementBean.parentElementId}" />
+						<h:inputHidden id="parentElementIDDummy" value="#{elementBean.parentElementIdDummy}" />	
+						<h:inputHidden id="parentModuleIdDummy" value="#{elementBean.parentModuleIdDummy}"/>	
+						<h:inputHidden id="e_deleteID" value=""/>						
+						<h:inputHidden id="module_type" value="#{elementBean.module_type}"/>		
+						</h:panelGrid>
+
+ 						<rich:spacer height="2px"/>
+
+	            	 	<h:panelGroup layout="block" styleClass="scrolls" style="width:450px;height:120px;">
+	            	 	<rich:dataTable value="#{elementBean.elementTypeOperList}" var="cap" id="table"  onRowMouseOver="this.style.backgroundColor='#F8F8F8'"
+            	 				onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'">
+	            	 	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.module.elementTypeOperateRight']}" />
+					    </f:facet>
+					    <rich:column>
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="" />
+					        </f:facet>
+					        <h:selectBooleanCheckbox id="selectFlag" value="#{cap.selectFlag}" onclick="this.value='#{cap.operateId}';"/>
+					    </rich:column>
+			        	<rich:column width="150px" visible="false">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.module.operateID']}" />
+					        </f:facet>
+				            <h:outputText value="#{cap.operateId}"/>
+				        </rich:column>					    
+				        <rich:column width="150px">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.module.operateName']}" />
+					        </f:facet>
+				            <h:outputText value="#{cap.operateName}"/>
+				        </rich:column>
+				        <rich:column width="150px">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.module.operateCode']}" />
+					        </f:facet>
+				            <h:outputText value="#{cap.operateCode}"/>
+				        </rich:column>
+				        <rich:column width="150px">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.module.operateDescribe']}" />
+					        </f:facet>
+				            <h:outputText value="#{cap.operateDesc}"/>
+				        </rich:column>               	 		 	
+	            		</rich:dataTable>
+	            	 	</h:panelGroup>		            	 				
+																					
+						<rich:spacer height="2px"/>
+
+						<center>
+	            	 	<h:panelGroup id="e_isBatchAddGroup" style="visibility:hidden;">		
+						<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+						<h:selectBooleanCheckbox id="e_isBatchSave" />	
+						</h:panelGroup>
+												
+						<rich:toolTip for="e_isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+						</rich:toolTip>		
+						<rich:spacer height="10px"/>												
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="submit" id="elementAdd" value="#{msgs['baf.module.btnNew']}">
+							<a4j:support event="onclick" onsubmit="if (onElementAdd()==false) return false;" requestDelay="100" actionListener="#{elementBean.addElementListener}" reRender="tabPanel" oncomplete="setFocus('elementForm:elementName');var e=document.getElementById('elementForm:e_isBatchAddGroup'); e.style.visibility='visible'; e.checked='false';"/>
+						</a4j:commandButton> 
+						<a4j:commandButton styleClass="rich-button" type="submit" id="elementSaveOrEdit" value="#{msgs['baf.module.btnSave']}">
+							<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('elementForm'))==false) return false;" data="#{elementBean.functionData}" oncomplete="onElementAddOrEditComplete(data)" action="#{elementBean.addOrEditElement}" reRender="e_panelGrid"/>
+						</a4j:commandButton> 
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="submit" id="elementSave" value="#{msgs['baf.module.btnSave']}">
+							<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('elementForm'))==false) return false;" data="#{elementBean.functionData}" oncomplete="onElementAddComplete(data)" actionListener="#{elementBean.addElement}" reRender="e_panelGrid"/>
+						</a4j:commandButton> 
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="submit" id="elementEdit" value="#{msgs['baf.module.btnEdit']}">
+							<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('elementForm'))==false) return false;" data="#{elementBean.functionData}" oncomplete="onElementEditComplete(data)" actionListener="#{elementBean.editElement}" reRender="e_panelGrid"/>
+						</a4j:commandButton> 			
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="elementDelete" value="#{msgs['baf.module.btnDelete']}" onclick="if (validateForm(document.getElementById('elementForm'))==true) {#{rich:component('e_deletePanel')}.show();} return false;"/>
+						</center>		
+						<s:validatorScript functionName="validateForm"/>
+						
+						<rich:modalPanel id="e_deletePanel" autosized="true" width="300">
+			        	<f:facet name="header">
+			            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+			                style="padding-right:15px;" />
+			        	</f:facet>
+						<!-- 关闭按钮 -->
+						<f:facet name="controls">
+						<h:panelGroup>
+					   	 	<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkDelete" styleClass="hidelink"/>
+					    <rich:componentControl for="e_deletePanel" attachTo="hidelinkDelete"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+						</f:facet>	
+		        		<center>		        	      	
+		                	<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+		                    	action="#{elementBean.deleteElement}"
+		                    	oncomplete="#{rich:component('e_deletePanel')}.hide();onElementDeleteComplete();"
+		                    	reRender="elementForm" />
+							<rich:spacer width="40px"/>
+		                	<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                    	onclick="#{rich:component('e_deletePanel')}.hide();return false;" />
+						</center>
+			    	</rich:modalPanel>					
+					</a4j:form>
+				</center>
+			</rich:tab>
+		</rich:tabPanel>	
+		
+		<!-- 模块排序模态框 -->
+		<rich:modalPanel id="modalPanel" autosized="true" keepVisualState="false" width="380" height="360">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.module.header']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+				    <rich:componentControl for="modalPanel" attachTo="hidelink" operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="orderListForm">					
+				<center>
+			        <rich:orderingList value="#{moduleBean.orderList}" var="orderList" listHeight="250" listWidth="280" converter="orderConverter"
+				        upControlLabel ="#{msgs['orderingList.up']}" 
+						downControlLabel="#{msgs['orderingList.down']}"
+						topControlLabel="#{msgs['orderingList.top']}"
+						bottomControlLabel="#{msgs['orderingList.bottom']}"
+				        >
+			            <rich:column  width="180" visible="false">
+				            <f:facet name="header">
+				                <h:outputText value="#{msgs['baf.module.idname']}" />
+				            </f:facet> 
+			                <h:outputText value="#{orderList.id}"></h:outputText>
+			            </rich:column>
+			            <rich:column> 
+			                <f:facet name="header">
+			                    <h:outputText value="#{msgs['baf.module.idmodName']}" />
+			                </f:facet>
+			                <h:outputText value="#{orderList.name}"></h:outputText><br/>
+			            </rich:column>
+			        </rich:orderingList>							
+				</center>			
+				<rich:spacer height="2px"/>	
+				<h:inputHidden id="parentModuleIdOrder" value="#{moduleBean.parentModule}"/>		
+				<center>								 
+					<a4j:commandButton styleClass="rich-button" type="submit" id="orderSave" value="#{msgs['baf.org.Save']}" actionListener="#{moduleBean.saveOrderListener}" data="#{moduleBean.functionData}" oncomplete="onSaveOrderComplete(data); #{rich:component('modalPanel')}.hide();"/>
+					<rich:spacer height="2px"/>	
+					<a4j:commandButton styleClass="rich-button" type="button" id="orderCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+				</center>
+			</a4j:form>		
+		</rich:modalPanel>
+		
+		<!-- 元素排序模态框 -->
+		<rich:modalPanel id="orderElementPanel" autosized="true" keepVisualState="false" width="380" height="360">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.element.order']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="ohidelink1" styleClass="hidelink"/>
+				    <rich:componentControl for="orderElementPanel" attachTo="ohidelink1" operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="orderElementForm">					
+				<center>
+			        <rich:orderingList id="olist" value="#{elementBean.orderList}" var="orderList" listHeight="250" listWidth="280" converter="orderConverter"
+				        upControlLabel ="#{msgs['orderingList.up']}" 
+						downControlLabel="#{msgs['orderingList.down']}"
+						topControlLabel="#{msgs['orderingList.top']}"
+						bottomControlLabel="#{msgs['orderingList.bottom']}">
+			            <rich:column visible="false">
+			                <h:outputText value="#{orderList.id}"/>
+			            </rich:column>
+			            <rich:column width="280"> 
+			                <f:facet name="header">
+			                    <h:outputText value="#{msgs['baf.module.elementName']}" style="width:280px;"/>
+			                </f:facet>
+			                <h:outputText value="#{orderList.name}"/>
+			            </rich:column>
+			        </rich:orderingList>							
+				</center>			
+				<rich:spacer height="1px"/>			
+				<center>								 
+					<a4j:commandButton styleClass="rich-button" type="button" id="orderESave" value="#{msgs['baf.org.Save']}" action="#{elementBean.saveElementOrder}" data="#{elementBean.parentId}" oncomplete="onSaveEOrderComplete(data)"/>
+					<rich:spacer width="10px"/>	
+					<a4j:commandButton styleClass="rich-button" type="button" id="orderECancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('orderElementPanel')}.hide(); return false;"/>
+				</center>
+				<a4j:keepAlive beanName="elementBean"/>
+			</a4j:form>		
+		</rich:modalPanel>
+		
+		<a4j:region renderRegionOnly="true">		
+			<!-- 选择模块图标模态框 -->
+			<rich:modalPanel id="iconPanel" autosized="true" keepVisualState="false" width="400" height="380" onshow="getIconList();">			
+				<f:facet name="header">
+					<h:outputText value="#{msgs['baf.module.selectModuleIcon']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png" id="ohidelink2" styleClass="hidelink"/>
+					    <rich:componentControl for="iconPanel" attachTo="ohidelink2" operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>	
+				<center>
+					<h:form id="iconForm">
+						<div style="height:300px;overflow: auto;">
+							<rich:dataGrid id="iconList" style="text-align: center;" value="#{moduleBean.picList}" frame="frame" var="list" columns="10" width="100%">
+					        	<img src="#{request.contextPath}/baf/images/dhtmlxtree/#{list}"  onclick="setIcon('#{list}');" style="cursor:hand;"/>
+					        	<rich:spacer width="2px"/>
+					        </rich:dataGrid>	
+				        </div>
+						<rich:spacer height="30px"/>			
+						<h:commandButton styleClass="rich-button" type="button" value="#{msgs['baf.Close']}" onclick="#{rich:component('iconPanel')}.hide(); return false;"/>
+						<!-- 读取图片 -->    
+		            	<a4j:jsFunction name="getIconList" action="#{moduleBean.readIconList}" reRender="iconList"/>     
+					</h:form>
+				</center>
+			</rich:modalPanel>
+		</a4j:region>
+				
+ 		<a4j:form>			         															         		
+	        <a4j:jsFunction name="m_Refresh" reRender="tabPanel" actionListener="#{moduleBean.refresh}" oncomplete="setFocus('moduleForm:moduleName');">
+	        	<a4j:actionparam name="id" value="" />
+	            <a4j:actionparam name="tabPanel" assignTo="#{elementBean.tabPanel}"/>                
+	        </a4j:jsFunction>   
+	               
+	        <!-- 刷新完成后把已经选中的操作表CheckBox都赋值operateid -->
+	        <a4j:jsFunction name="e_Refresh" reRender="tabPanel" actionListener="#{elementBean.refresh}" oncomplete="onElementRefreshComplete();">
+	        	<a4j:actionparam name="id" value="" />
+	            <a4j:actionparam name="tabPanel" assignTo="#{elementBean.tabPanel}"/>                
+	        </a4j:jsFunction>            
+	                
+	        <a4j:jsFunction name="m_moveTree" data="#{moduleBean.functionData}" action="#{moduleBean.moveTreeModule}" oncomplete="m_onMoveTreeComplete(data)">
+	        	<a4j:actionparam name="srcID" value="" />      
+	        	<a4j:actionparam name="destID" value="" />       
+	        </a4j:jsFunction>
+	        
+	        <a4j:jsFunction name="e_moveTree" data="#{elementBean.functionData}" action="#{elementBean.moveTreeElement}" oncomplete="e_onMoveTreeComplete(data)">
+	        	<a4j:actionparam name="srcID" value="" />      
+	        	<a4j:actionparam name="destID" value="" /> 
+	        	<a4j:actionparam name="destType" value="" />
+	        	<a4j:actionparam name="moduleCode" value="" />          
+	        </a4j:jsFunction>        
+						        
+	        <a4j:jsFunction name="m_AddTopNew" reRender="tabPanel" actionListener="#{moduleBean.addTopModuleListener}" oncomplete="setFocus('moduleForm:moduleName');">
+	            <a4j:actionparam name="tabPanel" assignTo="#{elementBean.tabPanel}"/>                 
+	        </a4j:jsFunction> 
+	        
+	        <a4j:jsFunction name="m_AddNew" reRender="tabPanel" actionListener="#{moduleBean.addModuleListener}" oncomplete="setFocus('moduleForm:moduleName');var e=document.getElementById('moduleForm:m_isBatchAddGroup'); e.style.visibility='visible'; e.checked='false';">
+	        	<a4j:actionparam name="moduleID" value="" />
+	            <a4j:actionparam name="moduleName" value=""/>   
+	            <a4j:actionparam name="tabPanel" assignTo="#{elementBean.tabPanel}"/>                 
+	        </a4j:jsFunction>        
+	
+	        <a4j:jsFunction name="m_refreshOrderForm" action="#{moduleBean.refreshOrder}" oncomplete="#{rich:component('modalPanel')}.show();" reRender="orderListForm">  
+	        	<a4j:actionparam name="parentID" assignTo="#{moduleBean.parentModule}"/>
+	        </a4j:jsFunction>  
+	        
+	        <!-- 获取指定模块下的所有元素 -->
+	        <a4j:jsFunction name="getElements" action="#{elementBean.getElements}" oncomplete="#{rich:component('orderElementPanel')}.show();" reRender="orderElementForm">  
+	        	<a4j:actionparam name="parentId" assignTo="#{elementBean.parentId}"/>
+	        	<a4j:actionparam name="parentType"/>
+	        </a4j:jsFunction>  
+                                                        
+    	</a4j:form>
+	</div>
+
+    <rich:toolTip for="helpicon" >
+    <div style="width:300;">
+      操作说明:<br/>1)编辑对象:在树形菜单使用鼠标选中某一个节点,然后在左边编辑窗进行修改保存操作;<br/>
+	 2)新增、删除：在树形菜单使用鼠标选中某一个节点然后点击鼠标右键在弹出菜单选择相关业务进行操作.
+    </div>
+    </rich:toolTip>
+<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

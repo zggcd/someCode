@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+function afterImport(){
+	if(!a4jcomplete())
+		return false;
+	return true;
+}
+function checkTable(){
+	var t = document.getElementById('dataImportForm:tableName').value
+	checkTableName(t);
+}
+function dataChecked(){
+	if (validateForm(document.getElementById('dataImportForm'))==false) return false;
+	var msg = document.getElementById('dataImportForm:msg').innerText
+	if(msg != ""){
+		alert(msg);
+		return false;
+	}
+}
+//]]>
+</script>
+<style type="text/css">
+	.column1{
+		
+		text-align:right;
+	}
+	.column2{
+		
+		text-align:left;
+	}
+</style>
+</head>
+<body >
+<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="100%" height="98%" switchType="client" >
+	<!-- 数据导入tab -->
+	<rich:tab id="impTab" name="impTab" label="#{msgs['baf.dataImport.importTabLable']}" style="text-align:center;height:98%;">
+		<h:form id="dataImportForm">
+		<a4j:keepAlive beanName="importPinyinBean"/>
+		<rich:spacer height="30px"/>
+		<div style="font-weight:bold;" >
+		注意：请确保导入字段能转换成拼音！“指定表主键”下拉框里选择该表的主键！
+		</div>
+		<fieldset style="height:90%;width:500px" >			
+	             <legend><h:outputText value="#{msgs['baf.dataImport.importTabLable']}" /></legend>			
+			<h:panelGrid id="impGrid" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;" styleClass=".rich-text-color-general">					 						
+				
+				<h:outputText value="#{msgs['baf.pinyin.whichTable']}：" style="text-align:right;" />
+				<h:panelGroup>
+				<h:inputText value="#{importPinyinBean.tableName}" onchange="checkTable();" id="tableName" style="width:195px;height:23px;text-align:left;" styleClass="rich-gradient-input">
+					<s:commonsValidator type="required" arg="表名" server="false" client="true"/>
+				</h:inputText>
+				<h:outputText value="#{importPinyinBean.msg}" id="msg" style="color:red;margin-left:5px;text-align:left;width:100px;"/> 
+				</h:panelGroup>
+			  
+				<h:outputText value="#{msgs['baf.pinyin.whichColumn']}："/>
+				<h:selectOneMenu style="width:195px;height:23px;" id="columnName"	value="#{importPinyinBean.columnName}" styleClass="rich-box-border-color-control-select rich-text-control-select" >
+					<f:selectItems value="#{importPinyinBean.columnNameList}" id="columnList1"/>
+				</h:selectOneMenu>		
+										
+			    <h:outputText value="#{msgs['baf.pinyin.whichIsPrimary']}：" style="text-align:right;"/>
+				<h:selectOneMenu style="width:195px;height:23px;" id="primaryColumnName"	value="#{importPinyinBean.primaryColumnName}" styleClass="rich-box-border-color-control-select rich-text-control-select" >
+					<f:selectItems value="#{importPinyinBean.columnNameList}" id="columnList2"/>
+				</h:selectOneMenu>		
+			</h:panelGrid>	
+		</fieldset>		
+		<br /><br />			
+		<rich:spacer height="20px"/>	
+		<a4j:commandButton styleClass="rich-button" type="submit" id="importCmd" value="#{msgs['baf.dataImport.importCmd']}" >
+			<a4j:support event="onclick" onsubmit="if(dataChecked()==false) return false;" 
+				action="#{importPinyinBean.importData}" oncomplete="afterImport();"/>
+		</a4j:commandButton>
+		<s:validatorScript functionName="validateForm"/>
+		</h:form>
+	</rich:tab>
+</rich:tabPanel>
+
+<a4j:form>
+ 	<a4j:jsFunction name="checkTableName" action="#{importPinyinBean.checkTableName}"  reRender="dataImportForm:columnName, dataImportForm:primaryColumnName, dataImportForm:msg">
+		<a4j:actionparam name="tempName" value=""/>
+	</a4j:jsFunction>          
+</a4j:form>
+<a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('operating_panel').component.show();" 
+      onstop="document.getElementById('operating_panel').component.hide();">
+</a4j:status> 
+<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

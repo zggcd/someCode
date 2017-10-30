@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>宽带端到端试图</title>
+    <link rel="stylesheet" href="lib/css/bootstrap.min.css">
+    <link rel="stylesheet" href="lib/css/style_duandaoduan.css">
+    <style type="text/css">
+        th{background-color: #efeded;}
+        /*tr{white-space:nowrap;}*/
+    </style>
+</head>
+<body id="duandaoduan">
+    <div class="top">
+        <p>宽带端到端试图</p><p style="width:10px;"><span> > </span></p>
+        <select id="selectNum" title="选择账号类型">
+            <option selected value="宽带账号">宽带账号</option>
+            <option value="宽带账号">宽带账号</option>
+            <option value="宽带账号">宽带账号</option>
+        </select>
+        <p style="width:10px;"><span> > </span></p>
+        <div id="num"><input id="seachNum" type="text" value="07394871787"/></div>
+        <img id="search" src="lib/images/u32.png" @click="">
+        <img class="img" src="lib/images/u561.png">
+        <a href="">一键检测</a>
+        <a href="">一键排障</a>
+        <a href="">智能派单</a>
+    </div>
+    <div id="information">
+        <div class="info">
+            <div><p>用户姓名： </p><span>李芳</span></div>
+            <div><p>接入方式： </p><span>FTTH</span></div>
+            <div><p>BRAS： </p><span>eth:3-0-3-2016-1026</span></div>
+            <div><p>OLT： </p><span>OLA-MA5860T/01</span></div>
+            <div><p>OBD： </p><span>739XNX.XTIAN/GJ003/FTTHOBD01/OBD09</span></div>
+            <div><p>终端： </p><span>3D2002957F3A1327</span></div>
+        </div>
+        <div class="img1"><img src="lib/images/img1.png"></div>
+    </div>
+    <div id="table">
+        <div class="tabtop">
+            <p><b>光纤性能指标</b></p>
+            <p>光纤综合评价线路质量差</p>
+            <p>下行光衰值：28.59</p>
+        </div>
+        <table class="table table-bordered" style="width:98%;font-size: 13px;">
+            <tr>
+                <th colspan=8>光模块信息：</th>
+            </tr>
+            <tr>
+                <th>家庭网关接收光功率：</th>
+                <td>-23.87</td>
+                <th>OLT发送光功率：</th>
+                <td>4.72</td>
+                <th>下行光衰值：</th>
+                <td>28.59</td>
+                <td colspan=2>不合格（合格标准：城市<=27.5dB；农村<=28dB）</td>
+            </tr>
+            <tr>
+                <th>家庭网关发送光功率：</th>
+                <td>1.51</td>
+                <th>OLT接收光功率：</th>
+                <td>-27.70</td>
+                <th>上行光衰值：</th>
+                <td>29.21</td>
+                <td colspan=2>不合格（合格标准：<=28.5dB）</td>
+            </tr>
+            <tr>
+                <th>整体光衰是否合格：</th>
+                <td colspan=3>不合格（合格标准：下行光衰合格）</td>
+                <th>家庭网关注册状态：</th>
+                <td colspan=4>正常</td>
+            </tr>
+            <tr>
+                <th>OLT光模块偏置电流：</th>
+                <td>2751.70mA</td>
+                <th>OLT光模块供电电压：</th>
+                <td>3.29V</td>
+                <th>OLT光模块温度：</th>
+                <td>21.57℃</td>
+                <td colspan=2></td>
+            </tr>
+            <tr>
+                <th>家庭网关光模块偏置电流：</th>
+                <td>14.40mA</td>
+                <th>家庭网关光模块供电电压：</th>
+                <td>3.20V</td>
+                <th>家庭网关光模块温度：</th>
+                <td>55.37℃</td>
+                <td colspan=2></td>
+            </tr>
+            <tr>
+                <th>家庭网关运行状态：</th>
+                <td></td>
+                <th>家庭网关管理状态：</th>
+                <td></td>
+                <th>终端到OLT之间的距离（米）：</th>
+                <td>2751.70</td>
+                <td colspan=2></td>
+            </tr>
+        </table>
+
+        <div class="accordion" id="accordion">
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
+                        用户基本信息
+                    </a>
+                </div>
+                <div id="collapseOne" class="accordion-body collapse in">
+                    <div class="accordion-inner">
+                        <p>用户姓名：李芳</p>
+                        <p>客户类型：家庭客户</p>
+                        <p>服务等级：普通卡</p>
+                        <p>付费类型：后付费（非公免）</p>
+                        <p>用户地址：四川省成都市金牛区蜀汉路289号</p>
+                        <p>业务开通日期：2010-4-20 15：41：52</p>
+                        <p>用户订购</p>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion-group">
+                <div class="accordion-heading">
+                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">
+                        BRAS基本信息
+                    </a>
+                </div>
+                <div id="collapseTwo" class="accordion-body collapse">
+                    <div class="accordion-inner">
+                        <p>设备名称：李芳</p>
+                        <p>设备厂商：</p>
+                        <p>安装地址：四川省成都市金牛区蜀汉路289号</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div id="tab">
+        <ul class="nav nav-tabs" role="tablist" id="myTab">
+            <li role="presentation" class="active"><a href="#lishi" role="tab" data-toggle="tab">用户历史订购</a></li>
+            <li role="presentation"><a href="#renzheng" role="tab" data-toggle="tab">用户认证记录</a></li>
+            <li role="presentation"><a href="#yichang" role="tab" data-toggle="tab">异常掉线记录</a></li>
+            <li role="presentation"><a href="#bras" role="tab" data-toggle="tab">BRAS告警信息</a></li>
+            <li role="presentation"><a href="#yijian" role="tab" data-toggle="tab">一键检测过程</a></li>
+        </ul>
+        <div id="tabCon" class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="lishi">
+                <p>备注：用户历史订购</p>
+                <p>1、在图中选择用户时，左边自动将用户基本信息显示在最上端，选择BRAS时自动将BRAS基本信息显示在最上端，其他设备以此类推；</p>
+                <p>2、在图中选择用户时，右边显示“用户历史订购”、“用户认证记录”、“异常掉线记录”Tab页，其他Tab页隐藏</p>
+                <p>3、在图中选择告警图标时，右边显示“设备告警”Tab页，并将Tab页标题改为“BRAS告警信息”，其他Tab页隐藏，选择其他设备类似；</p>
+                <p>4、点击了“一键检测”按钮，则显示“一键检测过程”Tab页，其他Tab页可保留</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="renzheng">
+                <p>备注：用户认证记录</p>
+                <p>1、在图中选择用户时，左边自动将用户基本信息显示在最上端，选择BRAS时自动将BRAS基本信息显示在最上端，其他设备以此类推；</p>
+                <p>2、在图中选择用户时，右边显示“用户历史订购”、“用户认证记录”、“异常掉线记录”Tab页，其他Tab页隐藏</p>
+                <p>3、在图中选择告警图标时，右边显示“设备告警”Tab页，并将Tab页标题改为“BRAS告警信息”，其他Tab页隐藏，选择其他设备类似；</p>
+                <p>4、点击了“一键检测”按钮，则显示“一键检测过程”Tab页，其他Tab页可保留</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="yichang">
+                <p>备注：异常掉线记录</p>
+                <p>1、在图中选择用户时，左边自动将用户基本信息显示在最上端，选择BRAS时自动将BRAS基本信息显示在最上端，其他设备以此类推；</p>
+                <p>2、在图中选择用户时，右边显示“用户历史订购”、“用户认证记录”、“异常掉线记录”Tab页，其他Tab页隐藏</p>
+                <p>3、在图中选择告警图标时，右边显示“设备告警”Tab页，并将Tab页标题改为“BRAS告警信息”，其他Tab页隐藏，选择其他设备类似；</p>
+                <p>4、点击了“一键检测”按钮，则显示“一键检测过程”Tab页，其他Tab页可保留</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="bras">
+                <p>备注：BRAS告警信息</p>
+                <p>1、在图中选择用户时，左边自动将用户基本信息显示在最上端，选择BRAS时自动将BRAS基本信息显示在最上端，其他设备以此类推；</p>
+                <p>2、在图中选择用户时，右边显示“用户历史订购”、“用户认证记录”、“异常掉线记录”Tab页，其他Tab页隐藏</p>
+                <p>3、在图中选择告警图标时，右边显示“设备告警”Tab页，并将Tab页标题改为“BRAS告警信息”，其他Tab页隐藏，选择其他设备类似；</p>
+                <p>4、点击了“一键检测”按钮，则显示“一键检测过程”Tab页，其他Tab页可保留</p>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="yijian">
+                <p>备注：一键检测过程</p>
+                <p>1、在图中选择用户时，左边自动将用户基本信息显示在最上端，选择BRAS时自动将BRAS基本信息显示在最上端，其他设备以此类推；</p>
+                <p>2、在图中选择用户时，右边显示“用户历史订购”、“用户认证记录”、“异常掉线记录”Tab页，其他Tab页隐藏</p>
+                <p>3、在图中选择告警图标时，右边显示“设备告警”Tab页，并将Tab页标题改为“BRAS告警信息”，其他Tab页隐藏，选择其他设备类似；</p>
+                <p>4、点击了“一键检测”按钮，则显示“一键检测过程”Tab页，其他Tab页可保留</p>
+            </div>
+        </div>
+    </div>
+
+       
+    <script type="text/javascript" src="lib/script/jquery-1.11.3.min.js"></script>
+    <script type="text/javascript" src='lib/script/Polyfill.js'></script>
+    <script type="text/javascript" src='lib/script/vue.js'></script>
+    <script type="text/javascript" src='lib/script/bootstrap.min.js'></script>
+    <script type="text/javascript">
+        new Vue({
+            el: '#duandaoduan',
+            data : function(){
+                return {
+                }
+            },
+            created : function(){
+                this.winHeight();
+            },
+            methods : {
+                winHeight : function(){
+                    var table = document.getElementById('table');
+                    var tabCon = document.getElementById('tabCon');
+                    var h = document.documentElement.clientHeight;
+                    table.style.minHeight = h-293 + "px";
+                    tabCon.style.minHeight = h-110 + "px";
+                },
+            }
+        })
+    </script>
+</body>
+</html>

@@ -1,0 +1,1002 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+
+		<head>
+			<script>
+	//<![CDATA[
+		var tabIndex="";
+	
+	function setIndex(index){
+	   tabIndex=index;
+	}
+	
+	function initTabIndex(){
+
+	   if(tabIndex!="1"){
+	      
+	      	RichFaces.switchTab('unitForm:tabPanel','unitForm:orgunit','orgunit');
+	      	
+	      	tabIndex="1";
+	   }
+	       
+	}
+	
+	function refleshComplete(){
+	   var busId = document.getElementById("treeForm:businessId").value;
+	   var ItemId=  ORGBUSTree_tree.getSelectedItemId().split("_")[1];
+	   reflashNewInfo(ItemId,busId);
+	  var timeout = setTimeout(" initTabIndex();", 80);
+	   tabIndex='';
+	 
+	} 
+	  		
+	  function validateAll(){
+	       	var checkedId = document.getElementById("unitForm:unitIds").value;
+	  
+	       	 if(isChange(checkedId)){	     
+	       	        document.getElementById("subForm:selectedUnitId").value=checkedId;
+	       	   }
+	       	   else{
+	       	       alert("${msgs['baf.org.noChange']}");
+	       	       return false;
+	       	 }
+	    
+            return true;
+	  }
+	  
+	function onSaveComplete(data){
+	   	if(a4jcomplete()==false){
+	   		document.getElementById('unitForm:btnSave').disabled = '';
+ 			return;
+ 		}
+ 		if(data=="Y"){
+          refleshNode();
+       }
+	}
+
+	
+	function refleshNode(){
+	      var ItemId=  ORGBUSTree_tree.getSelectedItemId();
+	      var pid=ORGBUSTree_tree.getParentId(ItemId) 
+	      var businessId= document.getElementById("treeForm:businessId").value;
+	      var url = "${request.contextPath}"+"/baf/jsp/orgbus/orgBustree.jsp?businessId="+businessId;
+	      ORGBUSTree_tree.setXMLAutoLoading(url);
+	      ORGBUSTree_tree.refreshItem(pid);
+	      setTimeout("ORGBUSTree_tree.selectItem('"+ItemId+"',false);",200);
+	}
+	function doOnClick(){
+	  var busId = document.getElementById("treeForm:businessId").value;
+	   var ItemId=  ORGBUSTree_tree.getSelectedItemId().split("_")[1];
+	   curSelUserAddArray = new Array;
+	   reflashUnit(ItemId);
+	    
+	   
+	}
+	
+	
+	
+ 	
+ 	function afterEdit(data){
+ 	   	if(a4jcomplete()==false){		
+ 			return;
+ 		} 
+ 	   if(data=='Y'){
+ 	   
+ 	       alert("#{msgs['baf.org.changeWarning']}");
+ 	   }else if(data="ND"){
+	      alert("${msgs['baf.org.checkdata']}");
+	   }
+ 	  refeshMyUnit();
+ 	}
+ 	
+
+	//刷新弹性树
+	function dRefresh(businessId){
+	  if(businessId!=""){
+	     var url = "${request.contextPath}"+"/baf/jsp/orgbus/orgBustree.jsp?businessId="+businessId;
+	      ORGBUSTree_tree.setXMLAutoLoading(url);
+	      ORGBUSTree_tree.refreshItem("0");
+	  
+	     
+	      //var url1="${request.contextPath}/baf/jsp/orgbus/orgtree.jsp";
+	      //ORGModuleTree_tree.setXMLAutoLoading(url1);
+	      //ORGModuleTree_tree.refreshItem("0");
+	  }
+	}
+	
+	
+	
+	//************************************************************
+//****************模块树拖动完成处理*********************
+//************************************************************
+var G_destID="";
+function onDrag(srcID, destID) {
+    var typeDescs = ['集团','省中心','本地网','区域','片区','营业区','分局','营业厅/所','部门','班组','代维公司','代维队','','','','','','网格','集中支撑','工程队'];
+    var type="";
+    var srctext="";
+    var desttext="";
+    var srctype = "";
+	var desttype = "";
+	
+    if(destID.indexOf("N_")==-1){
+      alert("该动作不被支持！（只支持从机构树到弹性组织树或弹性组织树内部拖动）");
+      return;
+    }else{
+        G_destID=destID;
+        var busId = document.getElementById("treeForm:businessId").value;
+        var parentID = ORGBUSTree_tree.getParentId(srcID).split("_")[1];;	//要拖动节点的父节点
+        if(srcID.indexOf("N_")==-1){
+          type="add";
+          srctext  =  ORGModuleTree_tree.getItemText(srcID);
+          desttext = ORGBUSTree_tree.getItemText(destID);
+          srctype = ORGModuleTree_tree.getUserData(srcID,'objectTypeId');
+          desttype = ORGBUSTree_tree.getUserData(destID,'objectTypeId');
+          destID=destID.split("_")[1];
+        }else{
+          type="edit";
+          srctext  = ORGBUSTree_tree.getItemText(srcID);
+          desttext = ORGBUSTree_tree.getItemText(destID);
+          srctype =  ORGBUSTree_tree.getUserData(srcID,'objectTypeId');
+          desttype = ORGBUSTree_tree.getUserData(destID,'objectTypeId');
+          srcID=srcID.split("_")[1];
+          destID=destID.split("_")[1];
+          //不建议拖动，由用户确定是否拖动
+		  if(!confirm("#{msgs['baf.org.moveMsg2']}" + typeDescs[srctype-1] + "#{msgs['baf.org.moveMsg3']}" + typeDescs[desttype-1] + "#{msgs['baf.org.moveMsg4']}\r\n#{msgs['baf.org.moveMsg9']}" + srctext + "#{msgs['baf.org.moveMsg10']}" + desttext + "#{msgs['baf.org.moveMsg11']}")){
+			return false;
+		  }
+        }
+        //目标与父节点相同，或者是自己，不拖动
+		if (destID == parentID) {
+				return false;		
+		}
+        if(parseInt(srctype) < parseInt(desttype)||parseInt(srctype) == parseInt(desttype)){
+			//不能将大的部门拖到小的部门下面
+			alert(typeDescs[srctype-1] + "#{msgs['baf.org.moveMsg5']}"+typeDescs[desttype-1] + "#{msgs['baf.org.moveMsg6']}");
+			return false;
+		}	
+        if(window.confirm("${msgs['baf.module.WarningDrag5']}'"+srctext+"'${msgs['baf.module.WarningDrag6']}'"+desttext+"'?")){
+            moveTree(srcID,destID,busId,type);
+	    }
+    }
+}
+
+function onMoveTreeComplete(data){
+ if(a4jcomplete()==false){		
+ 			return;
+ 		} 
+   if(data=="E"){
+     alert("该部门已存在当前的弹性组织树中！");
+     return;
+   }else if(data!="N"){
+      if(data!=""){
+          var ItemId="N_"+data;
+	      var businessId= document.getElementById("treeForm:businessId").value;
+	      var url = "${request.contextPath}"+"/baf/jsp/orgbus/orgBustree.jsp?businessId="+businessId;
+	      ORGBUSTree_tree.setXMLAutoLoading(url);
+	   
+	      ORGBUSTree_tree.refreshItem(G_destID);
+	      setTimeout("ORGBUSTree_tree.selectItem('"+ItemId+"',true);",200);
+      }
+       
+   }
+}
+
+//*************************************************************
+//**************菜单树上右键显示菜单**********************
+//*************************************************************
+function openContextMenu(){
+  try
+  { 
+
+	var objmenu = Ext.menu.MenuMgr.get("opmenu");		
+	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		var e = new Array(window.event.clientX,window.event.clientY);
+		objmenu.showAt(e);
+	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+		var e = new Array(arguments[1].clientX,arguments[1].clientY);
+		objmenu.showAt(e);
+	}
+  }
+  catch(e)
+  {
+    alert(e.description);
+  }
+}
+
+function deleteRecord(){
+   var ItemId=  ORGBUSTree_tree.getSelectedItemId();
+   
+   if(ItemId == "" || ItemId == null  || ItemId == undefined){
+          	alert("${msgs['baf.org.unit.javascript.alert.waringMsg']}");
+          	return;
+    }
+   var pId=ORGBUSTree_tree.getParentId(ItemId);
+   if("0"==pId){
+      alert("根节点不能删除");
+       return;
+   }
+   ItemId= ItemId.split("_")[1];
+   var busId = document.getElementById("treeForm:businessId").value;
+   if(busId == "" || busId == null  || busId == undefined){
+       alert("请选择业务类型");
+       return;
+    }
+    
+    var isleaf = ORGBUSTree_tree.getUserData(ORGBUSTree_tree.getSelectedItemId(),"isLeaf"); //是否叶子节点  "Y" 叶子节点，允许删除    不然不允许删除
+    if("Y"!=isleaf){
+       alert("该部门存在子部门，请先删除其下级部门");
+       return;
+    }
+     deletItem(ItemId,busId);
+}
+
+function onDeleteComplete(data){
+  if(a4jcomplete()==false){		
+ 			return;
+ 		} 
+    if(data=='Y'){
+ 	   
+ 	       alert("删除成功！");
+ 	       dRefresh( document.getElementById("treeForm:businessId").value)
+ 	   }
+}
+	
+		//打开综调四版Tab页
+	function openNewTab(index){
+		var orgId =ORGBUSTree_tree.getSelectedItemId().split("_")[1];
+		var orgName = ORGModuleTree_tree.getItemText(orgId);
+		 var busId = document.getElementById("treeForm:businessId").value;
+		var url="";
+		var title="";
+		if(index=="1"){
+		  url="#{orgBusBean.orgDispatchingURL}?dispatchObjectId=";
+		  title="派工关系";
+		}
+		if(index=="2"){
+		   url="#{orgBusBean.ployURL}?dispatchObjectId=";
+		   title="网格策略";
+		}
+		if(index=="3"){
+		    url="#{orgBusBean.tacticOrgRelURL}?businessId="+busId+"&objectId=";
+		    title="相邻网格 ";
+		}
+		if(index=="4"){
+		    url="#{orgBusBean.tacticOrgExtRelURL}?objectId=";
+		    title="营销网格";
+		}
+
+		url = url  + orgId;
+		
+		parent.parent.addTab(orgId+index, "【" + orgName + "】"+title, url);
+	}		
+	
+	function treepaly(){
+	  var dis=document.getElementById("unitPostTree").style.display;
+	  if(dis=="")
+	    document.getElementById("unitPostTree").style.display="none";
+	  if(dis=="none"){
+	    document.getElementById("unitPostTree").style.display="";
+	    }
+	}	 
+	//]]>
+	</script>
+			<style>
+	.column1{
+			width:25%;
+			text-align:right;
+		}
+		.column2{
+			width:45%;
+			text-align:right;
+		}
+		.column3{
+			width:30%;
+		}
+
+.column4 {
+	width: 30%;
+	text-align: right;
+}
+
+.column5 {
+	width: 50%;
+	text-align: left;
+}
+
+.column6 {
+	width: 20%;
+	text-align: center;
+}
+
+.column7 {
+	width: 30%;
+	text-align: right;
+}
+
+.column8 {
+	width: 70%;
+	text-align: left;
+}
+
+.bgcolor {
+	background: white;
+}
+</style>
+		</head>
+		<body>
+		<regaltec:extContextMenu id="opmenu">
+		<regaltec:extContextMenuItem id="menuDelete" text="删除" handler="deleteRecord"/>
+   	</regaltec:extContextMenu>
+			<regaltec:extPanel id="topregion" region="north" collapseMode="mini"
+				split="true" height="150" autoScroll="false" contentEl="laytop" />
+
+			<regaltec:extPanel id="bottomregion" region="center" split="true"
+				contentEl="laybottom" autoScroll="true" />
+
+			<regaltec:viewPort ctCls="panel-bdColor" autoScroll="false">
+
+				<regaltec:viewPortPanel region="west" id="west-panel"
+					autoScroll="true" contentEl="west" split="true" width="400" />
+
+				<regaltec:viewPortPanel region="center" id="eastpanel"
+					autoScroll="false" items="bottomregion_panel" split="true"
+					border="false" collapsible="true" margins="0 0 0 0" layout="border" />
+
+			</regaltec:viewPort>
+
+			
+			<div id="west">
+				<h:form id="treeForm">
+					<h:inputHidden id="oldUnitIds" value="#{userBean.unitIds}" />
+					<h:inputHidden id="unitIds" value="#{userBean.unitIds}" />
+
+					<table width="100%" height="100%" cellpadding="0" cellspacing="0">
+                        <tr style="heigh:60px;">
+                        <td colspan="2">
+                        	<h:panelGrid id="org" columns="3"
+									columnClasses="column4,column5,column6"
+									style="font-size:13px;width:100%;word-break:break-all;"
+									styleClass=".rich-text-color-general">
+                        <h:outputText value="业务类型:" />
+							<h:selectOneMenu style="width:70%;height:23px;"
+										id="businessId" value=""
+										styleClass="rich-box-border-color-control-select rich-text-control-select"
+										onchange="dRefresh(this.value)">
+										<f:selectItems value="#{orgBusBean.businessMap}" />
+							</h:selectOneMenu>
+							<a4j:commandButton id="export" tyleClass="rich-button" value="导出弹性组织" onclick="exportData(document.getElementById('treeForm:businessId').value);"
+							></a4j:commandButton>
+							
+							</h:panelGrid>
+                        </td>
+                        </tr>
+                        <tr>
+                        <td >
+                        <c:if test="${orgBusBean.initBusinessId!=''}">
+                         <h:outputLink value="#" onclick="treepaly();"><h:outputText value="显示/隐藏原始机构树"></h:outputText></h:outputLink>
+                         </c:if>
+                         </td>
+                        <td>
+                        </td>
+                        
+                        </tr>
+                        <c:if test="${orgBusBean.initBusinessId!=''}">
+						<tr>
+						   
+							<td id="unitPostTree" width="50%" height="90%" ></td>
+							<td id="orgBusTree" width="50%" height="90%"></td>
+						</tr>
+						<regaltec:dhtmlXtree id="ORGModuleTree"
+						imagePath="/baf/images/dhtmlxtree/" contentEl="unitPostTree"
+						loadXML="/baf/jsp/orgbus/orgtree.jsp"
+						xmlAutoLoading="/baf/jsp/orgbus/orgtree.jsp"
+						transient="true">
+						<regaltec:setDxtEnable enableFunction="enableDragAndDrop"
+							parameter="1" />
+                       <regaltec:setDxtEevntHandler eventName="Drag" handler="onDrag"/>
+					</regaltec:dhtmlXtree>
+
+					<regaltec:dhtmlXtree id="ORGBUSTree"
+						imagePath="/baf/images/dhtmlxtree/" contentEl="orgBusTree"
+						loadXML="/baf/jsp/orgbus/orgBustree.jsp?businessId=#{orgBusBean.initBusinessId}"
+						xmlAutoLoading="/baf/jsp/orgbus/orgBustree.jsp?businessId=#{orgBusBean.initBusinessId}"
+						transient="true">
+						<regaltec:setDxtEnable enableFunction="enableDragAndDrop"
+							parameter="1" />
+					    <regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+						<regaltec:setDxtEevntHandler eventName="onClick"
+							handler="doOnClick" />
+                        <regaltec:setDxtEevntHandler eventName="Drag" handler="onDrag"/>
+					</regaltec:dhtmlXtree>
+						
+						</c:if>
+						   <c:if test="${orgBusBean.initBusinessId==''}">
+						<tr>
+						   
+							<td  width="50%" height="90%" ></td>
+							<td  width="50%" height="90%"></td>
+						</tr>
+						</c:if>
+					</table>
+
+
+					
+
+
+				</h:form>
+			</div>
+
+
+			<div id="laybottom"
+				style="background: white; height: 100%; margin-top: 0px; margin-bottom: 0px;"
+				align="center">
+				<rich:spacer height="10px;" />
+				<h:form id="unitForm">
+					<rich:tabPanel id="tabPanel" style="width:98%;height:87%;"
+						switchType="client">
+						<!-- 部门基本信息 -->
+						<rich:tab id="orgunit" label="#{msgs['baf.org.unit.tab.orgunit']}"
+							onlabelclick="setIndex('1');">
+							<h:inputHidden id="orgID" value="#{organizationBean.orgID}" />
+							<h:inputHidden id="itemId" value="#{orgBusBean.itemId}" />
+							<h:inputHidden id="parentOrgID"
+								value="#{organizationBean.parentOrgID}" />
+							<fieldset style="height: 100%">
+								<legend>
+									<h:outputText value="#{msgs['baf.org.unit.tab.orgunit']}" />
+									<h:outputText
+										value="#{msgs['baf.leftBracket1']}ID : #{organizationBean.orgID}#{msgs['baf.rightBracket1']}"
+										style="color:red;"
+										rendered="#{organizationBean.orgID != null}" />
+								</legend>
+
+								<h:panelGrid  columns="3"
+									columnClasses="column1,column2,column3"
+									style="font-size:13px;width:100%;word-break:break-all;"
+									styleClass=".rich-text-color-general">
+									<h:outputText value="#{msgs['baf.org.unit.parentOrgName']}:" />
+									<h:inputText id="parentOrgName" style="width:95%;height:23px;"
+										readonly="true" styleClass="rich-gradient-input"
+										value="#{orgBusBean.parentOrgName}"
+										title="#{orgBusBean.parentOrgName}" disabled="true"/>
+									<h:outputText value="" />
+									
+									<h:outputText value="原#{msgs['baf.org.unit.orgName']}:" />
+									<h:panelGroup>
+											<h:inputText id="oldOrgName" style="width:95%;height:23px;"
+												styleClass="rich-gradient-input"
+												value="#{organizationBean.orgName}" disabled="true"> 
+												
+											</h:inputText>
+										
+									</h:panelGroup>
+									<h:outputText value="" />
+
+									<h:outputText value="#{msgs['baf.org.unit.orgName']}:" />
+									<h:panelGroup>
+											<h:inputText id="orgName" style="width:95%;height:23px;"
+												styleClass="rich-gradient-input"
+												value="#{orgBusBean.orgName}">
+												<s:commonsValidator type="required"
+													arg="#{msgs['baf.org.unit.orgName']}" server="false"
+													client="true" />
+												<s:commonsValidator type="maxlength"
+													arg="#{msgs['baf.org.unit.orgName']}" maxLength="64"
+													server="false" client="true" />
+											</h:inputText>
+										
+									</h:panelGroup>
+									<h:outputText value="" />
+
+									<h:outputText value="#{msgs['baf.org.unit.orgType']}:" />
+									<h:selectOneMenu style="width:95%;height:23px;"
+										id="objectTypeID" value="#{orgBusBean.objectTypeID}"
+										styleClass="rich-box-border-color-control-select rich-text-control-select"
+										>
+										<f:selectItems value="#{orgBusBean.orgTypeMap}" />
+									</h:selectOneMenu>
+									<h:outputText value="" />
+
+									<c:if
+										test="#{organizationBean.isoaInfo &amp;&amp; organizationBean.orgID != null}">
+										<h:outputText value="#{msgs['baf.org.unit.isoa']}:" />
+										<h:selectOneMenu style="width:95%;height:23px;" id="isOaOrg"
+											value="#{organizationBean.isOA}"
+											disabled="true">
+											<f:selectItems value="#{organizationBean.isOAMap}" />
+										</h:selectOneMenu>
+										<h:outputText value="" />
+									</c:if>
+
+
+									<c:if test="#{userBean.osSysSwitch}">
+										<h:outputText value="#{msgs['baf.org.TemplateName']}:" />
+										<h:inputText id="templateName" style="width:95%;height:23px;"
+											styleClass="rich-gradient-input" onfocus="this.blur()"
+											value="#{organizationBean.templateName}"
+											title="#{msgs['baf.org.templateName']}" />
+										<a4j:commandButton type="button" styleClass="rich-button"
+											style="width:70px;"
+											value="#{msgs['baf.org.unit.selectTemplate']}">
+											<a4j:support event="onclick"
+												onsubmit="Richfaces.showModalPanel('unitForm:templateModalPanel'); return false;" />
+										</a4j:commandButton>
+									</c:if>
+
+									<h:outputText value="#{msgs['baf.org.unit.phone']}:" />
+									<h:inputText id="phone" style="width:95%;height:23px;"
+										styleClass="rich-gradient-input"
+										value="#{organizationBean.phone}" disabled="true">
+										<s:commonsValidator type="maxlength" maxLength="16"
+											arg="#{msgs['baf.org.unit.phone']}" server="false"
+											client="true" />
+									</h:inputText>
+									<h:outputText value="" />
+
+									<h:outputText value="#{msgs['baf.org.unit.fax']}:" />
+									<h:inputText id="fax" style="width:95%;height:23px;"
+										styleClass="rich-gradient-input"
+										value="#{organizationBean.fax}" disabled="true">
+										<s:commonsValidator type="maxlength"
+											arg="#{msgs['baf.org.unit.fax']}" maxLength="16"
+											server="false" client="true" />
+									</h:inputText>
+									<h:outputText value="" />
+
+									<h:outputText value="#{msgs['baf.org.unit.email']}:" />
+									<h:inputText id="email" style="width:95%;height:23px;"
+										styleClass="rich-gradient-input"
+										value="#{organizationBean.email}" disabled="true">
+										<s:commonsValidator type="email"
+											arg="#{msgs['baf.org.unit.email']}" server="false"
+											client="true" />
+										<s:commonsValidator type="maxlength"
+											arg="#{msgs['baf.org.unit.email']}" maxLength="255"
+											server="false" client="true" />
+									</h:inputText>
+									<h:outputText value="" />
+
+									<h:outputText value="#{msgs['baf.org.unit.orgDes']}:" />
+									<h:inputTextarea id="orgDes"
+										style="width:95%;height:50px;word-break:break-all;resize:none;"
+										styleClass="rich-gradient-input"
+										value="#{organizationBean.orgDes}" disabled="true">
+										<s:commonsValidator type="maxlength"
+											arg="#{msgs['baf.org.unit.orgDes']}" maxLength="128"
+											server="false" client="true" />
+									</h:inputTextarea>
+									<h:outputText value="" />
+
+									<h:inputHidden id="orgTemplateId"
+										value="#{organizationBean.orgTemplateID}" />
+									<h:inputHidden id="orgCode" value="#{organizationBean.orgCode}" />
+
+								</h:panelGrid>
+
+								<rich:spacer height="50px" />
+								<rich:panel id="tid" header="#{msgs['baf.org.inputTname']}"
+									style="text-align:left;width:40%;display:none;">
+									<h:panelGrid id="torg" columns="2"
+										columnClasses="column4,column5"
+										style="font-size:13px;width:90%;"
+										styleClass=".rich-text-color-general">
+										<h:outputText value="#{msgs['baf.org.TemplateName']}" />
+										<h:inputText id="saveTemplateName"
+											style="width:100%;height:23px;"
+											styleClass="rich-gradient-input"
+											value="#{organizationBean.saveTemplateName}">
+											<s:commonsValidator type="maxlength"
+												arg="#{msgs['baf.org.TemplateName']}" maxLength="64"
+												server="false" client="true" />
+										</h:inputText>
+									</h:panelGrid>
+								</rich:panel>
+								<CENTER>
+								<a4j:commandButton id="btnSave" value="#{msgs['baf.org.unit.save']}" styleClass="rich-button">
+				                    <a4j:actionparam name="handleType" value="save" />
+				                    <a4j:support event="onclick"  action="#{orgBusBean.save}" data="#{orgBusBean.dealFlag}" oncomplete="onSaveComplete(data);" />
+		    	                </a4j:commandButton>
+		                        </CENTER>
+
+							</fieldset>
+						</rich:tab>
+
+						<rich:tab name="rightFactorType"
+							label="#{msgs['baf.org.Employee']}" onlabelclick="setIndex('2');">
+							  <!-- 人员列表 -->
+						<rich:spacer height="1%"/>
+	        	<div id="list" style="height:99%;overflow-x:auto;overflow-y:auto;">
+			        <h:panelGroup  style="height:30%;width:100%;">       
+					    <rich:dataTable width="95%" id="userList" footerClass="footer" rows="#{organizationBean.pageSize}" columnClasses="col" 
+				            value="#{organizationBean.secondDataModel}" var="orguser" style="font-size:13px;font-weight:normal;">
+				    
+				            <h:column>
+				            	<f:facet name="header">
+						        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+						        </f:facet>
+						     
+				                <h:outputText value="#{orguser.userName}"/>
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                        <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+						        </f:facet>
+						        <h:outputText rendered="#{orguser.gender=='M'}" value="#{msgs['baf.radioMankind']}"/>
+				                <h:outputText rendered="#{orguser.gender=='F'}" value="#{msgs['baf.radioFemale']}"/>
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.loginName}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.userType}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.officePhone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                    <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.mobilePhone}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.phs}" />
+				            </h:column>
+				            <h:column>
+				            	<f:facet name="header">
+				                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.email']}" style="font-weight:normal;"/>
+						        </f:facet>
+				                <h:outputText value="#{orguser.email}" />
+				            </h:column>
+				            
+				            <c:if test="#{organizationBean.isoaInfo }">
+					            <h:column>
+					            	<f:facet name="header">
+					                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.unit.isoauser']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText value="#{orguser.isOA}" />
+					            </h:column>
+				            </c:if>
+				            
+				        </rich:dataTable>    
+				       		
+					</h:panelGroup>
+					</div>
+						</rich:tab>
+
+						<!-- 领导信息 -->
+						<rich:tab id="orgleader"
+							label="#{msgs['baf.org.unit.leader.info']}" switchType="client"
+							rendered="#{organizationBean.orgID != null &amp;&amp; organizationBean.orgID != ''&amp;&amp;organizationBean.orgLeaderOperate}"
+							onlabelclick="setIndex('5');">
+							<fieldset style="height: 100%">
+								<legend>
+									<h:outputText value="#{msgs['baf.org.unit.leader.info']}" />
+								</legend>
+								<rich:spacer height="10px" />
+								<h:panelGroup style="height:30%;width:100%;">
+									<rich:spacer width="15px" />
+									<h:panelGroup style="width:100%;">
+								
+										<rich:spacer width="5px" />
+										
+										<a4j:commandButton styleClass="rich-button" type="button"
+											id="leaderOrg"
+											value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}"
+											onclick="Richfaces.showModalPanel('leaderModalPanelCancel'); "
+											action="#{organizationBean.loadOtherLeader}"
+											reRender="userLeaderLists,scls3" />
+									</h:panelGroup>
+									<rich:spacer width="15px" />
+									<center>
+										<rich:dataTable width="95%" id="userLeaderList"
+											footerClass="foor" rows="#{organizationBean.pageSize}"
+											columnClasses="col" value="#{organizationBean.fourDataModel}"
+											var="orgleaderuser"
+											style="font-size:13px;font-weight:normal;" rowKeyVar="index">
+											<rich:column style="text-align:center;width: 20%;">
+												<f:facet name="header">
+													<h:outputText styleClass="headerText "
+														value="#{msgs['baf.org.user.leaderUserName']}"
+														style="font-weight:normal;" />
+												</f:facet>
+
+												<h:inputHidden id="uid" name="uid"
+													value="#{orgleaderuser.userId}"></h:inputHidden>
+												<h:outputText id="uname" value="#{orgleaderuser.userName}" />
+											</rich:column>
+											<rich:column style="text-align:center;width: 50%;">
+												<f:facet name="header">
+													<h:outputText styleClass="headerText "
+														value="#{msgs['baf.org.user.legend.userUnit']}"
+														style="font-weight:normal;" />
+												</f:facet>
+												<h:outputText id="unit"
+													value="#{orgleaderuser.fullUnitNames}"
+													title="#{orgleaderuser.fullUnitNames}" />
+											</rich:column>
+											<rich:column style="width: 35%;">
+												<f:facet name="header">
+													<h:outputText styleClass="headerText "
+														value="#{msgs['baf.org.unit.leader.leadertype']}"
+														style="font-weight:normal;" />
+												</f:facet>
+												<center>
+													<h:selectOneMenu style="width:45%;height:23px;" id="LType"
+														name="LType" value="#{orgleaderuser.leaderType}"
+														onchange="getSelectValue('#{orgleaderuser.userId}',this.value);" disabled="true"
+														styleClass="rich-box-border-color-control-select rich-text-control-select">
+														<f:selectItems value="#{organizationBean.leaderTypeMap}" />
+													</h:selectOneMenu>
+												</center>
+											</rich:column>
+										</rich:dataTable>
+										<rich:spacer height="10px" />
+										<table width="95%">
+											<tr>
+												<td>
+													<rich:datascroller align="right" for="userLeaderList"
+														fastStep="1" page="#{organizationBean.scrollerPage3}"
+														id="scl3" reRender="pagenum,pagesize" />
+													<a4j:keepAlive beanName="organizationBean" />
+												</td>
+											</tr>
+										</table>
+									</center>
+								</h:panelGroup>
+							</fieldset>
+						</rich:tab>
+
+						<!-- 部门扩展属性 -->
+						<rich:tab id="orgunitext"
+							label="#{msgs['baf.org.unit.tab.orgextunit']}"
+							switchType="client"
+							rendered="#{organizationBean.unitDefineList!=null}"
+							onlabelclick="setIndex('6');">
+							<fieldset style="height: 100%">
+								<legend>
+									<h:outputText value="#{msgs['baf.org.unit.tab.orgextunit']}" />
+								</legend>
+								<rich:spacer height="10px" />
+								<center>
+									<h:panelGrid columns="2"
+										style="font-size:13px;word-break:break-all;" width="60%"
+										dir="ltr" columnClasses="column1,column2">
+										<c:forEach var="ext"
+											items="#{organizationBean.unitDefineList}" step="1">
+											<h:outputText value="#{ext.propertyName}:" />
+
+											<h:panelGroup>
+												<h:inputText
+													value="#{organizationBean.unitExtVO[ext.fieldName]}"
+													style="width:95%;height:23px;"
+													styleClass="rich-gradient-input"
+													rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='S'}">
+													<s:commonsValidator type="maxlength"
+														arg="#{ext.propertyName}" maxLength="512" server="false"
+														client="true" />
+												</h:inputText>
+												<h:inputText
+													value="#{organizationBean.unitExtVO[ext.fieldName]}"
+													style="width:95%;height:23px;"
+													styleClass="rich-gradient-input"
+													rendered="#{ext.controlType=='TEXT' &amp;&amp; ext.dataType=='N'}">
+													<s:commonsValidator type="integer"
+														arg="#{ext.propertyName}" server="false" client="true" />
+												</h:inputText>
+
+												<regaltec:dictionary type="dictionary" baseFlat="1"
+													dicCode="#{ext.dataFrom}" optValueType="itemValue"
+													value="#{organizationBean.unitExtVO[ext.fieldName]}"
+													style="width:95%;height:23px;"
+													rendered="#{ext.controlType=='COMBO'}" />
+											</h:panelGroup>
+
+										</c:forEach>
+									</h:panelGrid>
+								</center>
+							</fieldset>
+						</rich:tab>
+						
+						<!-- 部门派工关系 -->
+		<rich:tab disabled="true" rendered="false" onlabelclick="setIndex('7');">
+				<f:facet name="label">
+					<h:panelGroup>
+						<a href="#" onclick="openNewTab('1');">
+							<h:outputText value="#{msgs['baf.org.unit.relationdepartmentDispatching']}" />
+	                 	</a>
+                 	</h:panelGroup>
+				</f:facet>
+			</rich:tab>
+			
+							<!-- 部门网格策略 -->
+		<rich:tab id="info1" disabled="true" rendered="#{orgBusBean.showExtInfo == 'Y' }" onlabelclick="setIndex('8');">
+				<f:facet name="label">
+					<h:panelGroup>
+						<a href="#" onclick="openNewTab('2');">
+							<h:outputText value="网格策略" />
+	                 	</a>
+                 	</h:panelGroup>
+				</f:facet>
+			</rich:tab>
+			
+								<!-- 部门相邻网格 -->
+		<rich:tab id="info2" disabled="true" rendered="#{orgBusBean.showExtInfo == 'Y' }" onlabelclick="setIndex('9');">
+				<f:facet name="label">
+					<h:panelGroup>
+						<a href="#" onclick="openNewTab('3');">
+							<h:outputText value="相邻网格" />
+	                 	</a>
+                 	</h:panelGroup>
+				</f:facet>
+			</rich:tab>
+			
+								<!-- 部门营销网格 -->
+		<rich:tab id="info3" disabled="true" rendered="#{orgBusBean.showExtInfo == 'Y' }" onlabelclick="setIndex('0');">
+				<f:facet name="label">
+					<h:panelGroup>
+						<a href="#" onclick="openNewTab('4');">
+							<h:outputText value="营销网格" />
+	                 	</a>
+                 	</h:panelGroup>
+				</f:facet>
+			</rich:tab>
+
+					</rich:tabPanel>
+				</h:form>
+			</div>
+
+			<a4j:keepAlive beanName="userBean" />
+			<a4j:keepAlive beanName="organizationBean" />
+			<a4j:keepAlive beanName="orgBusBean" />
+			<!-- 选择部门模态框 -->
+		
+			
+			<rich:modalPanel id="leaderModalPanelCancel" autosized="false" keepVisualState="false" width="650" height="400">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="leaderModalPanelCancel" attachTo="hidelink" operation="hide" event="onclick" />
+			</h:panelGroup>
+			</f:facet>	
+			<a4j:form >
+			<fieldset style="width:100%;height:90%">
+	       		<legend><h:outputText value="#{msgs['baf.out.unit.leader.noUnitLeaderUserInfo']}" /></legend>				           		
+	       		<rich:spacer height="1px;"/>
+		      				<rich:dataTable width="100%" id="userLeaderLists" footerClass="foor" rows="#{organizationBean.pageSize}" columnClasses="col" 
+			            	value="#{organizationBean.fiveDataModel}" var="orgleaderuser" style="font-size:13px;font-weight:normal;" >
+					             <rich:column  style="text-align:center;width: 15%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.leaderUserName']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <h:inputHidden id="uid" value="#{orgleaderuser.userId}"></h:inputHidden>
+					                <h:outputText id="uname" value="#{orgleaderuser.userName}" />
+					            </rich:column>
+					            <rich:column style="text-align:center;width: 40%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.legend.userUnit']}" style="font-weight:normal;"/>
+							        </f:facet>
+					                <h:outputText id="unit" value="#{orgleaderuser.fullUnitNames}" title="#{orgleaderuser.fullUnitNames}"/>
+					            </rich:column>
+					            <rich:column style="width: 30%;">
+					            	<f:facet name="header">
+							        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.unit.leader.leadertype']}" style="font-weight:normal;"/>
+							        </f:facet>
+							        <center>
+					                	<h:outputText id="ltype" value="#{orgleaderuser.leaderTypeName}" />
+					                </center>
+					            </rich:column>
+					         
+				        	</rich:dataTable> 
+				        	<rich:spacer height="10px"/>
+					        <table width="95%">
+					            <tr>
+						            <td>
+										<rich:datascroller align="right"  for="userLeaderLists" fastStep="1"  page="#{organizationBean.scrollerPage3}" id="scls3" reRender="pagenum,pagesize"/>
+										<a4j:keepAlive beanName="organizationBean"/>
+									</td>
+								</tr>
+							</table>
+				
+			</fieldset>
+			<center>
+			<a4j:commandButton id="colleaderModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('leaderModalPanelCancel')}.hide(); return false;" />
+			</center>
+			</a4j:form>
+		</rich:modalPanel>
+	
+
+
+			<a4j:form>
+				<!-- 刷新部门页面中的人员列表 -->
+				<a4j:jsFunction name="listUser" limitToList="true"
+					action="#{organizationBean.reflash}" reRender="userForm">
+					<a4j:actionparam name="unitId" assignTo="#{organizationBean.orgID}" />
+					<a4j:actionparam name="scrollerPage" value="1"
+						assignTo="#{organizationBean.scrollerPage}" />
+				</a4j:jsFunction>
+
+
+				<a4j:jsFunction name="reflashUnit" limitToList="true"
+					action="#{organizationBean.reflashUnit}"
+					 oncomplete="refleshComplete();" reRender="unitForm">
+					<a4j:actionparam name="orgId" assignTo="#{organizationBean.orgID}" />
+					<a4j:actionparam name="scrollerPage1" value="1"
+						assignTo="#{organizationBean.scrollerPage1}" />
+					<a4j:actionparam name="scrollerPage2" value="1"
+						assignTo="#{organizationBean.scrollerPage2}" />
+					<a4j:actionparam name="scrollerPage3" value="1"
+						assignTo="#{organizationBean.scrollerPage3}" />
+				</a4j:jsFunction>
+				
+				<a4j:jsFunction name="reflashNewInfo" limitToList="true"
+					action="#{orgBusBean.reflashInfo}"
+					 reRender="unitForm">
+					<a4j:actionparam name="objectId" value="" />
+					<a4j:actionparam name="businessId" value="" />
+				
+				</a4j:jsFunction>
+				
+			<a4j:jsFunction name="moveTree" data="#{orgBusBean.moveFlag}" action="#{orgBusBean.moveTree}" oncomplete="onMoveTreeComplete(data)">
+	        	<a4j:actionparam name="srcID" value="" />      
+	        	<a4j:actionparam name="destID" value="" />  
+	        	<a4j:actionparam name="businessId" value="" /> 
+	        	<a4j:actionparam name="type" value="" />      
+	        </a4j:jsFunction>
+	        
+	        <a4j:jsFunction name="deletItem" data="#{orgBusBean.dealFlag}" action="#{orgBusBean.deletItem}" oncomplete="onDeleteComplete(data)">
+	        	<a4j:actionparam name="objectId" value="" />       
+	        	<a4j:actionparam name="businessId" value="" />      
+	        </a4j:jsFunction>
+	        
+	        
+	         <a4j:jsFunction name="exportData" data="#{tacticExtOrgBean.exportFilePath}" action="#{tacticExtOrgBean.exportOrgRecord}" oncomplete="window.open(data,'');">      
+	        	<a4j:actionparam name="businessId" value="" assignTo="#{tacticExtOrgBean.businessId}"/>      
+	        </a4j:jsFunction>
+	        
+			</a4j:form>
+
+
+
+
+
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml" />
+
+			<script>
+   	//<![CDATA[
+
+  	//]]>
+  	</script>
+
+		</body>
+	</f:view>
+</html>

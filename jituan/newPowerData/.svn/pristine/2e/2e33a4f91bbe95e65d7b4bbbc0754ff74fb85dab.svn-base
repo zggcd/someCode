@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+	<f:view contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<title><h:outputText value="#{msgs['baf.login.title']}" />
+			</title>
+			<style type="text/css">
+<!--
+BODY {
+	PADDING-RIGHT: 0px;
+	PADDING-LEFT: 0px;
+	PADDING-BOTTOM: 0px;
+	MARGIN: 0px;
+	PADDING-TOP: 0px;
+	BACKGROUND-COLOR: #e3e4e4;
+	FONT-FAMILY: Verdana, Arial, sans-serif;
+	COLOR: #7d6d64;
+	FONT-SIZE: 12px;
+	PADDING-TOP: 0px;
+	WEIGHT: 100%;
+}
+
+UL {
+	LINE-HEIGHT: 18px
+}
+
+A:link {
+	COLOR: #7d6d64;
+	TEXT-DECORATION: none;
+	LINE-HEIGHT: 18px;
+	FONT-SIZE: 15px;
+	FONT-WEIGHT: bold;
+	letter-spacing: 0px;
+}
+
+A:visited {
+	COLOR: #7d6d64;
+	TEXT-DECORATION: none;
+	LINE-HEIGHT: 18px;
+	FONT-SIZE: 15px;
+	FONT-WEIGHT: bold;
+	letter-spacing: 0px;
+}
+
+A:hover {
+	COLOR: #ffffff
+}
+
+INPUT.top {
+	BACKGROUND: url(../../images/login/font01.png) no-repeat
+}
+
+.tabs:unknown {
+	CLEAR: both;
+	DISPLAY: block;
+	VISIBILITY: hidden;
+	HEIGHT: 0px;
+	content: '.'
+}
+
+INPUT.top {
+	WIDTH: 303px;
+	CURSOR: pointer;
+	COLOR: #333333;
+	WHITE-SPACE: nowrap;
+	HEIGHT: 35px;
+	TEXT-ALIGN: left 8px
+}
+
+INPUT.top {
+	margin: 1px;
+	padding: 8px 42px;
+	font-family: "Arial";
+	border: 0px;
+	right: -30px;
+}
+
+INPUT.top2 {
+	BACKGROUND: url(../../images/login/font02.png) no-repeat
+}
+
+.tabs:unknown {
+	CLEAR: both;
+	DISPLAY: block;
+	VISIBILITY: hidden;
+	HEIGHT: 0px;
+	content: '.'
+}
+
+INPUT.top2 {
+	WIDTH: 303px;
+	CURSOR: pointer;
+	COLOR: #333333;
+	WHITE-SPACE: nowrap;
+	HEIGHT: 35px;
+	TEXT-ALIGN: left 40px
+}
+
+INPUT.top2 {
+	margin: 1px;
+	padding: 8px 42px;
+	font-family: "Arial";
+	border: 0px;
+	right: -30px;
+}
+
+INPUT.top3 {
+	BACKGROUND: url(../../images/login/font03.png) no-repeat
+}
+
+.tabs:unknown {
+	CLEAR: both;
+	DISPLAY: block;
+	VISIBILITY: hidden;
+	HEIGHT: 0px;
+	content: '.'
+}
+
+INPUT.top3 {
+	WIDTH: 220px;
+	CURSOR: pointer;
+	COLOR: #333333;
+	WHITE-SPACE: nowrap;
+	HEIGHT: 35px;
+	TEXT-ALIGN: left 40px
+}
+
+INPUT.top3 {
+	margin: 1px;
+	padding: 8px 42px;
+	font-family: "Arial";
+	border: 0px;
+	right: -30px;
+}
+
+.meun {
+	FONT-SIZE: 8pt;
+	COLOR: #64caf7;
+	LINE-HEIGHT: 14pt;
+	font-weight: bold;
+	font-family: "Geneva", "Arial", "Helvetica", "sans-serif";
+}
+
+.copyright {
+	FONT-SIZE: 9pt;
+	COLOR: #737272;
+	LINE-HEIGHT: 14pt;
+	font-weight: bold;
+	font-family: "Geneva", "Arial", "Helvetica", "sans-serif";
+}
+-->
+</style>
+			<script type="text/javascript"> 
+    //<![CDATA[
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+
+     function load(){
+		if(document.getElementById("loginForm:loginName").value==""){
+			document.getElementById("loginForm:loginName").focus();
+		}else{
+			document.getElementById("loginForm:password").focus();
+		}
+		document.getElementById("loginForm:validateCode").value = "";
+	}
+	
+	
+	function reloadVerifyCode(){
+		var timenow = new Date().getTime();                        
+		document.getElementById("piccode").src="#{request.contextPath}/servlet/ValidateCodeServlet?d="+timenow;
+	}
+  //]]>
+</script>
+		</head>
+
+		<body onLoad="MM_preloadImages('#{request.contextPath}/baf/images/login/ok01.gif');load();"
+			onkeyup="if(event.keyCode==13){document.getElementById('loginForm').onsubmit();}">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td background="#{request.contextPath}/baf/images/login/login_top_bg.gif" valign="top">
+						<div align="left">
+							<table width="100%" border="0" cellspacing="0" cellpadding="0">
+								<tr>
+									<td width="43%">
+										<h:graphicImage url="#{request.contextPath}/baf/images/login/login_logo.gif" width="453"
+											height="164"></h:graphicImage>
+
+									</td>
+									<td width="57%">
+										<div align="right">
+											<h:graphicImage url="#{request.contextPath}/baf/images/login/login_top_right.gif"
+												width="138" height="164"></h:graphicImage>
+										</div>
+									</td>
+								</tr>
+							</table>
+						</div>
+					</td>
+				</tr>
+				<tr>
+
+					<td height="303" valign="top"
+						background="#{request.contextPath}/baf/images/login/background.jpg">
+						<h:form id="loginForm" onsubmit="return validateForm(this);">
+							<table width="726" border="0" align="center" cellpadding="0"
+								cellspacing="0">
+								<tr>
+									<td width="238">
+										<h:graphicImage url="#{request.contextPath}/baf/images/login/im_01.png" width="256"
+											height="266"></h:graphicImage>
+
+									</td>
+									<td width="488">
+										<table width="420" border="0" cellspacing="2" cellpadding="0">
+											<tr>
+												<td width="111">
+													<div align="right">
+														<h:graphicImage url="#{request.contextPath}/baf/images/login/wz01.png" width="97"
+															height="23"></h:graphicImage>
+
+													</div>
+												</td>
+												<td width="308">
+													<h:inputText id="loginName"
+														value="#{userLoginBean.loginName}" styleClass="top">
+														<s:commonsValidator type="required"
+															arg="#{msgs['loginNameLable']}" server="false"
+															client="true" />
+														<s:commonsValidator type="maxlength" maxLength="32"
+															arg="#{msgs['loginNameLable']}" server="false"
+															client="true" />
+													</h:inputText>
+
+
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div align="right">
+														<h:graphicImage url="#{request.contextPath}/baf/images/login/wz02.png" width="97"
+															height="25"></h:graphicImage>
+
+													</div>
+												</td>
+												<td>
+													<h:inputSecret id="password"
+														value="#{userLoginBean.password}" styleClass="top2">
+														<s:commonsValidator type="required"
+															arg="#{msgs['loginPasswordlable1']}#{msgs['loginPasswordlable2']}"
+															server="false" client="true" />
+														<s:commonsValidator type="maxlength" maxLength="64"
+															arg="#{msgs['loginPasswordlable1']}#{msgs['loginPasswordlable2']}"
+															server="false" client="true" />
+													</h:inputSecret>
+
+
+												</td>
+											</tr>
+											<tr>
+												<td>
+													<div align="right">
+														<h:graphicImage url="#{request.contextPath}/baf/images/login/wz03.png" width="97"
+															height="25"></h:graphicImage>
+
+													</div>
+												</td>
+												<td>
+													<h:panelGroup style="vertical-align:bottom;">
+														<h:inputText id="validateCode"
+															value="#{userLoginBean.validateCode}" maxlength="4"
+															styleClass="top3">
+															<s:commonsValidator type="required"
+																arg="#{msgs['validateCode1']}#{msgs['validateCode2']}#{msgs['validateCode3']}"
+																server="false" client="true" />
+														</h:inputText>
+
+														<img id="piccode"
+															src="#{request.contextPath}/servlet/ValidateCodeServlet"
+															align="bottom" onclick="reloadVerifyCode()"
+															title="#{msgs['changeValidateCode']}" height="25"/>
+													</h:panelGroup>
+
+
+
+												</td>
+											</tr>
+											<tr>
+												<td>
+
+												</td>
+												<td>
+
+												</td>
+											</tr>
+											<tr>
+												<td colspan="2">
+													<table width="390" border="0" align="right" cellpadding="0"
+														cellspacing="5">
+														<tr>
+															<td width="252">
+																<div align="left">
+																	<h:graphicImage url="#{request.contextPath}/baf/images/login/phone-icon.gif"
+																		width="12" height="9"></h:graphicImage>
+																		<a href="#" onclick="invalidateSession(); return false;"><strong><font color="#FFFFFF"><h:outputText value="#{msgs['forgetPassword']}?"></h:outputText></font>
+																		</strong>
+																	</a>
+
+																</div>
+															</td>
+															<td width="143">
+																<div align="right">
+																<br />
+														
+														
+																<a4j:commandButton id="btnLogin"  type="submit" value="#{msgs['loginButton']}" action="#{userLoginBean.checkLogin}" data="#{userLoginBean.status}" oncomplete="onLoginComplete(data)" reRender="userId" image="#{request.contextPath}/baf/images/login/ok02.gif" onkeyup="MM_swapImgRestore()" onmouseover="MM_swapImage('Image10', '', '#{request.contextPath}/baf/images/login/ok01.gif', 1)" style="width:143px;height:38px"/>
+																
+																</div>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</td>
+								</tr>
+							</table>
+								<s:validatorScript functionName="validateForm"/>	
+											
+								<h:inputHidden id="userId" value="#{userLoginBean.userId}"/>
+						</h:form>
+					</td>
+				</tr>
+				<tr>
+					<td background="#{request.contextPath}/baf/images/login/down_bg.gif">
+						<table width="100%" border="0" cellpadding="0" cellspacing="0">
+							<tr>
+
+								<td width="23%">
+									<h:graphicImage url="#{request.contextPath}/baf/images/login/down_left.gif" width="278"
+										height="82"></h:graphicImage>
+
+								</td>
+								<td width="47%" class="meun">
+									<h:outputText value="#{msgs['downloadMessage1']}"
+										style="font-size:13" />
+									<h:outputText value="#{msgs['downloadMessage2']}"
+										style="font-size:13" />
+									<a href="http://www.google.com/chrome" target="_blank"
+										style="color: blue;"> <h:outputText
+											value="#{msgs['downloadMessage3']}" /> </a>
+									<h:outputText value="#{msgs['downloadMessage4']}"
+										style="font-size:13" />
+									<a href="#{userLoginBean.chromeUrl}" target="_blank"
+										style="color: blue;"> <h:outputText
+											value="#{msgs['downloadMessage5']}" /> </a>
+									<h:outputText value="#{msgs['downloadMessage6']}"
+										style="font-size:13" />
+								</td>
+								<td width="30%">
+									<div align="right">
+										<h:graphicImage url="#{request.contextPath}/baf/images/login/down_right.gif" width="306"
+											height="82"></h:graphicImage>
+
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+
+					<td height="60" valign="top"
+						background="#{request.contextPath}/baf/images/login/down_copyright.gif">
+						<table width="100%" border="0" cellspacing="12" cellpadding="0">
+							<tr>
+								<td>
+									<div align="right" class="copyright">
+										<h:outputText value="#{loginFrameBean.ipc_info_01}"
+											transient="true" />
+										
+										<h:outputText value="#{loginFrameBean.ipc_info_02}"
+											transient="true" />
+									</div>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			
+			<h:form>
+				<a4j:jsFunction name="invalidateSession"
+					action="#{userLoginBean.logout}"
+					oncomplete="document.location.href = '${request.contextPath}/baf/jsp/uiframe/forgetPassword.xhtml';" />
+			</h:form>
+		</body>
+		<script type="text/javascript">  
+	//<![CDATA[
+		//点击登录按钮完成事件
+   	function onLoginComplete(dealFlag){
+   	   
+	   	if(dealFlag=="-1"){
+	   		//登录失败，登录账号不存在！
+	   		alert("${msgs['loginErrorMessage1']}");
+	   		document.getElementById("loginForm:loginName").focus();
+	   		document.getElementById("loginForm:password").value = "";
+	   	}
+	   	if(dealFlag=="-2"){
+	   		//登录失败，登录密码错误！
+	   		alert("${msgs['loginErrorMessage2']}");
+	   		document.getElementById("loginForm:password").focus();
+	   		document.getElementById("loginForm:password").value = "";
+	   	}
+	   	if(dealFlag=="1"){
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/frame.xhtml";
+	   	}
+	   	if(dealFlag=="2"){
+	   		//您的密码已到期，请修改密码！
+	   		alert("#{msgs['mustModifyPwd']}");
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/modifyPassword.xhtml?userId="+document.getElementById("loginForm:userId").value;
+	   	}
+	   	if(dealFlag=="3"){
+	   		//验证码输入错误
+	   		alert("#{msgs['validateCodeError']}");
+	   		document.getElementById("loginForm:validateCode").value = "";
+	   		document.getElementById("loginForm:validateCode").focus();
+	   		reloadVerifyCode();
+	   	}
+	   	
+	   	//新用户第一次登录，强制进入修改密码页面
+	   	if(dealFlag=="4"){
+	   		alert("#{msgs['firstLoginModifyPassword']}");
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/modifyPassword.xhtml?userId="+document.getElementById("loginForm:userId").value + "&loginName=" + document.getElementById("loginForm:loginName").value ;
+	   	}
+	   	
+	   	//绑定IP登录时，登录IP和数据库中的IP不一致，需提示
+	   	if(dealFlag.indexOf("5#") != -1){
+	   		if(dealFlag == "5#"){
+	   			//登录失败！系统要求绑定IP地址登录，请绑定IP地址！
+	   			alert("#{msgs['notlimitedIP']}");
+	   		}else{
+	   			//登录失败！登录失败！您的登录IP与您绑定的IP不符！
+		   		alert("#{msgs['limitedIpdiffer']}'"+ dealFlag.split("#")[1] +"' #{msgs['differ']}");
+	   		}
+	   	}
+   	}
+   	//]]>
+    </script>
+	</f:view>
+</html>

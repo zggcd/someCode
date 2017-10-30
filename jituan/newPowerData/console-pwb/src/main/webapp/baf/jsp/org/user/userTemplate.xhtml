@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//保存完成触发事件
+	function onSaveComplete(data){
+		if(data=="Y"){
+			if(a4jcomplete()==false){
+	 			return;
+	 		}
+		}else{
+			alert("${msgs['baf.Failure']}...");
+		}
+		document.getElementById('userForm:templateModalPanelCancel').onclick();
+   }  
+   
+   	function checkMPhone(event,object){
+		  if((window.event.keyCode<48)||(window.event.keyCode>57)){
+		    window.event.keyCode=0;
+		  }
+		  if(object.value.length==11){
+		     window.event.keyCode=0;
+		  }
+		}
+		
+		
+		function checkPhone(event,object){
+		  if(object.value==""){
+		    if (window.event.keyCode!=48){
+		       window.event.keyCode=0;
+		    }
+		  }
+		  if((window.event.keyCode<48)||(window.event.keyCode>57)){
+		    window.event.keyCode=0;
+		  }
+		  if(object.value.length==13){
+		     window.event.keyCode=0;
+		  }
+		}
+		
+		function check(){
+		    var type = document.getElementById("userForm:userType").value;
+	        var phone = document.getElementById("userForm:mobilePhone").value;
+	        if(type=="S"){
+	           if(phone==""){
+	              alert(" #{msgs['baf.org.user.mobilePhone']}必输项");
+	              return false;
+	           } 
+	        }
+		}
+//]]>
+</script>
+</head>
+<body>
+	<!-- 人员信息模态框  -->
+	<rich:modalPanel id="user_panel" style="margin-left:5px;margin-right:5px;margin-top:5px;" switchType="client" width="750" height="350">
+		<f:facet name="header">
+			<h:outputText value="#{msgs['baf.userinfo.userinfo']}"/>
+		</f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		    <h:graphicImage value="/baf/images/icons/close.png" id="userhidelink" styleClass="hidelink"/>
+		    <rich:componentControl for="user_panel" attachTo="userhidelink" operation="hide" event="onclick" />
+		</h:panelGroup>
+		</f:facet>	
+		
+		<h:form id="userForm">
+		<fieldset style="height:85%" >
+           <legend><h:outputText value="#{msgs['baf.org.user.tab.user']}"/></legend>
+        <h:panelGroup  rendered="#{userBean.rendereds}" >
+		<table width="100%">
+		 		<tr>
+		 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userName']}:" style="font-size:13px;"/></td>
+		 			<td width="30%"><h:inputText  id="userName"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.userName}" disabled="true" /></td>
+		 			<td width="10%" style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.loginName']}:" style="font-size:13px;"/></td>
+		 			<td width="30%"><h:inputText  id="loginName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.loginName}" disabled="true"/></td>
+		 		</tr>
+		 		<tr>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.userType']}:" style="font-size:13px;"/></td>
+		 			<td>
+		 			<h:selectOneMenu style="width:95%;height:23px;" id="userType" value="#{userBean.userType}" styleClass="rich-box-border-color-control-select rich-text-control-select" disabled="true">
+					 	<f:selectItems value="#{userBean.userTypeSelectItems}"/>
+					 </h:selectOneMenu>
+					 </td>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.gender']}:" style="font-size:13px;"/></td>
+		 			<td> <h:selectOneRadio id="gender" value="#{userBean.gender}" style="font-size:13px;">
+					    <f:selectItem itemLabel="#{msgs['baf.radioMankind']}" itemValue="M" />
+					    <f:selectItem  itemLabel="#{msgs['baf.radioFemale']}"  itemValue="F" />
+			    	 </h:selectOneRadio></td>
+		 		</tr>
+		 		<tr>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.employDate']}:" style="font-size:13px;"/></td>
+		 			<td><rich:calendar id="employDate"  styleClass="rich-gradient-input" value="#{userBean.employDate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" disabled="true" inputStyle="width:85%;height:23px;" inputClass="rich-gradient-input" /></td>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.duty']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText id="duty" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.duty}" disabled="true"/></td>
+		 		</tr>
+		 		<tr>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.officePhone']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText  id="officePhone"  style="width:95%;height:23px;"  styleClass="rich-gradient-input"  value="#{userBean.officePhone}" disabled="true">
+		 			        <s:commonsValidator type="mask" mask="^[0][0-9]{1,12}$"  arg="#{msgs['baf.org.user.officePhone']}"  server="false" client="true"/> 
+						
+			            </h:inputText>
+		 			</td>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.homePhone']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText  id="homePhone" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.homePhone}" disabled="true">
+		 	             <s:commonsValidator type="mask" mask="^[0][0-9]{1,12}$"  arg="#{msgs['baf.org.user.homePhone']}"  server="false" client="true"/> 
+						
+		 			</h:inputText>
+		 			</td>
+		 		</tr>
+		 		<tr>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.email']}:" style="font-size:13px;"/></td>
+		 			<td> <h:inputText  id="email"   style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.email}" disabled="true"/></td>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.nativenet']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText  id="limitedIp"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.nativenetName}" disabled="true" /> </td>
+		 		</tr>
+		 		<tr>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.post.parentUnit']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText id="parentOrgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.unitNames}" disabled="true"/></td>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.userinfo.post']}:" style="font-size:13px;"/></td>
+		 			<td><h:inputText  id="orgName"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.postNames}" disabled="true"/></td>
+		 		</tr>
+		 		<tr>
+		 			<ui:remove>
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.mobilePhone']}:" style="font-size:13px;color: red;"/></td>
+		 			<td><h:inputText  id="mobilePhone"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.mobilePhone}" title="#{msgs['baf.userinfo.modify']}，手机格式必须11位" onkeypress="checkMPhone(event,this)" disabled="#{userBean.phoneDisable}" >
+		 				<s:commonsValidator type="mask" mask="[0-9]{11}"  arg="#{msgs['baf.org.user.mobilePhone']}"  server="false" client="true"/>  
+					    <s:commonsValidator type="maxlength"  arg="#{msgs['baf.org.user.mobilePhone']}" maxLength="11"  server="false" client="true"/>
+		 			</h:inputText>
+		 			</td>
+		 			</ui:remove>
+		 			
+		 			<td style="text-align:right;"><h:outputText value="#{msgs['baf.org.user.phs']}:" style="font-size:13px;color: red;"/></td>
+		 			<td><h:inputText  id="phs"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.phs}" title="#{msgs['baf.userinfo.modify']}"  disabled="#{userBean.phoneDisable}" />  </td>
+		 		</tr>
+		 	</table>
+		 	</h:panelGroup>
+		</fieldset>
+		<rich:spacer height="15px"/>
+       	<center>
+       		<a4j:commandButton id="btnsave" type="submit" value="#{msgs['baf.org.unit.save']}"
+       		onclick="if(validateForm(document.getElementById('userForm'))==false||check()==false) return false;" 
+       		 action="#{userBean.userSave}" data="#{userBean.dealFlag}" oncomplete="onSaveComplete(data);" reRender="userForm" styleClass="rich-button" />
+			<rich:spacer width="5px"/>
+			<h:commandButton type="button" id="templateModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('user_panel')}.hide(); return false;"/>
+			<h:inputHidden value="#{userBean.userId}" />
+			<h:inputHidden value="#{userBean.loginName}" />
+			<h:inputHidden value="#{userBean.userName}" />
+		</center>
+		<a4j:keepAlive beanName="userBean"/>
+		<s:validatorScript functionName="validateForm"/>
+	</h:form>
+	</rich:modalPanel>	 
+	<h:form>
+    	<a4j:jsFunction name="userInfo" limitToList="true" action="#{userBean.userInfo}" oncomplete="Richfaces.showModalPanel('user_panel');" reRender="userForm">
+           <a4j:actionparam name="userId" assignTo="#{userBean.userId}"  />           
+        </a4j:jsFunction>
+        <a4j:keepAlive beanName="userBean"/>
+    </h:form>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

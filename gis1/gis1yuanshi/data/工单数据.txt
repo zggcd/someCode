@@ -1,0 +1,62 @@
+{
+"total":6,
+"message":"ok",
+"pageCount":2,
+"dataset":"pub_disp_bill",
+"status":0,
+"pageSize":4,
+"currentPage":0,
+"results":[{
+	"deal_code":"ADSL87654321",
+	"user_name":"",
+	"fault_address":"",
+	"bill_sn":"20150402006271",
+	"booking_end_time":"2015-04-03 23:59:00.0",
+	"booking_begin_time":"2015-04-03 00:00:00.0",
+	"user_link_man":"test",
+	"user_link_phone":"12345678",
+	"create_time":"2015-04-02 14:37:53.0",
+	"business_id":"0001024",
+	"nativenet_id":"0000002",
+	"bill_id":"66575638"
+	},{
+	"deal_code":"ADSL",
+	"user_name":"",
+	"fault_address":"",
+	"bill_sn":"20150402006291",
+	"booking_end_time":"",
+	"booking_begin_time":"",
+	"user_link_man":"test2",
+	"user_link_phone":"12345678",
+	"create_time":"2015-04-03 09:35:42.0",
+	"business_id":"0001024",
+	"nativenet_id":"0000002",
+	"bill_id":"66575875"
+	},{
+	"deal_code":"ADSL33333333",
+	"user_name":"",
+	"fault_address":"",
+	"bill_sn":"20150403006331",
+	"booking_end_time":"",
+	"booking_begin_time":"",
+	"user_link_man":"test3",
+	"user_link_phone":"22222222",
+	"create_time":"2015-04-03 13:33:44.0",
+	"business_id":"0001024",
+	"nativenet_id":"0000002",
+	"bill_id":"66576575"
+	},{
+	"deal_code":"ADSL55555555",
+	"user_name":"",
+	"fault_address":"",
+	"bill_sn":"20150403006332",
+	"booking_end_time":"",
+	"booking_begin_time":"",
+	"user_link_man":"test5",
+	"user_link_phone":"22222222",
+	"create_time":"2015-04-03 14:08:44.0",
+	"business_id":"0001024",
+	"nativenet_id":"0000002",
+	"bill_id":"66576582"
+	}]
+}

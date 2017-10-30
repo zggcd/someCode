@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<esb>
+    <route>
+        <sender>gp_noc</sender>
+        <receiver>sh_eoms</receiver>
+        <time>2009-12-16 10:34:57</time>
+        <service_name>sa_nf_wp_nwp</service_name>
+        <msg_type/>
+        <msg_id>465</msg_id>
+    </route>
+    <interfacemsg>
+        <JMSType>JMSNewDistribute</JMSType>
+        <sheetTask>
+            <WSID>2009121600001</WSID>
+            <WSINFOHINT>移动网:CDMA网；故障对象:18918561512故障对象121501</WSINFOHINT>
+            <WSTYPECODE>移动专业故障</WSTYPECODE>
+            <WSMARKER>省-集团</WSMARKER>
+            <URGEDEGREE>一般</URGEDEGREE>
+            <TASKNAME>故障处理</TASKNAME>
+            <HANDLEPERSON>KEDA</HANDLEPERSON>
+            <BEGINTIME>2009-12-16 09:25:41</BEGINTIME>
+            <NETWORK>CDMA网</NETWORK>
+            <REJECT_NUMBER>1</REJECT_NUMBER>
+        </sheetTask>
+        <sheetDetail>
+            <applyInfo>
+                <IFVALIDAPPLY>是</IFVALIDAPPLY>
+                <CUSTTYPE>一般或其他</CUSTTYPE>
+                <APPLYER>KEDA</APPLYER>
+                <APPLYTIME>2009-12-16 09:25:39</APPLYTIME>
+                <APPLYUNIT>中国电信集团</APPLYUNIT>
+                <TROUBLEOBJ>18918561512故障对象121501</TROUBLEOBJ>
+                <APPLYCLASS>国内漫游</APPLYCLASS>
+                <APPLYCLASSSMALL>语音业务</APPLYCLASSSMALL>
+                <IFINFLBUSI>是</IFINFLBUSI>
+                <HAPPENTIME>2009-12-16 08:00:00</HAPPENTIME>
+                <IFFIRSTFOUND>否</IFFIRSTFOUND>
+                <TROUBLESOURCE>用户申告</TROUBLESOURCE>
+                <TIMELIMIT/>
+                <GECUSTCLASS/>
+                <CUSTINDUS/>
+                <CUSTSL/>
+                <CUSTLOCAL/>
+                <OTHERCUSTINFO/>
+                <ADDITIONALREMARK/>
+                <ROAMINGTYPE/>
+                <ROAMINGCOUNTRY/>
+                <IMSI/>
+                <CUSTNAME/>
+                <DEALREC/>
+                <SPEC>CDMA网</SPEC>
+                <TROUBLELOOKS>故障描述测试</TROUBLELOOKS>
+                <INFLRANGE>初步分析处理</INFLRANGE>
+                <CUSTLEVEL/>
+            </applyInfo>
+            <callCenterInfoList/>
+            <attachInfoList/>
+        </sheetDetail>
+    </interfacemsg>
+</esb>

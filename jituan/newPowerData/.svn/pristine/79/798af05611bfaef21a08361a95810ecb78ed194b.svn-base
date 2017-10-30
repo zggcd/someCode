@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+	<head> 
+    <title><h:outputText value="#{msgs['forgetPassword']}" /></title>             
+    <style type="text/css">
+    .column1{
+       	width:35%;
+       	text-align:right;
+    }
+    .column2{
+       	width:55%;
+       	text-align:right;
+    }
+    .column3{
+       	width:20%;
+    }
+    </style>      
+    <script type="text/javascript">  
+    //<![CDATA[
+        
+    //验证登录账号和移动电话（小灵通）
+    function validateAll(){
+    	if(validateForm(document.getElementById("passForm"))==false){
+    		return false;
+    	}
+    }
+    
+    //发送密码完成事件
+    function onSendComplete(data){
+    	if(data == "1"){//验证通过
+	    	if(a4jcomplete()==false){
+	 			return;
+	 		}
+	 		//密码已发送，请登录系统！
+    		alert("#{msgs['LoginAfterSendPwd']}");
+	   		top.location = "${request.contextPath}/baf/jsp/uiframe/login.xhtml";
+    	}else if(data == "-1"){
+    		//登录账号不存在
+    		alert("#{msgs['loginNameNotExist']}");
+    		setFocus('passForm:loginName');
+    	}else if(data == "-2"){
+    		//登录账号不存在
+    		alert("账号未绑定移动电话!");
+    		
+    	}else if(data == "-3"){
+    	  //24小时内发送密码超过3次
+    		alert("账号在24小时内发送密码超过3次!");
+    		document.getElementById("passForm:btnSend").disabled=true;
+    	}
+    }
+    
+    //清空表单
+    function onCancel(){
+    	document.getElementById("passForm:loginName").value = "";
+   
+    	setFocus('passForm:loginName');
+    }
+    
+       function login(){
+ 	     var flag="#{loginFrameBean.isSHLogin}";
+ 	     var customUrl="#{loginFrameBean.customUrl}";
+ 	     if(flag=='Y'){
+ 	       top.location="#{loginFrameBean.ssoUrl}";
+ 	     }else{
+ 	        if(""==customUrl||"Y"==customUrl){
+ 	          top.location ="${request.contextPath}/baf/jsp/uiframe/login.xhtml";
+ 	        }else{
+ 	          top.location ="${request.contextPath}"+customUrl;
+ 	        } 
+ 	     }
+ 	   }
+    
+    //]]>
+    </script>                     	
+    </head>
+    
+	<body style="overflow-x:hidden;overflow-y:hidden;" onkeyup="if(event.keyCode==13){document.getElementById('passwordForm').onsubmit();}" onload="setFocus('passForm:loginName')">		
+		<div id="center" style="background:white;height:100%;margin-top:0px;margin-bottom:0px;" align="center">
+		<rich:tabPanel id="tabPanel" style="width:100%;height:100%;" switchType="client">
+			<rich:tab id="forgetPassword" label="#{msgs['forgetPassword']}" style="text-align:center;">
+				<rich:spacer height="50px;"/>
+				<h:form id="passForm">
+					<h:panelGroup style="font-size:13px;">
+						<font color="red"><h:outputText value="#{msgs['operateMessage']}"/></font>
+					</h:panelGroup>
+					<br/><br/><br/>
+					<center>
+						<h:panelGrid columns="3" columnClasses="column1,column2,column3" style="vertical-align:middle;width:500px;font-size:13px;">
+							
+							<h:outputText value="#{msgs['loginNameLable']}：" transient="true"/>
+							<h:inputText id="loginName" value="#{userLoginBean.loginName}" style="width:100%;height:23px;" styleClass="rich-gradient-input">
+								<s:commonsValidator type="required" arg="#{msgs['loginNameLable']}" server="false" client="true"/>
+								<s:commonsValidator type="maxlength" maxLength="32" arg="#{msgs['loginNameLable']}" server="false" client="true"/>	
+							</h:inputText>
+							<h:outputText value="*" style="color:red;" transient="true"/>
+							
+						
+							
+						</h:panelGrid>
+						<br />
+						<h:panelGrid columns="1" style="width:400px;font-size:13px;text-align:center;">
+							<h:panelGroup>
+								<a4j:commandButton id="btnSend" type="submit" style="width:80px;" styleClass="rich-button" value="#{msgs['sendPassword']}">
+									<a4j:support event="onclick" onsubmit="if(validateForm(document.getElementById('passForm'))==false) return false;" action="#{userLoginBean.sendPassword}" data="#{userLoginBean.validateStatus}" oncomplete="onSendComplete(data);"/>
+								</a4j:commandButton>
+								<rich:spacer width="5px"/>
+								<h:commandButton id="btnCancel" styleClass="rich-button" value="#{msgs['baf.Cancel']}">
+									<a4j:support event="onclick" onsubmit="onCancel(); return false;"/>
+								</h:commandButton>
+								<rich:spacer width="10px"/>
+								<h:outputLink style="font-size:13px;" value="#" onclick="login();"><h:outputText value="#{msgs['loginButton']}"/></h:outputLink>
+							</h:panelGroup>
+						</h:panelGrid>
+					</center>
+					<s:validatorScript functionName="validateForm"/>	
+		
+				</h:form>	
+			</rich:tab>
+		</rich:tabPanel>
+		</div>
+		
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</f:view>
+</html>
+
+
+

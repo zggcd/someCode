@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+//************************************************************
+//****************业务树形菜单单击事件处理*********************
+//************************************************************
+function doOnClick()
+{
+	var itemId = this.getSelectedItemId();
+	if (itemId == "null") {
+		addNewTopBusiness();
+	} else {
+		Refresh(itemId);
+	}			
+}
+
+//************************************************************
+//****************业务树拖动完成处理*********************
+//************************************************************
+function onDrag(srcID, destID) {	
+	//目标与父节点相同，不拖动
+	var parentID = businessTree_tree.getParentId(srcID);
+	if (destID == parentID) {
+		return false;		
+	}		
+	//0为顶级节点
+	if (destID == "0"){ 
+		destID = "";
+	}
+	//moveTree(srcID, destID);
+	//return true;	
+}
+
+function onRefreshComplete(data){
+	var businessProperty = businessTree_tree.getUserData(data,"businessproperty");
+	if (businessProperty == "2"){
+		$('businessForm:businessIsProc:0').disabled = false;
+		$('businessForm:businessIsProc:1').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = false;
+	}else{
+		$('businessForm:businessIsProc:0').disabled = true;
+		$('businessForm:businessIsProc:1').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = true;
+	}
+	setFocus('businessForm:businessName');		
+}
+
+function onAddNewComplete(data){
+	var e=document.getElementById('businessForm:isBatchAddGroup'); 
+	e.style.visibility='visible'; 
+	e.checked='false';
+	if (data == "2"){
+		$('businessForm:businessIsProc:0').disabled = false;
+		$('businessForm:businessIsProc:1').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = false;
+	}else{
+		$('businessForm:businessproperty:2').disabled = true;
+		$('businessForm:businessIsProc:0').disabled = true;
+		$('businessForm:businessIsProc:1').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = true;		
+	}
+	setFocus("businessForm:businessName");
+}
+
+function onAddNewFalseComplete(data){
+	var businessProperty = businessTree_tree.getUserData(data,"businessproperty");
+	if (document.getElementById("businessForm:businessproperty:2").checked == true){
+		$('businessForm:businessIsProc:0').disabled = false;
+		$('businessForm:businessIsProc:1').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = false;
+	}else{
+		//$('businessForm:businessproperty:2').disabled = true;
+		$('businessForm:businessIsProc:0').disabled = true;
+		$('businessForm:businessIsProc:1').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = true;
+	}
+}
+
+function onMoveTreeComplete(data){
+		if (data != null && data != "") {
+		var idarray = data.split(",");
+		//处理结果 Y或者N，原父节点专业ID，拖动专业ID，目的节点专业ID
+		//拖动后，判断处理结果，成功则不用刷新树，树本身已经做了刷新 ，失败则需要刷新树
+		var flag = idarray[0];
+		var parentBusinessID = idarray[1];
+		var businessID = idarray[2];
+		var destBusinessID = idarray[3];
+		if (flag == "N") {
+			//拖动处理失败!
+			alert("${msgs['baf.business.WarningMoveFailure']}");
+			if (destBusinessID != null) {
+				//如果目标是顶级，则不用刷新整个树，直接删除，这样就可以选中原始拖动专业。
+				if (destBusinessID == "" || destBusinessID == "0") {
+					if (businessID != null && businessID != "" && businessID != "0")
+						businessTree_tree.deleteItem(businessID,false);
+				} else {
+					businessTree_tree.refreshItem(destBusinessID);
+				}						
+			}
+			if (parentBusinessID != null) {
+				if (parentBusinessID == "")
+					parentBusinessID = "0";
+				var timeout = setTimeout("businessTree_tree.refreshItem('"+parentBusinessID+"')", 300);
+				if (businessID != null) {	
+					var timeout = setTimeout("setselectitem('"+businessID+"')", 800);
+				}
+			}
+		} else {			
+			var destIsleaf = businessTree_tree.getUserData(destBusinessID,'isLeaf')
+			if (destIsleaf == "Y"){
+				businessTree_tree.setUserData(destBusinessID,'isLeaf','N');	
+			}
+			if (businessTree_tree.hasChildren(parentBusinessID) == "1"){
+				businessTree_tree.setUserData(parentBusinessID,'isLeaf','Y');
+			}
+			var timeout = setTimeout("setselectitem('"+businessID+"')",800);										
+		}
+	}
+}
+
+function onBusinessAddOrEditComplete(data){
+	var isAddOrEdit = document.getElementById("businessForm:isAddOrEdit").value;
+	if (isAddOrEdit == "E"){
+		onBusinessEditComplete(data);
+	}else{
+		onBusinessAddComplete(data);
+	}
+}
+
+function onBusinessAddComplete(data){
+	var businessID = document.getElementById("businessForm:businessId").value;
+	if (data != null && data != "") {
+		var idarray = data.split(",");
+		if (idarray.length >= 3){
+			alert("${msgs['baf.business.businessCodeExist']}");
+			onAddNewFalseComplete(businessID);
+			return;
+		}else{
+			var Flag = idarray[0];
+			if ( Flag == "M" ){
+				alert("${msgs['baf.business.businessCodeExist']}");
+				onAddNewFalseComplete(businessID);
+				return;
+			}
+			if ( Flag == "P" ){
+				alert("${msgs['baf.business.businessPropertyFailure']}");
+				onAddNewFalseComplete(businessID);
+				return;
+			}
+		}
+	}
+	
+	if(a4jcomplete()==false){
+	   	document.getElementById("businessForm:businessSaveOrEdit").disabled = "";
+ 		return;
+ 	}	
+	//判断是否批量新增操作
+	var isBatchAddNew = document.getElementById("businessForm:isBatchSave");
+	var parentBusinessID = document.getElementById("businessForm:parentBusinessId").value;	
+	var dealFlag = document.getElementById("businessForm:dealFlag").value;	
+	if (isBatchAddNew.checked) {
+		//选中批量新增
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.business.WarningHandleFailure']}");
+			onAddNewFalseComplete(businessID);
+			return;
+		}	
+		businessTree_tree.refreshItem(parentBusinessID);	
+	} else {
+		//没有选中批量新增
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.business.WarningHandleFailure']}");
+			onAddNewFalseComplete(businessID);
+			return;
+		}
+		businessTree_tree.refreshItem(parentBusinessID);
+		var timeout = setTimeout("setselectitem('"+businessID+"')", 800);		
+	}
+}
+
+function onBusinessEditComplete(data){
+	var businessID = document.getElementById("businessForm:businessId").value;
+	if (data != null && data != "") {
+		var idarray = data.split(",");
+		if (idarray.length >= 3){
+			alert("${msgs['baf.business.businessCodeExist']}");
+			onRefreshComplete(businessID);
+			return;
+		}else{
+			var Flag = idarray[0];
+			if ( Flag == "M" ){
+				alert("${msgs['baf.business.businessCodeExist']}");
+				onRefreshComplete(businessID);
+				return;
+			}
+			if ( Flag == "P" ){
+				alert("${msgs['baf.business.businessPropertyFailure']}");
+				onRefreshComplete(businessID);
+				return;
+			}
+		}
+	}
+	if(a4jcomplete()==false){		
+	   	document.getElementById("businessForm:businessSaveOrEdit").disabled = "";
+ 		return;
+ 	}
+	//判断是否批量新增操作
+	var isBatchAddNew = document.getElementById("businessForm:isBatchSave");
+	var parentBusinessID = document.getElementById("businessForm:parentBusinessId").value;		
+	var dealFlag = document.getElementById("businessForm:dealFlag").value;
+	if (isBatchAddNew.checked) {
+		//选中批量新增
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.business.WarningHandleFailure']}");
+			onRefreshComplete(businessID);
+			return;
+		}	
+		businessTree_tree.refreshItem(parentBusinessID);		
+	} else {
+		//没有选中批量新增
+		if (dealFlag == "N") {
+			//处理失败
+			alert("${msgs['baf.business.WarningHandleFailure']}");
+			onRefreshComplete(businessID);
+			return;
+		}
+		businessTree_tree.refreshItem(parentBusinessID);
+		var timeout = setTimeout("setselectitem('"+businessID+"')", 800);		
+	}
+}
+
+function onBusinessDeleteComplete(){
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	var isBatchAddNew = document.getElementById("businessForm:isBatchSave");
+	var preId=document.getElementById("businessForm:parentBusinessId").value;	
+	var dealFlag=document.getElementById("businessForm:dealFlag").value;
+	if (dealFlag == "N") {
+		//处理失败
+		alert("${msgs['baf.business.WarningHandleFailure']}");
+		return;
+	}
+	if (isBatchAddNew.checked){
+		var preId = businessTree_tree.getUserData(preId,'parentbusinessid');
+		if(preId == "null"){
+			preId = "";
+		}
+	}
+	businessTree_tree.refreshItem(preId);
+	var timeout = setTimeout("setselectitem('"+preId+"')", 800);
+}
+
+function onSaveOrderComplete(data){
+	if(a4jcomplete()==false){
+ 		return;
+ 	}
+	if (data == "N") {
+		//处理失败
+		alert("${msgs['baf.business.WarningHandleFailure']}");
+		return;
+	}
+
+	//刷新父节点
+	var itemId = businessTree_tree.getSelectedItemId(); 
+	var parentID = businessTree_tree.getParentId(itemId);
+	businessTree_tree.refreshItem(parentID);
+	var timeout = setTimeout("setselectitem('"+itemId+"')", 800);
+}
+
+function setselectitem(id){
+	businessTree_tree.selectItem(id,1);
+}
+//*************************************************************
+//**************菜单树上右键显示菜单**********************
+//*************************************************************
+function openContextMenu(){
+  try
+  { 
+  	var itemId = this.getSelectedItemId();
+	this.selectItem(itemId,false);
+	var objmenu = Ext.menu.MenuMgr.get("opmenu");		
+	if (itemId == "null") {
+		Ext.getCmp("menuItemAddTopBusiness").enable();
+		Ext.getCmp("menuItemAddBusiness").disable();
+		Ext.getCmp("menuItemDelete").disable();
+		Ext.getCmp("menuItemOrder").disable();			
+	} else {
+		Ext.getCmp("menuItemAddTopBusiness").enable();
+		Ext.getCmp("menuItemAddBusiness").enable();
+		Ext.getCmp("menuItemDelete").enable();
+		Ext.getCmp("menuItemOrder").enable();			
+	}	
+	
+	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		var e = new Array(window.event.clientX,window.event.clientY);
+		objmenu.showAt(e);
+	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+		var e = new Array(arguments[1].clientX,arguments[1].clientY);
+		objmenu.showAt(e);
+	}
+  }
+  catch(e)
+  {
+    alert(e.description);
+  }
+}
+
+function addNewTopBusiness(){	
+	AddTopNew();
+}
+
+function addNewBusiness(){
+	var itemId = businessTree_tree.getSelectedItemId();	
+	var itemText = businessTree_tree.getItemText(itemId); 
+	var businessProperty = businessTree_tree.getUserData(itemId,"businessproperty");	
+	AddNew(itemId ,itemText,businessProperty);
+}
+
+function deleteBusinessItem(){
+	var itemId = businessTree_tree.getSelectedItemId();
+	//删除业务时，是否进行判断
+   	var sysDelBus = document.getElementById("businessForm:deleteBus").value;
+	//当值为2时，删除的业务下含有子节点时不能删除该业务
+      	if(sysDelBus == "2"){
+      	  //	var isLeaf = businessTree_tree.getUserData(itemId,"isleaf");
+      	  //	if(isLeaf == "N"){
+      	  //		alert("该业务下含有子节点，不能将其删除！若要删除，请先删除业务下的子业务。");
+      	  //		return;
+      	  //	}else{	
+      		 		isExistChild(itemId);
+      	  //	}
+      	}else{
+      		document.getElementById("businessForm:deleteID").value = itemId;
+      		var e = document.getElementById("businessForm:businessDelete");
+      		onObjectFireMouseEvent(e,"onclick");
+      	}
+}
+//查询部门是否有子节点完成事件
+function onSelectComplete(data){
+  	if(data == "true"){
+  		alert("${msgs['baf.org.sysDelBusMmessage']}");
+		return;
+  	}else if(data == "false"){
+  		document.getElementById("businessForm:deleteID").value = businessTree_tree.getSelectedItemId();
+		var e = document.getElementById("businessForm:businessDelete");
+		onObjectFireMouseEvent(e,"onclick");
+  	}
+}
+
+function orderBusinessItem(){
+	var itemId = businessTree_tree.getSelectedItemId();
+	var parentID = businessTree_tree.getParentId(itemId);
+	if (parentID == "0"){
+		parentID = "";
+	}
+	refreshOrderForm(parentID);	
+}
+
+function displayRadio(value){
+	if (value == "2"){
+		$('businessForm:businessIsProc:0').disabled = false;
+		$('businessForm:businessIsProc:1').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = false;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = false;
+	}else{
+		$('businessForm:businessIsProc:0').disabled = true;
+		$('businessForm:businessIsProc:1').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:0').disabled = true;
+		$('businessForm:businessIsOrgViewFlag:1').disabled = true;
+	}
+}
+
+ 	//点击保存按钮时，对表单进行验证
+ 	function validate(formId){
+ 		var isSuccess = validateForm(formId);
+ 		if(isSuccess == true){
+			//将保存按钮置灰，防止多次提交表单
+	   		document.getElementById("businessForm:businessSaveOrEdit").disabled = "true";
+ 		}
+ 		return isSuccess;
+ 	}
+//]]>
+</script>
+</head>
+
+<body>
+	<regaltec:viewPort>
+		<regaltec:viewPortPanel region="east" id="east-panel" 
+			autoScroll="false" contentEl="east" split="true" width="200"   minSize="200" maxSize="400" 
+			collapsible="true" margins="0 0 0 0" layout="accordion"/>
+		<regaltec:viewPortPanel region="center" id="center-panel" contentEl="center" autoScroll="true"/>
+	</regaltec:viewPort>
+	
+	<div id="east">
+		<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+			<tr>
+				<td height="16" align="right" class="rich-gradient-tab" >
+				<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;" >
+				</h:graphicImage>
+				</td>
+			</tr>
+				<tr>
+				<td height="100%" id="treeboxbox_tree" >
+				</td>
+			</tr>
+  		</table>
+	</div>
+	
+	<regaltec:extContextMenu id="opmenu">
+	<regaltec:extContextMenuItem id="menuItemAddTopBusiness" text="#{msgs['baf.business.AddTopBusiness']}" handler="addNewTopBusiness"/>
+   	<regaltec:extContextMenuItem id="menuItemAddBusiness" text="#{msgs['baf.business.AddBusiness']}" handler="addNewBusiness" />
+   	<regaltec:extContextMenuItem id="menuItemDelete" text="#{msgs['baf.Delete']}" handler="deleteBusinessItem" />
+   	<regaltec:extContextMenuItem id="menuItemOrder" text="#{msgs['baf.module.ordertext']}" handler="orderBusinessItem" />
+   	</regaltec:extContextMenu>
+    	
+	<regaltec:dhtmlXtree id="businessTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+		loadXML="/baf/jsp/business/businessTreeXMLData.jsp"
+		xmlAutoLoading="/baf/jsp/business/businessTreeXMLData.jsp">
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="doOnClick" />
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+		<regaltec:setDxtEnable enableFunction="enableDragAndDrop" parameter="1"/>
+		<regaltec:setDxtEevntHandler eventName="Drag" handler="onDrag"/>
+	</regaltec:dhtmlXtree>
+	
+	<div id="center" style="background:white;height: 100%;margin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="99%" height="100%" switchType="client" >
+			<rich:tab id="business" name="business" label="#{msgs['baf.business.baseInfo']}" style="">
+				<center>
+				<a4j:form id="businessForm">
+				<rich:spacer height="2px"/>				
+					<h:panelGrid id="b_panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">					 
+						<h:outputText value="#{msgs['baf.business.parentName']}:" />
+						<h:inputText id="parentBusinessName" style="width:300px;height:23px;"  onfocus="this.blur()"
+							value="#{businessBean.parentBusinessName}" styleClass="rich-gradient-input">														
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.business.parentName']}" maxLength="64" server="false" client="true"/>							
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.business.name']}:"/>
+						<h:inputText id="businessName" style="width:300px;height:23px;"
+							value="#{businessBean.businessName}" styleClass="rich-gradient-input">
+							<s:commonsValidator type="required" arg="#{msgs['baf.business.name']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.business.name']}" maxLength="64" server="false" client="true"/>						
+						</h:inputText>						
+						
+						<h:outputText value="#{msgs['baf.business.code']}:"/>
+						<h:inputText id="businessCode" style="width:300px;height:23px;"
+							value="#{businessBean.businessCode}" styleClass="rich-gradient-input">
+							<s:commonsValidator type="required" arg="#{msgs['baf.business.code']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.business.code']}" maxLength="64" server="false" client="true"/>				
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.business.desc']}:"/>
+						<h:inputText id="businessDesc" style="width:300px;height:50px;"
+							value="#{businessBean.businessDesc}" styleClass="rich-gradient-input">
+							<s:commonsValidator type="maxlength" arg="#{msgs['baf.business.desc']}" maxLength="512" server="false" client="true"/>						
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.business.property']}:"/>
+						<h:selectOneRadio id="businessProperty" style="font-size:13px" onclick="displayRadio(this.value);"
+							value="#{businessBean.businessProperty}">
+							<f:selectItem itemLabel="#{msgs['baf.specialty.mainYes']}" itemValue="1" />
+							<f:selectItem itemLabel="#{msgs['baf.specialty.mainNo']}" itemValue="0" />
+							<f:selectItem itemLabel="#{msgs['baf.specialty.service']}" itemValue="2"/>
+						</h:selectOneRadio>
+						
+						<h:outputText value="#{msgs['baf.business.isBusinessProc']}:"/>
+						<h:selectOneRadio id="businessIsProc" style="font-size:13px" 
+							value="#{businessBean.isBusinessProce}">
+							<f:selectItem itemLabel="#{msgs['baf.radioYes']}" itemValue="Y" />
+							<f:selectItem itemLabel="#{msgs['baf.radioNo']}" itemValue="N" />
+						</h:selectOneRadio>
+						
+						<h:outputText value="#{msgs['baf.business.IsOrgViewFlag']}:"/>
+						<h:selectOneRadio id="businessIsOrgViewFlag" style="font-size:13px" 
+							value="#{businessBean.isOrgViewFlag}">
+							<f:selectItem itemLabel="#{msgs['baf.radioYes']}" itemValue="Y" />
+							<f:selectItem itemLabel="#{msgs['baf.radioNo']}" itemValue="N" />
+						</h:selectOneRadio>
+						
+						<h:outputText value="#{businessBean.extendTitle1}:" />
+						<h:inputText id="extField1" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField1}" title="#{burBean.extendTitle1}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle2}:" />
+						<h:inputText id="extField2" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField2}" title="#{burBean.extendTitle2}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle3}:" />
+						<h:inputText id="extField3" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField3}" title="#{burBean.extendTitle3}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle4}:" />
+						<h:inputText id="extField4" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField4}" title="#{burBean.extendTitle4}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle5}:" />
+						<h:inputText id="extField5" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField5}" title="#{burBean.extendTitle5}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle6}:" />
+						<h:inputText id="extField6" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField6}" title="#{burBean.extendTitle6}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle7}:" />
+						<h:inputText id="extField7" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField7}" title="#{burBean.extendTitle7}">	
+						</h:inputText>
+						<h:outputText value="#{businessBean.extendTitle8}:" />
+						<h:inputText id="extField8" style="width:95%;height:23px;"  maxlength="30" styleClass="rich-gradient-input"  value="#{businessBean.extField8}" title="#{burBean.extendTitle8}">	
+						</h:inputText>
+											
+											
+					<h:inputHidden id="parentBusinessId" value="#{businessBean.parentBusinessId}"/>
+					<h:inputHidden id="isAddOrEdit" value="#{businessBean.isAddOrEdit}"/>		
+					<h:inputHidden id="businessId" value="#{businessBean.businessId}"/>		
+					<h:inputHidden id="dealFlag" value="#{businessBean.dealFlag}"/>		
+					<h:inputHidden id="deleteID" value=""/>		
+					<h:inputHidden id="deleteBus" value="#{businessBean.deleteBus}"/>
+					</h:panelGrid>
+					
+											
+					<center>	
+						<h:panelGroup id="isBatchAddGroup" style="visibility:hidden;">
+							<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+							<h:selectBooleanCheckbox id="isBatchSave" />		
+						</h:panelGroup>
+							
+						<rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+						</rich:toolTip>
+												
+						<a4j:commandButton styleClass="rich-button" type="submit" id="businessSaveOrEdit" value="#{msgs['baf.Save']}">
+						<a4j:support event="onclick" onsubmit="if (validate(document.getElementById('businessForm'))==false) return false;" data="#{businessBean.functionData}" oncomplete="onBusinessAddOrEditComplete(data)" action="#{businessBean.addOrEditBusiness}" reRender="b_panelGrid"/>
+						</a4j:commandButton> <rich:spacer height="2px"/>
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="businessDelete" value="#{msgs['baf.Delete']}" onclick="if (validateForm(document.getElementById('businessForm'))==true) {#{rich:component('deletePanel')}.show();} return false;"/>
+					
+					</center>
+					
+					<s:validatorScript functionName="validateForm"/>
+					<rich:modalPanel id="deletePanel" autosized="true" width="300">
+			        <f:facet name="header">
+			            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+			                style="padding-right:15px;" />
+			        </f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					        id="hidelinkDelete" styleClass="hidelink"/>
+					    <rich:componentControl for="deletePanel" attachTo="hidelinkDelete"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>	
+		        	<center>		        	      	
+		                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+		                    action="#{businessBean.deleteBusiness}"
+		                    oncomplete="#{rich:component('deletePanel')}.hide();onBusinessDeleteComplete();"
+		                    reRender="b_panelGrid" />
+						<rich:spacer width="40px"/>
+		                <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                    onclick="#{rich:component('deletePanel')}.hide();return false;" />
+					</center>
+			    </rich:modalPanel>
+				</a4j:form>
+				</center>
+			</rich:tab>
+		</rich:tabPanel>
+		
+		<rich:modalPanel id="orderPanel" autosized="true" width="450" height="400">			    
+			<f:facet name="header">			    
+				<h:outputText value="#{msgs['baf.specialty.order']}" style="padding-right:15px;"/>
+			</f:facet>			    
+			<f:facet name="controls">			    	
+				<h:panelGroup>
+		    	<h:graphicImage value="/baf/images/icons/close.png"
+		        	id="hidelink" styleClass="hidelink"/>
+		    		<rich:componentControl for="orderPanel" attachTo="hidelink"
+		       	 	operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>
+			<a4j:form id="orderListForm">
+			    <center>  
+			        <rich:orderingList value="#{businessBean.orderList}" var="orderList" listHeight="300" listWidth="350" converter="orderConverter"
+	        		upControlLabel ="#{msgs['orderingList.up']}" 
+					downControlLabel="#{msgs['orderingList.down']}"
+					topControlLabel="#{msgs['orderingList.top']}"
+					bottomControlLabel="#{msgs['orderingList.bottom']}"
+	        		>
+	            		<rich:column  width="180" visible="false">
+	            			<f:facet name="header">
+	                			<h:outputText value="#{msgs['baf.specialty.idName']}" />
+	            			</f:facet> 
+	                		<h:outputText value="#{orderList.id}"></h:outputText>
+	           			</rich:column>
+	           			<rich:column> 
+	                	<f:facet name="header">
+	                    	<h:outputText value="#{msgs['baf.specialty.speName']}" />
+	                	</f:facet>
+	                	<h:outputText value="#{orderList.name}"></h:outputText><br/>
+	            		</rich:column>
+	        		</rich:orderingList>		    
+			    </center>
+			    <h:inputHidden id="parentBusinessIdOrder" value="#{businessBean.parentBusinessId}"/>
+				<center>								 
+				<a4j:commandButton styleClass="rich-button" type="submit" id="orderSave" value="#{msgs['baf.Save']}" action="#{businessBean.saveOrderListener}" data="#{businessBean.functionData}" oncomplete="onSaveOrderComplete(data); #{rich:component('orderPanel')}.hide();"/>
+				<rich:spacer height="2px"/>
+				<a4j:commandButton styleClass="rich-button" type="button" id="orderCancel" value="#{msgs['baf.Cancel']}" onclick="#{rich:component('orderPanel')}.hide(); return false;"/>
+				</center>
+				</a4j:form>
+			    </rich:modalPanel>
+		
+		<a4j:form>
+		
+			<a4j:jsFunction name="Refresh" reRender="tabPanel" actionListener="#{businessBean.refresh}" data="#{businessBean.functionData}" oncomplete="onRefreshComplete(data)">
+				<a4j:actionparam name="businessId" value="" />
+			</a4j:jsFunction>
+			
+			<a4j:jsFunction name="moveTree" data="#{businessBean.functionData}" action="#{businessBean.moveBusiness}" oncomplete="onMoveTreeComplete(data)">
+				<a4j:actionparam name="scrId" value="" />
+				<a4j:actionparam name="destId" value="" />
+			</a4j:jsFunction>
+		
+			<a4j:jsFunction name="AddTopNew" reRender="tabPanel" actionListener="#{businessBean.addTopBusinessListener}" oncomplete="setFocus('businessForm:businessName');" />          	
+        
+        	<a4j:jsFunction name="AddNew" reRender="tabPanel" actionListener="#{businessBean.addBusinessListener}" data="#{businessBean.functionData}" oncomplete="onAddNewComplete(data)">
+        		<a4j:actionparam name="parentId" value=""/>
+        		<a4j:actionparam name="parentName" value=""/>
+        		<a4j:actionparam name="businessProperty" value=""/>
+        	</a4j:jsFunction>
+        	
+        	<a4j:jsFunction name="refreshOrderForm" action="#{businessBean.refreshOrder}" oncomplete="#{rich:component('orderPanel')}.show();" reRender="orderListForm">  
+        		<a4j:actionparam name="parentID" assignTo="#{businessBean.parentBusinessId}"/>
+        	</a4j:jsFunction>
+        	
+        	<a4j:jsFunction name="isExistChild" action="#{businessBean.isExistChild}" oncomplete="onSelectComplete(data)" data="#{businessBean.existChild}" >
+        		<a4j:actionparam name="businessId" assignTo="#{businessBean.businessId}"/>
+        	</a4j:jsFunction>
+        	
+        </a4j:form>
+	</div>
+	
+	<rich:toolTip for="helpicon" >
+    	<div style="width:300;">
+      		#{msgs['baf.module.WarningDrag11']}：<br/>1)#{msgs['baf.business.WarningDrag1']}<br/>
+	 		2)#{msgs['baf.business.WarningDrag2']}
+    	</div>
+    </rich:toolTip>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

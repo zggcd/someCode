@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.sqlfunction.dao.SQLFunctionDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.sqlfunction.model.SQLFunctionVO">
+		<id column="FDUFUNCTIONID" jdbcType="VARCHAR" property="functionID" />
+		<result column="FDCFUNCNAME" jdbcType="VARCHAR" property="funcName" />
+		<result column="FDCFUNCEXPRESS" jdbcType="VARCHAR" property="funcExpress" />
+		<result column="FDCFUNCCATEGORY" jdbcType="CHAR" property="funcCategory" />
+		<result column="FDCFUNCTYPE" jdbcType="CHAR" property="funcType" />
+		<result column="FDIPARAMSCOUNT" jdbcType="INTEGER" property="paramsCount" />
+		<result column="FDCCLASSNAME" jdbcType="VARCHAR" property="className" />
+		<result column="FDCORACLEEXP" jdbcType="VARCHAR" property="oracleExp" />
+		<result column="FDCSQLSERVEREXP" jdbcType="VARCHAR" property="sqlServerExp" />
+		<result column="FDCDB2EXP" jdbcType="VARCHAR" property="db2Exp" />
+		<result column="FDCSYBASEEXP" jdbcType="VARCHAR" property="sybaseExp" />
+		<result column="FDCINFORMIXEXP" jdbcType="VARCHAR" property="informixExp" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addFunction" parameterType="com.ccssoft.rsas.metadata.sqlfunction.model.SQLFunctionVO">
+		insert into TBFUNCTION (FDUFUNCTIONID, FDCFUNCNAME, FDCFUNCEXPRESS, 
+		FDCFUNCCATEGORY, FDCFUNCTYPE, FDIPARAMSCOUNT, FDCCLASSNAME, 
+		FDCORACLEEXP, FDCSQLSERVEREXP, FDCDB2EXP, FDCSYBASEEXP, FDCINFORMIXEXP, FDCDESC)
+		values (#{functionID,jdbcType=VARCHAR}, #{funcName,jdbcType=VARCHAR}, 
+		#{funcExpress,jdbcType=VARCHAR}, #{funcCategory,jdbcType=CHAR}, 
+		#{funcType,jdbcType=CHAR}, #{paramsCount,jdbcType=INTEGER}, 
+		#{className,jdbcType=VARCHAR}, #{oracleExp,jdbcType=VARCHAR}, 
+		#{sqlServerExp,jdbcType=VARCHAR}, #{db2Exp,jdbcType=VARCHAR}, 
+		#{sybaseExp,jdbcType=VARCHAR}, #{informixExp,jdbcType=VARCHAR}, 
+		#{desc,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateFunction" parameterType="com.ccssoft.rsas.metadata.sqlfunction.model.SQLFunctionVO">
+		update TBFUNCTION
+		set FDCFUNCNAME = #{funcName,jdbcType=VARCHAR}, FDCFUNCEXPRESS = #{funcExpress,jdbcType=VARCHAR}, 
+		FDCFUNCCATEGORY = #{funcCategory,jdbcType=CHAR}, FDCFUNCTYPE = #{funcType,jdbcType=CHAR}, 
+		FDIPARAMSCOUNT = #{paramsCount,jdbcType=INTEGER}, FDCCLASSNAME = #{className,jdbcType=VARCHAR}, 
+		FDCORACLEEXP = #{oracleExp,jdbcType=VARCHAR}, FDCSQLSERVEREXP = #{sqlServerExp,jdbcType=VARCHAR}, 
+		FDCDB2EXP = #{db2Exp,jdbcType=VARCHAR}, FDCSYBASEEXP = #{sybaseExp,jdbcType=VARCHAR}, 
+		FDCINFORMIXEXP = #{informixExp,jdbcType=VARCHAR}, FDCDESC = #{desc,jdbcType=VARCHAR}
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delFunction" parameterType="java.lang.String">
+		delete from TBFUNCTION
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getFunction" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUFUNCTIONID, FDCFUNCNAME, FDCFUNCEXPRESS, 
+		FDCFUNCCATEGORY, FDCFUNCTYPE, FDIPARAMSCOUNT, FDCCLASSNAME, 
+		FDCORACLEEXP, FDCSQLSERVEREXP, FDCDB2EXP, FDCSYBASEEXP, FDCINFORMIXEXP, FDCDESC
+		from TBFUNCTION
+		where FDUFUNCTIONID = #{functionID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getFunctions" resultMap="BaseResultMap">
+		select FDUFUNCTIONID, FDCFUNCNAME, FDCFUNCEXPRESS, 
+		FDCFUNCCATEGORY, FDCFUNCTYPE, FDIPARAMSCOUNT, FDCCLASSNAME, 
+		FDCORACLEEXP, FDCSQLSERVEREXP, FDCDB2EXP, FDCSYBASEEXP, FDCINFORMIXEXP, FDCDESC
+		from TBFUNCTION
+	</select>
+</mapper>

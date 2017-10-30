@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="1.2" xmlns="http://java.sun.com/xml/ns/javaee"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd">
+ <managed-bean>
+  <managed-bean-name>boardBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.BoardBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+ <managed-bean>
+  <managed-bean-name>topicBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.TopicBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>topicAndReplyBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.TopicAndReplyBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>responseBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.ResponseBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>topicManageBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.TopicManageBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>commonBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.CommonBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>searchBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.bbs.data.ui.control.SearchBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property> 
+ </managed-bean>
+ </faces-config>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<style>
+	.column1{
+		width:20%;
+		text-align:right;
+	}
+	.column2{
+		width:45%;
+		text-align:right;
+	}
+	.column3{
+		width:10%;
+	}
+	.column4{
+		width:30%;
+	}
+	.column5{
+		width:70%;
+	}
+	.footer
+	{
+		background:#F8F8F8;
+		font-size:13px;
+		font-weight:normal;
+		text-align:center;
+	}
+</style>
+</head>
+<body>
+	<!-- 部门信息模态框 -->
+	<rich:modalPanel id="org_panel" style="margin-left:5px;margin-right:5px;margin-top:5px;" switchType="client" width="550" height="365">
+		<f:facet name="header">
+			<h:outputText value="#{msgs['baf.org.unit.tab.orgunit']}"/>
+		</f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		    <h:graphicImage value="/baf/images/icons/close.png" id="orghidelink" styleClass="hidelink"/>
+		    <rich:componentControl for="org_panel" attachTo="orghidelink" operation="hide" event="onclick" />
+		</h:panelGroup>
+		</f:facet>	
+		<a4j:form>
+           <rich:tabPanel id="tabPanel">
+            <rich:tab id="orgunit" label="#{msgs['baf.org.unit.tab.orgunit']}" switchType="client" style="height: 240px;">
+            <h:inputHidden id="orgID" value="#{organizationBean.orgID}" />
+				<h:inputHidden id="parentOrgID" value="#{organizationBean.parentOrgID}" />
+				<fieldset style="height:100%" >		
+					<h:panelGrid id="org" columns="3" columnClasses="column1,column2,column3" rendered="#{organizationBean.orgrender}" style="font-size:13px;width:100%;word-break:break-all;" styleClass=".rich-text-color-general">
+						<h:outputText value="#{msgs['baf.org.unit.parentOrgName']}:"/>
+						<h:inputText id="parentOrgName" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.parentOrgNames}" disabled="true" />
+						<a4j:commandButton type="button" style="display: none;"/>
+						
+						<h:outputText value="#{msgs['baf.org.unit.orgName']}:" />
+						<h:inputText id="orgName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.orgName}" disabled="true" />
+						<h:outputText value=""/>
+					
+						<h:outputText value="#{msgs['baf.org.unit.orgType']}:" />
+						<h:inputText id="objectTypeID" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.objectTypeID}" disabled="true" />	
+						
+						<h:outputText value=""/>
+						
+						<h:outputText value="#{msgs['baf.org.unit.phone']}:" />
+						<h:inputText id="phone" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.phone}" disabled="true" />	
+						<h:outputText value=""/>
+				
+						<h:outputText value="#{msgs['baf.org.unit.fax']}:" />
+						<h:inputText id="fax" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{organizationBean.fax}" disabled="true" />	
+						<h:outputText value=""/>
+						
+						<h:outputText value="#{msgs['baf.org.unit.email']}:" />
+						<h:inputText id="email" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{organizationBean.email}" disabled="true" />
+						<h:outputText value=""/>
+					</h:panelGrid>
+				</fieldset>
+			</rich:tab>
+			
+			<rich:tab id="orguserunit" label="#{msgs['baf.org.unit.orgusertab']}" switchType="client" >
+			<!-- 人员列表 -->
+			<center>
+	        <h:panelGroup style="height:220px;overflow-x:auto;overflow-y:auto;" rendered="#{organizationBean.orgrender}">       
+		    <rich:dataTable width="100%" id="userList" footerClass="footer" rows="#{organizationBean.pageSize}" columnClasses="col" 
+	            value="#{organizationBean.secondDataModel}" var="orguser" style="font-size:13px;font-weight:normal;">
+	            <h:column>
+	            	<f:facet name="header">
+			        	<h:outputText styleClass="headerText " value="#{msgs['baf.org.user.userName']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.userName}"/>
+	            </h:column>
+	            <h:column>
+	            	<f:facet name="header">
+	                        <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.gender']}" style="font-weight:normal;"/>
+			        </f:facet>
+			        <h:outputText rendered="#{orguser.gender=='M'}" value="#{msgs['baf.radioMankind']}"/>
+	                <h:outputText rendered="#{orguser.gender=='F'}" value="#{msgs['baf.radioFemale']}"/>
+	            </h:column>
+	            <h:column>
+	            	<f:facet name="header">
+	                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.loginName']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.loginName}" />
+	            </h:column>
+	            <h:column>
+	            	<f:facet name="header">
+	                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.userType']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.userType}" />
+	            </h:column>
+	            <h:column>
+	            	<f:facet name="header">
+	                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.officePhone']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.officePhone}" />
+	            </h:column>
+	            <c:if test="#{!organizationBean.isHideMobile}">
+	            <h:column>
+	            	<f:facet name="header">
+	                    <h:outputText styleClass="headerText" value="#{msgs['baf.org.user.mobilePhone']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.mobilePhone}" />
+	            </h:column>
+	            </c:if>
+	            <h:column>
+	            	<f:facet name="header">
+	                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.phs']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.phs}" />
+	            </h:column>
+	            <h:column>
+	            	<f:facet name="header">
+	                	<h:outputText styleClass="headerText" value="#{msgs['baf.org.user.email']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <h:outputText value="#{orguser.email}" />
+	            </h:column>
+	        </rich:dataTable>    
+	        <table width="95%">
+	            <tr>
+		            <td>
+						<rich:datascroller align="right"  for="userList" fastStep="1"  page="#{organizationBean.scrollerPage3}" id="sc3" />
+						<a4j:keepAlive beanName="organizationBean"/>
+					</td>
+				</tr>
+			</table>		
+			</h:panelGroup>
+			</center>
+			</rich:tab>
+           </rich:tabPanel>
+           </a4j:form>
+           <center>
+			<h:commandButton type="button" id="orgModalPanelCancel" styleClass="rich-button" value="#{msgs['baf.Close']}" onclick="#{rich:component('org_panel')}.hide(); return false;"/>
+		</center>
+	</rich:modalPanel>
+	<h:form>
+    	<a4j:jsFunction name="orgInfo" limitToList="true" action="#{organizationBean.reflashUnit}" oncomplete="Richfaces.showModalPanel('org_panel');" reRender="tabPanel">
+           <a4j:actionparam name="orgId" assignTo="#{organizationBean.orgID}"  />             
+        </a4j:jsFunction>
+    </h:form>
+</body>
+</f:view>
+</html>

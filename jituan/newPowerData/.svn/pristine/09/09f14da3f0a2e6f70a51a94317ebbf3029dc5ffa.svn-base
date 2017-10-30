@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+	<f:view  contentType="text/html">
+		<head>
+		<title>装维技术论坛</title>
+			<link rel="stylesheet"
+				href="${request.contextPath}/baf/jsp/bbs/css/pw_core.css" />
+			<link rel="stylesheet"
+				href="${request.contextPath}/baf/jsp/bbs/css/mian.css" />
+		<script type="text/javascript" src="#{request.contextPath}/baf/js/fckeditor/fckeditor.js" charset="UTF-8"></script>
+			<script type="text/javascript">
+			//<![CDATA[
+			 if('#{topicManageBean.isLock}'=="Y"){
+					window.location.href="${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1";
+		   			alert("${msgs['baf.bbs.isLockTopic']}");
+		   	 }
+			
+			 function onSaveTop(data){
+			    if("Y"==data){
+			      window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId=#{topicManageBean.topicId}";
+			    }
+			   if("T"==data){ 
+			      window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=#{topicManageBean.boardId}";
+			    }
+			 }
+			 
+			 function goback(){
+			    //window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=#{topicManageBean.boardId}";
+			    window.location.href="#{request.contextPath}/baf/jsp/bbs/bbsComments.xhtml?topicId=#{topicManageBean.topicId}";
+			 }
+			
+			function beforeSave(){
+				var name = document.getElementById("addForm:title").value;
+				if(name == null || name == ""){
+					alert("${msgs['baf.bbs.mustTopicTitle']}");
+					return false;
+				}
+				//var content = fckeditor.getInstanceById("addForm:contentTextArea").getBody().innerHTML;
+				var fckeditor = FCKeditorAPI.GetInstance('addForm:content'); 
+				var content = fckeditor.GetXHTML(true);
+				if(content.empty()){
+					alert("${msgs['baf.bulletin.mustContent']}");
+					return false;
+				}else{
+					var contentPlain = content.replace("<P>", "");
+					contentPlain = contentPlain.replace("&nbsp;", "");
+					contentPlain = contentPlain.replace("<br />", "");
+					contentPlain = contentPlain.replace("</P>", "");
+					if(contentPlain.length == 0){
+						alert("${msgs['baf.bulletin.mustContent']}");
+						return false;
+					}
+					if(contentPlain.length > 50000){
+						alert("${msgs['baf.bbs.longTopicContent']}");
+						return false;
+					}
+				}
+				$('addForm:content').value = content;
+				return true;
+			}
+		
+			function sdeleteFile(fileName){
+				if(window.confirm("${msgs['baf.bulletin.confirmDelete']}？")){
+					dFileByName(fileName);
+				}
+			}
+			
+			function init(){
+				var fckeditor=new FCKeditor('addForm:content');
+				fckeditor.Height = 350;
+				fckeditor.Width = "75%";
+				fckeditor.ReplaceTextarea();
+				//window.setTimeout(init2,1000);//延迟一秒执行
+			}
+			 //]]>
+			</script>
+		</head>
+		<body onload="init();">
+		<f:loadBundle basename="messages" var="msgs" />
+		<center>
+			<ui:include src="/baf/jsp/bbs/top.xhtml"/>	
+			<div class="tac mb5"></div>
+
+				<!-- 新建贴子 -->
+
+				<div class="main-wrap">
+					<div id="main">
+					 <div class="f_tree cc" align="left">
+					 <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/home.gif" 	style="vertical-align:middle"></h:graphicImage>
+              <h:outputLink onclick="window.location.href='${request.contextPath}/bbsIndex.do?method=index';" value="#" style="vertical-align: middle">
+							<h:outputText value="论坛" style="font-size:13px;"/>
+						</h:outputLink>
+               <h:graphicImage url="${request.contextPath}/baf/jsp/bbs/images/related_li.gif" 	style="vertical-align:middle;width:16px"></h:graphicImage> 
+               <h:outputLink onclick="window.location.href='${request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=${topicManageBean.boardId}&amp;boardName=${topicManageBean.boardName}';" value="#" style="vertical-align: middle">
+							<h:outputText value="#{topicManageBean.boardName}" style="font-size:13px;"/>
+						</h:outputLink> </div>
+						
+						 <div class="tac mb5"></div>
+						<div id="pw_content" class="mb10">
+		   <!-- 新建贴子 -->
+			<a4j:form id="addForm">
+			<h:inputHidden id="topicId" value="#{topicManageBean.topicId}"></h:inputHidden>
+			<h:inputHidden id="boardId" value="#{topicManageBean.boardId}"></h:inputHidden>
+			<h:inputHidden id="ruleName1"  value="#{topicManageBean.userName}" />
+				<br/><br/>
+					<center>
+						<table width="100%" border="0">
+						
+							<tr>
+								<td width="25%" align="right" height="30px"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.topicTitle']}: "/></td>
+								<td >
+									<h:inputText id="title"  value="#{topicManageBean.title}" style="width:40%;height:23px;" styleClass="rich-gradient-input">
+									  <s:commonsValidator type="required" arg="#{msgs['baf.bbs.topicTitle']}" server="false" client="true"/>
+									</h:inputText><rich:spacer height="5px"/>
+									<h:outputText value="*" style="color: red;"/>
+								</td>
+							</tr>
+							<tr>
+								<td width="25%" align="right" height="30px"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.topicType']}: "/></td>
+								<td >
+									<h:selectOneMenu id="toptype" value="#{topicManageBean.type}" style="width:20%;height:23px;">					
+										<f:selectItems value="#{topicManageBean.topTypeMap}"/>
+									</h:selectOneMenu>
+								</td>
+							</tr>
+							<tr>
+							<td width="25%" align="right" height="30px">
+								<h:outputText style="font-size:13px;"
+									value="显示名称: " />
+							</td>
+							<td>
+								<h:selectOneRadio id="displayName" style="font-size:13px;" value="#{topicManageBean.displayName}">
+								<f:selectItem itemLabel="全称" itemValue="F" />
+								<f:selectItem itemLabel="昵称" itemValue="N" />
+								</h:selectOneRadio>
+								
+							</td>
+						</tr>
+							<tr>			
+								<td width="25%" align="right" ><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.topicContext']}: "/></td>
+								<td colspan="4">
+									<h:inputTextarea id="content"  value="#{topicManageBean.content}"/>
+								</td>
+							</tr>
+							
+							<tr>			
+								<td width="25%" align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.attachment']}: "/></td>
+								<td >
+								    
+				<h:outputText value="#{msgs['baf.bulletin.addLimitAttachment']}" style="font-size:13px;color:red"></h:outputText>
+		<rich:tabPanel id="fileList" style="width:75%">
+		<rich:tab label="#{msgs['baf.bulletin.attachmentList']}" >
+		<table width="80%" style="font-size:13px;">
+			<a4j:repeat value="#{topicManageBean.uploadFileList}" var="vo">
+				<tr>
+					<td width="70%" style="overflow: hidden;">
+						<h:outputLabel value="#{vo.fileName}"></h:outputLabel>
+					</td>
+					<td width="10%" align="right">
+						<h:graphicImage url="/baf/images/delete.gif" title="#{msgs['baf.bulletin.delete']}" 
+						onclick="sdeleteFile('#{vo.fileName}')" style="cursor:hand;"/>
+					</td>
+				</tr>
+			</a4j:repeat>
+		</table>
+		<a4j:jsFunction action="#{topicManageBean.deleteFile}"  name="dFileByName" reRender="fileList">
+			<a4j:actionparam name="fileName"/>
+		</a4j:jsFunction>
+		</rich:tab>
+		</rich:tabPanel>
+		   <a4j:keepAlive beanName="topicManageBean"/>
+	  
+		<rich:fileUpload 
+			listWidth="75%"
+			listHeight="65"
+			maxFilesQuantity="10"
+			immediateUpload="true"
+			progressLabel="#{msgs['baf.bulletin.waitWhenUpdating']}"
+			addControlLabel="#{msgs['baf.bulletin.addAttachment']}"
+			clearControlLabel="#{msgs['baf.bulletin.cancelUpdate']}"
+			stopEntryControlLabel="#{msgs['baf.bulletin.stopUpdate']}"
+			autoclear="true"
+			noDuplicate="true"
+			doneLabel="#{msgs['baf.bulletin.done']}"
+			stopControlLabel="#{msgs['baf.bulletin.stopUpdate']}"
+			sizeErrorLabel="#{msgs['baf.bulletin.outOfLimit']}"
+			fileUploadListener="#{topicManageBean.uploadFileForAdd}" id="fileUpload">
+				<a4j:support event="onfileuploadcomplete" reRender="fileList"/>
+		</rich:fileUpload>
+								</td>
+							</tr>
+							<tr>
+								<td align="center" colspan="2" height="30px">
+					
+								<h:selectBooleanCheckbox id="anonymous" title="#{msgs['baf.bbs.anonymous']}" value="#{topicManageBean.anonymous}" rendered="false" /><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.anonymous']} " rendered="false" />
+									<a4j:commandButton styleClass="rich-button" type="submit" id="top_save" value="#{msgs['baf.Save']}"  onclick="if(beforeSave()==false){return false;}" action="#{topicManageBean.save}" oncomplete="onSaveTop(data);" data="#{topicManageBean.dealFlag}" />
+									<rich:spacer width="20"/>
+									<a4j:commandButton styleClass="rich-button" type="submit" id="top_rel" value="#{msgs['baf.desktop.btnReturn']}" oncomplete="goback();" action="topicManageBean.nothing"/>
+								</td>
+							</tr>
+						</table>
+					</center>
+			
+				<s:validatorScript functionName="validateForm"/> 
+			</a4j:form>
+			</div>
+			</div></div>
+			</center>
+		<!-- 正在操作模态框 -->	
+		<rich:modalPanel id="panel" width="350" height="100">
+	    	<h:graphicImage value="/baf/images/blue-loading.gif"/><h:outputText value="#{msgs['baf.Processing']}" escape="false"/>
+	    	
+	    </rich:modalPanel>
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+	</f:view>
+</html>

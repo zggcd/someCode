@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<head>
+		<script>
+		//<![CDATA[
+			//表单校验扩展
+			function validateAll(formobj)
+			{
+			   var returnvalue = true;	   
+			   returnvalue = validateForm(formobj);
+			   return returnvalue;
+			}
+	
+			function onSaveParent(data){
+				if (data == "N") {
+				  //处理失败
+				  alert("${msgs['baf.Failure']}");
+			   }
+		    	if(a4jcomplete()==false){
+					return;
+				}
+				//document.getElementById("addForm:boardName").value = "";
+				//document.getElementById("addForm:managerIds").value = "";
+				//document.getElementById("addForm:managerNames").value = "";
+				//document.getElementById("addForm:remark").value = "";
+				rereshparentpartition();
+				setFocus('addForm:boardName');
+			}
+			function beforeSave(){
+				var name = document.getElementById("addForm:boardName").value;
+				if(name == null || name == ""){
+					alert("${msgs['baf.bbs.checkBoardName']}");
+					return false;
+				}
+				return true;
+			}
+		//]]>
+		</script>
+
+</head>
+<body onload="setFocus('addForm:boardName');">
+<f:loadBundle basename="messages" var="msgs" />
+	<ui:include src="#{pageContext.contextPath}/baf/jsp/common/getTreeData.xhtml">
+		<ui:param name="modalName" value="bbsSelectOrgUser" />
+		<ui:param name="dataSource" value="IDT_BBS_USERTREE" />
+		<ui:param name="label" value="组织人员" />
+		<ui:param name="selectNum" value="0" />		
+		<ui:param name="inputId" value="addForm:managerIds" />
+		<ui:param name="inputName" value="addForm:managerNames" />
+	</ui:include>
+<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+	<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:98%;" switchType="client" >
+	<!-- 新建主分区 -->
+        <rich:tab id="tab_addboard" label="#{msgs['baf.bbs.bbsAddBoard']}" switchType="client">	
+			<a4j:form id="addForm">
+				<fieldset style="height: 90%;">
+					<legend><h:outputText value="#{msgs['baf.bbs.bbsAddBoard']}" /></legend>
+					<center>
+						<table width="90%" border="0">
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionName']}: "/></td>
+								<td width="40%">
+									<h:inputText id="boardName" maxlength="32" value="#{boardBean.boardName}" style="width:98%;height:23px;" styleClass="rich-gradient-input">
+										<s:commonsValidator type="required" arg="#{msgs['baf.bbs.partitionName']}" server="false" client="true"/>
+									</h:inputText>
+								</td>
+							</tr>
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionManager']}: "/></td>
+								<td>
+									<h:inputText id="managerNames" maxlength="32" value="#{boardBean.managerNames}" onfocus="this.blur()" style="width:86%;height:23px;" styleClass="rich-gradient-input"/>
+									<h:inputHidden id="managerIds" maxlength="32" value="#{boardBean.managerIds}" style="width:86%;height:23px;display:none;" styleClass="rich-gradient-input"/>
+									<a4j:commandButton id="sel_board" type="button" styleClass="rich-button" value="#{msgs['baf.dataImport.assginCmd']}" onclick="showbbsSelectOrgUser(); return false;"/>
+								</td>
+							</tr>
+							<tr align="center">
+								<td width="10%"><h:outputText style="font-size:13px;" value="#{msgs['baf.bbs.partitionRemark']}: "/></td>
+									<td>
+									<h:inputTextarea  id="remark" rows="5" value="#{boardBean.remark}" style="width:98%;resize:none;" styleClass="rich-gradient-input" >
+									   <s:commonsValidator type="maxlength" arg="#{msgs['baf.bbs.partitionRemark']}" server="false" client="true" maxLength="64"/>
+									</h:inputTextarea>
+								</td>
+							</tr>
+							<tr align="center">
+								<td colspan="2" align="center">
+									<a4j:commandButton styleClass="rich-button" type="submit" id="sel_save" value="#{msgs['baf.Save']}" onclick="if(!beforeSave()){return false;}" action="#{boardBean.addParent}" oncomplete="onSaveParent(data);" data="#{boardBean.dealFlag}" reRender="addForm,tabPanel,tab_addboard" />
+								</td>
+							</tr>
+						</table>
+					</center>
+				</fieldset>
+				<s:validatorScript functionName="validateForm"/> 
+				<a4j:keepAlive beanName="boardBean"/> 	
+			</a4j:form>
+			 <a4j:form>
+				<a4j:jsFunction name="rereshparentpartition" action="#{boardBean.initBoa}" reRender="tabPanel,addForm" />
+			</a4j:form>
+        </rich:tab>
+    </rich:tabPanel>
+</div>
+   	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

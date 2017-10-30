@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<script>	
+	    //<![CDATA[	
+	    //触发事件
+	 function onObjectFireMouseEvent(obj, eventname) { 					
+		if (document.all) {
+		//IE
+			obj.fireEvent(eventname);
+		} else {
+		//firefox						
+			var name = eventname.replace("on", "");
+			var evtObj = document.createEvent('MouseEvents');     
+			evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+			obj.dispatchEvent(evtObj);
+		}
+	}
+	//新增字典
+	function onDictionaryAdd(dictCategoryTree){
+		var cateId = dictCategoryTree.getSelectedItemId();
+		var cateName = dictCategoryTree.getSelectedItemText();
+		addDictionary(cateId,cateName);
+	}
+	
+	//表单校验扩展
+	function validateAll(formobj)
+	{
+	   var returnvalue = true;	   
+	   returnvalue = validateForm(formobj);
+	   return returnvalue;
+	}
+	
+	//保存或修改完条目触发事件
+    function onItemAddOrEditComplete(data) {
+       document.getElementById("queryForm:gotItemIdValues").value = "";//clear last ItemId,added Nov.24th,2009
+	   if (data == "R") {
+		  //条目编号已经存在
+		  alert("${msgs['baf.dict.confirm1']}");
+		  //设置焦点
+		  setFocus("itemModalForm:itemCode");
+		  var isBatchSaveGroup = document.getElementById("itemModalForm:isBatchSaveGroup");
+		  isBatchSaveGroup.style.visibility = "hidden";
+		  return;
+	   }
+	   if(data == "D") {
+	 		//条目存在逻辑删除了。弹出对话框是否覆盖或者恢复的选择处理.
+	 		Richfaces.showModalPanel("instendOrRestoreItemPanel");
+		    //设置焦点
+		    setFocus("dictionaryForm:dictCode");
+	 		return;
+   		}
+	   if(a4jcomplete()==false){
+ 			return;
+       }   
+	}
+	
+	//保存或修改完字典完成触发事件
+	function onSaveDictComplete(data){
+   		if(data!=null && data!=""){
+   		
+   			if(data=="R"){
+   				alert("${msgs['baf.dict.confirm2']}");  
+			    //设置焦点
+			    setFocus("dictionaryForm:dictCode");
+   				return;
+   			}
+   		}   
+   		//字典存在逻辑删除了。弹出对话框是否覆盖或者恢复的选择处理.	
+   		if(data == "D") {
+	 		Richfaces.showModalPanel("instendOrRestoredicPanel");
+		    //设置焦点
+		    setFocus("dictionaryForm:dictCode");
+	 		return;
+   		}
+   	    if(a4jcomplete()==false){
+ 			return;
+    	}   	
+   		parent.showDictList();   //刷新字典列表
+   		parent.reload();     //刷新当前类别
+   		parent.setUserdata("isExistDict","Y");     //设置类别节点属性，用来控制右键菜单的显示
+   		
+   		//是否批量新增
+		var isBatchAddNew = document.getElementById("dictionaryForm:isBatchAddSave");
+		if(isBatchAddNew.checked==false){
+			var dictId = document.getElementById("dictionaryForm:dictId").value;
+			var timeout = setTimeout("parent.showDict('"+dictId+"')", 800);			
+		}
+	}  
+	
+	//将编号转换为大写
+	function toUpper(code){
+		code.value = code.value.toUpperCase();
+	}	
+    //编辑条目,判断是否选择了一行
+    function checkSelectOneRow() {										
+	  var oTable = document.getElementById("itemInTabForm:itemLists");
+	  //获取当前页码数
+	  var pageNum = document.getElementById("itemInTabForm:pageNo").value;
+	  //获取每页数据个数	  
+	  var pageSize = document.getElementById("queryForm:pageSize").value;
+	  var size = oTable.rows.length - 1; //去除列头一行
+	  var selectCount = 0;
+	  if (size != null) {
+	  	for (var i=0; i<size; i++) {
+	   	    var realNum = (pageNum-1)*pageSize + i;
+			var e = document.getElementById("itemInTabForm:itemLists:"+realNum+":selectedItem");						
+			if (e != null && e.checked) {
+		    	selectCount ++;
+			}
+	  	}
+	  	if (selectCount != 1) {
+	   		//请勾选一行需要编辑的数据
+			alert("${msgs['baf.org.WarningEditOneRow']}");
+			return false;
+	  	}
+	  }
+	  return true;
+	}	
+	
+    //响应check点击事件
+	function checkBoxClick(object, value) {					
+	   var itemIdsArr = document.getElementById("queryForm:gotItemIdValues").value;
+	   if (itemIdsArr == null || itemIdsArr == "") {
+	   	 if (object.checked == true) {							
+			itemIdsArr = value;
+		 } 
+	   } else {
+		    if (object.checked == true) {
+				itemIdsArr = itemIdsArr + "$" + value;	 			
+			} 
+			else { //去掉取消选中的值
+				var index = itemIdsArr.indexOf(value);
+				if (index >= 0) {																
+					var str = "";
+					if(index>0){
+						str = "$"+value;
+					} else {
+						if(index==0 && itemIdsArr.indexOf("$")!=-1){
+							str = value + "$";
+						} else {
+							str = value;
+						}
+					}
+				itemIdsArr = itemIdsArr.replace(str, "");
+				}
+			}
+		}
+		//保存勾选的itemID值， 格式为 itemId$itemId$itemId
+		document.getElementById("queryForm:gotItemIdValues").value = itemIdsArr;
+		document.getElementById("queryForm:itemChecked").value= itemIdsArr;
+	}
+	
+	
+	//点击编辑按钮，修改条目
+	function onItemInTabEdit() {	
+		if(window.sys_error==true) return;
+		Richfaces.showModalPanel("modalPanel");
+		document.getElementById("itemModalForm:itemDict").disabled = true;	
+		var e = document.getElementById("itemModalForm:isBatchSave");
+		var isBatchSaveGroup = document.getElementById("itemModalForm:isBatchSaveGroup");
+			isBatchSaveGroup.style.visibility = "hidden";
+		if (e.checked){
+		  e.checked = !e.checked;
+		}
+		//设置焦点
+		setFocus("itemModalForm:itemName");
+	}
+	
+	//清空批量新增复选框
+	function reSetCancelChkbox(){
+	  	var e = document.getElementById("itemModalForm:isBatchSave");
+		if (e.checked){
+		  e.checked = !e.checked;
+		}
+	}
+	
+    //判断是否选择单行或者多行
+	function checkSelectRow() {		
+		var oTable = document.getElementById("itemInTabForm:itemLists");
+		//获取当前页码数
+		var pageNum = document.getElementById("itemInTabForm:pageNo").value;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value;				
+		var size = oTable.rows.length - 1; //去除列头一行	
+		var selectCount = 0;
+		if (size != null) {
+	    	for (var i=0; i<size; i++) {
+				var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("itemInTabForm:itemLists:"+realNum+":selectedItem");						
+				if (e != null && e.checked) {
+					selectCount ++;
+				}
+			}
+			if (selectCount <= 0) {
+				//请勾选需要删除的数据
+				alert("${msgs['baf.org.WarningDeleteRow']}");
+				return false;
+			}
+		}
+		return true;
+	}
+	function checkExportRow(){
+	    var oTable = document.getElementById("itemInTabForm:itemLists");
+		//获取当前页码数
+		var pageNum = document.getElementById("itemInTabForm:pageNo").value;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value;				
+		var size = oTable.rows.length - 1; //去除列头一行	
+		var selectCount = 0;
+		if (size != null) {
+	    	for (var i=0; i<size; i++) {
+				var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("itemInTabForm:itemLists:"+realNum+":selectedItem");						
+				if (e != null && e.checked) {
+					selectCount ++;
+				}
+			}
+			if (selectCount <= 0) {
+				//请勾选需要删除的数据
+				alert("${msgs['baf.org.WarningDeleteRow']}");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+    //全选select操作表所有项
+	function onSelectALlItems() {
+		var oTable = document.getElementById("itemInTabForm:itemLists");
+		var oChkAll = document.getElementById("itemInTabForm:itemLists:selectAll"); 
+		//当条目全选按钮由checked变为unchecked时,清空itemIDs$itemIDs串
+	    if (!oChkAll.checked){
+	      document.getElementById("queryForm:gotItemIdValues").value = "";
+	      document.getElementById("queryForm:itemChecked").value = "";
+	    }
+	    
+		//获取当前页码数
+		var pageNum = document.getElementById("itemInTabForm:pageNo").value;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value;      	      	
+		if (oTable != null && oChkAll != null) {
+			for (j = 0; j < oTable.rows.length -1; j++) {
+				var realNum = (pageNum-1)*pageSize + j;
+				var e = document.getElementById("itemInTabForm:itemLists:"+realNum+":selectedItem");
+				if (e.id.indexOf("selectedItem") >= 0) {   
+					//触发CheckBox onclick事件，用来设置itemid
+					if(document.all) {
+						//IE
+						var oldValue= e.checked;
+						e.checked = oChkAll.checked;
+						if (!oldValue && e.checked) {
+							onObjectFireMouseEvent(e, "onclick");
+						}
+					}else{
+						//firefox
+						if (oChkAll.checked) {
+							var oldValue= e.checked;
+							if (!oldValue)
+								onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+			}
+		 }
+	}		
+	
+	//标识当前是点击查询按钮执行的查询
+	function checkQueryInputValues(){
+	   document.getElementById("queryForm:flagId").value = "Y";
+	   return true;
+	}
+	
+	//按回车调用查询按钮的单击事件
+	function forSelect(){
+		if(event.keyCode==13){
+			document.getElementById('queryForm:itemForSearch').onclick();
+		}
+	}
+	
+	//切换到查询tab页时，设置按回车进行查询
+	function toSelectPage(){
+		document.body.onkeyup = forSelect;
+	}
+	
+	//切换到字典信息tab页时，设置回车事件为空
+	function toDictPage(){
+		document.body.onkeyup = "";
+	}	
+
+	//删除条目完成
+	function onDicItemsDelComplete(data) {
+	 	if(a4jcomplete()==false){
+ 			return;
+		}
+	    document.getElementById("queryForm:gotItemIdValues").value = "";
+		toSelectPage();  //设置回车事件
+	}
+	
+	//双击列表行，修改模板
+	function onDblClickItemEdit(eItemID) {			
+		rowDblClickItemEdit(eItemID);
+	}
+	
+    //added,March 31th,2010.
+    function refreshItemAddModelPanel(){
+        changeItemBeanInstance();
+        document.getElementById("queryForm:sitemCode").value = "";
+        document.getElementById("queryForm:sitemName").value = "";
+    }
+   
+    //保存完成事件
+    function onSaveDictItemComplete(data){
+		var e = document.getElementById('itemModalForm:isBatchSave'); 
+		onItemAddOrEditComplete(data); 
+		if(data=='Y' && !e.checked) {
+			Richfaces.hideModalPanel("modalPanel");
+		}
+    }
+    
+    //保存字典条目排序完成事件
+    function onSaveOrderComplete(){
+    	if(a4jcomplete()==false){
+ 			return;
+        }
+        #{rich:component('orderModalPanel')}.hide();
+    }
+    //点击查询按纽列表未渲染前置灰
+    function ondisabled(type){
+    	if(type == "S"){
+    		document.getElementById("dictionaryForm:dictsave").disabled = true;
+    	}else if(type == "Item"){
+    		document.getElementById("queryForm:itemForSearch").disabled = true;
+    	}
+    }
+	    //]]>
+		</script>
+		<style type="text/css">
+		.column1{
+			width:26%;
+			text-align:right;
+		}
+		.column2{
+			width:85%;
+			text-align:right;
+		}
+		</style>
+	</head>
+	<body onload="setFocus('dictionaryForm:dictName')">
+	  <f:loadBundle basename="messages" var="msgs" />
+	  <f:view  contentType="text/html">
+	  <rich:tabPanel id="tabPanel" style="width:100%;height:97%;" switchType="client" selectedTab="#{dictionaryBean.selectedTab}">		
+		<!-- 字典信息 -->
+		<rich:tab id="dictionary" label="#{msgs['baf.dict.dictionary']}" style="text-align:center;" onlabelclick="toDictPage();">
+			<rich:spacer height="10px"/>
+           	<h:form id="dictionaryForm">
+           		<center>
+					<h:panelGrid id="dict" columns="2" columnClasses="column1,column2" style="font-size:13px;width:60%;word-break:break-all;" styleClass=".rich-text-color-general">
+						
+						<h:outputText value="#{msgs['baf.dict.dictName']}:" />
+						<h:inputText id="dictName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictionaryBean.dictionaryName}">
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.dictName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.dictName']}" maxLength="64"  server="false" client="true"/>				 
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dict.dictCode']}:" />
+						<h:inputText id="dictCode" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictionaryBean.dictionaryCode}" onblur="toUpper(this);" title="#{msgs['baf.dict.dictCodeTips']}">
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.dictCode']}" server="false" client="true"/>
+							<s:commonsValidator type="mask" arg="#{msgs['baf.dict.dictCode']}" mask="^IDD_.{1,}$" server="false" client="true" />
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.dictCode']}" maxLength="64"  server="false" client="true"/>				 
+						</h:inputText>
+					
+						<h:outputText value="#{msgs['baf.dict.dictCate']}:" />
+						<h:inputText id="dictCategory" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()" value="#{dictionaryBean.dictionaryCategoryName}"/>
+						
+						<h:outputText value="#{msgs['baf.dict.dictDes']}:" />
+						<h:inputTextarea id="dictDes" style="width:95%;" rows="5" styleClass="rich-gradient-input" value="#{dictionaryBean.dictionaryDesc}">				
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.dictDes']}" maxLength="512"  server="false" client="true"/>
+						</h:inputTextarea>			
+						
+					</h:panelGrid>
+				</center>
+				
+				<h:inputHidden id="dictId" value="#{dictionaryBean.dictionaryId}" />
+				<h:inputHidden id="cateId" value="#{dictionaryBean.dictionaryCategoryId}" />
+				<h:inputHidden id="addOrEdit" value="#{dictionaryBean.addOrEdit}"/>
+				
+				<rich:spacer width="5px"/>	
+				
+				<center>
+				<h:panelGroup id="isBatchAddGroup" style="visibility:#{dictionaryBean.chkShow};">		
+					<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+					<h:selectBooleanCheckbox id="isBatchAddSave" />	
+				</h:panelGroup>												
+				<rich:toolTip for="isBatchAddSave" value="#{msgs['baf.org.BatchAddNewTip']}"/>	
+				<rich:spacer width="5px"/>
+				
+				<a4j:commandButton id="dictsave" value="#{msgs['baf.Save']}" styleClass="rich-button" >
+					<a4j:actionparam name="handleType" value="save" />
+					<a4j:support event="onclick" onsubmit="if(validateAll(document.getElementById('dictionaryForm'))==false) return false;ondisabled('S');" disabled="false" action="#{dictionaryBean.addOrEdit}" data="#{dictionaryBean.dealFlag}" oncomplete="onSaveDictComplete(data);" reRender="dictionaryForm,dictsave"/>
+				</a4j:commandButton>
+				</center>
+				<s:validatorScript functionName="validateForm"/>
+				<a4j:keepAlive beanName="dictionaryBean"/>
+				
+				<!-- 覆盖原来或者恢复已删除字典确认模态框 -->
+			 <rich:modalPanel id="instendOrRestoredicPanel" autosized="true" width="400" height="100">
+    	     <f:facet name="header">
+				<h:outputText value="#{msgs['baf.dict.tops']}：" style="padding-right:15px;" />
+	         	</f:facet>
+				<!-- 关闭按钮 -->
+		    	<f:facet name="controls">
+					<h:panelGroup>
+			 			<h:graphicImage value="/baf/images/icons/close.png"
+			 				id="hidelinkinstendOrRestoredic" styleClass="hidelink"/>
+						<rich:componentControl for="instendOrRestoredicPanel" attachTo="hidelinkinstendOrRestoredic"
+							operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>	
+			
+			<font style="color:red;font-size:15px;">#{msgs['baf.dict.confirm4']}</font><span></span>
+			<center>
+			<rich:spacer height="35px" />
+			<a4j:commandButton value="#{msgs['baf.dict.Cover']}" type="submit" styleClass="rich-button"
+		                 	data="#{dictionaryBean.dealFlag}"
+		                    action="#{dictionaryBean.OverOldDictionary}"
+		                    oncomplete="#{rich:component('instendOrRestoredicPanel')}.hide();onSaveDictComplete(data);"
+		                    reRender="dictionaryForm,dictsave"/>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton value="#{msgs['baf.dict.Restore']}" type="submit" styleClass="rich-button"
+		                 	data="#{dictionaryBean.dealFlag}"
+		                    action="#{dictionaryBean.restoreValidStatus}"
+		                    oncomplete="#{rich:component('instendOrRestoredicPanel')}.hide();onSaveDictComplete(data);"
+		                    reRender="dictionaryForm,dictsave"/>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+				onclick="#{rich:component('instendOrRestoredicPanel')}.hide();return false;" />
+			</center>
+			</rich:modalPanel>	
+			
+			</h:form>
+		</rich:tab>
+			
+		<!-- 字典条目 -->
+		<rich:tab id="dictItem" label="#{msgs['baf.dict.dictItem']}" switchType="client" onlabelclick="toSelectPage();">			 
+        	<br />
+        	<h:form id="queryForm">
+        	<center>
+			<rich:panel style="width:95%;">				
+				<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	
+					<h:panelGroup>
+					<h:outputText value="#{msgs['baf.dict.itemCode']}："/>
+					<h:inputText id="sitemCode" value="#{dictItemBean.itemCodeForQuery}" style="width:160px;height:23px;" styleClass="rich-gradient-input" /><rich:spacer width="5px"/>
+					</h:panelGroup>
+					
+					<h:panelGroup>
+					<h:outputText value="#{msgs['baf.dict.itemName']}："/>
+					<h:inputText id="sitemName" value="#{dictItemBean.itemNameForQuery}" style="width:160px;height:23px;" styleClass="rich-gradient-input"/><rich:spacer width="5px"/>
+					</h:panelGroup>
+					
+					<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.org.btnSearch']}">
+						<a4j:support event="onclick" onsubmit="if (checkQueryInputValues()==false) return false;ondisabled('Item');" disabled="false" action="#{dictItemBean.searchItems}" limitToList="true" reRender="itemLists,itemScroller,itemForSearch" requestDelay="100"/>
+					</a4j:commandButton>
+				</h:panelGrid>
+				
+			</rich:panel>
+			<rich:spacer width="5px"/>		 				 
+			<center>							 
+			<a4j:commandButton styleClass="rich-button" type="submit" id="itemAdd" value="#{msgs['baf.Add']}">
+				<a4j:support  event="onclick" actionListener="#{dictItemBean.addDictItemListener}" oncomplete="#{rich:component('modalPanel')}.show();setFocus('itemModalForm:itemName');" reRender="itemModalForm"/>
+			</a4j:commandButton>                                                          
+			<rich:spacer width="40px"/>
+			<a4j:commandButton styleClass="rich-button" type="submit" id="itemEdit" value="#{msgs['baf.Edit']}">
+				<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{dictItemBean.editDictionaryItemListener}" oncomplete="onItemInTabEdit();setFocus('itemModalForm:itemName');" reRender="itemModalForm"/>
+			</a4j:commandButton>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton styleClass="rich-button" type="button" id="itemDelete" value="#{msgs['baf.Delete']}">
+				<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('delItemPanel')}.show();} return false;"/>
+			</a4j:commandButton>
+			<rich:spacer width="40px"/>
+			<h:commandButton styleClass="rich-button" type="button" id="itemExport" value="#{msgs['baf.dict.exportButton']}" action="#{dictionaryExpBean.expDictionaryItem}">
+			    <a4j:support event="onclick" onsubmit="if (checkExportRow()==false){return false;}"></a4j:support>
+			</h:commandButton>
+			<rich:spacer width="40px"/>
+			<h:commandButton styleClass="rich-button" type="button" id="itemOrder" value="#{msgs['baf.dict.orderButton']}">
+			    <a4j:support event="onclick" onsubmit="getItemsByDictId();return false;"/>
+			</h:commandButton>
+			</center>	
+			
+			 <!-- 删除条目确认模态框 -->
+			 <rich:modalPanel id="delItemPanel" autosized="true" width="300">
+    	     <f:facet name="header">
+				<h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}" style="padding-right:15px;" />
+	         	</f:facet>
+				<!-- 关闭按钮 -->
+		    	<f:facet name="controls">
+					<h:panelGroup>
+			 			<h:graphicImage value="/baf/images/icons/close.png"
+			 				id="hidelinkDelete" styleClass="hidelink"/>
+						<rich:componentControl for="delItemPanel" attachTo="hidelinkDelete"
+							operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>	
+			<center>
+			<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+		                 	data="#{dictItemBean.dealFlag}"
+		                    action="#{dictItemBean.deleteDictionaryItem}"
+		                    oncomplete="#{rich:component('delItemPanel')}.hide();onDicItemsDelComplete(data);"
+		                    reRender="itemLists,itemScroller,pageNo"/>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+				onclick="#{rich:component('delItemPanel')}.hide();return false;" />
+			</center>
+			</rich:modalPanel>	
+			
+			<!-- 覆盖原来或者恢复已删除字典条目确认模态框 -->
+			 <rich:modalPanel id="instendOrRestoreItemPanel" autosized="true" width="400" height="150">
+    	     <f:facet name="header">
+				<h:outputText value="温馨提示：" style="padding-right:15px;" />
+	         	</f:facet>
+				<!-- 关闭按钮 -->
+		    	<f:facet name="controls">
+					<h:panelGroup>
+			 			<h:graphicImage value="/baf/images/icons/close.png"
+			 				id="hidelinkinstendOrRestore" styleClass="hidelink"/>
+						<rich:componentControl for="instendOrRestoreItemPanel" attachTo="hidelinkinstendOrRestore"
+							operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>	
+			
+			<font style="color:red;font-size:15px;">#{msgs['baf.dict.confirm7']}</font><span></span>
+			<center>
+			<rich:spacer height="35px" />
+			<a4j:commandButton value="#{msgs['baf.dict.Cover']}" type="submit" styleClass="rich-button"
+		                 	data="#{dictItemBean.dealFlag}"
+		                    action="#{dictItemBean.instendOld}"
+		                    oncomplete="#{rich:component('instendOrRestoreItemPanel')}.hide();#{rich:component('modalPanel')}.hide();onDicItemsDelComplete(data);"
+		                    reRender="itemLists,itemScroller,pageNo"/>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton value="#{msgs['baf.dict.Restore']}" type="submit" styleClass="rich-button"
+		                 	data="#{dictItemBean.dealFlag}"
+		                    action="#{dictItemBean.restoreIsvalidStatus}"
+		                    oncomplete="#{rich:component('instendOrRestoreItemPanel')}.hide();#{rich:component('modalPanel')}.hide();onDicItemsDelComplete(data);"
+		                    reRender="itemLists,itemScroller,pageNo"/>
+			<rich:spacer width="40px"/>
+			<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+				onclick="#{rich:component('instendOrRestoreItemPanel')}.hide();return false;" />
+			</center>
+			</rich:modalPanel>	
+			
+			
+			<h:inputHidden id="gotItemIdValues" value="#{dictItemBean.selectedItemIds}" />
+			<h:inputHidden id="itemChecked" value="#{dictionaryExpBean.itemChecked}" />
+		    <h:inputHidden id="flagId" value="#{dictItemBean.searchFlag}" />
+			<a4j:keepAlive beanName="dictItemBean"/>
+			
+		    <h:inputHidden id="pageSize" value="#{dictItemBean.pageSize}"/>	
+		    </center>
+		    </h:form>	
+		    	
+		    <!--新增/编辑模态框 -->
+			<rich:modalPanel id="modalPanel" autosized="false" keepVisualState="false" width="550" height="450">			
+			   <f:facet name="header">
+					<h:outputText value="#{msgs['baf.dict.itemMes']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png"
+				        id="hidelink" styleClass="hidelink"/>
+				    <rich:componentControl for="modalPanel" attachTo="hidelink"
+				        operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>				
+				<a4j:form id="itemModalForm">
+				  <center>   
+					<h:panelGrid id="dictItem" columns="2" columnClasses="column1,column2" style="font-size:13px;width:80%;word-break:break-all;" styleClass=".rich-text-color-general">						
+						<h:outputText value="#{msgs['baf.dict.toDict']}:"/>
+						<h:inputText id="itemDict" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()" value="#{dictItemBean.dictionaryName}"/>
+				
+						<h:outputText value="#{msgs['baf.dict.itemName']}:" />
+						<h:inputText id="itemName" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.itemName}">
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.itemName']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.itemName']}" maxLength="512"  server="false" client="true"/>				 
+						</h:inputText>
+						
+						<h:outputText value="#{msgs['baf.dict.itemCode']}:" />
+						<h:inputText id="itemCode" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.itemCode}"  >
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.itemCode']}" server="false" client="true"/>
+							<ui:remove>
+							<!-- 字典条目编号格式验证屏蔽 -->
+							<s:commonsValidator type="mask" arg="#{msgs['baf.dict.itemCode']}" mask="^IDI_.{1,}$" server="false" client="true" />
+							</ui:remove>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.itemCode']}" maxLength="128"  server="false" client="true"/>				 
+						</h:inputText>
+					
+						<h:outputText value="#{msgs['baf.dict.itemValue']}:" />
+						<h:inputTextarea id="itemValue" style="width:95%;height:22px;" rows="1" styleClass="rich-gradient-input" value="#{dictItemBean.itemValue}">				
+							<s:commonsValidator type="required" arg="#{msgs['baf.dict.itemValue']}" server="false" client="true"/>
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.itemValue']}" maxLength="1024"  server="false" client="true"/>	
+						</h:inputTextarea>
+						
+						<h:outputText value="#{msgs['baf.dict.itemStyle']}:" />
+						<h:inputText id="itemStyle" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.itemStyle}" title="#{msgs['baf.dict.Example']}: background-color:red;height:22px;"/>
+						
+						<h:outputText value="#{msgs['baf.dict.area']}:" />
+						<h:selectOneMenu id="area" value="#{dictItemBean.regionId}" style="width:95%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">					
+							<f:selectItems value="#{dictItemBean.dictItemAreaList}" />
+						</h:selectOneMenu>
+						
+						<h:outputText value="#{msgs['baf.org.extendTitle1']}:" />
+						<h:inputText id="extField1" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.extField1}"/>
+						
+						<h:outputText value="#{msgs['baf.org.extendTitle2']}:" />
+						<h:inputText id="extField2" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.extField2}"/>
+						
+						<h:outputText value="#{msgs['baf.org.extendTitle3']}:" />
+						<h:inputText id="extField3" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.extField3}"/>
+						
+						<h:outputText value="#{msgs['baf.org.extendTitle4']}:" />
+						<h:inputText id="extField4" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.extField4}"/>
+						
+						<h:outputText value="#{msgs['baf.org.extendTitle5']}:" />
+						<h:inputText id="extField5" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{dictItemBean.extField5}"/>
+						
+						<h:outputText value="#{msgs['baf.dict.itemDes']}:" />
+						<h:inputTextarea id="itemDes" style="width:95%;word-break:break-all;" rows="3" styleClass="rich-gradient-input" value="#{dictItemBean.itemDesc}">				
+							<s:commonsValidator type="maxlength"  arg="#{msgs['baf.dict.itemDes']}" maxLength="128"  server="false" client="true"/>
+						</h:inputTextarea>
+						
+						
+						
+															
+					</h:panelGrid>	
+				  </center>	
+				  <rich:spacer height="20px"/>
+				  <center>
+			        <h:panelGroup id="isBatchSaveGroup">	
+			           <h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+			           <h:selectBooleanCheckbox id="isBatchSave" />
+			        </h:panelGroup>
+			
+			        <rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+			        </rich:toolTip>	<rich:spacer width="5px"/>							 
+			        <a4j:commandButton styleClass="rich-button" type="submit" id="itemAddOrEditSave" value="#{msgs['baf.org.Save']}">
+				       <a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('itemModalForm'))==false) return false;" data="#{dictItemBean.dealFlag}" oncomplete="onSaveDictItemComplete(data)" action="#{dictItemBean.addOrEdit}" limitToList="true" reRender="itemLists,itemScroller,itemModalForm,flagId"/>
+			        </a4j:commandButton> <rich:spacer width="5px"/>
+			        <a4j:commandButton styleClass="rich-button" type="button" id="itemCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide();reSetCancelChkbox();"/>
+			     </center>	
+			     <s:validatorScript functionName="validateForm"/>  	
+			     
+			   </a4j:form>
+			</rich:modalPanel>
+
+			<h:form id = "itemInTabForm">
+			<!-- 字典条目列表 -->
+			<center>
+				<h:panelGroup id="panelGroupItem" style="width:100%;">
+					<rich:dataTable width="95%" id="itemLists" rows="#{dictItemBean.pageSize}" style="white-space:inherit;word-break:break-all;"
+			            value="#{dictItemBean.defaultDataModel}" var="currItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8';" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+			            title="#{msgs['baf.dict.dataTable.ItemEditTip']}" onRowDblClick="onDblClickItemEdit('#{currItem.itemId}');" >
+			            <rich:column width="5%" style="text-align:center;">
+					        <f:facet name="header">
+					        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+					        </f:facet>
+				             <h:selectBooleanCheckbox id="selectedItem" onclick="checkBoxClick(this, '#{currItem.itemId}');"/>
+				        </rich:column>	  
+			            
+			            <rich:column style="width:17%;">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText " value="#{msgs['baf.dict.itemName']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{currItem.itemName}" />
+			            </rich:column>
+			            <rich:column style="width:26%;">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.itemCode']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{currItem.itemCode}" />
+			            </rich:column>
+			            <rich:column style="width:25%;">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.itemValue']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{currItem.itemValue}" title="#{currItem.itemValue}"/>
+			            </rich:column>
+			            <rich:column style="width:12%;">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.toDict']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{currItem.dictionaryName}" />
+			            </rich:column>
+			            <rich:column style="width:15%;">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.dict.area']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{msgs['baf.dict.bureauName']}" rendered="#{currItem.bureauName==null}"/>
+			                <h:outputText value="#{currItem.bureauName}" rendered="#{currItem.bureauName!=null}"/>
+			            </rich:column>
+			        </rich:dataTable>
+			        <table width="95%">
+			            <tr>
+				            <td>
+								<rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{dictItemBean.scrollerPage}" id="itemScroller" reRender="pageNo" oncomplete="document.getElementById('queryForm:gotItemIdValues').value='';"/>
+								<a4j:keepAlive beanName="dictItemBean"/>
+							</td>
+						</tr>
+					</table>
+				</h:panelGroup>
+			</center>
+	        <h:inputHidden id="pageNo" value="#{dictItemBean.scrollerPage}"/>	 
+			</h:form>
+		</rich:tab>
+	</rich:tabPanel>
+	
+	<!-- 排序模态框 -->
+	<rich:modalPanel id="orderModalPanel" autosized="false" keepVisualState="false" width="380" height="360">			
+		<f:facet name="header">
+			<h:outputText value="#{msgs['baf.dict.orderItem']}"/>
+		</f:facet>
+		<!-- 关闭按钮 -->
+		<f:facet name="controls">
+		<h:panelGroup>
+		    <h:graphicImage value="/baf/images/icons/close.png"
+		        id="ohidelink" styleClass="hidelink"/>
+		    <rich:componentControl for="orderModalPanel" attachTo="ohidelink"
+		        operation="hide" event="onclick" />
+			</h:panelGroup>
+		</f:facet>	
+		<a4j:form id="orderListForm">					
+		<center>
+	        <rich:orderingList value="#{dictItemBean.orderList}" var="orderList" listHeight="250" listWidth="280" converter="orderConverter"
+		        upControlLabel ="#{msgs['orderingList.up']}" 
+				downControlLabel="#{msgs['orderingList.down']}"
+				topControlLabel="#{msgs['orderingList.top']}"
+				bottomControlLabel="#{msgs['orderingList.bottom']}"
+		        >
+	            <rich:column visible="false">
+	                <h:outputText value="#{orderList.id}"/>
+	            </rich:column>
+	            <rich:column width="280"> 
+	                <f:facet name="header">
+	                    <h:outputText value="#{msgs['baf.dict.itemName']}" style="width:280px;"/>
+	                </f:facet>
+	                <h:outputText value="#{orderList.name}"/><br/>
+	            </rich:column>
+	        </rich:orderingList>							
+		</center>			
+		<rich:spacer height="1px"/>			
+		<center>								 
+			<a4j:commandButton styleClass="rich-button" type="submit" id="orderSave" value="#{msgs['baf.org.Save']}" action="#{dictItemBean.saveItemOrder}" oncomplete="onSaveOrderComplete();" reRender="panelGroupItem"/>
+			<rich:spacer width="10px"/>	
+			<a4j:commandButton styleClass="rich-button" type="button" id="orderCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('orderModalPanel')}.hide(); return false;"/>
+		</center>
+		</a4j:form>		
+	</rich:modalPanel>
+	<a4j:form>
+		<a4j:jsFunction name="addDictionary" action="#{dictionaryBean.addDictListener}" reRender="dictionaryForm">
+			<a4j:actionparam name="cateId" value=""/>
+			<a4j:actionparam name="cateName" value=""/>
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction name="changeItemBeanInstance" actionListener="#{dictItemBean.addDictItemListener}" reRender="itemModalForm">
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction name="refresh" action="#{dictionaryBean.refresh}" oncomplete="refreshItemAddModelPanel();setFocus('dictionaryForm:dictName')" reRender="dictionaryForm,itemInTabForm">
+			<a4j:actionparam name="dictId1" assignTo="#{dictionaryBean.dictionaryId}"/>
+			<a4j:actionparam name="dictId2" assignTo="#{dictItemBean.dictionaryId}"/>
+			<a4j:actionparam name="searchSymbol" assignTo="#{dictItemBean.searchFlag}"/>
+			<a4j:actionparam name="itemScrlPage"  value="1" assignTo="#{dictItemBean.scrollerPage}"  />
+			<a4j:actionparam name="dictScrlPage"  value="1" assignTo="#{dictionaryBean.scrollerPage}"  />
+		</a4j:jsFunction>
+		
+	    <a4j:jsFunction name="rowDblClickItemEdit" action="#{dictItemBean.editDictionaryItemListener}" oncomplete="onItemInTabEdit();" reRender="itemModalForm">
+			<a4j:actionparam name="eItemID" value=""/>
+			<a4j:actionparam name="dbClick" value="Y"/>
+		</a4j:jsFunction>	
+		
+		<a4j:jsFunction name="getItemsByDictId" action="#{dictItemBean.getAllItemsByDictId}" oncomplete="Richfaces.showModalPanel('orderModalPanel');" reRender="orderListForm">
+		</a4j:jsFunction>
+	</a4j:form>
+	  </f:view>
+	  <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</html>

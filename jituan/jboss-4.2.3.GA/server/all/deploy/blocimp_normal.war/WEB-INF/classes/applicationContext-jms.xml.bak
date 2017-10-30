@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"
+ xmlns:jms="http://www.springframework.org/schema/jms" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd"> 
+ <bean id="weblogicJms" class="org.springframework.jndi.JndiTemplate">  
+        <property name="environment">  
+            <props>  
+                <prop key="java.naming.factory.initial">  
+                    weblogic.jndi.WLInitialContextFactory   
+                </prop>  
+				<!--集团JMS消息队列的URL-->
+                <prop key="java.naming.provider.url">  
+                    t3://132.33.2.88:8008
+                </prop>  
+                <prop key="java.naming.factory.url.pkgs">  
+                    weblogic.jndi.factories  
+                </prop>  
+				<!--用户名-->
+                <prop key="java.naming.security.principal">  
+                   
+                </prop> 
+				<!--密码-->
+                <prop key="java.naming.security.credentials">  
+                    
+                </prop>  
+            </props>  
+        </property>  
+    </bean>  
+ <!-- 连接工厂 -->  
+   <bean id="jmsConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">  
+         <!--集团工单消息工厂名-->
+        <property name="jndiName" value="esb_eoms_ConnectionFactory_1" />  
+        <property name="jndiTemplate" ref="weblogicJms"/>  
+    </bean>  
+	 <!-- 集团工单上海消息队列-->  
+	<bean id="jmsQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	     <!--集团工单消息队列-->
+        <property name="jndiName" value="sh_eoms_receive" />  
+        <property name="jndiTemplate" ref="weblogicJms"/>  
+    </bean> 
+<!--收到消息后发送回执的队列-->
+<bean id="sendQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+        <!--集团工单回执消息队列-->
+        <property name="jndiName" value="common_send" />  
+        <property name="jndiTemplate" ref="weblogicJms"/>  
+    </bean> 
+<!-- Receiver  消息接收实现类-->  
+    <bean id="jmsReceiver" class="com.regaltec.blocimp.daemon.BlocJMSReceiveListener"> 
+	  <property name= "destination" ref="sendQueue"/>
+	  <property name="externalInterfaceService" ref="externalInterfaceWebservice" />                               
+    </bean>  
+      
+    <!-- SPRING JMS消息监听器 -->  
+    <bean id="listenerContainer"  
+        class="org.springframework.jms.listener.DefaultMessageListenerContainer">  
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>  
+        <property name="destination" ref="jmsQueue"/>  
+        <property name="messageListener" ref="jmsReceiver"/>  
+        <property name="autoStartup" value="true"/>  
+		<!-- 设置固定的线程数 -->  
+        <property name="concurrentConsumers" value="6"></property>  
+           
+        
+        <!-- 设置最大的线程数 -->  
+        <property name="maxConcurrentConsumers" value="15"></property>  
+    </bean>  
+      
+    <!-- Spring JMS 模板 -->  
+    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" lazy-init="true">  
+        <property name="connectionFactory" ref="jmsConnectionFactory" />  
+        <property name="defaultDestination" ref="jmsQueue" />   
+   </bean>  
+
+   <bean  id="blocJMSReceiveListenerTask"  class="com.regaltec.blocimp.daemon.BlocJMSReceiveListenerTask"  scope="prototype">
+   <property name= "listenerContainer" ref="listenerContainer"/>
+   </bean>
+</beans>  

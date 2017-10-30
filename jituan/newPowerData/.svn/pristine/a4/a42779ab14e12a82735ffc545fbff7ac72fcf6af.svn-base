@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.member.dao.MemberDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.member.model.MemberVO">
+		<id column="FDUMEMBERID" jdbcType="VARCHAR" property="memberID" />
+		<result column="FDCMEMBERNAME" jdbcType="VARCHAR" property="memberName" />
+		<result column="FDUOWNERID" jdbcType="VARCHAR" property="ownerID" />
+		<result column="FDCOWNERTYPE" jdbcType="CHAR" property="ownerType" />
+		<result column="FDCPRIMARYFIELD" jdbcType="VARCHAR" property="primaryField" />
+		<result column="FDCDATATYPE" jdbcType="CHAR" property="dataType" />
+		<result column="FDCCAPTIONFIELD" jdbcType="VARCHAR" property="captionField" />
+		<result column="FDCPARENTFIELD" jdbcType="VARCHAR" property="parentField" />
+		<result column="FDCTABLENAME" jdbcType="VARCHAR" property="tableName" />
+		<result column="FDCDATEFORMAT" jdbcType="VARCHAR" property="dateFormat" />
+		<result column="FDCFUNCID" jdbcType="VARCHAR" property="funcID" />
+		<result column="FDCEXPRESSION" jdbcType="VARCHAR" property="expression" />
+		<result column="FDIISSUMHALF" jdbcType="INTEGER" property="isSumHalf" />
+		<result column="FDIMEMBERORDER" jdbcType="INTEGER" property="memberOrder" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addMember" parameterType="com.ccssoft.rsas.metadata.member.model.MemberVO">
+		insert into TBMEMBER (FDUMEMBERID, FDCMEMBERNAME, FDUOWNERID, 
+		FDCOWNERTYPE, FDCPRIMARYFIELD, FDCDATATYPE, FDCCAPTIONFIELD, 
+		FDCPARENTFIELD, FDCTABLENAME, FDCDATEFORMAT, FDCFUNCID, 
+		FDCEXPRESSION, FDIISSUMHALF, FDIMEMBERORDER, FDCDESC)
+		values (#{memberID,jdbcType=VARCHAR}, #{memberName,jdbcType=VARCHAR}, 
+		#{ownerID,jdbcType=VARCHAR}, #{ownerType,jdbcType=CHAR}, 
+		#{primaryField,jdbcType=VARCHAR}, #{dataType,jdbcType=CHAR}, 
+		#{captionField,jdbcType=VARCHAR}, #{parentField,jdbcType=VARCHAR}, 
+		#{tableName,jdbcType=VARCHAR}, #{dateFormat,jdbcType=VARCHAR}, 
+		#{funcID,jdbcType=VARCHAR}, #{expression,jdbcType=VARCHAR}, 
+		#{isSumHalf,jdbcType=INTEGER}, #{memberOrder,jdbcType=INTEGER}, 
+		#{desc,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateMember" parameterType="com.ccssoft.rsas.metadata.member.model.MemberVO">
+		update TBMEMBER
+		set FDCMEMBERNAME = #{memberName,jdbcType=VARCHAR}, FDUOWNERID = #{ownerID,jdbcType=VARCHAR}, 
+		FDCOWNERTYPE = #{ownerType,jdbcType=CHAR}, FDCPRIMARYFIELD = #{primaryField,jdbcType=VARCHAR}, 
+		FDCDATATYPE = #{dataType,jdbcType=CHAR}, FDCCAPTIONFIELD = #{captionField,jdbcType=VARCHAR}, 
+		FDCPARENTFIELD = #{parentField,jdbcType=VARCHAR}, FDCTABLENAME = #{tableName,jdbcType=VARCHAR}, 
+		FDCDATEFORMAT = #{dateFormat,jdbcType=VARCHAR}, FDCFUNCID = #{funcID,jdbcType=VARCHAR}, 
+		FDCEXPRESSION = #{expression,jdbcType=VARCHAR}, FDIISSUMHALF = #{isSumHalf,jdbcType=INTEGER}, 
+		FDIMEMBERORDER = #{memberOrder,jdbcType=INTEGER}, FDCDESC = #{desc,jdbcType=VARCHAR}
+		where FDUMEMBERID = #{memberID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delMember" parameterType="java.lang.String">
+		delete from TBMEMBER
+		where FDUMEMBERID = #{memberID,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="delMembers" parameterType="java.lang.String">
+		delete from TBMEMBER
+		where FDUOWNERID = #{ownerID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getMember" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUMEMBERID, FDCMEMBERNAME, FDUOWNERID, 
+		FDCOWNERTYPE, FDCPRIMARYFIELD, FDCDATATYPE, FDCCAPTIONFIELD, 
+		FDCPARENTFIELD, FDCTABLENAME, FDCDATEFORMAT, FDCFUNCID, 
+		FDCEXPRESSION, FDIISSUMHALF, FDIMEMBERORDER, FDCDESC
+		from TBMEMBER
+		where FDUMEMBERID = #{memberID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getMembersByOwnerType" parameterType="java.util.Map" resultMap="BaseResultMap">
+		select FDUMEMBERID, FDCMEMBERNAME, FDUOWNERID, 
+		FDCOWNERTYPE, FDCPRIMARYFIELD, FDCDATATYPE, FDCCAPTIONFIELD, 
+		FDCPARENTFIELD, FDCTABLENAME, FDCDATEFORMAT, FDCFUNCID, 
+		FDCEXPRESSION, FDIISSUMHALF, FDIMEMBERORDER, FDCDESC
+		from TBMEMBER
+		where FDUOWNERID = #{ownerID,jdbcType=VARCHAR}
+		and FDCOWNERTYPE = #{ownerType,jdbcType=CHAR}
+	</select>
+	
+	<select id="getMembers" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUMEMBERID, FDCMEMBERNAME, FDUOWNERID, 
+		FDCOWNERTYPE, FDCPRIMARYFIELD, FDCDATATYPE, FDCCAPTIONFIELD, 
+		FDCPARENTFIELD, FDCTABLENAME, FDCDATEFORMAT, FDCFUNCID, 
+		FDCEXPRESSION, FDIISSUMHALF, FDIMEMBERORDER, FDCDESC
+		from TBMEMBER
+		where FDUOWNERID = #{ownerID,jdbcType=VARCHAR}
+	</select>
+</mapper>

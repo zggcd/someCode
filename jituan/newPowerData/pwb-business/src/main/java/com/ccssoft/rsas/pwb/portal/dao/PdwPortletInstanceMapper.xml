@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.portal.dao.PdwPortletInstanceMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstance" >
+    <id column="PORTLET_INSTANCE_ID" property="portletInstanceId" jdbcType="VARCHAR" />
+    <result column="INSTANCE_NAME" property="instanceName" jdbcType="VARCHAR" />
+    <result column="INSTANCE_TYPE" property="instanceType" jdbcType="VARCHAR" />
+    <result column="IFRAME_URL" property="iframeUrl" jdbcType="VARCHAR" />
+    <result column="ECHART_TYPE" property="echartType" jdbcType="VARCHAR" />
+    <result column="HEIGHT" property="height" jdbcType="DECIMAL" />
+    <result column="WIDTH" property="width" jdbcType="DECIMAL" />
+    <result column="BORDER" property="border" jdbcType="DECIMAL" />
+    <result column="CHART_ID" property="chartId" jdbcType="VARCHAR" />
+    <result column="CHART_NAME" property="chartName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    PORTLET_INSTANCE_ID, INSTANCE_NAME, INSTANCE_TYPE, IFRAME_URL, ECHART_TYPE, HEIGHT, 
+    WIDTH, BORDER, CHART_ID, CHART_NAME
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstanceExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from PDW_PORTLET_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PDW_PORTLET_INSTANCE
+    where PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PDW_PORTLET_INSTANCE
+    where PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstanceExample" >
+    delete from PDW_PORTLET_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstance" >
+    insert into PDW_PORTLET_INSTANCE (PORTLET_INSTANCE_ID, INSTANCE_NAME, 
+      INSTANCE_TYPE, IFRAME_URL, ECHART_TYPE, 
+      HEIGHT, WIDTH, BORDER, 
+      CHART_ID, CHART_NAME)
+    values (#{portletInstanceId,jdbcType=VARCHAR}, #{instanceName,jdbcType=VARCHAR}, 
+      #{instanceType,jdbcType=VARCHAR}, #{iframeUrl,jdbcType=VARCHAR}, #{echartType,jdbcType=VARCHAR}, 
+      #{height,jdbcType=DECIMAL}, #{width,jdbcType=DECIMAL}, #{border,jdbcType=DECIMAL}, 
+      #{chartId,jdbcType=VARCHAR}, #{chartName,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstance" >
+    insert into PDW_PORTLET_INSTANCE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="portletInstanceId != null" >
+        PORTLET_INSTANCE_ID,
+      </if>
+      <if test="instanceName != null" >
+        INSTANCE_NAME,
+      </if>
+      <if test="instanceType != null" >
+        INSTANCE_TYPE,
+      </if>
+      <if test="iframeUrl != null" >
+        IFRAME_URL,
+      </if>
+      <if test="echartType != null" >
+        ECHART_TYPE,
+      </if>
+      <if test="height != null" >
+        HEIGHT,
+      </if>
+      <if test="width != null" >
+        WIDTH,
+      </if>
+      <if test="border != null" >
+        BORDER,
+      </if>
+      <if test="chartId != null" >
+        CHART_ID,
+      </if>
+      <if test="chartName != null" >
+        CHART_NAME,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="portletInstanceId != null" >
+        #{portletInstanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="instanceName != null" >
+        #{instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="instanceType != null" >
+        #{instanceType,jdbcType=VARCHAR},
+      </if>
+      <if test="iframeUrl != null" >
+        #{iframeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="echartType != null" >
+        #{echartType,jdbcType=VARCHAR},
+      </if>
+      <if test="height != null" >
+        #{height,jdbcType=DECIMAL},
+      </if>
+      <if test="width != null" >
+        #{width,jdbcType=DECIMAL},
+      </if>
+      <if test="border != null" >
+        #{border,jdbcType=DECIMAL},
+      </if>
+      <if test="chartId != null" >
+        #{chartId,jdbcType=VARCHAR},
+      </if>
+      <if test="chartName != null" >
+        #{chartName,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstanceExample" resultType="java.lang.Integer" >
+    select count(*) from PDW_PORTLET_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update PDW_PORTLET_INSTANCE
+    <set >
+      <if test="record.portletInstanceId != null" >
+        PORTLET_INSTANCE_ID = #{record.portletInstanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.instanceName != null" >
+        INSTANCE_NAME = #{record.instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.instanceType != null" >
+        INSTANCE_TYPE = #{record.instanceType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.iframeUrl != null" >
+        IFRAME_URL = #{record.iframeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.echartType != null" >
+        ECHART_TYPE = #{record.echartType,jdbcType=VARCHAR},
+      </if>
+      <if test="record.height != null" >
+        HEIGHT = #{record.height,jdbcType=DECIMAL},
+      </if>
+      <if test="record.width != null" >
+        WIDTH = #{record.width,jdbcType=DECIMAL},
+      </if>
+      <if test="record.border != null" >
+        BORDER = #{record.border,jdbcType=DECIMAL},
+      </if>
+      <if test="record.chartId != null" >
+        CHART_ID = #{record.chartId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.chartName != null" >
+        CHART_NAME = #{record.chartName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update PDW_PORTLET_INSTANCE
+    set PORTLET_INSTANCE_ID = #{record.portletInstanceId,jdbcType=VARCHAR},
+      INSTANCE_NAME = #{record.instanceName,jdbcType=VARCHAR},
+      INSTANCE_TYPE = #{record.instanceType,jdbcType=VARCHAR},
+      IFRAME_URL = #{record.iframeUrl,jdbcType=VARCHAR},
+      ECHART_TYPE = #{record.echartType,jdbcType=VARCHAR},
+      HEIGHT = #{record.height,jdbcType=DECIMAL},
+      WIDTH = #{record.width,jdbcType=DECIMAL},
+      BORDER = #{record.border,jdbcType=DECIMAL},
+      CHART_ID = #{record.chartId,jdbcType=VARCHAR},
+      CHART_NAME = #{record.chartName,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstance" >
+    update PDW_PORTLET_INSTANCE
+    <set >
+      <if test="instanceName != null" >
+        INSTANCE_NAME = #{instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="instanceType != null" >
+        INSTANCE_TYPE = #{instanceType,jdbcType=VARCHAR},
+      </if>
+      <if test="iframeUrl != null" >
+        IFRAME_URL = #{iframeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="echartType != null" >
+        ECHART_TYPE = #{echartType,jdbcType=VARCHAR},
+      </if>
+      <if test="height != null" >
+        HEIGHT = #{height,jdbcType=DECIMAL},
+      </if>
+      <if test="width != null" >
+        WIDTH = #{width,jdbcType=DECIMAL},
+      </if>
+      <if test="border != null" >
+        BORDER = #{border,jdbcType=DECIMAL},
+      </if>
+      <if test="chartId != null" >
+        CHART_ID = #{chartId,jdbcType=VARCHAR},
+      </if>
+      <if test="chartName != null" >
+        CHART_NAME = #{chartName,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortletInstance" >
+    update PDW_PORTLET_INSTANCE
+    set INSTANCE_NAME = #{instanceName,jdbcType=VARCHAR},
+      INSTANCE_TYPE = #{instanceType,jdbcType=VARCHAR},
+      IFRAME_URL = #{iframeUrl,jdbcType=VARCHAR},
+      ECHART_TYPE = #{echartType,jdbcType=VARCHAR},
+      HEIGHT = #{height,jdbcType=DECIMAL},
+      WIDTH = #{width,jdbcType=DECIMAL},
+      BORDER = #{border,jdbcType=DECIMAL},
+      CHART_ID = #{chartId,jdbcType=VARCHAR},
+      CHART_NAME = #{chartName,jdbcType=VARCHAR}
+    where PORTLET_INSTANCE_ID = #{portletInstanceId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>

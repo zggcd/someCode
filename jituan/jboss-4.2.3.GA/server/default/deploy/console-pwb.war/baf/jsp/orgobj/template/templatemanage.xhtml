@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<head>
+			<script>
+			//<![CDATA[
+			var  saveStatus = true; //数据保存状态 true 保存成功, false保存失败
+			
+				//触发事件
+				function onObjectFireMouseEvent(obj, eventname) { 					
+					if (document.all) {
+						//IE
+						obj.fireEvent(eventname);
+					} else {
+						//firefox						
+						var name = eventname.replace("on", "");
+						var evtObj = document.createEvent('MouseEvents');     
+					  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+					  	obj.dispatchEvent(evtObj);
+					}
+				}
+
+				function onObjectFireHtmlEvent(obj, eventname) {
+					if (document.all) {
+						//IE
+						obj.fireEvent(eventname);
+					} else {
+						//firefox
+						var name = eventname.replace("on", "");
+						var evtObj = document.createEvent('HTMLEvents');   
+						evtObj.initEvent(name, true, true);   
+						obj.dispatchEvent(evtObj);
+					}
+				}
+				
+				//全选select操作表所有项
+				function onSelectALlTemplate() {
+					//设置元素类型操作数据的已选CheckBox的value值为operateid
+					var oTable = document.getElementById("TemplateForm:table");
+					var oChkAll = document.getElementById("TemplateForm:table:selectAll"); 
+					//获取当前页码数
+					var pageNum = document.getElementById("TemplateForm:pageNo").value;
+					if (pageNum <= 0) pageNum = 1;
+					//获取每页数据个数
+					var pageSize = document.getElementById("TemplateForm:pageSize").value;             	
+					if (oTable != null && oChkAll != null) {
+						for (j = 0; j < oTable.rows.length -1; j++) {
+							var realNum = (pageNum-1)*pageSize + j;
+							var e = document.getElementById("TemplateForm:table:"+realNum+":selectFlag");
+							if (e.id.indexOf("selectFlag") >= 0) {   
+								//触发CheckBox onclick事件，用来设置operateid
+								if (document.all) {
+									//IE
+									var oldValue= e.checked;
+									e.checked = oChkAll.checked;
+									if (!oldValue && e.checked) {
+										onObjectFireMouseEvent(e, "onclick");
+									}
+								} else {
+									//firefox
+									if (oChkAll.checked) {
+										var oldValue= e.checked;
+										if (!oldValue)
+											onObjectFireMouseEvent(e, "onclick");
+									} else {
+										e.checked = oChkAll.checked;
+									}
+								}
+							}
+						}
+					}
+				}				
+
+				//判断是否选择了一行
+				function checkSelectOneRow() {										
+					var oTable = document.getElementById("TemplateForm:table");
+					//获取当前页码数
+					var pageNum = document.getElementById("TemplateForm:pageNo").value;
+					if (pageNum <= 0) pageNum = 1;
+					//获取每页数据个数
+					var pageSize = document.getElementById("TemplateForm:pageSize").value;
+					var size = oTable.rows.length - 1; //去除列头一行
+					var selectCount = 0;
+					if (size != null) {
+						for (var i=0; i<size; i++) {
+							var realNum = (pageNum-1)*pageSize + i;
+							var e = document.getElementById("TemplateForm:table:"+realNum+":selectFlag");						
+							if (e != null && e.checked) {
+								selectCount ++;
+							}
+						}
+						if (selectCount != 1) {
+							//请勾选一行需要编辑的数据
+							alert("${msgs['baf.org.WarningEditOneRow']}");
+							return false;
+						}
+					}
+					return true;
+				}
+
+				//判断是否选择单行或者多行
+				function checkSelectRow() {					
+					var oTable = document.getElementById("TemplateForm:table");
+					//获取当前页码数
+					var pageNum = document.getElementById("TemplateForm:pageNo").value;
+					if (pageNum <= 0) pageNum = 1;
+					//获取每页数据个数
+					var pageSize = document.getElementById("TemplateForm:pageSize").value;					
+					var size = oTable.rows.length - 1; //去除列头一行
+					var selectCount = 0;
+					if (size != null) {
+						for (var i=0; i<size; i++) {
+							var realNum = (pageNum-1)*pageSize + i;
+							var e = document.getElementById("TemplateForm:table:"+realNum+":selectFlag");							
+							if (e != null && e.checked) {
+								selectCount ++;
+							}
+						}
+						if (selectCount <= 0) {
+							//请勾选需要删除的数据
+							alert("${msgs['baf.org.WarningDeleteRow']}");
+							return false;
+						}
+					}
+					return true;
+				}				
+				//模板授权判断是否选择单行或者多行
+				function checkPermissionRow() {					
+					var oTable = document.getElementById("TemplateForm:table");
+					//获取当前页码数
+					var pageNum = document.getElementById("TemplateForm:pageNo").value;
+					if (pageNum <= 0) pageNum = 1;
+					//获取每页数据个数
+					var pageSize = document.getElementById("TemplateForm:pageSize").value;					
+					var size = oTable.rows.length - 1; //去除列头一行
+					var selectCount = 0;
+					if (size != null) {
+						for (var i=0; i<size; i++) {
+							var realNum = (pageNum-1)*pageSize + i;
+							var e = document.getElementById("TemplateForm:table:"+realNum+":selectFlag");							
+							if (e != null && e.checked) {
+								selectCount ++;
+							}
+						}
+						if (selectCount <= 0) {
+							//请勾选需要删除的数据
+							alert("${msgs['baf.org.WarningTemplateSele']}");
+							return false;
+						}
+					}
+					return true;
+				}
+				//新增模板
+				function onTemplateAddNew() {
+					document.getElementById('addTemplateForm:data').value='add';
+					var isBatchSave = document.getElementById("addTemplateForm:isBatchSave");
+					if (isBatchSave.checked)
+						isBatchSave.checked = !isBatchSave.checked;					
+					var templateCategory = document.getElementById("TemplateForm:s_TemplateCategory").value;
+					var e = document.getElementById("addTemplateForm:TemplateCategory");
+					if (templateCategory == "E") {
+						//如果是人员，则变更新增模板表单上的下拉框，让他选中人员
+						e.value = "E";					
+						onObjectFireHtmlEvent(e, "onchange");
+					}	
+					//设置焦点
+					setFocus("addTemplateForm:TemplateName");				
+				}
+
+				//双击列表行，修改模板
+				function onDblClickTemplateEdit(rowID, rowType) {			
+					rowDblClick(rowID, rowType);
+				}
+				
+				//点击编辑按钮，修改模板
+				function onTemplateEdit() {
+					document.getElementById("addTemplateForm:data").value = "edit";					
+					document.getElementById("addTemplateForm:TemplateCategory").disabled = true;	
+					var e = document.getElementById("addTemplateForm:isBatchSave");
+					var isBatchSaveGroup = document.getElementById("addTemplateForm:isBatchSaveGroup");
+					isBatchSaveGroup.style.visibility = "hidden";
+					if (e.checked)
+					{
+						e.checked = !e.checked;
+					}
+					//设置焦点
+					setFocus("addTemplateForm:TemplateName");		
+				}
+				//保存完成模板或者修改完成模板
+				function onTemplateAddOrEditComplete(data) {
+				    if (data == "C") {
+						//模板编号不唯一
+						alert("${msgs['baf.org.WarningTemplateCodeAlreadyExist']}");
+                        return;
+					}	
+				    //显示提示框
+				    if(a4jcomplete()==false){
+				       return;
+				    }
+								
+				}
+				//删除完成模板
+				function onTemplateDeleteComplete(data) {
+					//显示提示框
+				    if(a4jcomplete()==false){
+				       return;
+				    }
+					if (data == "N") {
+						//处理失败
+						alert("${msgs['baf.org.WarningHandleFailure']}");
+					}		
+					//如果全选框已经选中，则撤销掉勾选
+					var oChkAll = document.getElementById("TemplateForm:table:selectAll");  
+					if (oChkAll.checked)
+						oChkAll.checked = !oChkAll.checked;
+				}
+				//查询数据
+				function onSearchComplete(data) {
+					if (data == "N") {
+						//查询失败
+						alert("${msgs['baf.org.WarningSearchFailure']}");
+					}
+					//清除勾选的checkbox值 			 add by lsh 2009-11-02
+					document.getElementById("TemplateForm:templateIDArray").value = "";
+					document.getElementById('TemplateForm:templateCategory_show').value = document.getElementById('TemplateForm:s_TemplateCategory').value;
+				}
+				//双击列表一行
+				function onRowDblClick(id, name, code, desc, typeid, category, content) {					
+					document.getElementById("addTemplateForm:TemplateID").value = id;
+					document.getElementById("addTemplateForm:TemplateName").value = name;
+					document.getElementById("addTemplateForm:TemplateCode").value = code;
+					document.getElementById("addTemplateForm:TemplateDesc").value = desc;
+					document.getElementById("addTemplateForm:TemplateTypeID").value = typeid;
+					document.getElementById("addTemplateForm:TemplateCategory").value = category;
+					document.getElementById("addTemplateForm:TemplateContent").value = content;	
+					onOrgTemplateEdit();			
+				}
+	
+				/*
+				*授权页面，新增一个Tab页面在主框架上。
+				* add by lsh 2009-11-02
+				*/
+				//打开一个新的tabPanel
+				function openNewTab() {
+					var url = "/baf/jsp/orgobj/template/permissionPanel.xhtml";
+					var templateIDArray = document.getElementById("TemplateForm:templateIDArray").value;
+					var templateCategory_show = document.getElementById("TemplateForm:templateCategory_show").value;
+					url = url + "?templateID=" + templateIDArray + "&templateCategory=" + templateCategory_show;
+					this.parent.addTab(templateIDArray, "模板授权", url);
+				}
+				
+				//响应check点击事件
+				function checkBoxClick(object, value) {					
+					var templateIDArray = document.getElementById("TemplateForm:templateIDArray").value;
+					if (templateIDArray == null || templateIDArray == "") {
+						if (object.checked == true) {							
+							templateIDArray = value;
+						} 
+					} else {
+						if (object.checked == true) {
+							templateIDArray = templateIDArray + "~" + value;	 			
+						} else {
+							var index = templateIDArray.indexOf(value);
+							if (index >= 0) {																
+								var str = "";
+								if(index>0){
+									str = "~"+value;
+								} else {
+									if(index==0 && templateIDArray.indexOf("~")!=-1){
+										str = value + "~";
+									} else {
+										str = value;
+									}
+								}
+								templateIDArray = templateIDArray.replace(str, "");
+							}
+						}
+					}
+					//保存勾选的模板ID值， 格式为 id~id~id
+					document.getElementById("TemplateForm:templateIDArray").value = templateIDArray;
+				}
+
+				//选择人员或组织岗位时需要清空模板名称和模板编号
+				function onCategoryChanged() {
+					//document.getElementById("TemplateForm:s_TemplateName").value = "";
+					//document.getElementById("TemplateForm:s_TemplateCode").value = "";
+				}
+				//按回车调用查询按钮的单击事件
+				function forSelect(){
+					if(event.keyCode==13){
+						document.getElementById('TemplateForm:search').onclick();
+					}
+				}	
+				//]]>
+			</script>
+
+		</head>
+		<body>
+		<center>
+			
+			<style>
+		       .scrolls{
+		           width:100px;
+		           height:20px;
+		           overflow:auto;
+		       }
+				.cur{
+			        cursor: pointer; 
+			    }	
+		    </style>  
+    		
+			<f:loadBundle basename="messages" var="msgs" />
+			<div id="center" style="background:white;height:100%;width:100%;margin-top:0px;margin-bottom:0px;" align="center">			
+			<a4j:form id="TemplateForm">
+				<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:97%;" switchType="client">		
+				<rich:tab id="templateOperate" name="templateOperate" label="#{msgs['baf.org.TemplateManage']}">
+			    <rich:panel style="width:100%;border:0;">			    	
+			    	<rich:panel style="font-size:13px;font-weight:normal;">	
+			    		<center>
+				    		<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	    	
+						    	<h:panelGroup>
+							    	<h:outputLabel style="font-size:13px;" value="#{msgs['baf.org.TemplateName']}："/>
+									<h:inputText id="s_TemplateName" value="#{templateBean.search_TemplateName}" style="width:150px;height:23px;" styleClass="rich-gradient-input">
+										<rich:hotKey key="return" handler="forSelect();"/>
+									</h:inputText>
+								</h:panelGroup>
+								
+								<rich:spacer width="10px"/>  
+								
+								<h:panelGroup>
+									<h:outputLabel style="font-size:13px;" value="#{msgs['baf.org.TemplateCategory']}："/>
+									<h:selectOneMenu style="width:150px;height:23px;" id="s_TemplateCategory"
+										value="#{templateBean.search_TemplateCategory}" styleClass="rich-box-border-color-control-select rich-text-control-select"
+										onchange="onCategoryChanged();">
+										<f:selectItems value="#{templateBean.search_TemplateCategoryMap}" />
+									</h:selectOneMenu><rich:spacer height="2px"/>	
+									
+									<rich:spacer width="20px"/> 
+									
+									<a4j:commandButton id="search" value="#{msgs['baf.org.btnSearch']}" type="submit" styleClass="rich-button" onclick="var oChkAll=document.getElementById('TemplateForm:table:selectAll'); if (oChkAll.checked) {oChkAll.checked = !oChkAll.checked;}" 
+												   action="#{templateBean.search}" data="#{templateBean.data}" oncomplete="onSearchComplete(data);" reRender="panelGroup,scroller"/>
+								</h:panelGroup>
+							</h:panelGrid>	
+						</center>										   
+					</rich:panel>	
+					<rich:spacer height="10px"/>		 				 
+					<center>							 
+					<a4j:commandButton styleClass="rich-button" type="submit" id="TemplateAdd" value="#{msgs['baf.org.btnNew']}">
+						<a4j:support event="onclick" actionListener="#{templateBean.addTemplateListener}" oncomplete="#{rich:component('modalPanel')}.show(); onTemplateAddNew();" reRender="addTemplateForm"/>
+					</a4j:commandButton>
+					 <rich:spacer width="40px"/>
+					<a4j:commandButton styleClass="rich-button" type="submit" id="TemplateAddEdit" value="#{msgs['baf.org.btnEdit']}">
+						<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{templateBean.showEditTemplate}" oncomplete="#{rich:component('modalPanel')}.show(); onTemplateEdit();" reRender="addTemplateForm"/>
+					</a4j:commandButton>
+					<rich:spacer width="40px"/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="TemplateDelete" value="#{msgs['baf.org.btnDelete']}">
+						<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('deletePanel')}.show();} return false;" actionListener="#{templateBean.deleteTemplate}" data="#{templateBean.data}" oncomplete="onTemplateDeleteComplete(data);"/>
+					</a4j:commandButton>
+					<rich:spacer width="40px"/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="Templatep" value="#{msgs['baf.org.btnPermission']}">
+						<a4j:support event="onclick" ajaxSingle="true" onsubmit="if (checkPermissionRow()==false) {return false;}; " oncomplete="openNewTab();" />
+					</a4j:commandButton>									
+					</center>
+					<rich:spacer height="10px"/>										 
+	           	 	<h:panelGroup id="panelGroup" styleClass="scrolls" style="width:100%;height:100%">    	           	 	  	 	
+	           	 	<rich:dataTable  align="center" value="#{templateBean.defaultDataModel}" var="cap" width="100%" id="table" rowKeyVar="row" rows="#{templateBean.pageSize}" columnClasses="col"
+	  						onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" title="#{msgs['baf.org.dataTableTip']}" onRowDblClick="onDblClickTemplateEdit('#{cap.templateID}', '#{cap.templateCategory}');"> 		
+				        <rich:column width="5%" style="text-align:center;">
+					        <f:facet name="header">
+					        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlTemplate();"/>
+					        </f:facet>
+				             <h:selectBooleanCheckbox id="selectFlag" value="#{cap.selectFlag}" onclick="checkBoxClick(this, '#{cap.templateID}');this.value='#{cap.templateID}~#{cap.templateCategory}';"/>
+				        </rich:column>	  					
+			        	<rich:column width="20%" visible="false">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateID']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateID" value="#{cap.templateID}"/>
+				        </rich:column>					    
+				        <rich:column width="15%">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateName']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateName" value="#{cap.templateName}"/>
+				        </rich:column>
+				        <rich:column width="15%">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateDesc']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateDesc" value="#{cap.templateDesc}"/>
+				        </rich:column> 
+				        <rich:column width="15%" visible="false">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateTypeID']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateTypeID" value="#{cap.templateTypeID}"/>
+				        </rich:column>
+				        <rich:column width="15%">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateCategory']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateCategory" value="#{cap.templateCategory}"/>
+				        </rich:column> 
+				        <rich:column width="30%" visible="false">
+					        <f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplateContent']}" />
+					        </f:facet>
+				            <h:outputText id="t_TemplateContent" value="#{cap.templateContent}"/>
+				        </rich:column>         			          			                      	 		 	
+	           		</rich:dataTable>
+	           		<h:inputHidden id="dataTableSize" value="#{templateBean.dataTableSize}"/>	 
+	           		<h:inputHidden id="pageNo" value="#{templateBean.scrollerPage}"/>	 
+	          		<h:inputHidden id="pageSize" value="#{templateBean.pageSize}"/>	
+	           		<h:inputHidden id="preData" value="#{templateBean.preData}"/>
+	           		<h:inputHidden id="templateCode" value="#{templateBean.templateCode}"/>
+	           		<!-- 增加勾选的模板ID值数组 add by lsh 2009-11-02 -->
+	           		<h:inputHidden id="templateIDArray" value=""/>	             
+	           		<h:inputHidden id="templateCategory_show" value="OP"/>	
+	           	 	</h:panelGroup>		           	 	
+	           	<rich:datascroller id="scroller" align="right" for="table" selectedStyle="background-color:#FFB93F;" page="#{templateBean.scrollerPage}" fastStep="1" maxPages="#{templateBean.maxPages}" reRender="dataTableSize, pageNo" oncomplete="document.getElementById('TemplateForm:templateIDArray').value=''; "/>
+	           	<a4j:keepAlive beanName="templateBean"/>           	 	                 	 						
+			    </rich:panel>	
+			    </rich:tab>		    
+				</rich:tabPanel>	
+			   
+			    <rich:modalPanel id="deletePanel" autosized="true" width="300">
+			        <f:facet name="header">
+			            <h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}"
+			                style="padding-right:15px;" />
+			        </f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					        id="hidelinkDelete" styleClass="hidelink"/>
+					    <rich:componentControl for="deletePanel" attachTo="hidelinkDelete"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>	
+		        	<center>
+		                <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+		                 	data="#{templateBean.data}"
+		                    actionListener="#{templateBean.deleteTemplate}"
+		                    oncomplete="#{rich:component('deletePanel')}.hide();onTemplateDeleteComplete(data);"
+		                    reRender="panelGroup,scroller" />
+						<rich:spacer width="40px"/>
+		                <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                    onclick="#{rich:component('deletePanel')}.hide();return false;" />
+					</center>
+			    </rich:modalPanel>		    		    		    										
+			</a4j:form>				           
+	           					
+			<rich:modalPanel id="modalPanel" autosized="false" keepVisualState="false" width="500" height="450">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.org.AddNewTemplate']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+			<h:panelGroup>
+			    <h:graphicImage value="/baf/images/icons/close.png"
+			        id="hidelink" styleClass="hidelink"/>
+			    <rich:componentControl for="modalPanel" attachTo="hidelink"
+			        operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>				
+			<a4j:form id="addTemplateForm">			
+			<center>    	 									
+			<h:panelGrid id="panelGrid" columns="2" style="font-size:13px;" styleClass=".rich-text-color-general">						
+				<h:outputText value="#{msgs['baf.org.TemplateName']}:" />
+				<h:inputText id="TemplateName" style="width:280px;height:23px;" value="#{templateBean.templateName}" styleClass="rich-gradient-input">
+					<s:commonsValidator type="required" arg="#{msgs['baf.org.TemplateName']}" server="false" client="true"/>
+					<s:commonsValidator type="maxlength" arg="#{msgs['baf.org.TemplateName']}" maxLength="64" server="false" client="true"/>
+				</h:inputText>
+				
+				<h:outputText value="#{msgs['baf.org.TemplateDesc']}:" />
+				<h:inputTextarea value="#{templateBean.templateDesc}" id="TemplateDesc" style="width:280px;height:50px;" styleClass="rich-gradient-input">
+					<s:commonsValidator type="maxlength" arg="#{msgs['baf.org.TemplateDesc']}" maxLength="128" server="false" client="true"/>
+				</h:inputTextarea>
+										
+				<h:outputText value="#{msgs['baf.org.TemplateCategory']}:" />
+				<h:selectOneMenu style="width:280px;height:23px;" id="TemplateCategory"
+					value="#{templateBean.templateCategory}" styleClass="rich-box-border-color-control-select rich-text-control-select">
+					<f:selectItems value="#{templateBean.templateCategoryMap}" />
+					<a4j:support event="onchange" ajaxSingle="true" action="#{templateBean.changeCategory}" reRender="panelGroupDataTable"/>
+				</h:selectOneMenu>										
+																					
+			</h:panelGrid>
+			
+			
+			<h:panelGroup id="panelGroupDataTable" styleClass="scrolls" style="width:350px;height:250px;">
+			<rich:dataTable id="dataTable" value="#{templateBean.templatePropertyItemList}"  var="templateList" >
+           	 	<f:facet name="header">
+			        	<h:outputText styleClass="headerText" value="#{msgs['baf.org.TemplatePropertyData']}" />
+			    </f:facet>			
+				<rich:column  width="180">
+		            <f:facet name="header">
+		                <h:outputText value="#{msgs['baf.org.TemplateField']}" />
+		            </f:facet> 
+	                <h:outputText value="#{templateList.key}"/>
+	            </rich:column>
+				<rich:column> 
+	                <f:facet name="header">
+	                    <h:outputText value="#{msgs['baf.org.TemplateValue']}" />
+	                </f:facet>
+               		<h:inputText id="value" value="#{templateList.value}"/>
+               		<h:inputText id="key" style="display:none;" value="#{templateList.key}"/>
+           		</rich:column>		            
+			</rich:dataTable>
+			<h:inputHidden id="templatePropertyItemCount" value="#{templateBean.templatePropertyItemCount}"/>
+			</h:panelGroup>	
+				
+					
+			</center>								
+			
+			<h:inputHidden id="data" value="#{templateBean.isAddOrEdit}"/>
+			<h:inputHidden id="search_TemplateCategory" value="#{templateBean.search_TemplateCategory}"/>			
+			<center>
+			<h:panelGroup id="isBatchSaveGroup">	
+			<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+			<h:selectBooleanCheckbox id="isBatchSave" />
+			</h:panelGroup>
+			
+			<rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+			</rich:toolTip>								 
+			<a4j:commandButton styleClass="rich-button" type="submit" id="TemplateAddSave" value="#{msgs['baf.org.Save']}">
+				<a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('addTemplateForm'))==false) return false;" data="#{templateBean.data}" oncomplete="var e=document.getElementById('addTemplateForm:isBatchSave'); onTemplateAddOrEditComplete(data); if(data=='Y' &amp;&amp; !e.checked) {#{rich:component('modalPanel')}.hide();}" actionListener="#{templateBean.addOrEditTemplate}" reRender="panelGroup,templateCode,TemplateID,scroller"/>
+			</a4j:commandButton> <rich:spacer height="2px"/>
+			<a4j:commandButton styleClass="rich-button" type="button" id="TemplateCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+			</center>
+			
+			<h:inputHidden id="TemplateID" value="#{templateBean.templateID}" />
+			<h:inputHidden id="TemplateTypeID" value="#{templateBean.templateTypeID}" />
+			<s:validatorScript functionName="validateForm"/>  	
+			</a4j:form>			
+			</rich:modalPanel>	        					
+		    
+		    <a4j:form>
+		    <a4j:jsFunction name="rowDblClick" action="#{templateBean.showEditTemplate}" oncomplete="#{rich:component('modalPanel')}.show();  onTemplateEdit();" reRender="addTemplateForm">
+		    	<a4j:actionparam name="rowID" value=""/>
+		    	<a4j:actionparam name="rowType" value=""/>
+		    </a4j:jsFunction>	    
+		    </a4j:form>	
+			</div>
+			</center>
+			<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+		</body>
+</f:view>
+</html>

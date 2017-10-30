@@ -1,0 +1,685 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+//触发鼠标事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+	  	evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+	  	obj.dispatchEvent(evtObj);
+	}
+}
+
+//触发HTML事件
+
+function onObjectFireHtmlEvent(obj, eventname) {
+	if (document.all) {
+		//IE
+		obj.fireEvent(eventname);
+	} else {
+		//firefox
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('HTMLEvents');   
+		evtObj.initEvent(name, true, true);   
+		obj.dispatchEvent(evtObj);
+	}
+}
+
+
+
+
+//*************************************************************
+//**************菜单树上右键显示菜单**********************
+//*************************************************************
+function openContextMenu(){
+  try
+  { 
+  	var itemId = this.getSelectedItemId();
+	this.selectItem(itemId,false);
+	var objmenu = Ext.menu.MenuMgr.get("opmenu");
+	if (itemId == "null") {
+		Ext.getCmp("menuItemAddTopBur").enable();
+		Ext.getCmp("menuItemAddBur").disable();
+		Ext.getCmp("menuItemDelete").disable();
+		Ext.getCmp("menuItemOrder").disable();
+		Ext.getCmp("menuItemImpOrg").enable();
+	} else {
+		Ext.getCmp("menuItemAddTopBur").enable();
+		Ext.getCmp("menuItemAddBur").enable();
+		Ext.getCmp("menuItemDelete").enable();
+		Ext.getCmp("menuItemOrder").enable();
+		Ext.getCmp("menuItemImpOrg").enable();		
+	}
+	
+	if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+		var e = new Array(window.event.clientX,window.event.clientY);
+		objmenu.showAt(e);
+	}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+		var e = new Array(arguments[1].clientX,arguments[1].clientY);
+		objmenu.showAt(e);
+	}
+  }
+  catch(e)
+  {
+    alert(e.description);
+  }
+}
+
+//---------------------------------------------------------------------------
+ /********显示单位信息,如果尚未建立顶级单位,则显示添加页面*****/
+ 
+ //新增局向标志
+  var addFlag=false;
+  //隐藏批量新增的标志
+  var hideFlag=true;
+  function showBureau()
+  {
+      var id = BureauTree_tree.getSelectedItemId();
+      if (id == "null") {
+    	  addTopBur();
+    	  return;
+      }
+      var selecttype=BureauTree_tree.getUserData(id,"bureautype");
+      var batch= document.getElementById("bureauForm:b_isBatchSave");
+      if(batch.checked){	  
+    	  document.getElementById("bureauForm:bureauid").value="";	    	   
+      }
+      else{
+          b_Refresh(id,selecttype);
+      }
+      //如果不是新增操作，则隐藏
+      if(hideFlag){ 
+    //让批量新增的复选框隐藏
+	  document.getElementById("bureauForm:batchAddGroup").style.display="none";
+	  document.getElementById("bureauForm:b_isBatchSave").checked=false;
+      }
+      hideFlag=true;
+  }
+  function refreshSpeTree(){
+	  SpecialityTree_tree.deleteChildItems("0");
+	  var str=document.getElementById("bureauForm:speIds").value;
+	  var url="${request.contextPath}"+"/baf/jsp/bureau/specialtyTreeXMLData.jsp?speIds="+str;
+	  SpecialityTree_tree.setXMLAutoLoading(url);
+	  SpecialityTree_tree.refreshItem("0");
+	  
+  }
+
+  	//检查局向编码是否为空，为空则返回false
+	function checkBureaucode(){
+	      var bureaucode = document.getElementById("bureauForm:bureaucode").value;
+	      if(bureaucode==null||bureaucode==""){
+	      alert("${msgs['baf.bureau.WaringcodeNull']}");
+	      document.getElementById("bureauForm:bureaucode").focus();
+	          return false;
+	      }
+	      return true;
+	} 
+
+	
+	function onSaveComplete(data){
+		 //输入存在重复的局向编码，跳出	
+		  if(data!=null && data=="isDupCode"){
+			  alert("${msgs['baf.bureau.WaringDupCode']}");
+              document.getElementById("bureauForm:bureaucode").focus();
+              return false;
+		  }
+		  //显示操作提示
+		  if(a4jcomplete()==false){
+		  	  document.getElementById("bureauForm:btnSave").disabled = "";
+ 			  return;
+ 		  }		  
+	      var itemId = BureauTree_tree.getSelectedItemId(); 
+	      if(itemId == null||itemId == ""){
+	          BureauTree_tree.refreshItem("0"); 
+	      }
+	      else{	      
+		      //编辑
+		      if(!addFlag){
+		          var parentid=BureauTree_tree.getParentId(itemId);
+		          BureauTree_tree.refreshItem(parentid);
+		          var timeout = setTimeout("setselectitem('"+itemId+"')", 200);
+		        //让批量新增的复选框隐藏
+		 	     document.getElementById("bureauForm:batchAddGroup").style.display="none";
+		 	     document.getElementById("bureauForm:b_isBatchSave").checked=false;
+		 	     //该变量主要是给showBureau()使用
+		 	     hideFlag=true;
+		      }
+		      //新增
+		      else{
+		    	  //批量新曾标志
+		    	  var batch= document.getElementById("bureauForm:b_isBatchSave");
+		    	  if(batch.checked){
+			          BureauTree_tree.refreshItem(itemId);
+			          var timeout = setTimeout("setselectitem('"+itemId+"')", 200);
+			        //该变量主要是给showBureau()使用
+			          hideFlag=false;
+		    	  }
+		    	  else{
+		    	  var newId=document.getElementById("bureauForm:bureauid").value;
+		    	  var parentid=document.getElementById("bureauForm:parentbureauid").value;
+		    	  BureauTree_tree.refreshItem(parentid);
+		          var timeout = setTimeout("setselectitem('"+newId+"')", 200);
+		          //让批量新增的复选框隐藏
+			 	  document.getElementById("bureauForm:batchAddGroup").style.display="none";
+			 	  document.getElementById("bureauForm:b_isBatchSave").checked=false;
+		          addFlag=false;
+		        //该变量主要是给showBureau()使用
+		          hideFlag=true;
+		    	  }
+		           
+		      }
+	      }
+
+	      
+	} 
+	function addBur(){
+		 addFlag=true;
+	     var itemId = BureauTree_tree.getSelectedItemId(); 
+	     document.getElementById("bureauForm:parentbureauid").value=itemId;
+	     document.getElementById("bureauForm:parentbureauname").value = document.getElementById("bureauForm:bureauname").value;
+	     document.getElementById("bureauForm:bureaucode").value="IDB_XXX";
+	     document.getElementById("bureauForm:bureauname").value="";
+	     document.getElementById("bureauForm:citycode").value="";
+	     document.getElementById("bureauForm:latitude").value="";
+	     document.getElementById("bureauForm:longitude").value="";
+	     document.getElementById("bureauForm:bureaudesc").value="";
+	     document.getElementById("bureauForm:bureauid").value="";
+	     document.getElementById("bureauForm:extField1").value="";
+	     document.getElementById("bureauForm:extField2").value="";
+	     document.getElementById("bureauForm:extField3").value="";
+	     document.getElementById("bureauForm:extField4").value="";
+	     document.getElementById("bureauForm:extField5").value="";
+	     document.getElementById("bureauForm:extField6").value="";
+	     document.getElementById("bureauForm:extField7").value="";
+	     document.getElementById("bureauForm:extField8").value="";
+	     //查询局向类型，并组织局向类型下拉框内容
+	     var selecttype=BureauTree_tree.getUserData(itemId,"bureautype");
+	     b_queryType(selecttype);
+	     //让批量新增的复选框显示出来
+	     document.getElementById("bureauForm:batchAddGroup").style.display="";
+	     document.getElementById("bureauForm:b_isBatchSave").checked=false;
+	     //重新加载专业树
+		 SpecialityTree_tree.deleteChildItems("0");
+		 var url="${request.contextPath}/baf/jsp/bureau/specialtyTreeXMLData.jsp";
+		 SpecialityTree_tree.setXMLAutoLoading(url);
+		 SpecialityTree_tree.refreshItem("0");
+	}
+    //删除局向
+    function deleteBur(){
+        var itemId = BureauTree_tree.getSelectedItemId();
+        //删除业务时，是否进行判断
+        var sysdelBur = document.getElementById("bureauForm:deleteBur").value;
+        //当值为2时，删除的业务下含有子节点时不能删除该业务
+      	if(sysdelBur == "2"){
+      		isExistChild(itemId);
+      	}else{
+      		document.getElementById("delForm:delId").value = itemId;	
+		    var text = BureauTree_tree.getSelectedItemText();
+		    // var str="<h:outputText escape="false" value="#{msgs['baf.bureau.confirmDel']}"/>"+text
+		    // +"<h:outputText escape="false" value="#{msgs['baf.bureau.delSun']}"/> ";
+		    var str = '${msgs['baf.bureau.confirmDel']}'+text+'${msgs['baf.bureau.delSun']}';
+		    document.getElementById("condel").innerHTML = str;
+		    var e = document.getElementById("bureauForm:delBtn");		
+			onObjectFireMouseEvent(e,"onclick");
+      	}
+    }
+    
+    //查询部门是否有子节点完成事件
+	function onSelectComplete(data){
+	  	if(data == "true"){
+	  		alert("${msgs['baf.org.sysDelBurMessage']}");
+			return;
+	  	}else if(data == "false"){
+	  		document.getElementById("delForm:delId").value = BureauTree_tree.getSelectedItemId();
+	  		var text = BureauTree_tree.getSelectedItemText();
+	  		document.getElementById("condel").innerHTML = '${msgs['baf.bureau.confirmDel']}'+text+'?';
+	  		var e = document.getElementById("bureauForm:delBtn");		
+			onObjectFireMouseEvent(e,"onclick");
+	  	}
+	}
+
+  	//传递树的所有选中节点和所有展开的节点
+	function setCheckValue(){
+		var checkList = SpecialityTree_tree.getAllCheckedBranches();
+		var uncheckList = SpecialityTree_tree.getAllUnchecked();
+		document.getElementById("bureauForm:checked").value = checkList;
+		document.getElementById("bureauForm:unchecked").value = uncheckList;
+	}
+	//调整模块顺序
+    function orderModuleItem() {
+	    var itemId = BureauTree_tree.getSelectedItemId();
+		var parentID = BureauTree_tree.getParentId(itemId);
+		if (parentID == "0")
+			parentID = "";
+		refreshOrderForm(parentID);
+	
+	}
+  //模块调整完成
+    function onSaveOrderComplete() {
+        if(a4jcomplete()==false){
+ 			return;
+ 		}	
+    	//刷新父节点
+    	var itemId = BureauTree_tree.getSelectedItemId(); 
+    	var parentID = BureauTree_tree.getParentId(itemId);
+    	BureauTree_tree.refreshItem(parentID);
+    	var timeout = setTimeout("setselectitem('"+itemId+"')", 800);
+    }
+    function setselectitem(id){
+    	BureauTree_tree.selectItem(id,1);
+    }
+	/**
+	 * 增加顶级局向
+	 */
+	function addTopBur(){
+	         addFlag=true;
+	         document.getElementById("bureauForm:parentbureauid").value="";
+		     document.getElementById("bureauForm:bureaucode").value="";
+		     document.getElementById("bureauForm:bureauname").value="";
+		     document.getElementById("bureauForm:citycode").value="";
+		     document.getElementById("bureauForm:bureautype").value="";
+		     document.getElementById("bureauForm:latitude").value="";
+		     document.getElementById("bureauForm:longitude").value="";
+		     document.getElementById("bureauForm:bureaudesc").value="";
+		     document.getElementById("bureauForm:bureauid").value="";
+		     document.getElementById("bureauForm:parentbureauname").value="";
+		     document.getElementById("bureauForm:b_isBatchSave").checked=false;
+		     b_queryType("");
+	}
+	function importOrg(){
+		var e = document.getElementById("bureauForm:impBtn");		
+		onObjectFireMouseEvent(e,"onclick");
+	}
+	function numberOnly() {
+	    if (! ( ( (window.event.keyCode >= 48) && (window.event.keyCode <= 57)) || (window.event.keyCode == 13) || (window.event.keyCode == 46))) {
+			window.event.keyCode = 0;
+		}
+	}
+	//检查输入字符是否为数字,如果有非数字就返回false
+	function checkIsInt(obj){
+			var num="0123456789.";
+			var str=obj.value;
+			var ch;
+			for(i=0;i<str.length;i++){
+			ch=str.charAt(i);
+			if(num.indexOf(ch)==-1){
+				alert("${msgs['baf.bureau.WaringNotInt']}");
+				obj.value="";
+				obj.focus();
+				return false;
+			}
+			}
+			return true;
+	}
+     //处理后续事情
+     function finishHandle(){
+             if(a4jcomplete()==false){
+ 			    return;
+ 		     }	
+	    	 var itemId = BureauTree_tree.getSelectedItemId(); 
+		     if(itemId == null||itemId == ""){
+		          BureauTree_tree.refreshItem("0"); 
+		      }
+		      else{
+		          parentid=BureauTree_tree.getParentId(itemId);
+		          BureauTree_tree.refreshItem(parentid);
+		          var timeout = setTimeout("setselectitem('"+parentid+"')", 200);
+		      }
+     }
+     //限制textArea的长度
+     function strMaxLength(len,valu){
+           var leng= valu.replace(/[^x00-xFF]/g,'**').length;
+           if(leng>len){
+              window.event.keyCode=0;
+           }
+     }
+     
+ 	//点击保存按钮时，对表单进行验证
+ 	function validate(formId){
+ 		var isSuccess = validateForm(formId);
+ 		if(isSuccess == true){
+			//将保存按钮置灰，防止多次提交表单
+	   		document.getElementById("bureauForm:btnSave").disabled = "true";
+ 		}
+ 		return isSuccess;
+ 	}
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+	   td.column1{
+	   		width:30%;
+	   		text-align:right;
+	   }	
+	   td.column2{
+	   		width:70%;
+	   		text-align:right;
+	   }	
+    </style>    
+        
+    <!--[if !IE]><!-->
+    <style>
+	    legend{
+	    	margin:5 5 5 5;
+	    }
+    </style>
+    <!--<![endif]-->    
+</head>
+
+<body >
+    <regaltec:dhtmlXtree id="BureauTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="burTree"
+		loadXML="/baf/jsp/bureau/bureautree.jsp"
+		xmlAutoLoading="/baf/jsp/bureau/bureautree.jsp"
+		>
+		<regaltec:setDxtEevntHandler eventName="onClick" handler="showBureau" />	
+		<regaltec:setDxtEevntHandler eventName="onRightClick" handler="openContextMenu" />
+	</regaltec:dhtmlXtree>
+	
+	<regaltec:viewPort ctCls="panel-bdColor">
+		<regaltec:viewPortPanel region="east" id="eastpanel" 
+			autoScroll="false" contentEl="east-panel" split="true" width="230"   minSize="200" maxSize="400" 
+			collapsible="true" margins="0 0 0 0" layout="accordion" />		
+		<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+			contentEl="center" />	
+	</regaltec:viewPort>
+ 
+  	<div id="east-panel">   
+		<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+			<tr>
+				<td height="16" align="right" class="rich-gradient-tab" >
+				<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand;"/>
+				</td>
+			</tr>
+			<tr>
+				<td height="100%" id="burTree" >
+				</td>
+			</tr>
+	  	</table>  
+  	</div>
+  	
+	<regaltec:extContextMenu id="opmenu">
+		<regaltec:extContextMenuItem id="menuItemAddTopBur" text="#{msgs['baf.bureau.addTobBur']}" handler="addTopBur"/>
+		<regaltec:extContextMenuItem id="menuItemAddBur" text="#{msgs['baf.bureau.addBur']}" handler="addBur"/>
+	   	<regaltec:extContextMenuItem id="menuItemDelete" text="#{msgs['baf.bureau.delBur']}" handler="deleteBur" />
+	   	<regaltec:extContextMenuItem id="menuItemOrder" text="#{msgs['baf.module.ordertext']}" handler="orderModuleItem" />
+	   	<regaltec:extContextMenuItem id="menuItemImpOrg" text="#{msgs['baf.bureau.impOrg']}" handler="importOrg" />
+   	</regaltec:extContextMenu>
+   	
+	<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;" align="center">
+		<rich:tabPanel id="tabPanel" switchType="client" style="margin-left:5px;margin-right:5px;margin-top:5px;height:97%;width:98%;">
+			<rich:tab id="burBaseinfo" label="#{msgs['baf.bureau.bureauInfo']}">
+			    <a4j:form id="bureauForm" onsubmit="setCheckValue()">
+					<rich:spacer height="10px"/>
+					<center>
+						<table border="0" height="85%" width="98%" cellspacing="0" cellpadding="0">
+							<tr>
+								<td width="59%">
+									<fieldset style="height:100%;" >			
+							            <legend><h:outputText value="#{msgs['baf.bureau.bureauBaseInfo']}" /></legend>
+										<h:panelGrid id="org" columns="2" columnClasses="column1,column2" style="font-size:13px;width:95%;" styleClass=".rich-text-color-general">
+											 
+											<h:outputText value="#{msgs['baf.bureau.parentbureauName']}:"/>
+											<h:inputText id="parentbureauname" style="width:95%;height:23px;" styleClass="rich-gradient-input" onfocus="this.blur()"   value="#{burBean.parentBurname}"/>
+											 
+											<h:outputText value="#{msgs['baf.bureau.bureauCode']}:" />
+											<h:inputText id="bureaucode" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.bureaucode}" maxlength="32" title="局向编号:IDB_XXX">
+											    <s:commonsValidator type="required" arg="#{msgs['baf.bureau.bureauCode']}" server="false" client="true"/>
+											    <s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.bureauCode']}" server="false" client="true" maxLength="32"/>
+											</h:inputText>	
+											
+											<h:outputText value="#{msgs['baf.bureau.bureauName']}:" />
+											<h:inputText id="bureauname" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{burBean.bureauname}" maxlength="15">
+												<s:commonsValidator type="required" arg="#{msgs['baf.bureau.bureauName']}" server="false" client="true"/>
+											    <s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.bureauName']}" server="false" client="true" maxLength="32"/>				 			
+											</h:inputText>
+											
+											<h:outputText value="#{msgs['baf.bureau.bureauType']}:" />
+												<h:selectOneMenu id="bureautype"   value="#{burBean.bureautype}"  style="width:95%;height:23px;" styleClass="rich-box-border-color-control-select rich-text-control-select">
+													<f:selectItems value="#{burBean.selectBureautype}"/>
+												</h:selectOneMenu>
+											
+											<h:outputText value="#{msgs['baf.bureau.citycode']}:" />
+											<h:inputText id="citycode" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{burBean.citycode}" maxlength="16">	
+											    <s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.citycode']}" server="false" client="true" maxLength="32"/>			 			
+											</h:inputText>
+							
+											<h:outputText value="#{msgs['baf.bureau.latitude']}:" />
+											<h:inputText id="latitude" style="width:95%;height:23px;" onkeypress="numberOnly()" onblur="checkIsInt(this)" maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.latitude}" title="纬度">
+											 <s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.latitude']}" server="false" client="true" maxLength="5"/>				 			
+											</h:inputText>
+										
+											<h:outputText value="#{msgs['baf.bureau.longitude']}:" />
+											<h:inputText id="longitude" style="width:95%;height:23px;" onkeypress="numberOnly()" onblur="checkIsInt(this)"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.longitude}" title="经度">	
+											<s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.longitude']}" server="false" client="true" maxLength="5"/>			 			
+											</h:inputText>
+											
+											<h:outputText value="#{msgs['baf.bureau.burDesc']}:" />
+											<h:inputTextarea id="bureaudesc" style="width:95%;height:50px;" onkeypress="strMaxLength(100,this.value)" styleClass="rich-gradient-input" value="#{burBean.bureaudesc}">				
+											<s:commonsValidator type="maxlength" arg="#{msgs['baf.bureau.burDesc']}" server="false" client="true" maxLength="128"/>
+											</h:inputTextarea>
+											
+											<h:outputText value="#{burBean.extendTitle1}:" />
+											<h:inputText id="extField1" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField1}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle2}:" />
+											<h:inputText id="extField2" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField2}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle3}:" />
+											<h:inputText id="extField3" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField3}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle4}:" />
+											<h:inputText id="extField4" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField4}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle5}:" />
+											<h:inputText id="extField5" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField5}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle6}:" />
+											<h:inputText id="extField6" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField6}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle7}:" />
+											<h:inputText id="extField7" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField7}" title="扩展字段">	
+											</h:inputText>
+											<h:outputText value="#{burBean.extendTitle8}:" />
+											<h:inputText id="extField8" style="width:95%;height:23px;"  maxlength="5" styleClass="rich-gradient-input"  value="#{burBean.extField8}" title="扩展字段">	
+											</h:inputText>
+											
+											
+											<h:inputHidden id="bureauid" value="#{burBean.bureauid}" />
+											<h:inputHidden id="parentbureauid"     value="#{burBean.parentbureauid}"></h:inputHidden>
+										    <h:inputHidden id="selectTreetype"     value="#{burBean.selectTreetype}"></h:inputHidden>
+										    <h:inputHidden id="speIds"  value="#{burBean.speIds}"></h:inputHidden>
+										    <h:inputHidden id="deleteBur" value="#{burBean.deleteBur}"/>
+										</h:panelGrid>
+						 			</fieldset>
+					 			</td>
+					 			
+					 			<td width="1%"></td>
+					 
+						 		<td width="40%">
+							 		<fieldset style="height:100%;">
+							 			<legend><h:outputText value="#{msgs['baf.bureau.bussBaseInfo']}" /></legend>
+										<table width="100%" height="90%" cellpadding="0" cellspacing="0" style="table-layout:fixed;">
+											<tr>
+												<td id="treeboxbox_tree" width="100%" height="100%"></td>
+											</tr>
+										</table>
+							 			<regaltec:dhtmlXtree  id="SpecialityTree"
+							    			imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+				                			loadXML="/baf/jsp/bureau/specialtyTreeXMLData.jsp"
+						        			xmlAutoLoading="/baf/jsp/bureau/specialtyTreeXMLData.jsp?speIds=#{burBean.speIds}">
+				              				<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/>
+						      				<regaltec:setDxtEnable enableFunction="checkIsUpPass" parameter="false"/>
+						      				<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1"/>
+										</regaltec:dhtmlXtree> 		
+									</fieldset>
+								</td>
+							</tr>
+						</table>
+					
+					    <h:panelGroup id="batchAddGroup" style="display:none">
+							<h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+							<h:selectBooleanCheckbox id="b_isBatchSave" />		
+						</h:panelGroup>		
+						<rich:toolTip for="b_isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+						</rich:toolTip>	
+						<br />
+						<a4j:commandButton id="btnSave" value="#{msgs['baf.org.unit.save']}" styleClass="rich-button" >
+							<a4j:support event="onclick"  onsubmit="if (validate(document.getElementById('bureauForm'))==false) return false;" action="#{burBean.saveBureau}" data="#{burBean.data}" oncomplete="onSaveComplete(data);" reRender="org,btnSave" />
+						</a4j:commandButton>
+						<a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="impBtn"  onclick="#{rich:component('impPanel')}.show();return false"/>
+					    <a4j:commandButton style="display:none;" styleClass="rich-button" type="button" id="delBtn"  onclick="#{rich:component('delPanel')}.show();return false" />
+						<h:inputHidden id="checked" value="#{burBean.checked}"></h:inputHidden>
+						<h:inputHidden id="unchecked" value="#{burBean.unchecked}"></h:inputHidden>
+					</center>
+				</a4j:form>	
+			</rich:tab>		
+		</rich:tabPanel>
+    	<s:validatorScript functionName="validateForm"/>       	
+	
+	
+     	<rich:modalPanel id="impPanel" autosized="true" width="300">
+	        <f:facet name="header">
+	        	<h:outputText value="#{msgs['baf.bureau.confirmImpOrg']}" style="padding-right:15px;" />
+	        </f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+					<h:graphicImage value="/baf/images/icons/close.png" id="hidelinkDelete" styleClass="hidelink"/>
+					<rich:componentControl for="impPanel" attachTo="hidelinkDelete"	operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>
+			<h:form id="impForm">	
+	        	<center>		        	      	
+		            <a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+		            actionListener="#{burBean.importOrg}"   data="#{burBean.data}"
+		            oncomplete="#{rich:component('impPanel')}.hide();onSaveComplete(data);"
+		            reRender="m_panelGrid" />
+				    <rich:spacer width="40px"/>
+		            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"  onclick="#{rich:component('impPanel')}.hide();return false;" />
+				</center>
+			</h:form>
+		</rich:modalPanel>
+
+		<rich:modalPanel id="delPanel" autosized="true" width="300">
+	        <f:facet name="header">
+	        	<h:outputText id="condel" value="" style="padding-right:15px;" /> 
+	        </f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+					<h:graphicImage value="/baf/images/icons/close.png" id="deleteLink" styleClass="hidelink"/>
+					<rich:componentControl for="delPanel" attachTo="deleteLink" operation="hide" event="onclick" />
+			    </h:panelGroup>
+			</f:facet>
+			<h:form id="delForm">
+				<h:inputHidden id="delId" value="#{burBean.bureauid}"></h:inputHidden>	
+	        	<center>		        	      	
+	            	<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+	                    action="#{burBean.deleteBu}" data="#{burBean.data}"
+	                    oncomplete="#{rich:component('delPanel')}.hide();finishHandle()"
+	                     />
+					<rich:spacer width="40px"/>
+		            <a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button"
+		                    onclick="#{rich:component('delPanel')}.hide();return false;" />
+				</center>
+			</h:form>
+		</rich:modalPanel>
+	
+		<rich:modalPanel id="modalPanel" autosized="false" keepVisualState="false" width="450" height="400">			
+			<f:facet name="header">
+				<h:outputText value="#{msgs['baf.bureau.bureauSort']}"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+				    <rich:componentControl for="modalPanel" attachTo="hidelink" operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>	
+			<a4j:form id="orderListForm">
+				<center>
+			        <rich:orderingList value="#{burBean.orderList}" var="orderList" listHeight="300" listWidth="350" converter="orderConverter"
+				        upControlLabel ="#{msgs['orderingList.up']}" 
+						downControlLabel="#{msgs['orderingList.down']}"
+						topControlLabel="#{msgs['orderingList.top']}"
+						bottomControlLabel="#{msgs['orderingList.bottom']}"
+				        >
+			            <rich:column  width="180" visible="false">
+			            <f:facet name="header">
+			                <h:outputText value="#{msgs['baf.module.idname']}" />
+			            </f:facet> 
+			                <h:outputText value="#{orderList.id}"></h:outputText>
+			            </rich:column>
+			            <rich:column> 
+			                <f:facet name="header">
+			                    <h:outputText value="#{msgs['baf.bureau.bureauName']}" />
+			                </f:facet>
+			                <h:outputText value="#{orderList.name}"></h:outputText><br/>
+			            </rich:column>
+			        </rich:orderingList>							
+				</center>			
+				<rich:spacer width="5px"/>
+				<h:inputHidden id="parentIdOrder" value="#{burBean.parentbureauid}"/>		
+				<center>								 
+					<a4j:commandButton styleClass="rich-button" type="submit" id="orderSave" value="#{msgs['baf.org.Save']}" actionListener="#{burBean.saveOrderListener}" data="#{burBean.data}" oncomplete="onSaveOrderComplete(); #{rich:component('modalPanel')}.hide();"/>
+					<rich:spacer width="5px"/>
+					<a4j:commandButton styleClass="rich-button" type="button" id="orderCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+				</center>
+			</a4j:form>		
+		</rich:modalPanel>
+	
+ 		<a4j:form>			         															         		
+	        <a4j:jsFunction name="b_Refresh" reRender="org" action="#{burBean.reflashBureau}" oncomplete="refreshSpeTree();setFocus('bureauForm:bureaucode');">
+	        	<a4j:actionparam name="bureauid" assignTo="#{burBean.bureauid}" />
+	        	<a4j:actionparam name="selectTreetype" assignTo="#{burBean.selectTreetype}" />                
+	        </a4j:jsFunction>              		        
+	        
+	        <a4j:jsFunction name="refreshOrderForm" action="#{burBean.refreshOrder}" oncomplete="#{rich:component('modalPanel')}.show();" reRender="orderListForm">  
+	        	<a4j:actionparam name="parentID" assignTo="#{burBean.parentbureauid}"/>
+	        </a4j:jsFunction>      
+	        
+	        <a4j:jsFunction name="a4jdeleteBureau"    oncomplete="finishHandle()" action="#{burBean.deleteBu}" >
+	            <a4j:actionparam name="bureauid" assignTo="#{burBean.bureauid}"   />                
+	        </a4j:jsFunction>       
+	        <a4j:jsFunction name="b_queryType"  action="#{burBean.queryType}"  reRender="bureautype" oncomplete="setFocus('bureauForm:bureaucode');">
+	        	<a4j:actionparam name="selectTreetype" assignTo="#{burBean.selectTreetype}" />                          
+	        </a4j:jsFunction>
+	        <a4j:jsFunction name="isExistChild" action="#{burBean.isExistChild}" oncomplete="onSelectComplete(data)" data="#{burBean.existChild}" >
+        		<a4j:actionparam name="bureauid" assignTo="#{burBean.bureauid}" />
+        	</a4j:jsFunction>
+    	</a4j:form>
+         
+	</div> 
+    <rich:toolTip for="helpicon" >
+    <div style="width:300;">
+      操作说明:<br/>1)编辑对象:在树形菜单使用鼠标选中某一个节点,然后在左边编辑窗进行修改保存操作;局向类型不能修改<br/>
+	 2)新增、删除：在树形菜单使用鼠标选中某一个节点然后点击鼠标右键在弹出菜单选择相关业务进行操作.
+    </div>
+    </rich:toolTip>
+    <ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+  	</f:view>
+</html>

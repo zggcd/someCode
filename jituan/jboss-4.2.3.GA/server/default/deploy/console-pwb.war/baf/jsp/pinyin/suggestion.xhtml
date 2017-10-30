@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+	function SearchOrg(){
+		var org=document.getElementById("suggestForm:org").value;
+        var arr=org.split("#");
+		document.getElementById("suggestForm:org").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchUser(){
+		var user=document.getElementById("suggestForm:user").value;
+        var arr=user.split("#");
+		document.getElementById("suggestForm:user").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchBureau(){
+		var user=document.getElementById("suggestForm:bureau").value;
+        var arr=user.split("#");
+		document.getElementById("suggestForm:bureau").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchBusiness(){
+	    var business=document.getElementById("suggestForm:business").value;
+        var arr=business.split("#");
+		document.getElementById("suggestForm:business").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchOrgUser(){
+	    var orguser=document.getElementById("suggestForm:org_user").value;
+        var arr=orguser.split("#");
+		document.getElementById("suggestForm:org_user").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchNormal(){
+	    var normal=document.getElementById("suggestForm:normal").value;
+        var arr=normal.split("*");
+		document.getElementById("suggestForm:normal").value=arr[0];
+		//addCount(arr[1]);
+	}
+	function SearchSQL(){
+		var sql=document.getElementById("suggestForm:sql").value;
+		var arr=sql.split("#");
+		document.getElementById("suggestForm:sql").value=arr[0];
+		//addCount(arr[1]);
+	}
+//]]>
+</script>
+<style type="text/css">
+	.column1{
+		
+		text-align:right;
+	}
+	.column2{
+		
+		text-align:left;
+	}
+</style>
+</head>
+<body >
+<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="100%" height="98%" switchType="client" >
+	<rich:tab id="suggestTab" name="suggestTab" label="拼音输入提示" style="text-align:center;height:98%;">
+		<h:form id="suggestForm">
+		<table style="font-size:13px;width:100%;" class=".rich-text-color-general">
+		
+		
+		<tr>
+        <td align="right" width="20%">
+        <h:outputText value="动态SQL查询:"></h:outputText>	
+        </td>
+        <td>
+        <h:inputText id="sql" styleClass="rich-gradient-input" style="width:200px;height:23px;"></h:inputText>
+        <rich:suggestionbox height="200" width="200" onselect="SearchSQL();"
+			usingSuggestObjects="false"  
+			suggestionAction="#{pinyinBean.searchDynamicSQL}" var="cap" shadowOpacity="1" 
+              border="1" shadowDepth="1" cellpadding="0"	nothingLabel="无匹配结果" 
+			for="sql"  fetchValue="#{cap.keyWord}##{cap.id}" id="suggestion7" >
+			  <h:column>
+		          <h:outputText value="#{cap.keyWord}"/>
+		      </h:column>	      
+		      <h:column>
+		          <h:outputText value="__上级:#{cap.parentName}"/>
+		      </h:column>
+		      <h:column>
+		          <h:outputText value="#查询#{cap.count}次" style="float:right;margin-right:5px;"/>
+		      </h:column>
+			<a4j:actionparam name="treeAlias" value="ORG_TREE" ></a4j:actionparam>
+        </rich:suggestionbox>
+        </td>
+		</tr>
+		</table>
+		</h:form>
+	</rich:tab>
+</rich:tabPanel>
+<a4j:status layout="block" id="a4jstatus"  onstart="document.getElementById('operating_panel').component.show();" 
+      onstop="document.getElementById('operating_panel').component.hide();">
+</a4j:status> 
+</body>
+</f:view>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+		<parent>
+		<artifactId>pdw-parent</artifactId>
+		<groupId>com.regaltec.rsas</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+	</parent>
+    <name>集团网分</name>
+    <artifactId>pwd-ctg</artifactId>
+    <packaging>pom</packaging>
+    <url>http://www.ccssoft.com.cn</url>
+    <modules>
+	     <module>console-pwb</module>
+		<module>pwb-parent</module>
+		<module>pwb-business</module>
+		<module>pwb-web</module>
+  </modules>
+</project>

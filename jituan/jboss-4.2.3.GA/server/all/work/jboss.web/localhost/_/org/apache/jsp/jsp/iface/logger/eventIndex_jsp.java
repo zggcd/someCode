@@ -1,0 +1,357 @@
+package org.apache.jsp.jsp.iface.logger;
+
+import javax.servlet.*;
+import javax.servlet.http.*;
+import javax.servlet.jsp.*;
+
+public final class eventIndex_jsp extends org.apache.jasper.runtime.HttpJspBase
+    implements org.apache.jasper.runtime.JspSourceDependent {
+
+  private static final JspFactory _jspxFactory = JspFactory.getDefaultFactory();
+
+  private static java.util.List _jspx_dependants;
+
+  private javax.el.ExpressionFactory _el_expressionfactory;
+  private org.apache.AnnotationProcessor _jsp_annotationprocessor;
+
+  public Object getDependants() {
+    return _jspx_dependants;
+  }
+
+  public void _jspInit() {
+    _el_expressionfactory = _jspxFactory.getJspApplicationContext(getServletConfig().getServletContext()).getExpressionFactory();
+    _jsp_annotationprocessor = (org.apache.AnnotationProcessor) getServletConfig().getServletContext().getAttribute(org.apache.AnnotationProcessor.class.getName());
+  }
+
+  public void _jspDestroy() {
+  }
+
+  public void _jspService(HttpServletRequest request, HttpServletResponse response)
+        throws java.io.IOException, ServletException {
+
+    PageContext pageContext = null;
+    HttpSession session = null;
+    ServletContext application = null;
+    ServletConfig config = null;
+    JspWriter out = null;
+    Object page = this;
+    JspWriter _jspx_out = null;
+    PageContext _jspx_page_context = null;
+
+
+    try {
+      response.setContentType("text/html; charset=utf-8");
+      pageContext = _jspxFactory.getPageContext(this, request, response,
+      			null, true, 8192, true);
+      _jspx_page_context = pageContext;
+      application = pageContext.getServletContext();
+      config = pageContext.getServletConfig();
+      session = pageContext.getSession();
+      out = pageContext.getOut();
+      _jspx_out = out;
+
+      out.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\r\n");
+      out.write("\r\n");
+      out.write("<html>\r\n");
+      out.write("<head>\r\n");
+      out.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\">\r\n");
+      out.write("<title>集团电子运维系统互联接口平台</title>\r\n");
+      out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/js/ext3/resources/css/ext-all.css\" />\r\n");
+      out.write("<link rel=\"stylesheet\" type=\"text/css\" href=\"/js/ext3/resources/css/ext-app.css\" />\r\n");
+      out.write("<script type=\"text/javascript\" src=\"/js/ext3/adapter/ext/ext-base.js\"></script>\r\n");
+      out.write("<script type=\"text/javascript\" src=\"/js/ext3/ext-all-debug.js\"></script>\r\n");
+      out.write("<script type=\"text/javascript\" src=\"./logger.js\"></script>\r\n");
+      out.write("</head>\r\n");
+      out.write("<body>\r\n");
+      out.write("<script type=\"text/javascript\">\t\r\n");
+      out.write("\tExt.onReady(function() {\r\n");
+      out.write("\t\tExt.BLANK_IMAGE_URL = \"/js/ext3/resources/images/default/s.gif\";\r\n");
+      out.write("\r\n");
+      out.write("\t\tExt.QuickTips.init(); \r\n");
+      out.write("\r\n");
+      out.write("\t\tvar record;\r\n");
+      out.write("\t\t\r\n");
+      out.write("\t\tvar js = new Ext.data.JsonStore({\r\n");
+      out.write("\t\t\tautoLoad: false,\r\n");
+      out.write("\t\t\turl: \"/iface/ifaceLoggerEventAction.do?method=eventList\",\r\n");
+      out.write("\t\t\tparamNames: { start: \"skipResults\", limit: \"maxResults\" },\r\n");
+      out.write("\t\t\t//baseParams: Ext.get(\"form-ct\").getForm().getValues(false),\r\n");
+      out.write("\t\t\troot: \"data\",\r\n");
+      out.write("\t\t\ttotalProperty: \"totalRows\",\r\n");
+      out.write("\t        fields: [\r\n");
+      out.write("\t           {name: \"eventId\"},\r\n");
+      out.write("\t           {name: \"relateId\"},\r\n");
+      out.write("\t           {name: \"type\"},\r\n");
+      out.write("\t           {name: \"description\"},\r\n");
+      out.write("\t           {name: \"successful\"},\r\n");
+      out.write("\t           {name: \"created\" }\r\n");
+      out.write("\t        ]\r\n");
+      out.write("\t    });\r\n");
+      out.write("\t    \r\n");
+      out.write("\t\tvar viewportCt = new Ext.Viewport({\r\n");
+      out.write("\t\t\tlayout: {\r\n");
+      out.write("\t\t\t\ttype: \"vbox\",\r\n");
+      out.write("\t\t\t\talign : \"stretch\",\r\n");
+      out.write("\t\t\t\tpadding: \"10\"\r\n");
+      out.write("\t\t\t},\r\n");
+      out.write("\t\t\titems: [\r\n");
+      out.write("\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\tid: \"form-ct\",\r\n");
+      out.write("\t\t\t\t\theight: 90,\r\n");
+      out.write("\t\t\t\t\tregion: \"north\",\r\n");
+      out.write("\t\t\t\t\txtype: \"form\",\r\n");
+      out.write("\t\t\t\t\tcollapsed: true,\r\n");
+      out.write("\t\t\t\t\tcollapsible: true,\r\n");
+      out.write("\t\t\t\t\ttitle: \"搜索条件\",\r\n");
+      out.write("\t\t\t\t\ticonCls: \"fellow\",\r\n");
+      out.write("\t\t\t\t\tframe: true,\r\n");
+      out.write("\t\t\t\t\tmargins: \"0 0 10 0\",\r\n");
+      out.write("\t\t\t\t\tlabelWidth: 65,\r\n");
+      out.write("\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\tlayout: \"column\",\r\n");
+      out.write("\t\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\t\tcolumnWidth: .25,\r\n");
+      out.write("\t\t\t\t\t\t\tlayout: \"form\",\r\n");
+      out.write("\t\t\t\t\t\t\tid: \"document\",\r\n");
+      out.write("\t\t\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\t\t\txtype: \"textfield\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tfieldLabel: \"文档内容\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tname: \"document\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tanchor: \"95%\"\r\n");
+      out.write("\t\t\t\t\t\t\t}]\r\n");
+      out.write("\t\t\t\t\t\t}, {\r\n");
+      out.write("\t\t\t\t\t\t\tcolumnWidth: .25,\r\n");
+      out.write("\t\t\t\t\t\t\tlayout: \"form\",\r\n");
+      out.write("\t\t\t\t\t\t\tid: \"type\",\r\n");
+      out.write("\t\t\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\t\t\txtype: \"combo\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tfieldLabel: \"事件类型\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tmode: \"local\",\r\n");
+      out.write("\t\t\t\t\t\t\t\treadOnly: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\ttriggerAction: \"all\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tstore: new Ext.data.SimpleStore({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tfields: [\"valueText\", \"displayText\"],\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tdata: [[\"TRACE\", \"信息\"], [\"FAULT\", \"错误\"]]\r\n");
+      out.write("\t\t\t\t\t\t\t\t}),\r\n");
+      out.write("\t\t\t\t\t\t\t\t//id: \"type\",\r\n");
+      out.write("\t\t\t\t\t\t\t\thiddenName: \"type\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tvalueField: \"valueText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tdisplayField: \"displayText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tanchor: \"95%\"\r\n");
+      out.write("\t\t\t\t\t\t\t}]\r\n");
+      out.write("\t\t\t\t\t\t}, {\r\n");
+      out.write("\t\t\t\t\t\t\tcolumnWidth: .25,\r\n");
+      out.write("\t\t\t\t\t\t\tlayout: \"form\",\r\n");
+      out.write("\t\t\t\t\t\t\tid: \"successful\",\r\n");
+      out.write("\t\t\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\t\t\txtype: \"combo\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tfieldLabel: \"是否成功\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tmode: \"local\",\r\n");
+      out.write("\t\t\t\t\t\t\t\treadOnly: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\ttriggerAction: \"all\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tstore: new Ext.data.SimpleStore({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tfields: [\"valueText\", \"displayText\"],\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tdata: [[\"Y\", \"有效\"], [\"N\", \"无效\"]]\r\n");
+      out.write("\t\t\t\t\t\t\t\t}),\r\n");
+      out.write("\t\t\t\t\t\t\t\thiddenName: \"successful\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tvalueField: \"valueText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tdisplayField: \"displayText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tanchor: \"95%\"\r\n");
+      out.write("\t\t\t\t\t\t\t}]\r\n");
+      out.write("\t\t\t\t\t\t}, {\r\n");
+      out.write("\t\t\t\t\t\t\tcolumnWidth: .25,\r\n");
+      out.write("\t\t\t\t\t\t\tlayout: \"form\",\r\n");
+      out.write("\t\t\t\t\t\t\tid: \"historical\",\r\n");
+      out.write("\t\t\t\t\t\t\titems: [{\r\n");
+      out.write("\t\t\t\t\t\t\t\txtype: \"combo\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tfieldLabel: \"是否归档\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tmode: \"local\",\r\n");
+      out.write("\t\t\t\t\t\t\t\teditable: false,\r\n");
+      out.write("\t\t\t\t\t\t\t\ttriggerAction: \"all\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tstore: new Ext.data.SimpleStore({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tfields: [\"valueText\", \"displayText\"],\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tdata: [[\"Y\", \"是\"], [\"N\", \"否\"]]\r\n");
+      out.write("\t\t\t\t\t\t\t\t}),\r\n");
+      out.write("\t\t\t\t\t\t\t\tvalue: \"N\",\r\n");
+      out.write("\t\t\t\t\t\t\t\thiddenName: \"historical\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tvalueField: \"valueText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tdisplayField: \"displayText\",\r\n");
+      out.write("\t\t\t\t\t\t\t\tanchor: \"95%\"\r\n");
+      out.write("\t\t\t\t\t\t\t}]\r\n");
+      out.write("\t\t\t\t\t\t}]\r\n");
+      out.write("\t\t\t\t\t}],\r\n");
+      out.write("\t\t\t\t\tbuttons: [\r\n");
+      out.write("\t\t\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\t\t\ttext: \"搜索\",\r\n");
+      out.write("\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar params = Ext.getCmp(\"form-ct\").getForm().getValues();\r\n");
+      out.write("\t\t\t\t\t\t\t\tfor (var param in params) {\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tjs.setBaseParam(param, params[param]);\r\n");
+      out.write("\t\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t\t\tjs.load({ params: {skipResults: 0, maxResults: 20}});\r\n");
+      out.write("\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t},\r\n");
+      out.write("\t\t\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\t\t\ttext: \"重置\",\r\n");
+      out.write("\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\tExt.getCmp(\"form-ct\").getForm().reset();\r\n");
+      out.write("\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t]\r\n");
+      out.write("\t\t\t\t},\r\n");
+      out.write("\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\txtype: \"grid\",\r\n");
+      out.write("\t\t\t\t\tregion: \"center\",\r\n");
+      out.write("\t\t\t\t\tid: \"panel-ct\",\r\n");
+      out.write("\t\t\t\t\ttitle: \"接口事件列表\",\r\n");
+      out.write("\t\t\t\t\ticonCls: \"fellow\",\r\n");
+      out.write("\t\t\t\t\tframe: true,\r\n");
+      out.write("\t\t\t\t\tborder: true,\r\n");
+      out.write("\t\t\t\t\tstore: js,\r\n");
+      out.write("\t\t\t\t\tloadMask: { msg: \"正在加载中，请稍后……\" },\r\n");
+      out.write("\t\t\t\t\tstripeRows: true,\r\n");
+      out.write("\t\t\t\t\tautoExpandColumn: \"description\",\r\n");
+      out.write("\t\t\t\t\tflex: 1,\r\n");
+      out.write("\t\t\t\t\tviewConfig: { forceFit: true },\r\n");
+      out.write("\t\t\t\t\tcm: new Ext.grid.ColumnModel([\r\n");
+      out.write("\t\t\t\t\t\tnew Ext.grid.RowNumberer(),\r\n");
+      out.write("\t\t\t\t\t\t{header: \"事件类型\", width: 100, dataIndex: \"type\", renderer: function(value) { if (value == \"TRACE\") { return \"信息\"; } else if (value == \"FAULT\") { return \"错误\"; } else { return \"未知\"; } } },\r\n");
+      out.write("\t\t\t\t\t\t{header: \"日志描述\", width: 300, dataIndex: \"description\" },\r\n");
+      out.write("\t\t\t\t\t\t{header: \"是否成功\", width: 100, dataIndex: \"successful\", renderer: function(value) { if (value == \"Y\") { return '<span style=\"color:green;\">成功</span>'; } else if (value == \"N\") { return '<span style=\"color:red;\">失败</span>'; } else { return \"未知\"; } } },\r\n");
+      out.write("\t\t\t\t\t\t{header: \"创建日期\", width: 120, dataIndex: \"created\"}\r\n");
+      out.write("\t\t\t\t\t]),\r\n");
+      out.write("\t\t\t\t\ttbar: [\r\n");
+      out.write("\t\t\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\t\t\ttext: \"查看入参文档\",\r\n");
+      out.write("\t\t\t\t\t\t\ticonCls: \"code\",\r\n");
+      out.write("\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar selected = Ext.getCmp(\"panel-ct\").getSelectionModel().getSelected();\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar win = new Ext.Window({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tlayout: \"fit\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\twidth: 700,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\theight: 400,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\ttitle: \"事件详情\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tcloseAction:'hide',\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tmodal: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tborder: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\thtml: '<iframe width=\"100%\", height=\"100%\" scrolling=\"yes\" frameborder=\"no\" src=\"/iface/ifaceLoggerEventAction.do?method=eventArgu&eventId=' + selected.get(\"eventId\") + '\"/></iframe>',\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tautoScroll: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tresizable: false,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tbuttons: [\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t{ \r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\ttext: \"重新执行\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\tExt.MessageBox.confirm(\"请选择\", \"如果你确定需要重新执行，请点击是。\", function(btn) {\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\tif (btn == \"yes\") {\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\tvar conn = new Ext.data.Connection({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tautoAbort: false,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tdisableCaching: false,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\textraParams: { eventId: selected.get(\"eventId\"), method: \"eventImpl\" },\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tmethod: \"GET\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ttimeout: 300,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\turl: \"/iface/ifaceLoggerEventAction.do\"\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\tconn.request({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tcallback: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\tExt.MessageBox.alert(\"请选择\", \"后台调用完毕，请点击确认按钮刷新页面查看日志。\");\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t\t\t\t]\r\n");
+      out.write("\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\twin.show();\r\n");
+      out.write("\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t},\r\n");
+      out.write("\t\t\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\t\t\ttext: \"查看事件描述\",\r\n");
+      out.write("\t\t\t\t\t\t\ticonCls: \"text\",\r\n");
+      out.write("\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar selected = Ext.getCmp(\"panel-ct\").getSelectionModel().getSelected();\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar win = new Ext.Window({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tlayout: \"fit\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\twidth: 700,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\theight: 400,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\ttitle: \"描述详情\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tcloseAction:'close',\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tmodal: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tborder: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\thtml: '<iframe width=\"100%\", height=\"100%\" scrolling=\"yes\" frameborder=\"no\" src=\"/iface/ifaceLoggerEventAction.do?method=eventDesc&eventId=' + selected.get(\"eventId\") + '\"/></iframe>',\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tautoScroll: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tresizable: false\r\n");
+      out.write("\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\twin.show();\r\n");
+      out.write("\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t},\r\n");
+      out.write("\t\t\t\t\t\t{\r\n");
+      out.write("\t\t\t\t\t\t\ttext: \"打开日志记录\",\r\n");
+      out.write("\t\t\t\t\t\t\ticonCls: \"note\",\r\n");
+      out.write("\t\t\t\t\t\t\thandler: function() {\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar selected = Ext.getCmp(\"panel-ct\").getSelectionModel().getSelected();\r\n");
+      out.write("\t\t\t\t\t\t\t\t//window.location.href = \"/jsp/iface/ifaceLoggerTraceSrch.jsp?relateId=\" + selected.get(\"relateId\");\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar gridCt = new Ext.ux.grid.LoggerGrid({baseParams: {relateId: selected.get(\"relateId\")}});\r\n");
+      out.write("\t\t\t\t\t\t\t\tvar win = new Ext.Window({\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tlayout: \"fit\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\twidth: 770,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\ttitle: \"日志记录列表\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tcloseAction: \"close\",\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tmodal: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tborder: false,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\titems: gridCt,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tautoScroll: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tautoHeight: true,\r\n");
+      out.write("\t\t\t\t\t\t\t\t\tresizable: false\r\n");
+      out.write("\t\t\t\t\t\t\t\t});\r\n");
+      out.write("\t\t\t\t\t\t\t\twin.show();\r\n");
+      out.write("\t\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t],\r\n");
+      out.write("\t\t\t\t\tbbar: new Ext.PagingToolbar({\r\n");
+      out.write("\t                    pageSize: 20,\r\n");
+      out.write("\t                    store: js,\r\n");
+      out.write("\t                    beforePageText: \"第\",\r\n");
+      out.write("\t                    afterPageText: \"/{0}页\",\r\n");
+      out.write("\t                    firstText: \"首页\",\r\n");
+      out.write("\t                    prevText: \"上页\",\r\n");
+      out.write("\t                    nextText: \"下页\",\r\n");
+      out.write("\t                    lastText: \"尾页\",\r\n");
+      out.write("\t                    refreshText: \"刷新\",\r\n");
+      out.write("\t                    displayInfo: true,\r\n");
+      out.write("\t                    displayMsg: '当前显示记录从{0} 到 {1} 总共{2}条记录',\r\n");
+      out.write("\t                    emptyMsg: \"没有数据\"\r\n");
+      out.write("\t                }),\r\n");
+      out.write("\t\t\t\t\tlisteners: {\r\n");
+      out.write("\t\t\t\t\t\trowclick: function(g, i, e) {\r\n");
+      out.write("\t\t\t\t\t\t\trecord = js.getAt(i);\r\n");
+      out.write("\t\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t\t}\r\n");
+      out.write("\t\t\t\t}\r\n");
+      out.write("\t\t\t]\r\n");
+      out.write("\t\t});\r\n");
+      out.write("\r\n");
+      out.write("\t\tExt.getCmp(\"form-ct\").addListener(\"collapse\", function(panelCt) {\r\n");
+      out.write("\t\t\tviewportCt.doLayout();\r\n");
+      out.write("\t\t});\r\n");
+      out.write("\t\tExt.getCmp(\"form-ct\").addListener(\"expand\", function(panelCt) {\r\n");
+      out.write("\t\t\tviewportCt.doLayout();\r\n");
+      out.write("\t\t});\r\n");
+      out.write("\r\n");
+      out.write("\t\tjs.load({params: {skipResults: 0, maxResults: 20}});\r\n");
+      out.write("\t});\r\n");
+      out.write("</script>\r\n");
+      out.write("</body>\r\n");
+      out.write("</html>");
+    } catch (Throwable t) {
+      if (!(t instanceof SkipPageException)){
+        out = _jspx_out;
+        if (out != null && out.getBufferSize() != 0)
+          try { out.clearBuffer(); } catch (java.io.IOException e) {}
+        if (_jspx_page_context != null) _jspx_page_context.handlePageException(t);
+      }
+    } finally {
+      _jspxFactory.releasePageContext(_jspx_page_context);
+    }
+  }
+}

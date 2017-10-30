@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+      
+	<f:view  contentType="text/html">
+		<f:loadBundle basename="messages" var="msgs" />
+		<head>
+			<script>
+			//<![CDATA[ 
+				function loginUser(){
+					userInfo();
+				}
+				
+				//打开人员及人员部门派工关系Tab页
+				function openDispatching(type){
+					var userId = document.getElementById("userId").value;
+					var userName = document.getElementById("userName").value;
+					var unitIds = document.getElementById("unitIds").value;
+					var url = "";
+					if(type == "user"){
+						url = "#{userBean.userDispatchingURL}";
+						if(url.indexOf("?") == -1){
+							url = url + "?dispatchObjectId=" + userId;
+						}else{
+							url = url + "&dispatchObjectId=" + userId;
+						}
+						parent.parent.addTab(userId, "【" + userName + "】派工关系", url);
+					}else{
+						url = "#{organizationBean.orgDispatchingURL}";
+						if(url.indexOf("?") == -1){
+							url = url + "?dispatchObjectId=" + unitIds;
+						}else{
+							url = url + "&dispatchObjectId=" + unitIds;
+						}
+						parent.parent.addTab(unitIds, "【" + userName + "】部门派工关系", url);
+					}
+				}
+			//]]>
+			</script>
+			<style type="text/css">
+		    .column1{
+		       	width:25%;
+		       	text-align:right;
+		    }
+		    .column2{
+		       	width:75%; 
+		       	text-align:right;
+		    }
+			A:link {
+				COLOR: red; TEXT-DECORATION: none
+			}
+			A:visited {
+				COLOR: red; TEXT-DECORATION: none
+			}
+			A:active {
+				COLOR: #ffffff; TEXT-DECORATION: none
+			}
+			A:hover {
+				COLOR: #ffffff; TEXT-DECORATION: none
+			}
+		    </style>
+		</head>
+		<body style="overflow-x:hidden;overflow-y:hidden;" onload="loginUser();">
+			<div id="center" style="background:white;height:100%;margin-top:0px;margin-bottom:0px;" align="center">
+				<rich:tabPanel style="width:100%;height:100%;" switchType="client">
+					<rich:tab label="#{msgs['baf.loginUserInfo']}" style="text-align:center;">
+						<rich:spacer height="10px;"/>
+						<h:form id="queryForm">
+							<center>
+								<h:panelGrid columns="2" columnClasses="column1,column2" style="vertical-align:middle;width:60%;font-size:13px;">
+						 			<h:outputText value="#{msgs['baf.org.user.officePhone']}:" style="font-size:13px;"/>
+						 			<h:inputText  id="officePhone"  style="width:95%;height:23px;"  styleClass="rich-gradient-input"  value="#{userBean.officePhone}" disabled="true"/>
+						 		
+						 			<h:outputText value="#{msgs['baf.org.user.homePhone']}:" style="font-size:13px;"/>
+						 			<h:inputText  id="homePhone" style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.homePhone}" disabled="true"/>
+						 		
+						 			<h:outputText value="#{msgs['baf.org.user.mobilePhone']}:" style="font-size:13px;"/>
+						 			<h:inputText  id="mobilePhone"  style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{userBean.mobilePhone}" disabled="true"/>
+						 			
+						 		
+						 			<h:outputText value="#{msgs['baf.org.user.phs']}:" style="font-size:13px;"/>
+						 			<h:inputText  id="phs"  style="width:95%;height:23px;" styleClass="rich-gradient-input"  value="#{userBean.phs}" disabled="true"/>  
+						 		
+						 			<h:outputText value="#{msgs['baf.org.post.parentUnit']}:" style="font-size:13px;"/>
+						 			<h:inputTextarea id="parentOrgName" style="width:95%;resize:none;" rows="4" styleClass="rich-gradient-input"  value="#{userBean.fullUnitNames}" title="#{userBean.fullUnitNames}" readonly="true"/>
+						 			
+							 		<h:outputText value="#{msgs['baf.org.unit.unitPhone']}:" style="font-size:13px;"/>
+							 		<h:inputTextarea id="unitPhone" style="width:95%;resize:none;" rows="4" styleClass="rich-gradient-input"  value="#{userBean.unitPhone}" readonly="true"/>
+						 		</h:panelGrid>
+						 	</center>
+						 	<input type="hidden" id="userId" value="${userBean.userId}" />
+						 	<input type="hidden" id="userName" value="${userBean.userName}" />
+						 	<input type="hidden" id="unitIds" value="${userBean.unitIds}" />
+			    		</h:form>
+					    <h:form>
+					    	<a4j:jsFunction name="userInfo" limitToList="true" action="#{userBean.loginUserInfo}" reRender="queryForm"/>
+					        <a4j:keepAlive beanName="userBean"/>
+					    </h:form>
+			    	</rich:tab>
+			    	
+			    	<!-- 当前用户派工关系 -->
+					<rich:tab disabled="true" rendered="#{organizationBean.showDispatching == 'Y'}">
+						<f:facet name="label">
+							<h:panelGroup>
+								<a href="#" onclick="openDispatching('user');">
+									<h:outputText value="当前用户派工关系" />
+			                 	</a>
+		                 	</h:panelGroup>
+						</f:facet>
+					</rich:tab>
+					
+					<!-- 所在部门派工关系 -->
+					<rich:tab disabled="true" rendered="#{organizationBean.showDispatching == 'Y'}">
+						<f:facet name="label">
+							<h:panelGroup>
+								<a href="#" onclick="openDispatching('org');">
+									<h:outputText value="所在部门派工关系" />
+			                 	</a>
+		                 	</h:panelGroup>
+						</f:facet>
+					</rich:tab>
+			    </rich:tabPanel>
+		    </div>
+		</body>
+	</f:view>
+</html>

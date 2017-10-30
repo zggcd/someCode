@@ -1,0 +1,132 @@
+ /*用户界面的body样式*/
+ .uibody{
+ 	margin-left: 0px;
+	margin-top: 0px;
+	margin-right: 0px;
+	margin-bottom: 0px;
+	background-color:#FFFFFF;
+ 	font-size:13px;
+ 	background-color:"";
+ }
+ td{
+    font-size:13px;
+  }
+ /*背景颜色*/
+ .tbody_bgcolor{
+   background-color:#F7F7F7;
+ }
+ /*标题栏*/ 
+.bar{
+	FILTER: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffffff, EndColorStr=#788997);  
+}
+.bar_2{
+   FILTER: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#C9D0D5, EndColorStr=#ffffff);  
+}	
+
+/*按钮样式*/
+.button{ 
+	BORDER-RIGHT: #7b9ebd 1px solid;
+	PADDING-RIGHT: 2px;
+	BORDER-TOP: #7b9ebd 1px solid;
+	PADDING-LEFT: 2px;
+	FONT-SIZE: 13px;
+	FILTER: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffffff, EndColorStr=#cecfde);
+	BORDER-LEFT: #7b9ebd 1px solid;
+	CURSOR: hand;
+	COLOR: black;
+	PADDING-TOP: 2px;
+	BORDER-BOTTOM: #7b9ebd 1px solid 
+	height:16px;
+} 
+/*按钮样式*/
+.ptagb  { 
+	BORDER-RIGHT: #7b9ebd 1px solid;
+	PADDING-RIGHT: 2px;
+	BORDER-TOP: #7b9ebd 1px solid;
+	PADDING-LEFT: 2px;
+	FONT-SIZE: 13px;
+	FILTER: progid:DXImageTransform.Microsoft.Gradient(GradientType=0, StartColorStr=#ffffff, EndColorStr=#cecfde);
+	BORDER-LEFT: #7b9ebd 1px solid;
+	CURSOR: hand;
+	COLOR: black;
+	PADDING-TOP: 2px;
+	BORDER-BOTTOM: #7b9ebd 1px solid 
+	height:16px;
+}
+/*工作区表头字体样式*/
+.headerfont{
+color: #000000;
+	font-family: "宋体";
+	font-size: 9pt;
+	font-weight: bold;
+}
+/*工作区的表头样式*/
+.headers{
+	color: #003399;
+	font-family: "宋体";
+	font-size: 9pt;
+	font-weight: bold;
+}
+A:link {color:black; text-decoration:none}
+A:visited {color:black; text-decoration:none}
+A:hover {color:red; text-decoration:none}
+A:active {color:blue; text-decoration:none}
+
+.font:link {font-size:9pt; color:black; line-height:15pt;}
+.font:visited {font-size:9pt;  color:black; line-height:15pt;}
+.font:hover {font-size:9pt; color:red; line-height:15pt;}
+.font:active {font-size:9pt; color:black; line-height:15px}
+
+.font2:link {font-size: 9pt; color:blue;line-height:12pt;}
+.font2:visited {font-size: 9pt; color:blue;line-height:12pt;}
+.font2:hover {font-size: 9pt; color:red;line-height:12pt;}
+.font2:active {font-size: 9pt; color:green line-height:12pt;}
+
+.font3:link {font-size: 9pt; color: black; line-height:12pt;}
+.font3:visited {font-size: 9pt; color: black; line-height:12pt;}
+.font3:hover {font-size: 9pt; color:red; line-height:12pt;}
+.font3:active {font-size: 9pt;line-height: 12pt;; text-decoration: underline; color:red}
+
+.input_button{background-color: #ffffff; color: #0033FF; border: 1px #8D9DC6 solid;text-align:left}
+
+.Select {background-color:#E5E4E4;height:18px;BORDER: #ffffff 1px solid; FONT-SIZE:9pt }
+
+
+.little:link {font-family:"宋体";font-size: 9pt; color:042694; text-decoration: none; line-height: 15px; font-weight: normal}
+.little:visited {font-family:"宋体";font-size: 9pt; color:042694; text-decoration: none; line-height: 15px; font-weight: normal}
+.little:hover  {font-family:"宋体";font-size: 9pt; color:#339966 text-decoration: none; line-height: 15px; font-weight: normal}
+.little:active {font-family:"宋体";font-size: 9pt; color:green; text-decoration: none; line-height: 15px; font-weight: normal}
+
+.little2:link {font-family:"宋体";FONT-SIZE: 9px; color:#FFFFFF; font-weight: bold}
+.little2:visited {font-family:"宋体";FONT-SIZE: 9px; color:#FFFFFF; font-weight: bold}
+.little2:hover {font-family:"宋体";FONT-SIZE: 9px; color:#99FFFF; font-weight: bold}
+.little2:active {font-family:"宋体";FONT-SIZE: 9px; color:#99FFFF; font-weight: bolder; text-decoration: none}
+
+.little3:link {font-family:"宋体";font-size: 12px; color: #FFFFFF; line-height: 20px; font-weight: bold}
+.little3:visited {font-family:"宋体";font-size: 12px; color: #FFFFFF; line-height: 20px; font-weight: bold}
+.little3:hover {font-family:"宋体";font-size: 12px; color: #FFCC00; line-height: 20px; font-weight: bold}
+.little3:active {font-family:"宋体";font-size: 12px; color: #8FBEFF; line-height: 20px; font-weight: bold}
+
+.font6:link {font-family:"宋体";font-size: 12px; color: #000000; line-height: 20px; font-weight: none}
+.font6:visited {font-family:"宋体";font-size: 12px; color: #000000; line-height: 20px; font-weight: none}
+.font6:hover {font-family:"宋体";font-size: 12px; color: #000000; line-height: 20px; font-weight: none}
+.font6:active {font-family:"宋体";font-size: 12px; color: #000000; line-height: 20px; font-weight: none}
+
+.little4 {font-family:"宋体";font-size: 15pt; color: #000000; font-weight:bolder; text-decoration: underline; line-height: 20px}
+.little5 {FONT-FAMILY:"宋体";font-size: 9pt; color: #0033CC; text-decoration: none; clip:  rect(   ); line-height: 18px}
+
+
+/*outlook风格菜单滚动条*/
+.scroll{
+height:500px;
+width:150px;
+overflow-y: auto;
+scrollbar-face-color:EAF3FF;
+scrollbar-highlight-color:#ffffff;
+scrollbar-shadow-color:#ffffff;
+scrollbar-arrow-color:#66CC66;
+scrollbar-darkshadow-color:EAF3FF;
+scrollbar-base-color:#ffffff;
+scrollbar-3d-light-color:#ffffff;
+}
+.3dfont{color:#000000;font-size:16;FILTER: glow(color=ffffff,strength=0) shadow(color=aaaaaa,direction:135); POSITION: relative; WIDTH: 100%}

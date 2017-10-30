@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+    	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0, initial-scale=1.0">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<meta name="mobile-web-app-capable" content="yes">
+    	<meta name="description" content="">
+    	<meta name="author" content="">
+    	<meta http-equiv="Cache-Control" CONTENT="no-cache">
+		<title>营维通</title>
+    	<link type="text/css" rel="stylesheet" href="lib/ratchet-2.0.1/css/ratchet.min.css">
+    	<link type="text/css" rel="stylesheet" href="lib/ratchet-2.0.1/css/ratchet-theme-ios.css">
+		<link type="text/css" rel="stylesheet" href="lib/css/ui-dialog.css">
+		<link type="text/css" rel="stylesheet" href="lib/css/chat.css">
+	</head>
+	<body>
+		<div id="to_chat" style='display:none'>
+			<header class="bar bar-nav">
+				<a class="icon icon-left-nav pull-left" id="back"></a>
+				<button class="btn btn-negative pull-right" id="logout" style='display:none'>结束支撑</button>
+				<div class="ajax-loader pull-right" id="loading" style='display:none'></div>
+				<h1 class="title" id="title">在线客服</h1>
+			</header>
+			<div class="content" id="content">
+			    <ul id='log'></ul>
+			</div>
+			<div class="bar bar-footer" id="footer" style='display:none'></div>
+			<div class="bar bar-footer" id="footer-say" style='display:none'>
+				<button class="btn" id="say-btn">按住 说话</button>
+				<a class="icon icon-sound pull-left" id="change-say"></a>
+				<a class="icon icon-plus pull-right" id="show-say"></a>
+			</div>
+			<div class="bar bar-footer" id="footer-send">
+	  			<input type="text" class="write" id="message">
+	  			<a id="send">发送</a>
+				<a class="icon icon-sound pull-left" id="change"></a>
+				<a class="icon icon-plus pull-right" id="show"></a>
+			</div>
+			<div class="bar bar-standard bar-footer bar-detail" id="moreMenu" style="display:none">
+				<div class="bar-detail-inner">
+					<div>
+						<button class="btn" id="pic">图片</button>
+						<button class="btn" id="photo">拍照</button>
+						<button class="btn icon icon-plus" id="more"></button>
+						<button class="btn" id="hide">关闭</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="to_btn">
+	    	<label for='domain'>域:</label>
+		    <input type='text' id='domain' value="zhddinterface03"/>
+		    <label for='domain'>外线人员:</label>
+		    <input type="checkbox" id='isclient' checked='checked'/>
+		  	<form name='cred'>
+		    	<label for='jid'>登录ID:</label>
+		    	<input type='text' id='jid' value="sj">
+		    	<label for='pass' style='display:none'>Password:</label>
+		    	<input type='password' id='pass' value="1" style='display:none'>
+		    	<label for='serviceRegion'>本地网id:</label>
+		    	<input type='text' id='serviceRegion' value="1">
+		    	<label for='serviceData'>业务号码:</label>
+		    	<input type='text' id='serviceData' value="109399672">
+		    	<label for='clientName'>姓名:</label>
+		    	<input type='text' id='clientName' value="某某">
+		  	</form>
+		  	<input type='button' id='go' value='请求支撑'>
+		</div>
+
+		<script type='text/javascript' src='lib/js/jquery-1.9.0.js'></script>
+		<script type="text/javascript" src="lib/js/strophe-1.1.0.js"></script>
+		<script type="text/javascript" src="lib/js/dialog-min.js"></script>
+		<script type="text/javascript" src="lib/js/chat.js"></script>
+	</body>
+</html>

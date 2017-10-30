@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition 
+xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent">
+
+         <script type='text/javascript' src='${request.contextPath}/baf/jsp/bbs/js/dropdown.js'></script>
+         <script type="text/javascript">
+         document.onload=reflash();
+         function reflash(){
+             setInterval("getInfo();",1000*60);  
+         }
+         
+         function getInfo(){
+           getReCount();
+           getPoint();
+         }
+         
+         </script>
+<link rel="stylesheet" type="text/css" href="${request.contextPath}/baf/jsp/bbs/css/css.css"/>
+<center>
+<div style="background:url(${request.contextPath}/baf/jsp/bbs/images/gonggaobg.png) 0 0 repeat-x; text-align: center; color:red; font-weight:bold; line-height:29px;"></div>
+
+<div class="wrap">
+<div id="header">
+<div id="head" class="cc"> <a href="#"><img src="${request.contextPath}/baf/jsp/bbs/images/logo.png" border="0" class="fl" /></a> 
+<span class="fr" style="width:210px;margin-top:65px;margin-right: 3px;height: 20px;" >
+<a href="#" onclick="window.location.href='${request.contextPath}/baf/jsp/bbs/myTopicReply.xhtml'" style="margin-top: 3px;" ><font style="font-size: 12px;">回复提醒(<span style="color: red;"><h:outputText value="#{topicBean.reply_totalCount}" id="replyCount"></h:outputText></span>)</font></a>
+<rich:spacer width="5px;"/>| <a href="#" onclick="window.location.href='${request.contextPath}/bbsIndex.do?method=getUserInfo';" style="margin-right: 2px;"><font style="font-size: 12px;">个人信息</font></a> | <font style="font-size: 12px;">积分:<h:outputText value="#{topicBean.userPoint}" id="userInfoVoPoint"></h:outputText></font>
+</span>
+
+</div>
+
+
+<div id="navMenu">
+
+<ul>
+		<li class="" id="nav_index_1" ><a id="nav_key_up_79" href="${request.contextPath}/bbsIndex.do?method=index&amp;navId=nav_index_1" title="" ><b><span style="font-size:14px;color:#FFFFFF;" onmousemove="this.style.color='#FFFF00'" onmouseout="this.style.color='#FFFFFF'">论坛</span></b></a></li>
+		<li id="nav_index_3"><a id="nav_key_up_122" href="${request.contextPath}/baf/jsp/bbs/myTopic.xhtml?boardName=我的帖子&amp;navId=nav_index_3" title="" ><b><span style="font-size:14px;color:#FFFFFF;" onmousemove="this.style.color='#FFFF00'" onmouseout="this.style.color='#FFFFFF'">我的帖子</span></b></a></li>
+		<li id="nav_index_4"><a id="nav_key_up_122" href="${request.contextPath}/baf/jsp/bbs/searchTopic.xhtml?boardName=搜索&amp;navId=nav_index_4" title="" ><b><span style="font-size:14px;color:#FFFFFF;" onmousemove="this.style.color='#FFFF00'" onmouseout="this.style.color='#FFFFFF'">搜索</span></b></a></li>
+		<c:forEach items="${boardBean.boadList}" var="boardVO">
+		  <li><a href='#'  rel='${boardVO.boardId}'><span style="font-size:14px;color:#FFFFFF;" onmousemove="this.style.color='#FFFF00'" onmouseout="this.style.color='#FFFFFF'"><b>${boardVO.boardName}</b></span></a></li>
+		</c:forEach>
+</ul>
+<div id="navMenu_r"></div>
+</div>
+
+	  
+
+     </div>
+
+</div>
+</center>
+<div>
+<script type="text/javascript">cssdropdown.startchrome("navMenu")</script> 
+<c:forEach items="${boardBean.boadList}" var="vo">
+ <ul id="${vo.boardId}" class="dropMenu">
+  <c:forEach items="${vo.childBoardVOList}" var="vo1">
+ 
+    <li><a href="${pageContext.request.contextPath}/baf/jsp/bbs/bbsTopic.xhtml?boardId=${vo1.boardId}" >${vo1.boardName}</a></li>
+    </c:forEach>
+
+  <li class="end"></li>
+ </ul>
+</c:forEach>
+
+</div>
+<a4j:keepAlive beanName="boardBean"/>
+ <a4j:form>
+	<a4j:jsFunction name="getReCount" action="#{topicBean.getReply_totalCount}"  reRender="replyCount" />
+	<a4j:jsFunction name="getPoint" action="#{topicBean.getUserPoint}" reRender="userInfoVoPoint" />
+</a4j:form>
+
+</ui:composition>
+
+

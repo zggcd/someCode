@@ -1,0 +1,62 @@
+	.hide									{ display:none;visibility:hidden;}
+	.clearfix:after							{ content: ".";display: block;height: 0;clear: both;visibility: hidden;}
+	.clearfix 								{ display: inline-block;}
+	* html .clearfix 							{ height: 1%;}
+	.clearfix 								{ display: block;}
+		
+	/**
+	****** Header - Dashboard  ************************************************
+	**/
+	#pannelDash .dashboard{
+		font-size:12px;
+		font-weight:normal;
+		overflow:hidden;
+		height:62px;
+		width:550px;
+		float:right;
+		padding:0 5px 5px 0;
+		}
+		
+	#pannelDash .dashboard li {
+		background:url("#") no-repeat top right;
+		width:62px;
+		height:62px;
+		float:right;
+		margin:0px;
+		padding:0px 0px 5px 0px;
+		border-bottom:1px solid white;
+		
+		text-align:center;
+		overflow:hidden;
+		}
+		
+		
+	#pannelDash .dashboard li:hover { 
+		background:url("../images/button_mov.png") no-repeat top right; 
+		}
+	
+	#pannelDash .dashboard li:hover a , .dashboardItOver a   { 
+		color:#000000;font-weight:normal;font-size:12px; 
+		}
+	
+	#pannelDash .dashboard li img { 
+		padding:0px 0px 5px 0px;
+		display:block;
+		margin:auto;
+		}
+	
+	#pannelDash .dashboard li a{
+		display:block;
+		background:transparent;
+		color:#000000;
+		text-decoration:none;
+		padding:5px;
+		margin:0;
+		margin-top:5px;
+		}
+	
+			
+	/**
+	****** Ui Components - utton model ************************************************
+	**/
+	

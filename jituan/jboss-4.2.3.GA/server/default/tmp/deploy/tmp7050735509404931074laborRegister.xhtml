@@ -1,0 +1,1029 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:s="http://shale.apache.org/core"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:rich="http://richfaces.org/rich"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:c="http://java.sun.com/jstl/core"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	xmlns:regaltec="http://regaltec.org/customConponent">
+<f:view  contentType="text/html">
+	<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<link  href="#{request.contextPath}/ida40/module/reg/style/ida40_reg.css" rel="stylesheet" type="text/css" />
+	</head>
+<body style="margin: 8px;">
+	<!-- ajax模板 -->
+	<ui:include src="/ida40/common/page/getTreeData.xhtml">
+			<ui:param name="modalName" value="SpecialtyModal" />
+			<ui:param name="dataSource" value="#{regRegisterBean.specialtyTree}" />
+			<ui:param name="label" value="业务类型" />
+			<ui:param name="inputId" value="registerForm:specialtyId" />
+			<ui:param name="inputName" value="registerForm:specialtyName" />
+			<c:if test="#{regRegisterBean.specialtyTree eq 'IDT_REG_SPECIALTY_GROUP'}">
+			<ui:param name="paramName" value="deptId#objType" />
+			<ui:param name="paramLabel" value="部门#障碍类型" />
+			<ui:param name="paramInput" value="registerForm:areaDept#registerForm:complaintSrc" />
+			</c:if>
+			<ui:param name="selectNum" value="1" />
+			<ui:param name="isReload" value="N" />
+			<ui:param name="afterConfirm" value="afterchangeSpecialty()" />
+		</ui:include>
+
+	<ui:include src="/ida40/common/page/modalTemplate.xhtml" />
+ 
+ 	<a4j:form id="registerForm" eventsQueue="regQueue">
+ 	 <div style="POSITION: absolute;z-index: 100;top: 100px;left: 200px;">
+ 	 <rich:progressBar mode="client" label="获取信息中..." id="progressBar" >      
+      </rich:progressBar>
+      </div>
+ 		<h:inputHidden  id="areaDept" value="#{regRegisterBean.areaDept}" />
+  <rich:tabPanel switchType="client" id="regtabs">
+           <rich:tab id="regtab">
+		        
+		        <f:facet name="label">
+						<h:panelGroup  style="width:100%">
+						    <img src="#{request.contextPath}/ida40/module/reg/images/register.gif" style="vertical-align: middle;"/>
+							<h:outputLabel value="综合受理" />
+							<h:outputLabel value="(#{regRegisterBean.regDto.historyFaultNum})" rendered="#{regRegisterBean.regDto.historyFaultNum ne 0}"/>
+						</h:panelGroup>
+					</f:facet>
+				<rich:spacer height="5px" />
+				<h:inputHidden  id="businessId" value="#{regRegisterBean.regDto.businessId}" />
+                <h:inputHidden  id="billsn" value="#{regRegisterBean.billsn}" />
+                <h:inputHidden  id="projectId" value="#{regRegisterBean.regDto.projectId}" />
+				<a4j:region> <!-- 获取资源 -->
+					<h:panelGroup>
+			             <fieldset>
+							<legend style="color:blue"><h:outputText value="故障基本信息" /></legend>
+							<table id="t_baseinfo" border="0"  cellspacing="0" cellpadding="0"
+								style="font-size: 13px;">
+								<tr>
+								<th>障碍类型：</th>
+									<td align="left" style="width:205px;">
+									<h:selectOneMenu style="width:205px;height:23px;"
+										 id="complaintSrc" tabindex="2"  disabled="#{regRegisterBean.regDto.repeatAccepted}"
+										value="#{regRegisterBean.regDto.complaintSrc}"
+										 onchange="showOrHideTestInfo(this.value);">
+										<f:selectItem itemValue="W" itemLabel="故障单"/>
+										<f:selectItem itemValue="T" itemLabel="测试单"/>
+									</h:selectOneMenu>
+									</td>
+									<th style="width:140px;">业务类型：</th>
+									<td align="left" style="width:254px;">
+									<h:inputText id="specialtyName" 
+										 tabindex="1"  disabled="#{regRegisterBean.regDto.repeatAccepted}" 
+										value="#{regRegisterBean.regDto.specialtyName}"
+										styleClass="rich-gradient-input"  style="width:205px;height:23px;"/>
+									<h:inputHidden value="#{regRegisterBean.regDto.specialtyId}" id="specialtyId">
+										<s:commonsValidator type="required" arg="业务类型" server="false" client="true" />
+									</h:inputHidden>
+									<a4j:commandButton id="serachSpecialtyButton" value="选择"
+										style="width:40px;" styleClass="rich-button"
+										onclick="showSpecialtyModal('');return false;" disabled="#{regRegisterBean.regDto.repeatAccepted}" />
+										<h:outputLabel style="font-size:13px;color:red;" value="*" />
+									<rich:suggestionbox  id="specialtySuggestionbox"
+										height="200" width="205"
+										onselect="afterchangeSpecialty(suggestion);"
+										usingSuggestObjects="true" 
+										suggestionAction="#{regRegisterBean.querySpecialty}" var="cap"
+										shadowOpacity="1" border="1" shadowDepth="3" cellpadding="0"
+										nothingLabel="无匹配结果" for="specialtyName"
+										fetchValue="#{cap.keyWord}" >
+										<h:column>
+											<h:outputText value="#{cap.keyWord}" />
+										</h:column>
+									</rich:suggestionbox>
+									
+									</td>
+								</tr>
+							</table>
+						</fieldset>
+					</h:panelGroup>
+					
+					<h:panelGroup id="faultCodeDiv" >
+					    
+			        <c:if test="#{(not empty regRegisterBean.faultCodes)}">
+			             <fieldset id="g_failcodes" >
+							<legend><font color="blue">障碍部位信息</font></legend>
+							<h:panelGrid id="p_faultCodes" cellspacing="0" cellpadding="0"  columns="4" style="font-size:13px;" dir="ltr"  rowClasses="rowsh29" columnClasses="column11R,column22L,column11R,column22L,column11R,column22L">
+								<c:if test="#{not empty regRegisterBean.faultCodes}">
+									<c:forEach items="#{regRegisterBean.faultCodes}" var="codeNode" varStatus="status">
+									   <c:if test="#{codeNode.nodeType eq '1' or codeNode.nodeType eq '3'}">
+									   	        <h:outputText value="#{codeNode.name}：" />
+									   		<h:panelGroup>
+									   		<c:if test="#{codeNode.nodeType eq '3'}">
+									   		<h:inputText id="#{codeNode.nameField}" 
+													style="width:205px;height:23px;" tabindex="#{codeNode.tabIndex}"
+													value="#{codeNode.nameFieldValue}"  disabled="#{regRegisterBean.regDto.repeatAccepted}"
+													styleClass="rich-gradient-input"  onkeydown="qInfoShortcut(event)">
+												<c:if test="#{codeNode.isFilled eq 'Y'}"><s:commonsValidator type="required" arg="#{codeNode.name}" server="false" client="true" /></c:if>
+											</h:inputText>
+											</c:if>
+											<c:if test="#{codeNode.nodeType ne '3'}">
+											<c:if test="#{status.first}">
+											<h:inputText id="#{codeNode.nameField}"  
+													style="width:205px;height:23px;" tabindex="#{codeNode.tabIndex}"
+													value="#{codeNode.nameFieldValue}"  disabled="#{regRegisterBean.regDto.repeatAccepted}"
+													styleClass="rich-gradient-input" onblur="beforeJudgeRepeatAccept(this.value)" >
+													
+												<c:if test="#{codeNode.isFilled eq 'Y'}"><s:commonsValidator type="required" arg="#{codeNode.name}" server="false" client="true" /></c:if>
+											</h:inputText>
+											</c:if>
+											
+											<c:if test="#{!status.first}">
+											<h:inputText id="#{codeNode.nameField}"  
+													style="width:205px;height:23px;" tabindex="#{codeNode.tabIndex}"
+													value="#{codeNode.nameFieldValue}"  disabled="#{regRegisterBean.regDto.repeatAccepted}"
+													styleClass="rich-gradient-input"  >
+													
+												<c:if test="#{codeNode.isFilled eq 'Y'}"><s:commonsValidator type="required" arg="#{codeNode.name}" server="false" client="true" /></c:if>
+											</h:inputText>
+											</c:if>
+											</c:if>
+											<c:if test="#{codeNode.nodeType eq '3'}">
+											
+											<a4j:commandButton id="btn_getInfo" action="#{regRegisterBean.getInfo}"  value="获取信息"  disabled="#{regRegisterBean.regDto.repeatAccepted}" 
+										style="width:75px;"  onclick="beforeGetInfo();return; " styleClass="rich-button"  
+										 />
+										 
+										 </c:if>
+										 <c:if test="#{codeNode.isFilled eq 'Y'}"><h:outputLabel style="font-size:14px;color:red;" value="*" /></c:if>
+										<c:if test="#{not empty codeNode.descript }">
+										<rich:toolTip  for="#{codeNode.nameField}" hideDelay="5">
+										    <div><h:outputText value="#{codeNode.descript}" escape="false"/></div>
+										</rich:toolTip>
+										</c:if>
+										 </h:panelGroup>
+									   </c:if>
+								
+									   <c:if test="#{codeNode.nodeType eq '0' or codeNode.nodeType eq '2'}">
+									 
+									   		<h:outputText
+												value="#{codeNode.name}：" />
+											<h:panelGroup>
+										   		<regaltec:dictionary type="dictionary"
+																	 dicCode="#{codeNode.nodeValue}"
+																	 id="#{codeNode.nameField}"
+																	 emptValue=""
+																	 emptText="----请选择----"
+																	 value="#{codeNode.nameFieldValue}"
+																	 tabindex="#{codeNode.tabIndex}"
+																	 optValueType="itemValue"
+																	 style="width:205px;height:23px;"
+																	 onBlur="judgeRepeatAccept(this.value)"
+																	 styleClass="rich-box-border-color-control-select rich-text-control-select">
+													<c:if test="#{codeNode.isFilled eq 'Y'}"><s:commonsValidator type="required" arg="#{codeNode.nameField}" server="false" client="true" /></c:if>
+												</regaltec:dictionary>
+												<c:if test="#{codeNode.nodeType eq '2'}">
+											
+											<a4j:commandButton value="获取信息"
+										style="width:75px;" 
+										onclick="beforeGetInfo();return; "  id="btn_getInfo"
+										 styleClass="rich-button"   disabled="#{regRegisterBean.regDto.repeatAccepted}" 
+										   />
+										 
+										   </c:if>
+										  <c:if test="#{codeNode.isFilled eq 'Y'}"><h:outputLabel style="font-size:14px;color:red;" value="*" /></c:if>
+											
+											<c:if test="#{not empty codeNode.descript }">
+										<rich:toolTip  for="#{codeNode.nameField}" hideDelay="5">
+										    <h:outputText  escape="false" value="#{codeNode.descript}"/>
+										</rich:toolTip>
+										</c:if>
+											</h:panelGroup>
+									   </c:if>
+									  
+									</c:forEach>
+								</c:if>
+								是否EPON：<h:selectBooleanCheckbox id="isEpon" style="margin-left: 0;" disabled="#{regRegisterBean.regDto.repeatAccepted}"  value="#{regRegisterBean.regDto.isEpon}" tabindex="3" />
+								</h:panelGrid>  
+						</fieldset>
+						</c:if>
+					</h:panelGroup>
+					
+					<h:panelGroup id="testInfo" style="#{(regRegisterBean.regDto.complaintSrc) eq 'T'?'':'display:none'}">
+			             <fieldset>
+							<legend><font color="blue">测试单补充信息</font></legend>
+							<table  cellspacing="0" cellpadding="0" style="font-size: 13px;">
+								<tr>
+									<th>测试开始时间：</th>
+									<td align="left">
+										<rich:calendar id="testBeginTime"
+													   value="#{regRegisterBean.regDto.testBeginTime}"
+													   datePattern="yyyy-MM-dd HH:mm"
+													   defaultTime="00:00"
+													   weekDayLabelsShort="日,一,二,三,四,五,六"
+													   showWeeksBar="false"
+													   tabindex="15" 
+													   inputStyle="width:185px"
+													   inputClass="rich-gradient-input"
+													   styleClass="rich-gradient-input"
+													  
+													   enableManualInput="false" 
+													   resetTimeOnDateSelect ="true"
+													   disabled="#{regRegisterBean.regDto.repeatAccepted}"
+													   >
+										</rich:calendar>
+									</td>
+									
+									<th style="width:179px;">测试时长：</th>
+									<td align="left" width="135px;">
+									<h:inputText id="testDurationHour"
+										style="width:79px;height:23px;" tabindex="16"    maxlength="3"
+										value="#{regRegisterBean.regDto.testDurationHour}" 
+										onkeypress="return verificationPositiveInt();" onpaste="return false" styleClass="rich-gradient-input" />
+									<h:outputLabel style="font-size:13px;" value="小时" />
+									<h:inputText id="testDurationMinute"
+										style="width:79px;height:23px;" tabindex="32"  maxlength="3" 
+										value="#{regRegisterBean.regDto.testDurationMinute}" 
+										onkeypress="return verificationPositiveInt();" onpaste="return false" styleClass="rich-gradient-input" />
+									<h:outputLabel style="font-size:13px;" value="分"  />
+									</td>
+									</tr>
+								    <tr height="30px">
+									<th>测试方式：</th>
+									<td align="left">
+										<regaltec:dictionary type="dictionary"
+															 emptValue=""
+															 emptText="---请选择---"
+															 dicCode="IDD_REG_TESTBILL_ATR"
+															 id="testType"
+															 tabindex="17"
+															 value="#{regRegisterBean.regDto.testType}"
+															 optValueType="itemValue"
+															 style="width:205px;"
+															 styleClass="rich-box-border-color-control-select rich-text-control-select"/>
+									</td>
+									<th style="width:179px;">测试范围：</th>
+									<td align="left">
+										<regaltec:dictionary type="dictionary"
+															 emptValue=""
+															 emptText="---请选择---"
+															 dicCode="IDD_REG_TESTRANGE"
+															 id="testRange"
+															 tabindex="17"
+															 value="#{regRegisterBean.regDto.testRange}"
+															 optValueType="itemValue"
+															 style="width:205px;"
+															 styleClass="rich-box-border-color-control-select rich-text-control-select"/>
+									
+									</td>
+								</tr>
+
+								<tr height="60px">
+									<th>测试原因：</th>
+									<td colspan="3" align="left"><h:inputTextarea
+										id="testReason" value="#{regRegisterBean.regDto.testReason}"
+										tabindex="19" style="width:609PX;height:50px;"
+										styleClass="rich-gradient-input">
+                                      <s:commonsValidator type="maxlength" arg="测试原因"  maxLength="60" server="false" client="true" />										
+									</h:inputTextarea></td>
+									<td></td>
+								</tr>
+							</table>
+						</fieldset>
+					</h:panelGroup>
+					
+					<h:panelGroup id="createCauseInfo" style="display:''">
+			             <fieldset>
+							<legend><font color="blue">故障现象</font></legend>
+							<table id="t_cause" cellspacing="0" cellpadding="0" style="font-size: 13px;">
+								<tr>
+									<th align="right">障碍现象：</th>
+									<td align="left" style="width:219px;">
+									<h:selectOneMenu value="#{regRegisterBean.regDto.createCause}" disabled="#{regRegisterBean.regDto.repeatAccepted}" onchange="setCreateInfo(this)" style="width:205px;height:23px;" class="rich-box-border-color-control-select rich-text-control-select">
+									<f:selectItem itemLabel ="---请选择---" />
+									<c:if test="#{regRegisterBean.comCauses != null}">
+									<f:selectItems value="#{regRegisterBean.comCauses}"/>
+									</c:if>
+									<s:commonsValidator type="required" arg="障碍现象" server="false" client="true" />
+									</h:selectOneMenu>
+									<h:outputLabel style="font-size:13px;color:red;" value="*" /></td>
+									
+									
+								</tr>
+
+								<tr height="60px">
+									<th colspan="1" align="right">障碍描述：</th>
+									<td colspan="4" align="left"><h:inputTextarea
+										id="createInfo" value="#{regRegisterBean.regDto.createInfo}"
+										tabindex="22" style="width:609px;height:50px;"
+										styleClass="rich-gradient-input">
+										<s:commonsValidator type="maxlength" arg="障碍描述" maxLength="2000" server="false" client="true" />
+									</h:inputTextarea></td>
+									
+									
+								</tr>
+							</table>
+						</fieldset>
+					</h:panelGroup>
+					
+					<h:panelGroup>
+			             <fieldset>
+							<legend><font color="blue"><h:outputText value="故障等级" /></font></legend>
+							<table  id="t_causelevel" cellspacing="0" cellpadding="0" style="font-size: 13px;">
+								<tr height="25px">
+									<th>电路维护等级：</th>
+									<td align="left" >
+									<h:selectOneMenu id="cmLevels" style="width:151px;height:23px;" onchange="circuitMLChange(this);" disabled="#{regRegisterBean.regDto.repeatAccepted}" value="#{regRegisterBean.regDto.circuitMaiLevel}" class="rich-box-border-color-control-select rich-text-control-select"> 
+									<f:selectItem itemLabel ="---请选择---" />
+									<f:selectItems value="#{regRegisterBean.cmLevels}"/>
+									</h:selectOneMenu>
+									
+									<h:outputLabel style="font-size:13px;color:red;" value="*" />
+									</td>
+									<td rowspan="5" colspan="4" style="padding-left: 8px;">
+									<h:panelGroup>
+										<fieldset style="border-style:dotted;width:417px;width:441px\9;padding-top: 0;">
+										<legend>维护等级II：</legend>
+										<h:panelGrid columns="3" style="font-size:13px;width:320px" dir="ltr" columnClasses="column33L,column33L,column34L">
+											<c:forEach items="#{regRegisterBean.maiLevels}" var="maiLevel">
+												<h:panelGroup><h:selectBooleanCheckbox value="#{maiLevel.maiLevelBooleanValue}"  onmousedown="circuitMLChange(this);"   disabled="#{regRegisterBean.regDto.repeatAccepted}"/>#{maiLevel.maiLevelLabel}</h:panelGroup>
+											</c:forEach>
+										</h:panelGrid>
+										</fieldset>
+									</h:panelGroup>
+									</td>
+								</tr>
+								<tr height="25px">
+									<th>通信范围：</th>
+									<td align="left">
+										<regaltec:dictionary type="dictionary"
+															 emptValue=""
+															 emptText="---请选择---"
+															 dicCode="IDD_REG_COMMUNICATE_RANGE"
+															 id="communicateRange"
+															 tabindex="25"
+															 value="#{regRegisterBean.regDto.communicateRange}"
+															 optValueType="itemValue"
+															 style="width:151px;"
+															 styleClass="rich-box-border-color-control-select rich-text-control-select">
+										</regaltec:dictionary>
+									</td>
+									
+									<td width="1%"></td>
+								</tr>
+								<tr height="25px">
+									<th>客户服务等级：</th>
+									<td align="left">
+										<regaltec:dictionary type="dictionary"
+															 emptValue=""
+															 emptText="---请选择---"
+															 dicCode="IDD_REG_SERVICE_LEVEL"
+															 id="serviceLevel"
+															 tabindex="26"
+															 value="#{regRegisterBean.regDto.serviceLevel}"
+															 optValueType="itemValue"
+															 style="width:151px;height:23px;"
+															 styleClass="rich-box-border-color-control-select rich-text-control-select">
+			
+										</regaltec:dictionary>
+									</td>
+									<td></td>
+									<td width="1%"></td>
+								</tr>
+								<tr height="25px">
+									<th >故障等级：</th>
+									<td align="left" >
+										<regaltec:dictionary type="dictionary"
+															 emptValue=""
+															 emptText="---请选择---"
+															 dicCode="IDD_REG_FAULT_LEVEL"
+															 id="faultLevel"
+															 tabindex="27"
+															 value="#{regRegisterBean.regDto.faultLevel}"
+															 optValueType="itemValue"
+															 style="width:151px;"
+															 styleClass="rich-box-border-color-control-select rich-text-control-select">
+											<s:commonsValidator type="required" arg="故障等级" server="false" client="true" />
+										</regaltec:dictionary>
+										<h:outputLabel style="font-size:13px;color:red;" value="*" />
+									</td>
+									<td></td>
+									<td width="1%"></td>
+								</tr>
+								<tr height="25px">
+									<th>集团流水号：</th>
+									<td align="left" ><h:inputText id="blocId" style="width:151px;height:23px;"
+										value="#{regRegisterBean.regDto.blocId}" tabindex="28" styleClass="rich-gradient-input" disabled="#{regRegisterBean.regDto.repeatAccepted}"></h:inputText>
+									</td>
+									<td></td>
+									<td width="1%"></td>
+								</tr>
+								<tr><th>主备电路标识：</th>
+								  <td>
+									<h:selectOneMenu id="mastCircuit" value="#{regRegisterBean.regDto.mastCircuit}"  disabled="#{regRegisterBean.regDto.repeatAccepted}" style="width: 151px;" onchange="mastCircuitChanged(this.value)">
+									<f:selectItem itemLabel="无" itemValue="0"/>
+									<f:selectItem itemLabel="主用" itemValue="1"/>
+									<f:selectItem itemLabel="备用" itemValue="2"/>
+									</h:selectOneMenu>
+								</td>
+								<th><h:outputText id="l_circuitType" style="#{(regRegisterBean.regDto.mastCircuit == '0' || empty regRegisterBean.regDto.mastCircuit)?'display:none;':''}" value="#{regRegisterBean.regDto.mastCircuit == '1'?'备用':''}#{regRegisterBean.regDto.mastCircuit == '12'?'主用':''}电路类型：" /></th>
+								<td>
+									<h:inputText id="circuitType"  reRended ="#{regRegisterBean.regDto.mastCircuit != '0'}"
+										style="width:121px;height:23px;#{(regRegisterBean.regDto.mastCircuit == '0' || empty regRegisterBean.regDto.mastCircuit)?'display:none;':''}" tabindex="13"
+										value="#{regRegisterBean.regDto.circuitType}"
+										styleClass="rich-gradient-input" disabled="#{regRegisterBean.regDto.repeatAccepted}">
+									</h:inputText>
+								  </td>
+								<th><h:outputText id="l_circuitName" style="#{(regRegisterBean.regDto.mastCircuit == '0' || empty regRegisterBean.regDto.mastCircuit)?'display:none;':''}" value="#{regRegisterBean.regDto.mastCircuit == '1'?'备用':''}#{regRegisterBean.regDto.mastCircuit == '12'?'主用':''}电路名称：" /></th>
+								<td>
+									<h:inputText id="circuitName"
+										style="width:121px;height:23px;#{(regRegisterBean.regDto.mastCircuit == '0' || empty regRegisterBean.regDto.mastCircuit)?'display:none;':''}" tabindex="14"
+										value="#{regRegisterBean.regDto.circuitName}"
+										styleClass="rich-gradient-input" disabled="#{regRegisterBean.regDto.repeatAccepted}">
+									</h:inputText>
+								</td>
+							 </tr>
+							</table>
+						</fieldset>
+				</h:panelGroup>
+					
+				<h:panelGroup>
+		             <fieldset>
+						<legend><font color="blue"><h:outputText value="客户属性" /></font></legend>
+				<table id="t_clientinfo"  cellspacing="0" cellpadding="0" style="font-size: 13px;">
+					<tr>
+						<th>客户属性：</th>
+						<td align="left"  width="22%">
+							<h:panelGroup style="font-size:13px;width:100%" dir="ltr">
+								<regaltec:dictionary type="dictionary"
+													 emptValue=""
+													 emptText="---请选择---"
+													 dicCode="IDD_REG_CUSTOMER_TYPE"
+													 id="customerType"
+													 tabindex="29"
+													 value="#{regRegisterBean.regDto.customerType}"
+													 optValueType="itemValue"
+													 onchange="user_cat_Changed(this.value)"
+													 style="width:151px;"
+													 styleClass="rich-box-border-color-control-select rich-text-control-select"/>
+							</h:panelGroup>
+						</td>
+						<th>客户类别：</th>
+						<td align="left"  >
+							<h:panelGroup style="font-size:13px;width:100%" dir="ltr">
+								<regaltec:dictionary type="dictionary"
+													 emptValue=""
+													 emptText="---请选择---"
+													 dicCode="IDD_REG_USE_CATEGORY"
+													 id="customerCategory"
+													 tabindex="30"
+													 value="#{regRegisterBean.regDto.customerCategory}"
+													 optValueType="itemValue"
+													 style="width:151;"
+													 onchange="filterItems(this);"
+													 styleClass="rich-box-border-color-control-select rich-text-control-select"
+													 disabled="#{regRegisterBean.regDto.repeatAccepted}"
+													 >
+	
+								</regaltec:dictionary>
+							</h:panelGroup>
+						</td>
+						<th align="right" >客户状态：</th>
+						<td align="left" style="width:100px;padding-left:5px;">
+						<c:if  test="#{regRegisterBean.regDto.customerStatus eq '活动'}" >
+						<font style="color:#339900">#{regRegisterBean.regDto.customerStatus}</font>
+						</c:if>
+						<c:if  test="#{regRegisterBean.regDto.customerStatus ne '活动'}" >
+						<font style="color:#ff0000">#{regRegisterBean.regDto.customerStatus}</font>
+						</c:if>
+						</td>
+						
+					</tr>
+					<tr align="right" style="height: 30">
+						<th><h:outputText value="客户等级：" /></th>
+						<td align="left" >
+							<regaltec:dictionary type="dictionary"
+												 emptValue=""
+												 emptText="---请选择---"
+												 dicCode="IDD_REG_CUSTOMER_LEVEL"
+												 id="customerLevel"
+												 tabindex="31"
+												 value="#{regRegisterBean.regDto.customerLevel}"
+												 optValueType="itemValue"
+												 onchange="filterItems(this);"
+												 style="width:151px;"
+												 styleClass="rich-box-border-color-control-select rich-text-control-select">
+							</regaltec:dictionary>
+						</td>
+						<th>客户标识：</th>
+						<td align="left" nowrap="nowrap">
+							<h:panelGroup
+								style="font-size:13px;width:100%" dir="ltr">
+								<h:inputText id="customerId"
+									style="width:151px;height:23px;"
+									value="#{regRegisterBean.regDto.customerId}" tabindex="32"
+									styleClass="rich-gradient-input" disabled="#{regRegisterBean.regDto.repeatAccepted}">
+								</h:inputText>
+							</h:panelGroup>
+						</td>
+					</tr>
+				</table>
+				</fieldset>
+				</h:panelGroup>
+					
+				<h:panelGroup >
+				<fieldset>
+				<legend style="color:blue"><h:outputText value="故障派发辅助信息" /></legend>
+
+				<table id="t_aideinfo" cellspacing="0" cellpadding="0" style="font-size: 13px;">
+				    <tr style="#{ not empty regRegisterBean.regDto.callMan?'height:30px;':'height:30px;display:none;'}">
+				    <th>报障人：</th>
+				    <td><h:inputText style="width:135px;height:23px;" tabindex="35" id="callman" readonly="false" value="#{regRegisterBean.regDto.callMan}" disabled="#{regRegisterBean.regDto.repeatAccepted}"  styleClass="rich-gradient-input"/></td>
+				    <th>身份来源：</th>
+				    <td><h:inputText style="width:135px;height:23px;" tabindex="35" id="fromType" readonly="false" value="#{regRegisterBean.regDto.fromType}" disabled="#{regRegisterBean.regDto.repeatAccepted}"  styleClass="rich-gradient-input"/></td>
+				      <th>报障电话：</th>
+				      <td><h:inputText style="width:135px;height:23px;" id="callPhone"
+										value="#{regRegisterBean.regDto.callPhone}" tabindex="21"
+										styleClass="rich-gradient-input" disabled="#{regRegisterBean.regDto.repeatAccepted}">
+									</h:inputText></td>
+				    </tr>
+					<tr>
+					<th>处理时限：</th>
+					<td align="left" >
+				
+						<h:inputText id="billLimitHour" style="width:45px;height:23px;"  disabled="#{regRegisterBean.regDto.repeatAccepted}" maxlength="3" tabindex="33" value="#{regRegisterBean.regDto.billLimitHour}"  onkeypress="return verificationPositiveInt();" onpaste="return false" styleClass="rich-gradient-input" />
+						<h:outputLabel style="font-size:13px;width:31px;" value="小时"  />
+						<h:inputText id="billLimitMinute" style="width:45px;height:23px;"  disabled="#{regRegisterBean.regDto.repeatAccepted}" maxlength="3" tabindex="34" value="#{regRegisterBean.regDto.billLimitMinute}" onkeypress="return verificationPositiveInt();" onpaste="return false" styleClass="rich-gradient-input" />
+						<h:outputLabel style="font-size:13px;width:31px;" value="分" /></td>
+					<th style="width:93px;">联系人： </th>
+					<td align="left">
+						<h:inputText style="width:135px;height:23px;" tabindex="35" id="userLinkMan" readonly="false" value="#{regRegisterBean.regDto.userLinkMan}" disabled="#{regRegisterBean.regDto.repeatAccepted}"  styleClass="rich-gradient-input">
+							<c:if test="#{regRegisterBean.regDto.repeatAccepted == false}">
+							<s:commonsValidator type="required" arg="联系人" server="false" client="true" />
+						    </c:if>
+						</h:inputText>
+						<h:outputLabel style="font-size:13px;color:red;" value="*" />
+					</td>
+					<th>联系人电话：</th>
+					<td align="left" >
+						<h:inputText style="width:135px;height:23px;" tabindex="36" id="userLinkPhone" value="#{regRegisterBean.regDto.userLinkPhone}"  disabled="#{regRegisterBean.regDto.repeatAccepted}" styleClass="rich-gradient-input">
+							<c:if test="#{regRegisterBean.regDto.repeatAccepted == false}">
+							<s:commonsValidator type="required" arg="联系人电话 " server="false" client="true" />
+							<s:commonsValidator type="maxlength" arg="联系人电话" maxLength="13" server="false" client="true" />
+						    </c:if>
+						</h:inputText>
+						<h:outputLabel style="font-size:13px;color:red;" value="*" />
+					</td>
+					<td></td>
+					</tr>
+					
+					<tr height="30px">
+					<th>受理时间：</th>
+					<td align="left" >
+						<rich:calendar id="registerTime"
+									   value="#{regRegisterBean.regDto.registerTime}"
+									   datePattern="yyyy-MM-dd HH:mm"
+									   defaultTime="00:00"
+									   weekDayLabelsShort="日,一,二,三,四,五,六"
+									   showWeeksBar="false"
+									   inputStyle="width:117px;height:23px;"
+									   inputClass="rich-gradient-input"
+									   styleClass="rich-gradient-input"
+									   enableManualInput="false"
+									   disabled="#{regRegisterBean.regDto.repeatAccepted}"
+									   >
+						</rich:calendar>
+					</td>
+				
+					<th style="width:93px;">派发人：</th>
+					<td align="left" >
+					    <h:inputHidden  id="operatorId" value="#{regRegisterBean.regDto.operatorName}" />
+						<h:inputText style="width:135px;height:23px;"  disabled="#{regRegisterBean.regDto.repeatAccepted}" tabindex="38" id="operatorName" readonly="true" value="#{regRegisterBean.regDto.operatorName}" styleClass="rich-gradient-input">
+							<s:commonsValidator type="required" arg="派发人 " server="false" client="true" />
+						</h:inputText>
+					</td>
+					<th>派发人电话：</th>
+					<td align="left" >
+						<h:inputText style="width:135px;height:23px;" disabled="#{regRegisterBean.regDto.repeatAccepted}"  tabindex="39" id="operatorPhone" value="#{regRegisterBean.regDto.operatorPhone}" styleClass="rich-gradient-input" >
+							<s:commonsValidator type="required" arg="派发人电话 " server="false" client="true" />
+							<s:commonsValidator type="maxlength" arg="派发人电话" maxLength="13" server="false" client="true" />
+						</h:inputText>
+						<h:outputLabel style="font-size:13px;color:red;" value="*" />
+					</td>
+					
+					<td></td>
+					</tr>
+					
+				</table>
+				<rich:spacer height="5px" />
+				<h:inputHidden value="#{regRegisterBean.regDto.dealOperator}"/>
+				
+			    <c:if test="#{regRegisterBean.isAccept}">
+				<table cellspacing="0" cellpadding="0" style="font-size: 13px;  ">
+					<tr>
+						<th align="right">派发到部门：</th>
+						<td align="left"  colspan="5" >
+						<h:panelGroup>
+						<fieldset style="border-style:dotted;margin-left: 0px;width:587px;width:608px\9;">
+						<h:panelGrid  id="t_processgroup" columns="3" style="font-size:13px;width:100%;" dir="ltr" 
+						
+						columnClasses="column33L,column33L,column34L">
+						<c:if test="#{not empty regRegisterBean.processgroup}">
+						<c:forEach items="#{regRegisterBean.processgroup}" var="pgitem">
+						    <h:panelGroup>
+						    <h:selectBooleanCheckbox value="#{pgitem.value}" disabled="#{regRegisterBean.regDto.repeatAccepted}" />#{pgitem.label}
+						    </h:panelGroup>
+						</c:forEach>
+						</c:if>
+					     	
+				        </h:panelGrid>
+						
+						</fieldset>							
+						</h:panelGroup>
+						</td>
+					</tr>
+					
+				</table>
+				</c:if>
+				<c:if test="#{!regRegisterBean.isAccept}">
+				<table cellspacing="0" cellpadding="0" style="font-size: 13px;">
+				 <tr style="height:30px;">
+				 <th>来源部门：</th>
+					<td>
+					<h:selectOneMenu value="#{regRegisterBean.regDto.sourceDept}"  style="width:239px;" disabled="#{regRegisterBean.regDto.repeatAccepted}" styleClass="rich-box-border-color-control-select rich-text-control-select">
+						<f:selectItem itemLabel ="---请选择---" />
+						<c:if test="#{regRegisterBean.sourceDepts != null}">
+						<f:selectItems value="#{regRegisterBean.sourceDepts}" />
+						</c:if>
+					</h:selectOneMenu>
+					</td>
+					<th>派发：</th>
+					<td>
+					<h:selectOneRadio  id="changeDisType" style="font-size: 13px;" onclick="showChangeDept(this)"  disabled="#{regRegisterBean.regDto.repeatAccepted}"  value="#{regRegisterBean.regDto.changeDisType}">
+					<f:selectItem itemValue="1" itemLabel="首派本部门"/>
+					<f:selectItem itemValue="2" itemLabel="直接派发"/>
+					<f:selectItem itemValue="3"  itemLabel="直接转报"/>
+					</h:selectOneRadio >
+					</td>
+					
+					</tr>
+				    <tr id="tr_changeDept" style="height:30px;#{regRegisterBean.regDto.changeDisType eq '1'?'display:none;':''}">
+				   <th> 派发部门：</th><td>
+				   <h:selectOneMenu  id="changeDeptId" style="width:239px;" onchange="beforeChgDisptype();" disabled="#{regRegisterBean.regDto.repeatAccepted}" value="#{regRegisterBean.regDto.changeDeptId}">
+				   <f:selectItem itemLabel ="---请选择---" />
+				    <c:if test="#{not empty regRegisterBean.changeDepts}">
+				    <f:selectItems value="#{regRegisterBean.changeDepts}"/>
+				    </c:if>
+				    </h:selectOneMenu>
+				    </td>
+				      <th id="changeBusinessType_label"  style="#{regRegisterBean.regDto.changeDisType eq '3'?'':'display:noen;'}">工种：</th>
+				      <td><h:selectOneMenu  id="changeBusinessType" style="width:239px;#{regRegisterBean.regDto.changeDisType eq '3'?'':'display:noen;'}" disabled="#{regRegisterBean.regDto.repeatAccepted}"  value="#{regRegisterBean.regDto.changeBusinessType}">
+				     <c:if test="#{not empty regRegisterBean.changeBusinessTypes}">
+				    	<f:selectItems value="#{regRegisterBean.changeBusinessTypes}"/>
+				    </c:if>
+				    </h:selectOneMenu>
+				    </td>
+				    </tr>
+				</table>
+				</c:if>
+				
+				<rich:spacer height="5px" />
+				
+				<table id="t_remark"  cellspacing="0" cellpadding="0"
+					style="font-size: 13px;">
+					<tr>
+						<th id="th_remark">备                  注：</th>
+						<td align="left" nowrap="nowrap" ><h:inputTextarea maxlength="10"
+							id="remark" value="#{regRegisterBean.regDto.remark}"
+							tabindex="41" style="width:609px;height:100px;"
+							styleClass="rich-gradient-input">
+							<s:commonsValidator type="maxlength" arg="备注" maxLength="2000" server="false" client="true" />
+						</h:inputTextarea></td>
+					</tr>
+					<tr><td height="3" colspan="4"></td></tr>
+					<tr >
+						<th>附     件：</th>
+						<td align="left" nowrap="nowrap" ><h:panelGroup
+							id="filePanelGroup" >
+							<rich:fileUpload id="fileUploadbillControl" listWidth="609px"
+								listHeight="40px"
+								style="rich-gradient-input;font-size:13px;"
+								allowFlash="false"
+								immediateUpload="true"
+								required="true"
+								noDuplicate="true"
+								maxFilesQuantity="10"
+								progressLabel="正在加载数据文件，请稍等... "
+								addControlLabel="选择文件"
+								cancelEntryControlLabel="取消"
+								clearAllControlLabel="全部清除"
+								clearControlLabel="删除"
+								stopControlLabel="全部停止"
+								uploadControlLabel="开始加载"
+								doneLabel="数据文件已加载,可执行确定上传操作"
+								sizeErrorLabel="文件大小超出限制,单个文件最大10M."
+								transferErrorLabel="上传出错"
+								stopEntryControlLabel="停止"
+								onerror="uploadFileErrorControl();"
+								ontyperejected="fileSuffixAllowedErrorControl();"
+								onclear="clearUploadFileControl(event.memo.index);"
+								onadd="checkFileSize(event.memo.entries);"
+								fileUploadListener="#{regRegisterBean.uploadListener}"
+								cleanButtonClass="clearButton">
+								<f:facet name="label">
+									<h:outputText value="已加载{_KB}KB 共{KB}KB 耗时{mm}:{ss}" />
+								</f:facet>
+							</rich:fileUpload>
+						</h:panelGroup>
+						
+						
+				 </td>
+					</tr>
+				</table>
+				
+				</fieldset>
+				</h:panelGroup>
+
+				</a4j:region>
+				<ui:remove>非受理岗操（处理岗）操作作按钮</ui:remove>
+				<c:if test="#{!regRegisterBean.isAccept}">
+				<h:panelGrid columns="1" style="font-size:13px;width:320px;margin-left:250px;" >								
+					<h:panelGroup>
+						 <h:selectBooleanCheckbox id="hangupControl" value="#{regRegisterBean.regDto.hangupControl}" />
+						 <h:outputLabel value="挂起控制" style="font-size:13px;" styleClass="rich-text-color-general" />
+						 <rich:spacer height="5%" />
+						 <h:selectBooleanCheckbox id="feedBackOntime" value="#{regRegisterBean.regDto.feedBackOntime}" />
+						 <h:outputLabel value="定时反馈" style="font-size:13px;" styleClass="rich-text-color-general" />
+						 <rich:spacer height="5%" />
+						<a4j:commandButton value="#{regRegisterBean.regDto.repeatAccepted ?'保存(R)':'受理 (R)'}" id='registerBill' tabindex="35"
+							style="width:80px;" onclick="if( registerValidate(#{regRegisterBean.regDto.repeatAccepted}) ==false ) return false;" 
+							action="#{regRegisterBean.registerBill}"
+							data="#{regRegisterBean.responseText}" accesskey="R"
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							reRender="registerForm" /><rich:spacer width="2px" />
+							<ui:remove>
+							 <a4j:commandButton value="反馈 (B)" id='feedback' tabindex="35"
+							style="width:75px;"  
+							onclick = "#{rich:component('feedbackmp')}.show();return;"
+							 accesskey="B"
+							styleClass="rich-button"
+							rendered="#{regRegisterBean.regDto.repeatAccepted}"
+							title="收集故障维修期间客户反馈的信息！"
+							 />
+							 <rich:spacer width="2px" />
+							  <a4j:commandButton value="催修 (U)" id='urge' tabindex="35"
+							style="width:75px;"  
+							onclick = "#{rich:component('urgemp')}.show();return;"
+							data="#{regRegisterBean.responseText}" accesskey="U"
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							rendered="#{regRegisterBean.regDto.repeatAccepted}"
+							title="督促相关人员及时处理故障！"
+							 />
+							 </ui:remove>
+						</h:panelGroup>	 
+				</h:panelGrid>
+				</c:if>
+				<c:if test="#{regRegisterBean.isAccept}">
+				<h:panelGrid columns="1" style="font-size:13px;width:320px;margin-left:250px;" >								
+					<h:panelGroup>
+						 <h:selectBooleanCheckbox id="hangupControl" value="#{regRegisterBean.regDto.hangupControl}" />
+						 <h:outputLabel value="挂起控制" style="font-size:13px;" styleClass="rich-text-color-general" />
+						 <rich:spacer height="5%" />
+						 <h:selectBooleanCheckbox id="feedBackOntime" value="#{regRegisterBean.regDto.feedBackOntime}" />
+						 <h:outputLabel value="定时反馈" style="font-size:13px;" styleClass="rich-text-color-general" />
+						 <rich:spacer height="5%" />
+						<a4j:commandButton value="#{regRegisterBean.regDto.repeatAccepted?'保存(R)':'受理 (R)'}" id='registerBill' tabindex="35"
+							style="width:80px;" onclick="if( registerValidate(#{regRegisterBean.regDto.repeatAccepted}) == false) return false;" 
+							action="#{regRegisterBean.registerBill}"
+							data="#{regRegisterBean.responseText}" accesskey="R"
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							reRender="registerForm" /><rich:spacer width="2px" />
+							<ui:remove>
+							<a4j:commandButton value="归档 (F)" id='file' tabindex="35"
+							style="width:75px;"  
+						    onclick = "return pigeonhole();"
+							data="#{regRegisterBean.responseText}" accesskey="F"
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							rendered="#{!regRegisterBean.regDto.repeatAccepted}"
+							 /><rich:spacer width="2px" />
+							
+							 <a4j:commandButton value="反馈 (B)" id='feedback' tabindex="35"
+							style="width:75px;"  
+							onclick = "#{rich:component('feedbackmp')}.show();return;"
+							accesskey="B"
+							styleClass="rich-button"
+							rendered="#{regRegisterBean.regDto.repeatAccepted}"
+							title="收集故障维修期间客户反馈的信息！"
+							 />
+							 <rich:spacer width="2px" />
+							  <a4j:commandButton value="催修 (U)" id='urge' tabindex="35"
+							style="width:75px;"  
+							onclick = "#{rich:component('urgemp')}.show();return;"
+							data="#{regRegisterBean.responseText}" accesskey="U"
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							rendered="#{regRegisterBean.regDto.repeatAccepted}"
+							title="督促相关人员及时处理故障！"
+							 />
+							 </ui:remove>
+						</h:panelGroup>	 
+				</h:panelGrid>
+				</c:if>
+				<rich:spacer width="2px" />
+				<a4j:keepAlive beanName="regRegisterBean" ajaxOnly="true" />
+			
+	   </rich:tab>
+
+		<!-- tab list -->
+		<c:forEach var="list" items="#{regRegisterBean.tabList}" varStatus="status">
+			<c:if test="#{list.showType eq 'tab'}">
+				<rich:tab id="#{list.pageType}"  onlabelclick="tabContentload('#{list.pageType}_ifr','#{list.infoUrl}');"
+				style="height:800px" rendered="#{list.isShow}">
+					<f:facet name="label">
+						<h:panelGroup  style="width:100%">
+						    <c:if test="#{not empty list.iconUrl}">
+						    <img src="#{request.contextPath}/ida40/module/reg/images/#{list.iconUrl}" style="vertical-align: middle;"/>
+							</c:if>
+							<h:outputLabel value="#{list.headTitle}" />
+							<h:outputLabel value="(#{regRegisterBean.regDto.historyFaultNum})" rendered="#{regRegisterBean.regDto.historyFaultNum ne 0}"/>
+						</h:panelGroup>
+					</f:facet>
+					<h:panelGroup id="#{list.pageType}PanelGroup"  style="width:100%">
+	                       <c:if test="#{list.initTabPanal}">
+							<iframe id="#{list.pageType}_ifr" name="#{list.pageType}_ifr"  scrolling="auto" width="100%" height="800" src=""></iframe>
+						   </c:if>
+					</h:panelGroup>
+				</rich:tab>
+			</c:if>
+		</c:forEach>
+</rich:tabPanel>
+
+   <rich:modalPanel id="feedbackmp"  minHeight="200" minWidth="450" 
+            height="200" width="500">
+            <f:facet name="header">
+                <h:outputText value="反馈内容" />
+            </f:facet>
+            <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage value="#{request.contextPath}/baf/images/icons/close.png" styleClass="hidelink" id="colsefbmp"/>
+                <rich:componentControl for="feedbackmp" attachTo="colsefbmp" operation="hide" event="onclick"/>
+            </h:panelGroup>
+        </f:facet>
+             <h:inputTextarea maxlength="10"
+							id="feedBackContent" value="#{regRegisterBean.regDto.feedBackContent}"
+							 style="width:480px;height:130px;"
+							styleClass="rich-gradient-input">
+							
+						</h:inputTextarea>
+                          <br/>
+                          <center>
+							  <a4j:commandButton value="确认" id="feedbackbtn" name="feedbackbtn" 
+							style="width:50px;" onclick="if( !fbContentVerify())return false;" 
+							action="#{regRegisterBean.feeback}"
+							data="#{regRegisterBean.responseText}" 
+							oncomplete="ajaxComplete(data);"
+							styleClass="rich-button"
+							 />
+							 <input type="button" style="width:50px;" onclick="#{rich:component('feedbackmp')}.hide();" value="取消" class="rich-button"/>
+							</center>
+          </rich:modalPanel>
+    <rich:modalPanel id="urgemp"  minHeight="300" minWidth="450" height="200" width="570">
+            <f:facet name="header"> <h:outputText value="催修" /> </f:facet>
+            <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage value="#{request.contextPath}/baf/images/icons/close.png" styleClass="hidelink" id="colseupmp"/>
+                <rich:componentControl for="urgemp" attachTo="colseupmp" operation="hide" event="onclick"/>
+            </h:panelGroup>
+        </f:facet>
+         <h:panelGrid  columns="2" style="font-size:13px;width:100%;height:23px;" dir="ltr" columnClasses="column15R,column85L">
+					<h:outputText value="催修原因：  " />
+					<h:panelGroup>
+					<h:selectOneMenu style="width:160px;height:23px;"
+						onchange="changeHastenRepairInfo()" id="controlCode" value="#{regRegisterBean.hastenRepairReason}"
+						styleClass="rich-box-border-color-control-select rich-text-control-select">
+						 <f:selectItems value="#{regRegisterBean.selectType}" />
+					</h:selectOneMenu>
+					<h:outputLabel style="font-size:13px;color:red;" value="*" />
+                   </h:panelGroup>
+					<h:outputText value="催修备注： " ></h:outputText>
+					<h:inputTextarea id="hastenRepairRemark" style="width:455px;height:45px;"
+						value="#{regRegisterBean.remark}" />
+				</h:panelGrid>
+
+               <ui:include src="/ida40/module/sa/page/common/saPubNotifyInclude.xhtml">
+						  <ui:param name="formName" value="registerForm"/>
+						  <ui:param name="beanName" value="#{regRegisterBean}"/>
+				</ui:include>
+          <center>
+		    <a4j:commandButton value="确认" id="urgebtn" name="urgebtn" 
+			  style="width:50px;" onclick="if( !urgeVerify())return false;" 
+			  action="#{regRegisterBean.hastenRepair}"
+			  data="#{regRegisterBean.responseText}" 
+			  oncomplete="ajaxComplete(data);"
+			  styleClass="rich-button"
+			/>
+			<input type="button" style="width:50px;" onclick="#{rich:component('urgemp')}.hide();" value="取消" class="rich-button"/>
+		</center>
+		
+   </rich:modalPanel>
+		<ui:remove>刷新故障部位</ui:remove>
+		<a4j:jsFunction   name="refreshFaultCodeArea" data="#{fn:length(regRegisterBean.faultCodes)}" action="#{regRegisterBean.findFaultCodesBySpecialtyId}" oncomplete="showFaultCodeArea(data)"   reRender="regtabs">
+			<a4j:actionparam name="specialtyId" assignTo="#{regRegisterBean.regDto.specialtyId}"  />
+			<a4j:actionparam name="specialtyTopId" assignTo="#{regRegisterBean.regDto.businessId}"  />
+		</a4j:jsFunction>
+		<ui:remove>取消选中文件</ui:remove>
+		<a4j:jsFunction  name="clearFileControl" action="#{regRegisterBean.clearUploadFile}">
+			<a4j:actionparam name="uploadItemIndex" assignTo="#{regRegisterBean.uploadItemIndex}" />
+		</a4j:jsFunction>
+		<a4j:jsFunction  name="judgeRepeatAccept" data ="#{regRegisterBean.msg}" action="#{regRegisterBean.isRepeatAccepted}"
+		 oncomplete="repAcpWarn(data);"  status="forbidStatus">
+		<a4j:actionparam name="faultCode1" assignTo="#{regRegisterBean.regDto.faultCode1}" />
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction  name="loadregQueue" action="#{regRegisterBean.loadregQueue}" oncomplete="afterLoadregQueue()" status="forbidStatus" reRender="regtabs">
+		<a4j:actionparam  name="faultCode1" assignTo="#{regRegisterBean.regDto.faultCode1}" />
+		</a4j:jsFunction>
+		
+		<a4j:jsFunction  eventsQueue="getBillInfo"  name ="getBillInfo" action="#{regRegisterBean.getInfo}"  reRender="regtabs,warnMsg" data="#{regRegisterBean.regDto}"  status="forbidStatus"  oncomplete="queryInfoCallBack(data)">
+		  <a4j:actionparam  name="selectRowIdx"  assignTo="#{regRegisterBean.selectRowIdx}" />
+		</a4j:jsFunction>
+	    <a4j:jsFunction  name ="changeTimeLimit" action="#{regRegisterBean.queryTimeLimit}"   reRender="billLimitHour,billLimitMinute,t_processgroup" />
+	    <a4j:jsFunction  name="chgDisptype" action="#{regRegisterBean.changeDisptype}"  status="notStatus" reRender="changeBusinessType" />
+        <a4j:jsFunction  name="changeFaultLevel" action="#{regRegisterBean.changeFaultLevel}" status="forbidStatus"  reRender="faultLevel"/>
+ <rich:modalPanel id="warnMsg"  width="565"  resizeable="false">
+            <f:facet name="header"> <h:outputText value="提示信息" /> </f:facet>
+            <f:facet name="controls">
+            <h:panelGroup>
+                <h:graphicImage value="#{request.contextPath}/baf/images/icons/close.png" styleClass="hidelink" id="wmclose"/>
+                <rich:componentControl for="warnMsg" attachTo="wmclose" operation="hide" event="onclick"/>
+            </h:panelGroup>
+        </f:facet>
+           <div id="divwarnmsg" style="width:543px;font-size:13px;padding-left:10px;">
+
+           <c:if test="#{regRegisterBean.regDto.resIFStype == 2}">
+           <p style="color:red;">查询#{regRegisterBean.regDto.faultCode1}有多条信息返回,请选择！<BR/></p>
+           <table cellspacing="0" cellpadding="3" rules="all" DESIGNTIMEDRAGDROP="12" bordercolor="DimGray" border="1" id="dgUserInfo" style="font-size:13px;background-color:White;border-color:DimGray;border-width:1px;border-style:None;width:100%;border-collapse:collapse;"
+              width="100%" align="center" bgcolor="aliceblue">
+	           <tr valign="top" style="color:White;background-color:#006699;font-weight:bold;">	
+	              <th style="text-align:center;">电路名称</th><th style="text-align:center;">电路编号</th><th style="text-align:center;">电路维护等级</th><th style="text-align:center;">客户服务等级</th><th style="text-align:center;">电路标志</th>
+               </tr>
+           <c:forEach var="map" items="#{regRegisterBean.customerList}" varStatus="status">
+              <tr style="text-align:center;cursor:hand;" onclick="selectRow(this);" >
+           		 	<td><h:outputText value="#{map['cir_name']}"/></td>
+           		 	<td><h:outputText value="#{map['cir_no']}"/></td>
+           		 	<td><h:outputText value="#{map['cir_grade_des']}"/></td>
+           		 	<td><h:outputText value="#{map['service_grade_desc']}"/></td>
+           		 	<td><h:outputText value="#{map['cir_flag_code']}"/></td>
+           	  </tr>
+           </c:forEach>
+           </table>
+           </c:if>
+           
+           <c:if test="#{regRegisterBean.regDto.resIFStype == 3 and regRegisterBean.regDto.resResultRows > 1}">
+           <p style="color:red;">查询#{regRegisterBean.regDto.faultCode1}有多条信息返回,请选择！<BR/></p>
+           <table cellspacing="0" cellpadding="3" rules="all" DESIGNTIMEDRAGDROP="12" bordercolor="DimGray" border="1" id="dgUserInfo" style="font-size:13px;background-color:White;border-color:DimGray;border-width:1px;border-style:None;width:100%;border-collapse:collapse;"
+              width="100%" align="center" bgcolor="aliceblue">
+	           <tr valign="top" style="color:White;background-color:#006699;font-weight:bold;" >	
+	             <c:if test="#{not empty regRegisterBean.xmlResLabels}">
+	              <c:forEach var="slabel" items="#{regRegisterBean.xmlResLabels}" >
+	               <th style="text-align:center;">#{slabel}</th>
+	               </c:forEach>
+                 </c:if>
+               </tr>
+           <c:forEach var="map" items="#{regRegisterBean.customerList}" varStatus="status">
+              <tr style="text-align:center;cursor:hand;" onclick="getBillInfo(this.rowIndex);">
+              <c:if test="#{not empty regRegisterBean.xmlResFields}">
+              <c:forEach var="sfield" items="#{regRegisterBean.xmlResFields}" >
+           		 	<td><h:outputText value="#{map[sfield]}"/></td>
+           		</c:forEach>
+           	  </c:if>
+           	  </tr>
+           </c:forEach>
+           </table>
+           </c:if>
+           </div>
+          <br/>
+        <center>				
+		<input type="button" id="warnMsg_close_btn" style="width:50px;" onclick="return warnMsgMpClose();" value="关闭" class="rich-button"/>
+		</center>   
+   </rich:modalPanel>
+   </a4j:form>
+   <s:validatorScript functionName="validateForm" /> 
+	<script>
+	//<![CDATA[
+	 var tabReloadObj={};
+	 var searchReturnDataValue = "";  // 定义全局变量(查询按钮返回值)
+	 var userId = "";
+	 var userName = "";
+	 var loginName = "";
+	 var oriTabID = '#{param.oriTabID}';
+	 var counter = 1;
+     var intervalID;
+     var qInfoLimitTime = (#{regRegisterBean.qInfoLimitTime}+2);
+     var commentspng ="<img style='vertical-align: middle;' src='${pageContext.contextPath}/ida40/module/reg/images/comments.png'/>";
+     
+	//]]>
+	</script>
+    <script src="${pageContext.contextPath}/ida40/module/reg/script/laborRegister.js" type="text/javascript"></script>
+	</body>
+</f:view>
+</html>

@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+	<head> 
+    <title><h:outputText value="#{loginFrameBean.loginWindowTitle}" /></title>             
+    <style type="text/css">
+    BODY {
+		BACKGROUND: #d7dfec; MARGIN: 0px; FONT: small/1.22em arial,helvetica,clean,sans-serif
+	}
+	A:link {
+		FONT-SIZE: 9pt; COLOR: #dee9f5; TEXT-DECORATION: none
+	}
+	A:visited {
+		FONT-SIZE: 9pt; COLOR: #dee9f5; TEXT-DECORATION: none
+	}
+	A:active {
+		FONT-SIZE: 9pt; COLOR: #ffffff; TEXT-DECORATION: none
+	}
+	A:hover {
+		FONT-SIZE: 9pt; COLOR: ##ffffff; TEXT-DECORATION: none
+	}
+	INPUT.ygbt {
+		BACKGROUND: url(${request.contextPath}/baf/images/ok_bg.png) no-repeat}
+	.tabs:unknown {
+		CLEAR: both; DISPLAY: block; VISIBILITY: hidden; HEIGHT: 0px; content: '.'
+	}
+	INPUT.ygbt {
+		BORDER-RIGHT: #235699 1px solid; BORDER-TOP: #235699 1px solid; BORDER-LEFT: #235699 1px solid; WIDTH: 70px; CURSOR: pointer; COLOR: #ffffff; BORDER-BOTTOM: #235699 1px solid; WHITE-SPACE: nowrap; HEIGHT: 1.7em; TEXT-ALIGN: center
+	}
+	INPUT.ygbt {
+		margin: 1px;
+		padding: 2px 3px;
+		font-family: "Arial";
+		font-weight: bold;
+	}
+	
+	INPUT.inputbox {    
+		BORDER-RIGHT: #595c61 1px solid; BORDER-TOP: #595c61 1px solid; PADDING-LEFT:#d5d6d8 1px; BACKGROUND: url(/baf/images/meun_bg.png) # no-repeat 0px; BORDER-LEFT: #d5d6d8 1px solid; WIDTH: 165px; COLOR: #; BORDER-BOTTOM: # 1px solid; HEIGHT: 1.7em
+	}
+	BODY#tutorials #form-login-username INPUT.inputbox {
+		COLOR: #94c000
+	}
+	BODY#tutorials #form-login-password INPUT.inputbox {
+		COLOR: #94c000
+	}
+	BODY#labs #form-login-username INPUT.inputbox {
+		COLOR: #999
+	}
+	BODY#labs #form-login-password INPUT.inputbox {
+		COLOR: #999
+	}
+	BODY#drupal #form-login-username INPUT.inputbox {
+		COLOR: #23afe5
+	}
+	BODY#drupal #form-login-password INPUT.inputbox {
+		COLOR: #23afe5
+	}
+	BODY#phpbb3 #form-login-username INPUT.inputbox {
+		COLOR: #6fa0bf
+	}
+	BODY#phpbb3 #form-login-password INPUT.inputbox {
+		COLOR: #6fa0bf
+	}
+	BODY#magento #form-login-username INPUT.inputbox {
+		COLOR: #bc45b9
+	}
+	BODY#magento #form-login-password INPUT.inputbox {
+		COLOR: #bc45b9
+	}
+	
+	TD {
+		font-family: "Arial", "Helvetica", "sans-serif"; FONT-SIZE: 9pt; COLOR: #333333; LINE-HEIGHT: 15pt
+	}
+    .login_bg{
+    	height:191px;
+    	width:401px;
+    	background-image: url(${request.contextPath}/baf/images/login_bg.png);
+		background-repeat: no-repeat;
+    }
+    .login_logo{
+    	height:78px;
+    	width:401px;
+    	background-image: url(${request.contextPath}${loginFrameBean.loginLogoURL});
+		background-repeat: no-repeat;
+    }
+    
+    /*-----设置验证码图片在google浏览器下垂直居中-----*/
+    img[align=bottom] {
+		vertical-align: bottom;
+	}
+    </style>      
+ 
+    <!--[if IE 6]>
+ 	<style>
+	 .login_bg{
+	 	  height:191px;
+	 	  width:401px;
+	 	  background: url(${request.contextPath}/baf/images/login_bg.jpg);
+	 }
+	 
+	 
+	 .login_logo{
+	 	  height:78px;
+	 	  width:401px;
+	 	  background: url(${request.contextPath}${loginFrameBean.loginLogoURL})no-repeat;
+	 }
+	 html .login_logo{
+		background: none;
+		width: 401px; /* 必须指定背景图片宽度 */
+		height: 78px;
+		filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=scale, src='${request.contextPath}${loginFrameBean.loginLogoURL}');
+	 }
+	</style>
+    <![endif]--> 
+    <script type="text/javascript">  
+    //<![CDATA[
+    function load(){
+		if(document.getElementById("loginForm:loginName").value==""){
+			document.getElementById("loginForm:loginName").focus();
+		}else{
+			document.getElementById("loginForm:password").focus();
+		}
+		document.getElementById("loginForm:validateCode").value = "";
+	}
+	
+	//更换验证码
+	function reloadVerifyCode(){
+		var timenow = new Date().getTime();                        
+		document.getElementById("piccode").src="#{request.contextPath}/servlet/ValidateCodeServlet?d="+timenow;
+	}
+	
+    //]]>
+    </script>                     	
+    </head>
+    
+	<body bgcolor="#d7dfec" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0" style="overflow-x:auto;overflow-y:auto;" onkeyup="if(event.keyCode==13){document.getElementById('loginForm').onsubmit();}" onload="load()">		
+		
+		<div align="center">
+  			<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0" background="${request.contextPath}/baf/images/login_background.png" >
+    			<tr> 
+      				<td>
+      					<div align="center"> 
+          					<table width="401" border="0" cellspacing="0" cellpadding="0">
+					            <tr> 
+					            	<td class="login_logo" width="401" height="78"></td>
+					            </tr>
+	            				<tr> 
+	              					<td height="191" valign="top" class="login_bg"> 
+	                					<h:form id="loginForm" onsubmit="return validateForm(this);">
+	                  						<table width="388" border="0" align="center" cellpadding="0" cellspacing="4">
+	                    						<tr height="5"> 
+	                    							<td width="93"><![CDATA[&nbsp;]]></td>
+	                      							<td width="172"><![CDATA[&nbsp;]]></td>
+	                      							<td width="107"><![CDATA[&nbsp;]]></td>
+					                    		</tr>
+					                    		<tr> 
+					                      			<td><div align="right"><h:outputText value="#{msgs['loginNameLable']}："/></div></td>
+					                      			<td>
+					                      				<h:inputText id="loginName" value="#{userLoginBean.loginName}" style="width:95%;height:23px;" styleClass="rich-gradient-input">
+															<s:commonsValidator type="required" arg="#{msgs['loginNameLable']}" server="false" client="true"/>
+															<s:commonsValidator type="maxlength" maxLength="32" arg="#{msgs['loginNameLable']}" server="false" client="true"/>	
+														</h:inputText> 
+													</td>
+					                      			<td><![CDATA[&nbsp;]]></td>
+					                    		</tr>
+					                    		<tr> 
+					                      			<td><div align="right"><h:outputText value="#{msgs['loginPasswordLabel']}："/></div></td>
+					                      			<td>
+					                      				<h:inputSecret id="password" value="#{userLoginBean.password}" style="width:95%;height:23px;" styleClass="rich-gradient-input">
+															<s:commonsValidator type="required" arg="#{msgs['loginPasswordlable1']}#{msgs['loginPasswordlable2']}" server="false" client="true"/>
+															<s:commonsValidator type="maxlength" maxLength="64" arg="#{msgs['loginPasswordlable1']}#{msgs['loginPasswordlable2']}" server="false" client="true"/>	
+														</h:inputSecret></td>
+					                      			<td><![CDATA[&nbsp;]]></td>
+					                    		</tr>
+					                    		<tr> 
+					                      			<td>
+						                      			<div align="right">
+						                      				<h:outputText value="#{msgs['validateCode1']}"/><rich:spacer width="5px"/>
+						                      				<h:outputText value="#{msgs['validateCode2']}"/><rich:spacer width="5px"/>
+						                      				<h:outputText value="#{msgs['validateCode3']}："/>
+						                      			</div>
+						                  			</td>
+					                      			<td>
+					                      				<h:panelGroup style="vertical-align:bottom;">
+					                      					<h:inputText id="validateCode" value="#{userLoginBean.validateCode}" maxlength="4" style="width:53%;height:23px;" styleClass="rich-gradient-input">
+																<s:commonsValidator type="required" arg="#{msgs['validateCode1']}#{msgs['validateCode2']}#{msgs['validateCode3']}" server="false" client="true"/>
+															</h:inputText>
+															<img id="piccode" src="#{request.contextPath}/servlet/ValidateCodeServlet" align="bottom" onclick="reloadVerifyCode()" title="#{msgs['changeValidateCode']}"/>
+										  				</h:panelGroup>
+										  			</td>
+					                      			<td>
+					                      				<a4j:commandButton id="btnLogin"  type="submit" styleClass="rich-button" value="#{msgs['loginButton']}" action="#{userLoginBean.checkLogin}" data="#{userLoginBean.status}" oncomplete="onLoginComplete(data)" reRender="userId"/>
+														<rich:spacer width="20px"/>
+										  			</td>
+					                    		</tr>
+					                    		<tr height="10"> 
+					                      			<td colspan="3"><![CDATA[&nbsp;]]></td>
+					                    		</tr>
+					                    		<tr> 
+					                      			<td colspan="3">
+						                      			<h:graphicImage  url="/baf/images/login_arrow.gif"  width="34" height="5"/>
+						                      			<font color="#FFFFFF">
+						                      				<a4j:commandLink id="aaa" style="font-size:13px;" value="#{msgs['forgetPassword']}？" onclick="invalidateSession(); return false;"/> 
+						                        		</font>
+						                        	</td>
+					                    		</tr>
+				                  			</table>
+				                  			
+				                  			<br/>
+				                  			<ui:remove><!-- 下载谷歌浏览器提示 --></ui:remove>
+				                  			<h:panelGroup rendered="#{userLoginBean.chrome==false}" style="color: red;">
+						   						<h:outputText value="#{msgs['downloadMessage1']}"/>
+						   						<h:outputText value="#{msgs['downloadMessage2']}"/>
+						   						<a href="http://www.google.com/chrome" target="_blank" style="color:blue;">
+						   							<h:outputText value="#{msgs['downloadMessage3']}"/>
+						   						</a>
+												<h:outputText value="#{msgs['downloadMessage4']}"/>
+						   						<a href="#{userLoginBean.chromeUrl}" target="_blank" style="color:blue;">
+						   							<h:outputText value="#{msgs['downloadMessage5']}"/>
+						   						</a>
+						   						<h:outputText value="#{msgs['downloadMessage6']}"/>
+							   				</h:panelGroup>
+							   				
+				                  			<s:validatorScript functionName="validateForm"/>	
+											
+											<h:inputHidden id="userId" value="#{userLoginBean.userId}"/>
+				                		</h:form>
+					                </td>
+					            </tr>
+							</table>
+							<!-- 销毁session -->
+							<h:form>
+								<a4j:jsFunction name="invalidateSession" action="#{userLoginBean.logout}" oncomplete="document.location.href = '${request.contextPath}/baf/jsp/uiframe/forgetPassword.xhtml';"/>
+							</h:form>
+						</div>
+					</td>
+    			</tr>
+    			<tr valign="bottom">
+    				<td align="center">
+    					<h:outputText value="#{loginFrameBean.ipc_info_01}"/><br />
+    					<h:outputText value="#{loginFrameBean.ipc_info_02}"/>
+    				</td>
+    			</tr>
+  			</table>
+		</div>
+	</body>
+	<script type="text/javascript">  
+	//<![CDATA[
+	//点击登录按钮完成事件
+   	function onLoginComplete(dealFlag){
+	   	if(dealFlag=="-1"){
+	   		//登录失败，登录账号不存在！
+	   		alert("${msgs['loginErrorMessage1']}");
+	   		document.getElementById("loginForm:loginName").focus();
+	   		document.getElementById("loginForm:password").value = "";
+	   	}
+	   	if(dealFlag=="-2"){
+	   		//登录失败，登录密码错误！
+	   		alert("${msgs['loginErrorMessage2']}");
+	   		document.getElementById("loginForm:password").focus();
+	   		document.getElementById("loginForm:password").value = "";
+	   	}
+	   	if(dealFlag=="1"){
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/frame.xhtml";
+	   	}
+	   	if(dealFlag=="2"){
+	   		//您的密码已到期，请修改密码！
+	   		alert("#{msgs['mustModifyPwd']}");
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/modifyPassword.xhtml?userId="+document.getElementById("loginForm:userId").value;
+	   	}
+	   	if(dealFlag=="3"){
+	   		//验证码输入错误
+	   		alert("#{msgs['validateCodeError']}");
+	   		document.getElementById("loginForm:validateCode").value = "";
+	   		document.getElementById("loginForm:validateCode").focus();
+	   		reloadVerifyCode();
+	   	}
+	   	
+	   	//新用户第一次登录，强制进入修改密码页面
+	   	if(dealFlag=="4"){
+	   		alert("#{msgs['firstLoginModifyPassword']}");
+	   		document.location.href = "${request.contextPath}/baf/jsp/uiframe/modifyPassword.xhtml?userId="+document.getElementById("loginForm:userId").value + "&loginName=" + document.getElementById("loginForm:loginName").value ;
+	   	}
+	   	
+	   	//绑定IP登录时，登录IP和数据库中的IP不一致，需提示
+	   	if(dealFlag.indexOf("5#") != -1){
+	   		if(dealFlag == "5#"){
+	   			//登录失败！系统要求绑定IP地址登录，请绑定IP地址！
+	   			alert("#{msgs['notlimitedIP']}");
+	   		}else{
+	   			//登录失败！登录失败！您的登录IP与您绑定的IP不符！
+		   		alert("#{msgs['limitedIpdiffer']}'"+ dealFlag.split("#")[1] +"' #{msgs['differ']}");
+	   		}
+	   	}
+   	}
+   	//]]>
+    </script>   
+</f:view>
+</html>
+
+
+

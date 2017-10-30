@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss-web>
+    <class-loading java2ClassLoadingCompliance="true" />
+	<context-root>/</context-root>	
+    <resource-ref>
+        <res-ref-name>RegalBdpDB</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <jndi-name>java:/RegalBdpDB</jndi-name>
+    </resource-ref>
+    <resource-ref>
+        <res-ref-name>oa</res-ref-name>
+        <res-type>javax.sql.DataSource</res-type>
+        <jndi-name>java:/oa</jndi-name>
+    </resource-ref>
+</jboss-web>

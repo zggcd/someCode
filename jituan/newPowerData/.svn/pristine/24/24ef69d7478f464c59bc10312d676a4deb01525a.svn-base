@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<f:loadBundle basename="messages" var="msgs" />
+
+<head>
+<script>	
+	//<![CDATA[
+	//保存完成触发事件
+	function onSaveComplete(data){
+		if(a4jcomplete()==false){
+		 	return;
+		}		
+		if(data!=null){
+			var timeout = setTimeout("parent.refreshShortcut()", 400);
+			moduleTree_tree.refreshItem("0");
+			refreshOrderList();
+			//以前是保存完之后利用reRender来重新渲染OrderList，但是checkbox不会被重新渲染，所以改为在js中将复选框的选中项清空 
+			var chks = document.getElementsByName("chk");
+			if(chks!=null){
+				for(var i=0;i<chks.length;i++){
+					if(chks[i].checked==true){
+						chks[i].checked = false;
+					}
+				}
+			}
+		}		
+	}
+	
+	//在树上点击checkbox框触发事件
+  	function clickCheck(checkId,checkState) {
+		var itemText = this.getItemText(checkId);
+		var isLeaf = this.getUserData(checkId,"isLeaf");
+		var treeCode = this.getUserData(checkId,"treeCode");
+		if(checkState==0){
+			operOrderList(checkId,itemText,"delete",isLeaf,treeCode);			
+		}else{
+			operOrderList(checkId,itemText,"add",isLeaf,treeCode);
+		}
+  	}
+  	
+  	//往列表添加或删除快捷方式之后触发事件
+  	function onOperComplete(){  		
+  		var tcs = document.getElementById("shortcutForm:treeCodes").value;	
+  		moduleTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/shortcut/shortCutXMLData.jsp?treeCodes="+tcs);	
+  	}
+  	
+  	//从列表中删除快捷方式
+  	function removeShortCutMenu(type){  		  	
+  		var tcs = document.getElementById("shortcutForm:treeCodes").value;
+  		var chks = document.getElementsByName("chk");
+  		//采纳建议：点移除按钮时若未选择模块则弹出提示信息
+  		if(chks.length>0){
+  			if(type=="many"){  
+  				var hasChecked = 0;			
+		  		for(var i=0;i<chks.length;i++){
+		  			if(chks[i].checked){
+		  				hasChecked = 1;
+		  				break;
+		  			}
+		  		}
+		  		if(hasChecked==0){
+		  			alert("#{msgs['baf.shortcut.isCheckedMessage']}");
+		  			return;
+		  		}
+	  		}  	
+  		}else{
+  			alert("#{msgs['baf.shortcut.noneModuleMessage']}");
+  			return;
+  		}  			
+  		var selectIds = "";
+  		var selectTreeCodes = "";
+  		var treeCodes = "";
+		if(chks!=null){  	
+			for(var i=0;i<chks.length;i++){
+				if(type=="all"){
+					if(selectIds==""){
+						selectIds = chks[i].id;  	
+						selectTreeCodes = chks[i].value;  					
+					}else{
+						selectIds = selectIds + "," + chks[i].id;
+						selectTreeCodes = selectTreeCodes + "," + chks[i].value;  			
+					}
+					moduleTree_tree.setCheck(chks[i].id,"0");
+					//将所要取消节点的父节点也取消选中状态
+					var parentId = getParent(chks[i].value);
+	 				moduleTree_tree.setCheck(parentId,"0");
+				}else{
+					if(chks[i].checked){
+	 					if(selectIds==""){
+	 						selectIds = chks[i].id;  
+	 						selectTreeCodes = chks[i].value;	
+	 					}else{
+	 						selectIds = selectIds + "," + chks[i].id;
+	 						selectTreeCodes = selectTreeCodes + "," + chks[i].value;
+	 					}
+	 					tcs = tcs.replace("$"+chks[i].value,"");
+	 					moduleTree_tree.setCheck(chks[i].id,"0");		 										
+	 					var parentId = getParent(chks[i].value);
+	 					var parentTreeCode = moduleTree_tree.getUserData(parentId,"treeCode");
+	 					var openState = moduleTree_tree.getOpenState(parentId);
+	 					if(tcs.indexOf("$"+parentTreeCode)==-1 && openState==0){	 						
+	 						moduleTree_tree.setCheck(parentId,"0");//将所要取消节点的父节点也取消选中状态
+	 					}
+	 				}else{
+	 					if(treeCodes==""){
+	 						treeCodes = "$" + chks[i].value;
+	 					}else{
+	 						treeCodes = treeCodes + "$" + chks[i].value;
+	 					}
+	 				}
+				}		  				
+			}  			
+  			moduleTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/shortcut/shortCutXMLData.jsp?treeCodes="+treeCodes);
+  			document.getElementById("shortcutForm:treeCodes").value = treeCodes;
+  			//removeOrderList(selectIds);
+  			reRenderOrderList(selectIds);
+  		} 
+  	}
+  	
+  	//从列表中移除快捷方式后触发事件
+  	function onRemoveComplete(){
+  	  	var tcs = document.getElementById("shortcutForm:treeCodes").value;	
+  		moduleTree_tree.setXMLAutoLoading("${request.contextPath}/baf/jsp/shortcut/shortCutXMLData.jsp?treeCodes="+tcs);
+  		moduleTree_tree.refreshItem("0");
+  	}
+  	
+  	//获取移除节点的父节点
+  	function getParent(treeCode){
+  		var ids = moduleTree_tree.getAllChecked().split(",");
+  		var parentId = "";
+  		for(var i=0;i<ids.length;i++){
+  			var isLeaf = moduleTree_tree.getUserData(ids[i],"isLeaf");
+  			var tcode = moduleTree_tree.getUserData(ids[i],"treeCode");
+  			if(isLeaf=="N" && treeCode.indexOf(tcode)==0){
+  				parentId = ids[i];
+  			}
+  		}  		
+  		return parentId;
+  	}
+  	
+  	//设置排序列表中的选中项
+  	function setSelectionItem(){
+  		var chks = document.getElementsByName("chk");
+  		var selectIds = "";
+  		var selectNames = "";
+  		var selectTreeCodes = "";
+  		if(chks!=null){  	
+			for(var i=0;i<chks.length;i++){
+				if(chks[i].checked){
+					if(selectIds==""){
+						selectIds = chks[i].id;  
+						selectNames = chks[i].title;  	
+						selectTreeCodes = chks[i].value;  					
+					}else{
+						selectIds = selectIds + "," + chks[i].id;
+						selectNames = selectNames + "," + chks[i].title;
+						selectTreeCodes = selectTreeCodes + "," + chks[i].value;  			
+					}
+				}	  				
+			}
+		}
+  		selection(selectIds,selectNames,selectTreeCodes);
+  	}
+  	
+  	function test(){
+  		return true;
+  	}
+  	
+  	function ondisabled(){
+		document.getElementById("shortcutForm:save").disabled = true;
+	}
+    //]]>
+ 	</script>
+ 	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }	
+       .column1{
+       		width:45%;
+       }
+       .column2{
+       		width:0%;
+       }
+       .column3{
+       		width:45%;
+       }
+       .column4{
+       		width:20%;
+       }
+       .column5{
+       		width:80%;
+       }  
+       .header{
+       		width:100%;
+       }       
+    </style>  
+</head>
+
+<body>
+	<regaltec:dhtmlXtree id="moduleTree"
+		imagePath="/baf/images/dhtmlxtree/" contentEl="treeboxbox_tree"
+		loadXML="/baf/jsp/shortcut/shortCutXMLData.jsp?treeCodes=#{shortCutBean.orderListTreeCode}"
+		xmlAutoLoading="/baf/jsp/shortcut/shortCutXMLData.jsp?treeCodes=#{shortCutBean.orderListTreeCode}">
+		<regaltec:setDxtEnable enableFunction="checkBoxes" parameter="1"/> 
+		<regaltec:setDxtEnable enableFunction="threeStateCheckboxes" parameter="1" />										
+ 		<regaltec:setDxtEevntHandler eventName="onCheck" handler="clickCheck"/>	
+	</regaltec:dhtmlXtree>	
+								
+	<rich:tabPanel id="tabPanel" style="width:100%;height:97%;" switchType="client">
+		<rich:tab id="orgtree" label="#{msgs['baf.shortcut.tabLabel']}" style="text-align:center;">
+			<h:form id="shortcutForm">
+			<table style="font-size:13px;height:95%;" cellspacing="10%" width="80%" align="center">
+				<tr>
+					<td class="column1">
+						<fieldset style="height:100%">
+			           		<legend><h:outputText value="#{msgs['baf.shortcut.sourceSelectTitle']}" /></legend>	
+			           		<rich:spacer height="1px"/>
+							<table width="100%" height="92%" cellpadding="0" cellspacing="0">
+								<tr>
+									<td id="treeboxbox_tree" width="100%" height="92%"></td>
+								</tr>
+							</table>
+						</fieldset>
+					</td>
+					<td class="column2" align="center">
+						<a4j:commandButton id="removeAll" style="width:70px;" styleClass="rich-button" value="#{msgs['baf.shortcut.removeAll']}" onclick="removeShortCutMenu('all')"/><br /><br />
+						<a4j:commandButton id="remove" style="width:70px;" styleClass="rich-button" value="#{msgs['baf.shortcut.remove']}" onclick="removeShortCutMenu('many')"/>
+					</td>
+					<td class="column3">
+						<fieldset style="height:95%;" id="right">
+			           		<legend><h:outputText value="#{msgs['baf.shortcut.targetSelectTitle']}" /></legend>      
+			           		<rich:spacer height="1%"/>
+							<rich:orderingList id="orderList" value="#{shortCutBean.orderList}" var="orderList" listHeight="300" listWidth="200" columnClasses="column4,column5" converter="orderConverter"
+						        upControlLabel ="#{msgs['orderingList.up']}" 
+								downControlLabel="#{msgs['orderingList.down']}"
+								topControlLabel="#{msgs['orderingList.top']}"
+								bottomControlLabel="#{msgs['orderingList.bottom']}"
+						        >
+						         
+					            <rich:column width="35px">
+					            	<f:facet name="header">
+						                <h:outputText value="#{msgs['baf.shortcut.select']}" style="width:35px;"/>
+						            </f:facet> 					            
+						            <input type="checkbox" id="${orderList.id}" name="chk" value="${orderList.treeCode}" title="${orderList.name}"/>
+					            </rich:column>
+					            
+					            <rich:column width="157px"> 
+					                <f:facet name="header">
+					                    <h:outputText value="#{msgs['baf.module.moduleName']}" style="width:156px;"/>
+					                </f:facet>						                
+					                <h:outputText value="#{orderList.name}"/><br />
+					            </rich:column>				            
+						    </rich:orderingList>
+						</fieldset>
+					</td>
+				</tr>
+			</table>
+			<h:inputHidden id="checkedIds" value="#{shortCutBean.checkedIds}"/>
+			<h:inputHidden id="allOpenedIds" value=""/>
+			<h:inputHidden id="canceledIds" value="#{shortCutBean.canceledIds}"/>
+			<h:inputHidden id="treeCodes" value="#{shortCutBean.orderListTreeCode}"/>
+			
+			<a4j:commandButton id="save" type="button" value="#{msgs['baf.Save']}" styleClass="rich-button" onclick="ondisabled();" disabled="false" action="#{shortCutBean.saveShortCut}" data="#{shortCutBean.dealFlag}" oncomplete="onSaveComplete(data);" reRender="save" />		
+			
+			<a4j:keepAlive beanName="shortCutBean"/>	
+			</h:form>
+		</rich:tab>
+	</rich:tabPanel>		
+	
+	<a4j:form>
+        <a4j:jsFunction name="operOrderList" action="#{shortCutBean.operOrderListItem}" oncomplete="onOperComplete()" reRender="orderList,treeCodes">
+        	<a4j:actionparam name="id" value=""/>
+        	<a4j:actionparam name="name" value=""/>
+        	<a4j:actionparam name="type" value=""/>
+        	<a4j:actionparam name="isLeaf" value=""/>
+        	<a4j:actionparam name="treeCode" value=""/>
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="reRenderOrderList" action="#{shortCutBean.reRenderOrderList}" data="#{shortCutBean.deleteIds}" oncomplete="removeOrderList(data);">
+        	<a4j:actionparam name="selectIds" value=""/>
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="removeOrderList" action="#{shortCutBean.removeShortCut}" reRender="orderList,treeCodes">
+        	<a4j:actionparam name="selectIds" value=""/>
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="refreshOrderList" action="#{shortCutBean.getAllShortCut}">
+        </a4j:jsFunction>
+        
+        <a4j:jsFunction name="selection" actionListener="#{shortCutBean.selection}" reRender="orderList">
+        	<a4j:actionparam name="selectIds" value=""/>
+        	<a4j:actionparam name="selectNames" value=""/>
+        	<a4j:actionparam name="selectTreeCodes" value=""/>        
+        </a4j:jsFunction>
+   	</a4j:form>
+   	
+   	<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<esb>
+	<route>
+		<sender>gp_noc</sender>
+		<receiver>sh_eoms</receiver>
+		<time>2009-12-16 13:13:20</time>
+		<service_name>sa_nf_wp_uwp</service_name>
+		<msg_type />
+		<msg_id>549</msg_id>
+	</route>
+	<interfacemsg>
+		<JMSType>JMSNewFinishInfo</JMSType>
+		<changed_Data>
+			<finishInfo>
+				<FIRSTRESPER>本地网</FIRSTRESPER>
+				<BUSIRECOVERTIME>2009-12-16 12:00:00</BUSIRECOVERTIME>
+				<CONFIRMRESULT>通过</CONFIRMRESULT>
+				<CONFIRMDETAIL>确认</CONFIRMDETAIL>
+				<TROUBLEPOINT>青海</TROUBLEPOINT>
+				<TROUBLEREASON>合作伙伴原因</TROUBLEREASON>
+				<TROUBLEREASONDESCR>大赛发送颠覆sdfd</TROUBLEREASONDESCR>
+				<ARCHIVEDETAIL>速度发送颠覆色调fsdfs</ARCHIVEDETAIL>
+				<CONFIRMER>KEDA</CONFIRMER>
+				<CONFIRMTIME />
+				<RECOVERTIME>2009-12-16 12:00:00</RECOVERTIME>
+				<TROUBLEPROV />
+				<TROUBLETYPE>网络覆盖</TROUBLETYPE>
+			</finishInfo>
+			<attachList />
+			<WSID>2009121600001</WSID>
+		</changed_Data>
+	</interfacemsg>
+</esb>

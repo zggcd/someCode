@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//触发事件
+function onObjectFireMouseEvent(obj, eventname) { 					
+	if (document.all) {
+	//IE
+		obj.fireEvent(eventname);
+	} else {
+	//firefox						
+		var name = eventname.replace("on", "");
+		var evtObj = document.createEvent('MouseEvents');     
+		evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+		obj.dispatchEvent(evtObj);
+	}
+}
+function beforeDelete(){
+ 	var tempId = $F('listForm:tempId');
+
+ 	if(typeof tempId == "undefined" || tempId == "" || tempId == null){
+		alert("${msgs['baf.bulletin.chooseDeleteBulletin']}");
+		return false;
+	}
+ 	return confirm("${msgs['baf.bulletin.confirmDeleteBulletin']}？");
+		
+}
+function beforeEdit(){
+	
+	return true;
+}
+function beforePublish(){
+ 	var tempId = $F('listForm:tempId');
+ 	var tempStatus = $F('listForm:tempStatus');
+ 	if(typeof tempId == "undefined" || tempId == "" || tempId == null){
+		alert("${msgs['baf.bulletin.confirmPublishBulletin']}");
+		return false;
+	}
+	var arr=tempStatus.split("#");
+	for(i=0;i&lt;arr.length;i++){
+       if(arr[i]=="2"){
+          alert("不能发布已经发布的公告!");
+          return false;
+       }
+	}
+	/*
+ 	if(tempStatus != "0" &amp;&amp; tempStatus != "1" &amp;&amp; tempStatus != "4"){
+		alert("${msgs['baf.bulletin.chooseRightBulletinInRightState']}！");
+		return false;
+	}*/
+ 	return true;
+}
+function beforeCancel(){
+ 	var tempId = $F('listForm:tempId');
+ 	var tempStatus = $F('listForm:tempStatus');
+ 	if(typeof tempId == "undefined" || tempId == "" || tempId == null){
+		alert("${msgs['baf.bulletin.chooseCancelBulltin']}");
+		return false;
+	}
+ 	return true;
+}
+function _setValue(id, status){
+	document.getElementById("listForm:tempId").value = id;
+	document.getElementById("listForm:tempStatus").value = status;
+}
+function _onComplete(obj){
+	if(a4jcomplete() == false){
+		obj.disabled = "";
+		document.getElementById("listForm:tempId").value = "";
+		document.getElementById("listForm:tempStatus").value = "";
+		return;	
+	}
+}
+//屏蔽退格键的事件监听
+function forCheck(){
+	if(event.keyCode == 8){
+	    event.returnValue   =   false;
+	}
+}
+function editBullutin(){
+	var tempId = $F('listForm:tempId');
+	var tempStatus = $F('listForm:tempStatus');
+	
+	if(typeof tempId == "undefined" || tempId == "" || tempId == null){
+		alert("${msgs['baf.bulletin.chooseEditBulltin']}");
+		return false;
+	}
+	var arr=tempStatus.split("#");
+	if(arr!=null&amp;&amp;arr.length>1){
+       alert("只能选择一个公告编辑!");
+       return ;
+	}
+ 	if(tempStatus != "0" &amp;&amp; tempStatus != "1" &amp;&amp; tempStatus != "4"){
+		alert("${msgs['baf.bulletin.editBulltinInRightState']}！");
+		return false;
+	}
+ 	window.location.href='editBulletin.xhtml?bulletinId='+tempId;
+}
+
+//点击查询按纽人员列表未渲染前置灰
+function ondisabled(obj){
+  	obj.disabled = true;
+}
+
+
+//响应check点击事件
+function checkBoxClick(object, value,statusValue) {					
+	var templateIDArray = document.getElementById("listForm:tempId").value;
+	var statusArr=document.getElementById("listForm:tempStatus").value;
+	if (templateIDArray == null || templateIDArray == "") {
+		if (object.checked == true) {							
+			templateIDArray = value;
+			statusArr=statusValue;
+		} 
+	} else {
+		if (object.checked == true) {
+			templateIDArray = templateIDArray + "#" + value;	
+			statusArr=statusArr+"#"+statusValue; 			
+		} else {
+			var index = templateIDArray.indexOf(value);
+			if (index >= 0) {																
+				var str = "";
+				var str2="";
+				if(index>0){
+					str = "#"+value;
+					str2="#"+statusValue;
+				} else {
+					if(index==0 &amp;&amp; templateIDArray.indexOf("#")!=-1){
+						str = value + "#";
+						str2=statusValue+"#";
+						
+					} else {
+						str = value;
+						str2=statusValue;
+					}
+				}
+				templateIDArray = templateIDArray.replace(str, "");
+				statusArr=statusArr.replace(str2,"");
+			}
+		}
+	}
+	//保存勾选的模板ID值， 格式为 id~id~id
+	document.getElementById("listForm:tempId").value = templateIDArray;
+	document.getElementById("listForm:tempStatus").value=statusArr;
+}
+
+
+function toCancel(){
+	if(window.confirm("确认撤销?")){
+	cancelBulletin();
+	return true;
+	}
+	else return false;
+}
+//全选select操作表所有项
+//<![CDATA[
+function onSelectALlItems() {
+	var oTable = document.getElementById("listForm:list");
+	var oChkAll = document.getElementById("listForm:list:selectAll"); 
+	//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+    if (!oChkAll.checked){
+      document.getElementById("listForm:tempId").value = "";
+      document.getElementById("listForm:tempStatus").value="";
+    }
+	//获取当前页码数
+	var pageNum = document.getElementById("listForm:page").value;
+	if (pageNum <= 0) pageNum = 1;
+	
+	//获取每页数据个数
+	//var pageSize = document.getElementById("listForm:pageSize").value; 
+	var pageSize = 10;            	
+	if (oTable != null && oChkAll != null) {
+		for (j = 0; j < oTable.rows.length -2; j++) {
+			var realNum = (pageNum-1)*pageSize + j;
+			var e = document.getElementById("listForm:list:"+realNum+":selectFlag");
+			if (e.id.indexOf("selectFlag") >= 0) {   
+				//触发CheckBox onclick事件，用来设置itemid
+				if (document.all) {
+					//IE
+					var oldValue= e.checked;
+					e.checked = oChkAll.checked;
+					if (!oldValue && e.checked) {
+						onObjectFireMouseEvent(e, "onclick");
+					}
+				} else {
+					//firefox
+					if (oChkAll.checked) {
+						var oldValue= e.checked;
+						if (!oldValue)
+							onObjectFireMouseEvent(e, "onclick");
+						} else {
+							e.checked = oChkAll.checked;
+						}
+					}
+				}
+			}
+	 	}
+	}
+
+
+//全选select操作表所有项------------------用于置顶公告列表
+//<![CDATA[
+function onSelectALlTopItems() {
+	var oTable = document.getElementById("listForm:toplist");
+	var oChkAll = document.getElementById("listForm:toplist:selectTopAll"); 
+	//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+  if (!oChkAll.checked){
+    document.getElementById("listForm:tempId").value = "";
+    document.getElementById("listForm:tempStatus").value="";
+  }
+	//获取当前页码数
+	//var pageNum = document.getElementById("listForm:page").value;
+	//if (pageNum <= 0) pageNum = 1;
+	
+	//获取每页数据个数
+	//var pageSize = document.getElementById("listForm:pageSize").value; 
+	//var pageSize = 10;            	
+	if (oTable != null && oChkAll != null) {
+		for (j = 0; j < oTable.rows.length -1; j++) {
+			//var realNum = (pageNum-1)*pageSize + j;
+			var e = document.getElementById("listForm:toplist:"+j+":selectFlag");
+			if (e.id.indexOf("selectFlag") >= 0) {   
+				//触发CheckBox onclick事件，用来设置itemid
+				if (document.all) {
+					//IE
+					var oldValue= e.checked;
+					e.checked = oChkAll.checked;
+					if (!oldValue && e.checked) {
+						onObjectFireMouseEvent(e, "onclick");
+					}
+				} else {
+					//firefox
+					if (oChkAll.checked) {
+						var oldValue= e.checked;
+						if (!oldValue)
+							onObjectFireMouseEvent(e, "onclick");
+						} else {
+							e.checked = oChkAll.checked;
+						}
+					}
+				}
+			}
+	 	}
+	}
+
+function clearCheckAll(){
+	var checkObj=document.getElementById("listForm:list:selectAll");
+	checkObj.checked=false;
+}
+
+//]]>
+</script>
+<style>
+	   .tip{
+	   font-weight:normal;font-size:14;color:red;
+	   position:absolute;
+	   top:3px;
+	   right:30px;
+	   }
+</style>
+</head>
+<body >
+<span id="operateTip" class="tip">操作提示</span>
+<rich:tabPanel style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;" width="99%" switchType="client">
+	<rich:tab label="#{msgs['baf.bulletin.queryTerm']}">
+		<h:form id="queryForm">			
+		<table width="99%" style="font-size:13px;word-break:break-all;">
+		<tr>
+			<td align="right">
+			<h:outputText value="#{msgs['baf.bulletin.titile']}：" />
+			</td>
+			<td align="left">
+			<h:inputText id="title" style="width:195px;height:23px;" 
+				value="#{manageBulletinBean.searchTitle}" styleClass="rich-gradient-input">							
+				<s:commonsValidator type="maxlength" arg="#{msgs['baf.bulletin.titile']}" server="false" client="true" maxLength="64"/>						
+			</h:inputText>
+			</td>
+			
+			<td align="right">
+			<h:outputText value="关键字：" />
+			</td>
+			<td align="left">
+			<h:inputText id="keyWord" style="width:195px;height:23px;"
+				value="#{manageBulletinBean.searchKeyWord}" styleClass="rich-gradient-input">							
+				<s:commonsValidator type="maxlength" arg="#{msgs['baf.bulletin.publisher']}" server="false" client="true" maxLength="64"/>						
+			</h:inputText>
+			</td>
+		</tr>
+			
+		<tr>
+			<td align="right" >
+			<h:outputText value="#{msgs['baf.bulletin.startTime']}：" />
+			</td>
+			<td align="left">
+			<rich:calendar id="startTime"  value="#{manageBulletinBean.startTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+			showApplyButton="true" oninputkeydown="forCheck();" inputStyle="width:195px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+			</td>
+			
+			<td align="right" >
+			<h:outputText value="#{msgs['baf.bulletin.endTime']}：" />
+			</td>
+			<td align="left">
+			<rich:calendar id="endTime"  value="#{manageBulletinBean.endTime}" datePattern="yyyy-MM-dd HH:mm"  weekDayLabelsShort="日,一,二,三,四,五,六" 
+			showApplyButton="true" oninputkeydown="forCheck();" inputStyle="width:195px;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"/>
+			</td>
+		</tr>			
+		
+		</table>
+		<table width="99%" style="font-size:13px;word-break:break-all;">
+		<tr>
+			<td align="right">
+			<h:outputText value="#{msgs['baf.bulletin.status']}：" />
+			</td>
+			<td align="left" width="400px">
+			<h:selectOneRadio id="status" style="font-size:13px"
+				value="#{manageBulletinBean.searchStatus}" >
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.all']}" itemValue="-1" />
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.published']}" itemValue="2" />
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.publishing']}" itemValue="1" />
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.draft']}" itemValue="0" />
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.cancel']}" itemValue="4" />
+				<f:selectItem itemLabel="#{msgs['baf.bulletin.waste']}" itemValue="3" />
+			</h:selectOneRadio>
+			</td>
+			<td></td>
+			<td align="right">
+			<a4j:commandButton styleClass="rich-button" type="submit" disabled="false" id="query" value="#{msgs['baf.bulletin.query']}" reRender="query">
+				<a4j:support event="onclick" onsubmit="ondisabled(this);if (validateForm(document.getElementById('queryForm'))==false) return false;" requestDelay="100"  action="#{manageBulletinBean.searchBulletin}" reRender="list"/>				
+			</a4j:commandButton> 		
+			<rich:spacer width="10"/>	
+			<input type="reset" value="#{msgs['baf.calendar.reset']}" class="rich-button"/>
+			<rich:spacer width="40"/>
+			</td>
+		</tr>
+		</table>
+		<s:validatorScript functionName="validateForm"/>
+		</h:form>
+				
+		<a4j:form id="listForm">
+		<a4j:keepAlive beanName="manageBulletinBean"></a4j:keepAlive>
+		<div style="margin:30px 0px;border:solid #69C 1px;">
+		<rich:panel>
+        <f:facet name="header">
+          	<h:outputText value="置顶公告"/>
+        </f:facet>	
+		<rich:dataTable width="100%" columnClasses="col" id="toplist"  title="双击查看公告内容"
+		onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+		 value="#{manageBulletinBean.topBulletinList}" rows="#{manageBulletinBean.pageSize}" var="vo" align="center"
+		 onRowDblClick="bulletinDetail('#{vo.bulletinId}')">
+		<rich:column style="width:50px;">
+		    <f:facet name="header">
+		   	<h:selectBooleanCheckbox id="selectTopAll" onclick="onSelectALlTopItems();"/>
+		   	</f:facet>
+			<center>
+			<!-- 
+		 	<input type="radio" value="#{vo.bulletinId}" name="taskItem" onclick="_setValue('#{vo.bulletinId}', '#{vo.status}');"/>
+		     -->
+		     
+		     <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{vo.bulletinId}','#{vo.status}');"/>
+		      
+		     </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.emergency']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" rendered="#{vo.emergency == '2'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" rendered="#{vo.emergency == '1'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" rendered="#{vo.emergency == '0'}"/>
+		    			    	
+		    </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.status']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:outputText value="#{msgs['baf.bulletin.draft']}" rendered="#{vo.status == '0'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.pendingPublish']}" rendered="#{vo.status == '1'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.published']}" rendered="#{vo.status == '2'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.rubbish']}" rendered="#{vo.status == '3'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.cancel']}" rendered="#{vo.status == '4'}"/>
+		    </center>
+		 </rich:column>
+		  <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.responseStatus']}" style="font-weight:normal;"/>
+			</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_reverted1.gif" alt="#{msgs['baf.bulletin.answered']}" rendered="#{vo.isResponsed == 'Y' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_norevert1.gif" alt="#{msgs['baf.bulletin.answering']}" rendered="#{vo.isResponsed == 'N' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_nlrevert1.gif" alt="#{msgs['baf.bulletin.noAnswer']}" rendered="#{vo.needResponse == 'N'}"/>
+		    </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.title']}" style="font-weight:normal;"/>
+		 </f:facet>
+		    <center><h:outputText value="#{vo.title}" /></center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.author']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.publisherName}" /></center>
+		 </rich:column>
+		<ui:remove>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.inscription']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.inscription}" /></center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.publishTime']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.publishTime}" title="#{msgs['baf.bulletin.publishTime']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 <ui:remove>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.expireDate']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.expireDate}" title="#{msgs['baf.bulletin.expireDate']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.hasAttachment']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/noAttachment.gif" alt="#{msgs['baf.bulletin.noAttachment']}" title="#{msgs['baf.bulletin.noAttachment']}" rendered="#{vo.hasAttachment == 'N'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" alt="#{msgs['baf.bulletin.withAttachment']}" title="#{msgs['baf.bulletin.withAttachment']}" rendered="#{vo.hasAttachment == 'Y'}"/>      	
+		    </center>
+		 </rich:column>
+		</rich:dataTable>
+		</rich:panel>
+		</div>
+		<rich:dataTable width="100%" columnClasses="col" id="list" title="双击查看公告内容"
+		onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'"
+		 value="#{manageBulletinBean.dataList}" rows="#{manageBulletinBean.pageSize}" var="vo" align="center" onRowDblClick="bulletinDetail('#{vo.bulletinId}')">
+		<rich:column style="width:50px;">
+		    <f:facet name="header">
+		   	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+		   	</f:facet>
+			<center>
+			<!-- 
+		 	<input type="radio" value="#{vo.bulletinId}" name="taskItem" onclick="_setValue('#{vo.bulletinId}', '#{vo.status}');"/>
+		     -->
+		     
+		     <h:selectBooleanCheckbox id="selectFlag" onclick="checkBoxClick(this, '#{vo.bulletinId}','#{vo.status}');"/>
+		      
+		     </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.emergency']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_plain.gif" alt="#{msgs['baf.bulletin.plain']}" rendered="#{vo.emergency == '2'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" alt="#{msgs['baf.bulletin.urgent']}" rendered="#{vo.emergency == '1'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" alt="#{msgs['baf.bulletin.exurgent']}" rendered="#{vo.emergency == '0'}"/>
+		    			    	
+		    </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.status']}" style="font-weight:normal;"/>
+		 	</f:facet>
+		    <center>
+		    	<h:outputText value="#{msgs['baf.bulletin.draft']}" rendered="#{vo.status == '0'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.pendingPublish']}" rendered="#{vo.status == '1'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.published']}" rendered="#{vo.status == '2'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.rubbish']}" rendered="#{vo.status == '3'}"/>
+		    	<h:outputText value="#{msgs['baf.bulletin.cancel']}" rendered="#{vo.status == '4'}"/>
+		    </center>
+		 </rich:column>
+		  <rich:column>
+		   	<f:facet name="header">
+		 		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.responseStatus']}" style="font-weight:normal;"/>
+			</f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_reverted1.gif" alt="#{msgs['baf.bulletin.answered']}" rendered="#{vo.isResponsed == 'Y' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_norevert1.gif" alt="#{msgs['baf.bulletin.answering']}" rendered="#{vo.isResponsed == 'N' &amp;&amp; vo.needResponse == 'Y'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/blt_nlrevert1.gif" alt="#{msgs['baf.bulletin.noAnswer']}" rendered="#{vo.needResponse == 'N'}"/>
+		    </center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+		 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.title']}" style="font-weight:normal;"/>
+		 </f:facet>
+		    <center><h:outputText value="#{vo.title}" /></center>
+		 </rich:column>
+		 <rich:column>
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.author']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.publisherName}" /></center>
+		 </rich:column>
+		 <ui:remove>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.inscription']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center><h:outputText value="#{vo.inscription}" /></center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.publishTime']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.publishTime}" title="#{msgs['baf.bulletin.publishTime']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 <ui:remove>
+		 <rich:column style="width:120px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.expireDate']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    <h:outputLabel value="#{vo.expireDate}" title="#{msgs['baf.bulletin.expireDate']}">
+		    		<f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/>
+		    	</h:outputLabel>
+		    </center>
+		 </rich:column>
+		 </ui:remove>
+		 <rich:column style="width:80px;">
+		   	<f:facet name="header">
+			 	<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.hasAttachment']}" style="font-weight:normal;"/>
+			 </f:facet>
+		    <center>
+		    	<h:graphicImage url="/baf/images/bulletin/noAttachment.gif" alt="#{msgs['baf.bulletin.noAttachment']}" title="#{msgs['baf.bulletin.noAttachment']}" rendered="#{vo.hasAttachment == 'N'}"/>
+		    	<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif" alt="#{msgs['baf.bulletin.withAttachment']}" title="#{msgs['baf.bulletin.withAttachment']}" rendered="#{vo.hasAttachment == 'Y'}"/>      	
+		    </center>
+		 </rich:column>
+		 <f:facet name="footer">				
+			<rich:datascroller align="right" id="itemScroller"  page="#{manageBulletinBean.scrollPage}" selectedStyle="background-color:#FFB93F;" fastStep="5" 
+			reRender="listForm"  />
+		</f:facet>
+		</rich:dataTable>
+		<h:inputHidden id="tempId" value="#{manageBulletinBean.tempId}"/>
+		<h:inputHidden id="tempStatus" value="#{manageBulletinBean.tempStatus}"/>
+		<h:inputHidden id="page" value="#{manageBulletinBean.scrollPage}"/>
+		<a4j:jsFunction name="bulletinDetail" action="#{manageBulletinBean.viewDetail}" reRender="detailForm" oncomplete="#{rich:component('modalPanel')}.show();">              
+          <a4j:actionparam name="bulletinId" assignTo="#{manageBulletinBean.bulletinId}"/> 
+        </a4j:jsFunction>
+		<a4j:jsFunction name="cancelBulletin" action="#{manageBulletinBean.cancelBulletin}" reRender="listForm" oncomplete="_onComplete(this);">              
+        </a4j:jsFunction>
+		<rich:spacer height="10px"/>
+		<a4j:commandButton styleClass="rich-button" type="button"  id="edit" value="#{msgs['baf.bulletin.edit']}"
+		onclick="editBullutin();return true;ondisabled(this);"/>						
+		<rich:spacer width="10px"/>	
+		<a4j:commandButton styleClass="rich-button" type="button"  id="delete" value="#{msgs['baf.bulletin.delete']}"
+		onclick="if(beforeDelete()==false) return false;ondisabled(this);" action="#{manageBulletinBean.deleteBulletin}" reRender="listForm" oncomplete="_onComplete(this);"/>				
+		<rich:spacer width="10px"/>	
+		<a4j:commandButton styleClass="rich-button" type="button" disabled="#{manageBulletinBean.release_btn_flag==null}" id="publish" value="#{msgs['baf.bulletin.publish']}"
+		onclick="if(beforePublish()==false) return false;ondisabled(this);" action="#{manageBulletinBean.publishBulletin}" reRender="listForm" oncomplete="_onComplete(this);"/>				
+		<rich:spacer width="10px"/>	
+		<a4j:commandButton styleClass="rich-button" type="button" id="cancel" value="#{msgs['baf.bulletin.cancel']}"
+		onclick="if(beforeCancel()==false) return false;if(toCancel()==false)return false;ondisabled(this);" disabled="#{manageBulletinBean.cancel_btn_flag==null}" />
+		<rich:spacer width="10px"/>
+		<a4j:commandButton styleClass="rich-button" type="button" id="makeTop_btn" value="置顶" action="#{manageBulletinBean.makeBulletinTop}" reRender="listForm" 
+		onclick="ondisabled(this);" disabled="#{manageBulletinBean.top_btn_flag==null}" />
+		<rich:spacer width="10px"/>
+		<a4j:commandButton styleClass="rich-button" type="button" id="cancelTop_btn" value="取消置顶" action="#{manageBulletinBean.cancelTop}" reRender="listForm" 
+		onclick="ondisabled(this);" disabled="#{manageBulletinBean.cancel_top_btn_flag==null}" />
+		</a4j:form>	
+		<rich:spacer height="10px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.photoExplain']}：" style="font-weight:normal;"/>	
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_plain.gif"/>
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.plain']}" style="font-weight:normal;"/>
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_urgent.gif" />
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.urgent']}" style="font-weight:normal;"/>
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_exurgent.gif" />
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.exurgent']}" style="font-weight:normal;"/>
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_reverted1.gif" />
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.answered']}" style="font-weight:normal;"/>
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_norevert1.gif" />
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.answering']}" style="font-weight:normal;"/>
+		<rich:spacer width="10px"/>
+		<h:graphicImage url="/baf/images/bulletin/blt_nlrevert1.gif"/>
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.noAnswer']}" style="font-weight:normal;"/>
+		<rich:spacer width="8px"/>
+		<h:graphicImage url="/baf/images/bulletin/hasAttachment.gif"/>
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.withAttachment']}" style="font-weight:normal;"/>
+		<rich:spacer width="8px"/>
+		<h:graphicImage url="/baf/images/bulletin/noAttachment.gif"/>
+		<rich:spacer width="8px"/>
+		<h:outputText styleClass="headerText " value="#{msgs['baf.bulletin.noAttachment']}" style="font-weight:normal;"/>
+	</rich:tab>	
+</rich:tabPanel>
+
+		<rich:modalPanel id="modalPanel" autosized="false"  width="650" height="500">			
+			<f:facet name="header">
+				<h:outputText value="查看公告"/>
+			</f:facet>
+			<!-- 关闭按钮 -->
+			<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+				    <rich:componentControl for="modalPanel" attachTo="hidelink" operation="hide" event="onclick" />
+				</h:panelGroup>
+			</f:facet>	
+			<div style="over-float:auto;">
+			<a4j:form id="detailForm">
+				<center>	 									
+			<table cellspacing="0"  class="rich-table" cellpadding="0" border="0" width="90%" style="text-align:center;font-size:13px;background-color:${a4jSkin.tableBackgroundColor};table-layout:fixed;">
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell" width="20%"><h:outputText value="#{msgs['baf.bulletin.title']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.title}"></h:outputText></td>	
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.keyword']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.keyword}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.category']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.category}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.emergency']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.emergency}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.publisher.name']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.publisherName}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.immediatePublish']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="${manageBulletinBean.issentAtonce=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.yes']}"/>
+				</c:if>
+				<c:if test="${manageBulletinBean.issentAtonce!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.no']}"/>
+				</c:if>
+			</td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.publishTime']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.publishTime}"><f:convertDateTime pattern="yyyy-MM-dd HH:mm:ss" timeZone="GMT+8"/></h:outputText></td>
+			</tr>	
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.receiver.name']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.receivers}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.validity']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.expiredate}"><f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/></h:outputText></td>
+			</tr>	
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.inscription']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.inscription}"></h:outputText></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.response.need']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="#{manageBulletinBean.needResponse=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.yes']}"/>
+				</c:if>
+				<c:if test="#{manageBulletinBean.needResponse!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.no']}"/>
+				</c:if>	
+			</td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.state']}"></h:outputText></td><td class="rich-table-cell" align="left"><h:outputText value="#{manageBulletinBean.status}"/></td>
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.Attachment']}"></h:outputText></td>			
+			
+			</tr>
+			<tr class="rich-table-row" >
+			<td class="rich-table-cell"><h:outputText value="#{msgs['baf.bulletin.response']}"></h:outputText></td>
+			<td class="rich-table-cell" align="left">
+				<c:if test="#{manageBulletinBean.isresponsed=='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.have']}"></h:outputText>
+				</c:if>
+				<c:if test="#{manageBulletinBean.isresponsed!='Y'}">
+					<h:outputText value="#{msgs['baf.bulletin.haveNot']}"/>
+				</c:if>	
+			</td>
+			</tr>	
+			<tr class="rich-table-row" >	
+			<td class="rich-table-cell">	
+			    <h:outputText value="#{msgs['baf.bulletin.bulletinName']}"></h:outputText>
+			</td>
+			<td class="rich-table-cell" align="left">
+			    ${manageBulletinBean.content}
+			 </td>  
+			 </tr> 
+			</table>							
+				</center>			
+				<rich:spacer height="15px"/>		
+				<center>								 
+					<a4j:commandButton styleClass="rich-button" type="button" id="orderCancel" value="关闭" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+				</center>
+				
+			</a4j:form>	
+			</div>	
+		</rich:modalPanel>
+
+    <rich:toolTip for="operateTip" >
+    <div style="width:300;">
+     1)普通用户只能编辑和删除自己发布的和自己权限下的公告<br/>
+	 2)公告被置顶后将从原列表消失，出现在置顶列表中<br/>
+	 3)双击列表中的某条公告可以查看该公告的概况<br/>
+	 4)要编辑已发布的公告，必须先进行撤销操作，才能再编辑
+    </div>
+    </rich:toolTip>
+<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</f:view>
+</html>

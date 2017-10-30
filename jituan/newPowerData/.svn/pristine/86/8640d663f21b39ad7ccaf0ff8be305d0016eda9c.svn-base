@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ccssoft.rsas.metadata.memberproperty.dao.MemberPropertyDAOMapper">
+	<resultMap id="BaseResultMap" type="com.ccssoft.rsas.metadata.memberproperty.model.MemberPropertyVO">
+		<id column="FDUPROPETYID" jdbcType="VARCHAR" property="propetyID" />
+		<result column="FDCPROPETYNAME" jdbcType="VARCHAR" property="propetyName" />
+		<result column="FDUMEMBERID" jdbcType="VARCHAR" property="memberID" />
+		<result column="FDCPROPERTYFIELD" jdbcType="VARCHAR" property="propertyField" />
+		<result column="FDCTABLENAME" jdbcType="VARCHAR" property="tableName" />
+		<result column="FDILEVELLENGTH" jdbcType="INTEGER" property="levelLength" />
+		<result column="FDCNODETYPE" jdbcType="CHAR" property="nodeType" />
+		<result column="FDCMINVALUE" jdbcType="VARCHAR" property="minValue" />
+		<result column="FDCMAXVALUE" jdbcType="VARCHAR" property="maxValue" />
+		<result column="FDCPROPERTYVALUE" jdbcType="VARCHAR" property="propertyValue" />
+		<result column="FDCSEARCHKIND" jdbcType="VARCHAR" property="searchKind" />
+		<result column="FDCEXPRESSION" jdbcType="VARCHAR" property="expression" />
+		<result column="FDCPARENTID" jdbcType="VARCHAR" property="parentID" />
+		<result column="FDCDESC" jdbcType="VARCHAR" property="desc" />
+	</resultMap>
+	
+	<insert id="addProperty" parameterType="com.ccssoft.rsas.metadata.memberproperty.model.MemberPropertyVO">
+		insert into TBMEMBERPROPETY (FDUPROPETYID, FDCPROPETYNAME, FDUMEMBERID, 
+		FDCPROPERTYFIELD, FDCTABLENAME, FDILEVELLENGTH, FDCNODETYPE, FDCMINVALUE, 
+		FDCMAXVALUE, FDCPROPERTYVALUE, FDCSEARCHKIND, FDCEXPRESSION, FDCPARENTID, 
+		FDCDESC)
+		values (#{propetyID,jdbcType=VARCHAR}, #{propetyName,jdbcType=VARCHAR}, 
+		#{memberID,jdbcType=VARCHAR}, #{propertyField,jdbcType=VARCHAR}, 
+		#{tableName,jdbcType=VARCHAR}, #{levelLength,jdbcType=INTEGER}, 
+		#{nodeType,jdbcType=CHAR}, #{minValue,jdbcType=VARCHAR}, 
+		#{maxValue,jdbcType=VARCHAR}, #{propertyValue,jdbcType=VARCHAR}, 
+		#{searchKind,jdbcType=VARCHAR}, #{expression,jdbcType=VARCHAR}, 
+		#{parentID,jdbcType=VARCHAR}, #{desc,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateProperty" parameterType="com.ccssoft.rsas.metadata.memberproperty.model.MemberPropertyVO">
+		update TBMEMBERPROPETY
+		set FDCPROPETYNAME = #{propetyName,jdbcType=VARCHAR}, FDUMEMBERID = #{memberID,jdbcType=VARCHAR}, 
+		FDCPROPERTYFIELD = #{propertyField,jdbcType=VARCHAR}, FDCTABLENAME = #{tableName,jdbcType=VARCHAR}, 
+		FDILEVELLENGTH = #{levelLength,jdbcType=INTEGER}, FDCNODETYPE = #{nodeType,jdbcType=CHAR}, 
+		FDCMINVALUE = #{minValue,jdbcType=VARCHAR}, FDCMAXVALUE = #{maxValue,jdbcType=VARCHAR}, 
+		FDCPROPERTYVALUE = #{propertyValue,jdbcType=VARCHAR}, FDCSEARCHKIND = #{searchKind,jdbcType=VARCHAR}, 
+		FDCEXPRESSION = #{expression,jdbcType=VARCHAR}, FDCPARENTID = #{parentID,jdbcType=VARCHAR}, 
+		FDCDESC = #{desc,jdbcType=VARCHAR}
+		where  FDUPROPETYID = #{propetyID,jdbcType=VARCHAR}
+	</update>
+	
+	<delete id="delProperty" parameterType="java.lang.String">
+		delete from TBMEMBERPROPETY
+		where FDUPROPETYID = #{propetyID,jdbcType=VARCHAR}
+	</delete>
+	
+	<delete id="delMemberPropertys" parameterType="java.lang.String">
+		delete from TBMEMBERPROPETY
+		where FDUMEMBERID = #{memberID,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="getProperty" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUPROPETYID, FDCPROPETYNAME, FDUMEMBERID, 
+		FDCPROPERTYFIELD, FDCTABLENAME, FDILEVELLENGTH, FDCNODETYPE, FDCMINVALUE, 
+		FDCMAXVALUE, FDCPROPERTYVALUE, FDCSEARCHKIND, FDCEXPRESSION, FDCPARENTID, 
+		FDCDESC
+		from TBMEMBERPROPETY
+		where FDUPROPETYID = #{propetyID,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getPropertys" parameterType="java.lang.String" resultMap="BaseResultMap">
+		select FDUPROPETYID, FDCPROPETYNAME, FDUMEMBERID, 
+		FDCPROPERTYFIELD, FDCTABLENAME, FDILEVELLENGTH, FDCNODETYPE, FDCMINVALUE, 
+		FDCMAXVALUE, FDCPROPERTYVALUE, FDCSEARCHKIND, FDCEXPRESSION, FDCPARENTID, 
+		FDCDESC
+		from TBMEMBERPROPETY
+		where FDUMEMBERID = #{memberID,jdbcType=VARCHAR}
+	</select>
+	
+</mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+<head>
+<script>
+//<![CDATA[
+function showStrategy()  //节点左键单击事件相应函数
+{
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	var  type =  moduleTree_tree.getUserData(itemId,"USERDATA"); 
+	var businessTypeId = null;
+	var areaId = null;
+	if(type == "bureau"){
+		areaId = itemId;
+		businessTypeId = "-1";
+	}else{		
+		if(itemId == '0001'){
+			areaId = '0001';
+			businessTypeId = '-1';
+		}else{
+			var temp = null;
+			var index = itemId.lastIndexOf('|');
+			if(index != -1){
+				areaId = itemId.substring(0, index);
+				businessTypeId = itemId.substring(index+1);
+			}
+			
+		}
+	} 
+	document.getElementById('businessConfigArea').src = "${request.contextPath}/baf/jsp/dialoutStrategy/businessConfig/businessConfigDetail.xhtml?areaId=" + areaId +"&businessTypeId="+businessTypeId ;
+	
+}
+
+function editConfig(){
+	var itemId = moduleTree_tree.getSelectedItemId();
+	var index = itemId.indexOf('_');
+	if(index != -1){
+		itemId = itemId.substring(0, index);
+	}
+	
+	var  type =  moduleTree_tree.getUserData(itemId,"USERDATA"); 
+	var businessTypeId = null;
+	if(type == "bureau"){
+		var areaId = itemId;
+		businessTypeId = "-1";
+	}else{
+		var  areaId = moduleTree_tree.getUserData(itemId,"PARENTID");
+		businessTypeId =  itemId;
+	} 
+	document.getElementById('businessConfigArea').src = "${request.contextPath}/baf/jsp/dialoutStrategy/businessConfig/editBusinessConfig.xhtml?areaId=" + areaId +"&businessTypeId="+businessTypeId ;
+}
+
+     //]]>
+</script>
+	<style>
+       .scrolls{
+           width:400px;
+           height:300px;
+           overflow:auto;
+       }
+	   td.column1{
+	   width:20%;
+	   }	
+	   td.column2{
+	   width:60%;
+	   }	
+    </style> 
+</head>
+
+<body>
+    <regaltec:dhtmlXtree id="moduleTree" imagePath="/baf/images/dhtmlxtree/"
+	 dataSource="TREE_DIALOUT_BUSINESSCONFIG" showFullPath="1" contentEl="treebox" >	
+	 <regaltec:setDxtEevntHandler eventName="onClick" handler="showStrategy" />
+	 <regaltec:dhtmlXtreeParam name="userId" value="#{businessConfigBean.userId}" dataType="String"/>
+	</regaltec:dhtmlXtree>
+	
+	<regaltec:viewPort>
+		<regaltec:viewPortPanel region="east" id="east-panel"
+			autoScroll="false" contentEl="east" split="true" width="200" minSize="200" maxSize="400"
+			collapsible="true" margins="0 0 0 0" layout="accordion"/>
+		<regaltec:viewPortPanel region="center" id="center-panel" contentEl="center"/>
+	</regaltec:viewPort>
+	
+	<div id="east">
+		<table width="100%" CELLSPACING="0" CELLPADDING="0" height="100%" style="font-size:13px;">
+		<tr>
+			<td height="16" align="right" class="rich-gradient-tab">
+			<h:graphicImage id="helpicon" url="/baf/images/icons/questionmark.gif" style="cursor:hand"/>
+			</td>
+		</tr>
+		<tr>
+			<td height="100%" id="treebox">
+			</td>
+		</tr>
+		</table>
+	</div>
+	<div id="center">
+	  <iframe  id="businessConfigArea" src="businessConfigDetail.xhtml?areaId=0001&amp;businessTypeId=-1" height="100%" width="100%" frameborder="NO" style="border-style:none;"></iframe>
+	</div>
+	
+	
+	
+</body>
+  	</f:view>
+</html>

@@ -1,0 +1,45 @@
+a.{TEXT-DECORATION:none;color:#660000;}
+a:hover{TEXT-DECORATION:underline;color:FF0000;}
+.agetime_bar{
+  position:absolute;top:0px;left:0px;height:22px;width:100%;border:1px outset;background-color:#F4EDFE;z-index:98;
+ }
+ .agetime_barItem{
+  width:60px;height:20px;border:0px solid RGB(212,208,200);text-align:left;padding-left:10px;
+  background:#F4EDFE;color:#000000;font-size:9pt;
+ }
+ .agetime_barItemDown{
+  width:60px;height:20px;border:1px inset RGB(212,208,200);text-align:left;padding-left:10px;
+  background:#F0F0F0;color:#000000;font-size:9pt;
+ }
+ .agetime_barItemHover{
+  width:60px;height:20px;border:1 outset;text-align:left;padding-left:10px;
+  background:#F0F0F0;color:#000000;font-size:9pt;
+ }
+ .agetime_pad{
+  cursor:default;font-size:9pt;width:100%;
+ }
+ 
+ .agetime_padItem{
+  width:100%;height:18px;border:0px solid RGB(212,208,200);text-align:left;padding-left:10px;
+  background:#F4EDFE;color:#000000;font-size:9pt;
+ }
+ .agetime_padItemFalse{
+  padding-left:10px;font-size:9pt; color:#808080;
+ }
+ .agetime_padItemFalseHover{
+  padding-left:10px;font-size:9pt; color:#808080;background-color:#F1FFF0;
+ }
+ .agetime_padItemHover{
+  width:100%;height:18px;text-align:left;padding-left:10px;
+  background-color:#F1FFF0;color:#3300FF;font-size:9pt;
+ }
+ .agetime_padItemDown{
+  width:100%;height:18px;text-align:left;padding-left:10px;border:1px inset;
+  background-color:#9999CC;color:#FFFFFF;font-size:9pt;
+ }
+ .agetime_hr{
+  border:1px inset;
+ }
+ .agetime_board{
+  background-color:#F4EDFE;border:1px solid;
+ }

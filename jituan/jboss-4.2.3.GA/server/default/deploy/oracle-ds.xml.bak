@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ===================================================================== -->
+<!--                                                                       -->
+<!--  JBoss Server Configuration                                           -->
+<!--                                                                       -->
+<!-- ===================================================================== -->
+
+<!-- $Id: oracle-ds.xml,v 1.6 2004/09/15 14:37:40 loubyansky Exp $ -->
+<!-- ==================================================================== -->
+<!--  Datasource config for Oracle originally from Steven Coy             -->
+<!-- ==================================================================== -->
+
+
+<datasources>
+  <local-tx-datasource>
+    <jndi-name>RegalBdpDB</jndi-name>
+ 	<connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>baf</user-name>
+      <password>password</password>
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+
+<local-tx-datasource>
+    <jndi-name>metadataDB</jndi-name>
+	 <isSameRM-override-value>false</isSameRM-override-value>
+	<use-java-context>false</use-java-context>
+ 	<connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>baf</user-name>
+      <password>password</password>
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle10g</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+
+<local-tx-datasource>
+    <jndi-name>collectionDs</jndi-name>
+	 <isSameRM-override-value>false</isSameRM-override-value>
+	<use-java-context>false</use-java-context>
+ 	<connection-url>jdbc:oracle:thin:@10.128.90.123:4546:sqmtest1</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>unrsas</user-name>
+      <password>ccssqm</password>
+	<prefill>true</prefill>
+    <min-pool-size>1</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle10g</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+<local-tx-datasource>
+    <jndi-name>agentDB</jndi-name>
+	 <isSameRM-override-value>false</isSameRM-override-value>
+	<use-java-context>false</use-java-context>
+ 	<connection-url>jdbc:oracle:thin:@10.128.90.123:4546:sqmtest1</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>unrsas</user-name>
+      <password>ccssqm</password>
+	<prefill>true</prefill>
+    <min-pool-size>1</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle10g</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+
+<local-tx-datasource>
+    <jndi-name>integrateDB</jndi-name>
+	 <isSameRM-override-value>false</isSameRM-override-value>
+	<use-java-context>false</use-java-context>
+ 	<connection-url>jdbc:oracle:thin:@10.128.90.123:4546:sqmtest1</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>unrsas</user-name>
+      <password>ccssqm</password>
+	<prefill>true</prefill>
+    <min-pool-size>1</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle10g</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+
+  <local-tx-datasource>
+    <jndi-name>collectionDB</jndi-name>
+	 <isSameRM-override-value>false</isSameRM-override-value>
+	<use-java-context>false</use-java-context>
+ 	<connection-url>jdbc:oracle:thin:@10.128.90.123:4546:sqmtest1</connection-url>
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+      <user-name>unrsas</user-name>
+      <password>ccssqm</password>
+	<prefill>true</prefill>
+    <min-pool-size>1</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle10g</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+  <local-tx-datasource>
+    <jndi-name>oa</jndi-name>
+	<connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>   
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+	 <user-name>baf</user-name>
+      <password>password</password>
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+
+  <local-tx-datasource>
+    <jndi-name>tml</jndi-name>
+	<connection-url>jdbc:oracle:thin:@199.3.11.28:1521/baf</connection-url>   
+    <driver-class>oracle.jdbc.driver.OracleDriver</driver-class>
+  <user-name>baf</user-name>
+      <password>password</password>
+	<prefill>true</prefill>
+    <min-pool-size>2</min-pool-size>
+    <max-pool-size>5</max-pool-size>
+    <max-idle-timeout>0</max-idle-timeout>
+    <track-statements>false</track-statements>
+    <prepared-statement-cache-size>50</prepared-statement-cache-size> 
+    <blocking-timeout-millis>30000</blocking-timeout-millis>
+    <idle-timeout-minutes>10</idle-timeout-minutes>
+    <track-statements>false</track-statements>
+    <exception-sorter-class-name>org.jboss.resource.adapter.jdbc.vendor.OracleExceptionSorter</exception-sorter-class-name>
+      <metadata>
+         <type-mapping>Oracle9i</type-mapping>
+      </metadata>
+  </local-tx-datasource>
+ 
+  
+  
+</datasources>

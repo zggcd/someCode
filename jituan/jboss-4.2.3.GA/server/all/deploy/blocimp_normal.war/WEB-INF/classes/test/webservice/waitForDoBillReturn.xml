@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="GB2312"?>
+<commonInfo>
+	<sender>sh_wx</sender>
+	<systemPwd>123456</systemPwd>
+	<receiver>gp_noc</receiver>
+	<service_name>sa_nf_wrd_wd</service_name>
+	<invokeTime>20091210101035</invokeTime>
+	<msg_type>request</msg_type>
+	<msg_id>282</msg_id>
+	<sheetNo></sheetNo>
+	<workItemID></workItemID>
+	<startTime></startTime>
+	<isTest>yes</isTest>
+	<otherInfo>
+		<operID>answer_sheet</operID>
+		<workSheetNo>2009121000004</workSheetNo>
+		<FULL_FAULT_NO>09-00359805</FULL_FAULT_NO>
+		<WSType>交换专业故障</WSType>
+		<workSheet>
+			<BUSIRECOVERTIME>20091210050000</BUSIRECOVERTIME>
+			<RECOVERTIME>20091210090000</RECOVERTIME>
+			<TROUBLEREASONSUM>war12d</TROUBLEREASONSUM>
+			<FIRSTRESPER>省/本地网原因</FIRSTRESPER>
+			<LOCALNETWORK>jshd</LOCALNETWORK>
+			<TROUBLETYPE>数据配置类</TROUBLETYPE>
+			<CL_DEVNAME>rfe</CL_DEVNAME>
+			<CL_DATATYPE>局数据</CL_DATATYPE>
+			<FULL_FAULT_NO>09-00359805</FULL_FAULT_NO>
+			<DEALER>test</DEALER>
+			<DEALTIME>20091210101034</DEALTIME>
+			<IFMYZONE>是</IFMYZONE>
+		</workSheet>
+	</otherInfo>
+</commonInfo>

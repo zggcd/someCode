@@ -1,0 +1,215 @@
+*{
+	margin : 0;
+	padding: 0;
+}
+body{
+	overflow : hidden; 
+  	background-color : #404a59;
+  	font-family:Microsoft YaHei;
+}
+#info{
+	position: absolute;
+	z-index: 1;
+	min-width: 420px;
+	padding: 15px;
+  	background:rgba(255, 255, 255, 0) none repeat scroll 0 0 !important;
+  	filter:Alpha(opacity=0);
+  	background:#fff;
+}
+
+.tittxt{
+	margin-bottom: 20px;
+    font-size: 13px;
+	color: #fff;
+}
+
+#nowTime{	
+	position: absolute;
+	top: 29px;
+    left: 260px;
+	margin-bottom: 20px;
+    font-size: 13px;
+	color: #fff;
+}
+
+.img{
+    position: relative;
+	top: 8px;
+	margin: 0 20px;
+}
+
+#itemli{
+	position: absolute;
+	top: 60px;
+	left: 15px;
+  	background:rgba(255, 255, 255, 0) none repeat scroll 0 0 !important;
+  	filter:Alpha(opacity=0);
+	z-index: 1;
+}
+
+.item{
+	display: inline-block;
+	margin-bottom: 3px;
+	padding-right: 30px;
+	height: 35px;
+	border: 1px solid #7894ad;
+	border-radius: 8px;
+	background:rgba(93, 112, 127, 0.6) none repeat scroll 0 0 !important;
+	filter:Alpha(opacity=0.6);
+	clear: both;
+}
+
+.item img{
+	float: left;
+	margin: 7px 0 9px 9px;
+}
+
+.tit{
+	float: left;
+    margin-left: 10px;
+	height: 35px;
+	color: #00CDFF;
+    font-size: 18px;
+    line-height: 35px;
+}
+
+.num{
+	float: left;
+    margin-left: 10px;
+	color: #fff;
+	height: 35px;
+    font-size: 18px;
+    line-height: 35px;
+}
+
+#main{
+	float: left;
+	width: 71%;
+	height: 800px;
+}
+
+#right{
+	float: right;
+	width: 29%;
+	height: 800px;
+	background-color: #404a59;
+}
+
+#table{
+	position: absolute;
+	right: 0;
+	z-index: 1;
+    margin-top: 50px;
+    margin-right: 10px;
+	min-width: 500px;
+	height: 430px;
+  	border: 1px solid #556877;
+	font-size: 16px;
+	color: #ffffff;
+	overflow: hidden;
+}
+
+.table_header_th p{
+	text-align: center;
+	line-height: 28px;
+}
+
+.table_header_th{
+	width: 100%;
+	height: 30px;
+}
+
+.ease{
+	width: 100%;
+    overflow: hidden;
+}
+
+#ease_data{
+	transition: all .10s ease;
+    position: relative;
+    top: 0px;
+}
+@keyframes fade-in {
+    0% {opacity: 0;}/*初始状态 透明度为0*/
+    20% {opacity: 0;}
+    40% {opacity: 0.8;}/*过渡状态 透明度为0*/
+    60% {opacity: 1;}
+    80% {opacity: 1;}
+    100% {opacity: 1;}/*结束状态 透明度为1*/
+}
+@-webkit-keyframes fade-in {/*针对webkit内核*/
+    0% {opacity: 0;}/*初始状态 透明度为0*/
+    20% {opacity: 0;}
+    40% {opacity: 0.8;}/*过渡状态 透明度为0*/
+    60% {opacity: 1;}
+    80% {opacity: 1;}
+    100% {opacity: 1;}/*结束状态 透明度为1*/
+}
+.showIn {
+    animation: fade-in;/*动画名称*/
+    animation-duration: 15s;/*动画持续时间*/
+    -webkit-animation:fade-in 15s infinite;/*针对webkit内核*/
+}
+
+.table_body{
+	width: 100%;
+	height: 30px;
+	clear: both;
+}
+
+.text_th{
+	float: left;
+	background-color: #333840;
+	min-width: 110px;
+	height: 30px;
+	border-top: solid #737373 1px;
+	border-left: solid #737373 1px;
+	border-right: solid #737373 1px;
+}
+
+.text_th_last{
+	float: left;
+	background-color: #333840;
+	min-width: 170px;
+	height: 30px;
+	border-top: solid #737373 1px;
+	border-left: solid #737373 1px;
+	border-right: solid #737373 1px;
+}
+
+.text_body{
+	float: left;
+	margin: 5px 0 5px 2px;
+	min-width: 110px;
+	height: 30px;
+	white-space: nowrap;
+}
+
+.text_body p{
+	text-align: center;
+	line-height: 28px;
+}
+
+.text_body_last{
+	float: left;
+	margin: 5px 0 5px 2px;
+	min-width: 170px;
+	height: 30px;
+	white-space: nowrap;
+}
+
+.text_body_last p{
+	text-align: center;
+	line-height: 28px;
+}
+
+.sum_div{
+	float: right;
+    margin-top: -16px;
+    margin-right: 8px;
+    max-width: 200px;
+    min-width: 1px;
+    height: 13px;
+    background-color: rgba(54, 169, 206, 1);
+    overflow: hidden;
+}

@@ -1,0 +1,1087 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config version="1.2" xmlns="http://java.sun.com/xml/ns/javaee"
+ xmlns:xi="http://www.w3.org/2001/XInclude"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd">
+ <converter>
+  <converter-id>agconverter</converter-id>
+  <converter-class>com.regaltec.baf.org.organization.ui.control.AuthorizationItemConverter</converter-class>
+ </converter>
+
+ <converter>
+  <converter-id>orderConverter</converter-id>
+  <converter-class>com.regaltec.baf.module.ui.control.OrderItemConverter</converter-class>
+ </converter>
+ 
+ <!-- 基础数据处理bean -->
+ <managed-bean>
+  <managed-bean-name>dataProcessBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dataprocess.ui.control.DataProcessBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <!-- 操作日志查询bean -->
+ <managed-bean>
+  <managed-bean-name>logBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.log.ui.control.LogBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 流水项配置bean -->
+ <managed-bean>
+  <managed-bean-name>sequenceRuleBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.sequence.ui.control.SequenceRuleBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+<!-- 自定义组件测试Bean -->
+<managed-bean>
+ <managed-bean-name>componentTest</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.test.component.ComponentTest</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+ </managed-property>  
+</managed-bean>
+ 
+ <!-- 通用树bean -->
+ <managed-bean>
+  <managed-bean-name>currencyTreeBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.tree.ui.control.CurrencyTreeBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <!-- 数据导入Bean -->
+ <managed-bean>
+  <managed-bean-name>loginFrameBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.user.ui.control.LoginFrameBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>  
+ </managed-bean>
+ 
+ <!-- 数据导入Bean -->
+ <managed-bean>
+  <managed-bean-name>importBean</managed-bean-name>
+  <managed-bean-class> com.regaltec.baf.init.imp.ui.control.DataImportBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>  
+ </managed-bean>	
+ 
+ 
+ 
+ <!-- 数据导出Bean -->
+ <managed-bean>
+  <managed-bean-name>exportBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.init.exp.ui.control.exportBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>  
+ </managed-bean>	
+  
+  <!-- 数据字典脚本导出 -->
+  <managed-bean>
+  <managed-bean-name>dictionaryExpBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.export.ui.control.DictionaryExpBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>  
+ </managed-bean>
+ <!-- 用户登录Bean -->
+ <managed-bean>
+  <managed-bean-name>userLoginBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.user.ui.control.UserLoginBean</managed-bean-class>
+  <managed-bean-scope>session</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>	
+ 
+ <managed-bean>
+ <managed-bean-name>skinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.profile.theme.ui.control.SkinBean</managed-bean-class>
+  <managed-bean-scope>session</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <managed-bean>
+  <managed-bean-name>specialtyBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.specialty.ui.control.SpecialtyBean</managed-bean-class> 
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+  
+ <managed-bean>
+  <managed-bean-name>businessBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.business.ui.control.BusinessBean</managed-bean-class> 
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean> 
+ 
+<!-- 组织视图Bean -->
+ <managed-bean>
+  <managed-bean-name>orgviewBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.orgview.ui.control.OrgViewBean</managed-bean-class> 
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean> 
+ 
+ <!-- 桌面定制Bean -->
+ <managed-bean>
+  <managed-bean-name>desktopCustomizeBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.profile.desktop.ui.control.DesktopCostomizeBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 字典Bean -->
+ <managed-bean>
+  <managed-bean-name>dictionaryBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.dictionary.ui.control.DictionaryBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>dictionaryBean2</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.dictionary.ui.control.DictionaryBean2</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+   <managed-property>
+   <property-name>dictItemBean2</property-name>
+   <value>#{dictItemBean2}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 字典条目Bean -->
+ <managed-bean>
+  <managed-bean-name>dictItemBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.dictionary.ui.control.DictionaryItemBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>dictItemBean2</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.dictionary.ui.control.DictionaryItemBean2</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 字典类别Bean -->
+ <managed-bean>
+  <managed-bean-name>dictCategoryBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.category.ui.control.DictCategoryBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>dictCategoryBean2</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.dict.category.ui.control.DictCategoryBean2</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 权限因子Bean -->
+ <managed-bean>
+  <managed-bean-name>dataRightFactorBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.rig.factor.ui.control.DataRightFactorBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 权限因子类别Bean -->
+ <managed-bean>
+  <managed-bean-name>dataRightFactorTypeBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.rig.factor.ui.control.DataRightFactorTypeBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ <managed-bean>
+  <managed-bean-name>operRigGroupBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.rig.group.ui.control.OperRigGroupBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 模板Bean -->
+ <managed-bean>
+  <managed-bean-name>templateBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.template.ui.control.TemplateManageBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <managed-bean>
+  <managed-bean-name>perBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.template.ui.control.TemplatePermissionBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+	<property-name>constructor</property-name>
+	<value>true</value>   
+  </managed-property>
+  </managed-bean>
+ 
+ <managed-bean>
+  <managed-bean-name>shortCutBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.profile.shortcut.ui.control.ShortCutBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ <managed-bean>
+ 
+ <managed-bean-name>moduleBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.module.ui.control.ModuleBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <managed-bean>
+  <managed-bean-name>elementBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.module.ui.control.ElementBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <!-- 这是一个纯JSF可管理bean,它持有一个到Spring可管理bean的一个引用. -->
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 组织Bean -->
+ <managed-bean>
+  <managed-bean-name>organizationBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.organization.ui.control.OrganizationBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <!-- 是否初始化数据 -->
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+  <!-- 群组Bean -->
+ <managed-bean>
+  <managed-bean-name>groupBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.group.ui.control.GroupBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <!-- 是否初始化数据 -->
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+
+ 
+ <!-- 岗位Bean -->
+ <managed-bean>
+  <managed-bean-name>postBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.post.ui.control.PostBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <!-- 是否初始化数据 -->
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 人员Bean -->
+ <managed-bean>
+  <managed-bean-name>userBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.user.ui.control.UserBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <!-- 是否初始化数据 -->
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+<!-- 节假日bean -->
+ <managed-bean>
+  <managed-bean-name>holidayBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.calendar.holiday.ui.control.HolidayBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ <!-- 调班调休bean -->
+ <managed-bean>
+	<managed-bean-name>ajustBean</managed-bean-name>
+	<managed-bean-class>com.regaltec.baf.calendar.holidayadj.ui.control.CalenderAjustBean</managed-bean-class>
+	<managed-bean-scope>request</managed-bean-scope>
+	<managed-property>
+	   <property-name>business</property-name>
+	   <value>#{baf_businessDelegate}</value>
+	</managed-property>
+</managed-bean>
+<!-- 工作时间bean -->
+ <managed-bean>
+  <managed-bean-name>workTimeBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.calendar.worktime.ui.control.WorkTimeBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ <!-- 局向bean -->
+<managed-bean>
+	<managed-bean-name>burBean</managed-bean-name>
+	<managed-bean-class>com.regaltec.baf.bureau.ui.control.BureauBean</managed-bean-class>
+	<managed-bean-scope>request</managed-bean-scope>
+	<managed-property>
+	   <property-name>business</property-name>
+	   <value>#{baf_businessDelegate}</value>
+	</managed-property>
+	<managed-property>
+   		<property-name>constructor</property-name>
+   		<value>true</value>   
+    </managed-property>
+</managed-bean>
+<!-- 桌面模板 --> 
+<managed-bean>
+	<managed-bean-name>layoutBean</managed-bean-name>
+	<managed-bean-class>com.regaltec.baf.profile.desktop.ui.control.LayoutTemplateBean</managed-bean-class>
+	<managed-bean-scope>request</managed-bean-scope>
+	<managed-property>
+	   <property-name>business</property-name>
+	   <value>#{baf_businessDelegate}</value>
+	</managed-property>
+</managed-bean>
+
+<!-- 桌面管理 --> 
+ <managed-bean>
+	<managed-bean-name>desktopManageBean</managed-bean-name>
+	<managed-bean-class>com.regaltec.baf.profile.desktop.ui.control.DesktopManageBean</managed-bean-class>
+	<managed-bean-scope>request</managed-bean-scope>
+	<managed-property>
+	   <property-name>business</property-name>
+	   <value>#{baf_businessDelegate}</value>
+	</managed-property>
+ </managed-bean>
+
+<!-- 桌面视图bean -->
+ <managed-bean>
+  <managed-bean-name>desktopViewBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.profile.desktop.ui.control.DesktopViewBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <!-- 任务调度bean -->
+  <managed-bean>
+  <managed-bean-name>taskBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.taskmanage.ui.TaskManagerBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+ </managed-bean> 
+ <!-- 任务调度开关bean -->
+  <managed-bean>
+  <managed-bean-name>machineBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.taskmanage.ui.TaskMachineBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+    <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+ </managed-bean>
+  
+ <lifecycle>  
+  <phase-listener>com.regaltec.common.jsf.phaseListener.JsfPhaseListener</phase-listener>  
+ </lifecycle>
+ 
+  <managed-bean>
+  <managed-bean-name>bulletinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.bulletin.ui.control.BulletinBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+  </managed-bean> 
+  
+  <managed-bean>
+  <managed-bean-name>viewBulletinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.bulletin.ui.control.ViewBulletinBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+  </managed-bean> 
+  
+  <managed-bean>
+  <managed-bean-name>editBulletinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.bulletin.ui.control.EditBulletinBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+   <managed-property>
+   <property-name>bulletinId</property-name>
+   <value>#{param.bulletinId}</value>
+	</managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+ 
+  </managed-bean> 
+  
+      <managed-bean>
+	  <managed-bean-name>pinyinBean</managed-bean-name>
+	  <managed-bean-class>com.regaltec.baf.pinyin.ui.control.PinyinBean</managed-bean-class>
+	  <managed-bean-scope>request</managed-bean-scope>
+	  <managed-property>
+	  <property-name>business</property-name>
+	  <value>#{baf_businessDelegate}</value>
+	  </managed-property>
+	  <managed-property>
+	  <property-name>constructor</property-name>
+	  <value>true</value>
+	  </managed-property>
+	  </managed-bean> 
+  
+ <managed-bean>
+  <managed-bean-name>manageBulletinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.bulletin.ui.control.ManageBulletinBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+  </managed-bean> 
+  
+  <managed-bean>
+  <managed-bean-name>messageBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.message.ui.control.MessageBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>true</value>
+  </managed-property>
+  </managed-bean> 
+  
+  <managed-bean>
+  <managed-bean-name>importPinyinBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.pinyin.ui.control.ImportPinyinBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+  <property-name>business</property-name>
+  <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <managed-property>
+  <property-name>constructor</property-name>
+  <value>false</value>
+  </managed-property>
+  </managed-bean> 
+  
+<managed-bean>
+<managed-bean-name>scrollMessageBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.message.ui.control.ScrollMessageBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>messageTypegBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.message.ui.control.MessageTypegBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>false</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>testSequenceBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.sequence.ui.control.TestSequenceBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>false</value>
+ </managed-property>
+ </managed-bean>
+ 
+ <managed-bean>
+<managed-bean-name>holidayStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.holidayStrategy.ui.control.HolidayStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>holidayId</property-name>
+	<value>#{param.holidayId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+<managed-bean-name>addHolidayStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.holidayStrategy.ui.control.AddHolidayStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>holidayId</property-name>
+	<value>#{param.holidayId}</value>
+</managed-property>
+<managed-property>
+	<property-name>holidayName</property-name>
+	<value>#{param.holidayName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>dateStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.dateStrategy.ui.control.DateStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validDateId</property-name>
+	<value>#{param.validDateId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+<managed-bean-name>addDateStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.dateStrategy.ui.control.AddDateStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validDateId</property-name>
+	<value>#{param.validDateId}</value>
+</managed-property>
+<managed-property>
+	<property-name>validDateName</property-name>
+	<value>#{param.validDateName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+<managed-bean-name>timeStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.timeStrategy.ui.control.TimeStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validTimeId</property-name>
+	<value>#{param.validTimeId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+<managed-bean-name>addTimeStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.timeStrategy.ui.control.AddTimeStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validTimeId</property-name>
+	<value>#{param.validTimeId}</value>
+</managed-property>
+<managed-property>
+	<property-name>validTimeName</property-name>
+	<value>#{param.validTimeName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>valueStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.valueStrategy.ui.control.ValueStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validValueId</property-name>
+	<value>#{param.validValueId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+<managed-bean-name>addValueStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.valueStrategy.ui.control.AddValueStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>validValueId</property-name>
+	<value>#{param.validValueId}</value>
+</managed-property>
+<managed-property>
+	<property-name>validValueName</property-name>
+	<value>#{param.validValueName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+   <managed-bean>
+<managed-bean-name>telephoneFilterStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.telephoneFilterStrategy.ui.control.TelephoneFilterStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>telephoneFilterId</property-name>
+	<value>#{param.telephoneFilterId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>addTelephoneFilterStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.telephoneFilterStrategy.ui.control.AddTelephoneFilterStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>telephoneFilterId</property-name>
+	<value>#{param.telephoneFilterId}</value>
+</managed-property>
+<managed-property>
+	<property-name>telephoneFilterName</property-name>
+	<value>#{param.telephoneFilterName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>noDisturbStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.noDisturbStrategy.ui.control.NoDisturbStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>noDisturbId</property-name>
+	<value>#{param.noDisturbId}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+<managed-bean-name>addNoDisturbStrategyBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.noDisturbStrategy.ui.control.AddNoDisturbStrategyBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>noDisturbId</property-name>
+	<value>#{param.noDisturbId}</value>
+</managed-property>
+<managed-property>
+	<property-name>noDisturbName</property-name>
+	<value>#{param.noDisturbName}</value>
+</managed-property>
+<managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ <managed-bean>
+ <managed-bean-name>businessConfigBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.dialoutStrategy.businessConfig.ui.control.BusinessConfigBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+	<property-name>areaId</property-name>
+	<value>#{param.areaId}</value>
+</managed-property>
+<managed-property>
+	<property-name>businessTypeId</property-name>
+	<value>#{param.businessTypeId}</value>
+</managed-property>
+
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <managed-bean>
+ <managed-bean-name>syncOaBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.other.data.ui.control.SyncOaBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ 
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+   <managed-bean>
+ <managed-bean-name>syncUserBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.syn.ui.control.SyncUserBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ 
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+ 
+ <managed-bean>
+<managed-bean-name>testMessageBean</managed-bean-name>
+ <managed-bean-class>com.regaltec.baf.message.ui.control.TestMessageBean</managed-bean-class>
+ <managed-bean-scope>request</managed-bean-scope>
+ <managed-property>
+ <property-name>business</property-name>
+ <value>#{baf_businessDelegate}</value>
+ </managed-property>
+ <managed-property>
+ <property-name>constructor</property-name>
+ <value>true</value>
+ </managed-property>
+ </managed-bean> 
+ 
+  <!-- 重置密码Bean -->
+ <managed-bean>
+  <managed-bean-name>initPasswordBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.org.user.ui.control.InitPasswordBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+    </managed-property>
+    <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean> 
+ 
+  <!-- 弹性组织Bean -->
+ <managed-bean>
+  <managed-bean-name>orgBusBean</managed-bean-name>
+  <managed-bean-class>com.regaltec.baf.orgbus.ui.control.OrgBusBean</managed-bean-class>
+  <managed-bean-scope>request</managed-bean-scope>
+  <managed-property>
+   <property-name>business</property-name>
+   <value>#{baf_businessDelegate}</value>
+  </managed-property>
+  <!-- 是否初始化数据 -->
+  <managed-property>
+   <property-name>constructor</property-name>
+   <value>true</value>
+  </managed-property>
+ </managed-bean>
+ 
+ <application>
+  <locale-config>
+   <default-locale>zh_CN</default-locale>
+   <supported-locale>en_US</supported-locale>
+  </locale-config>
+  <variable-resolver>org.springframework.web.jsf.DelegatingVariableResolver</variable-resolver>
+ </application>
+ <navigation-rule>
+      <from-view-id>/baf/jsp/uiframe/login.xhtml</from-view-id>  
+      <navigation-case>  
+          <from-outcome>loginSuccess</from-outcome>  
+          <to-view-id>/baf/jsp/uiframe/frame.xhtml</to-view-id>  
+          <redirect />  
+      </navigation-case>  
+      <navigation-case>  
+          <from-outcome>loginFail</from-outcome>  
+          <to-view-id>/baf/jsp/uiframe/login.xhtml</to-view-id>  
+          <redirect />
+      </navigation-case>  
+      
+</navigation-rule>
+</faces-config>

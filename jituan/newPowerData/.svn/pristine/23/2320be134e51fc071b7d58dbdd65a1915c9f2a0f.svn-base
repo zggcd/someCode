@@ -1,0 +1,793 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<f:view  contentType="text/html">
+	<head>
+		<script>
+		//<![CDATA[
+			var treeId = null;
+			var cur_treeList_tdobj = null;
+		  	//显示右键菜单
+		  	function openCurTreeContextMenu(e){
+		  	 	var objmenu = Ext.menu.MenuMgr.get("curtreemenu");
+		  		if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+				    if( window.event.srcElement.tagName != "TD"){
+				       	cur_treeList_tdobj = window.event.srcElement.parentNode;
+				    }else{
+				    	cur_treeList_tdobj = window.event.srcElement;
+				    }
+				     var e = new Array(window.event.clientX,window.event.clientY);
+					 objmenu.showAt(e);
+				}else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0 ){  //Firefox浏览器下
+					if( e.target.tagName != "TD"){
+				       	cur_treeList_tdobj = e.target.parentNode;
+				    }else{
+				    	cur_treeList_tdobj = e.target;
+				    }
+				     var e = new Array(e.clientX,e.clientY);
+					 objmenu.showAt(e);
+				}
+		  	}
+		  	 
+			//新增
+		  	function addCurTree(){
+		  		//页面初始化
+				initCurTree();
+				//设置焦点
+				//setFocus("currTreeForm:treeName");
+		  	}
+	  	
+		  	//删除
+		  	function delCurTree(){
+		  		if(cur_treeList_tdobj != null ){
+				      var trobj = cur_treeList_tdobj.parentNode 
+				      var  innerText0 = "", innerText1 = "";
+				      if( navigator.userAgent.indexOf("MSIE") > 0 ){  //IE浏览器下
+				      		innerText0 = trobj.cells[0].innerText;
+				      		//innerText1 = trobj.cells[1].innerText;
+					  }else if( navigator.userAgent.indexOf("Firefox") > 0 || navigator.userAgent.indexOf("Chrome") > 0){  //Firefox浏览器下
+					  		innerText0 = trobj.cells[0].textContent;
+				      		//innerText1 = trobj.cells[1].textContent;
+					  }
+				      if(treeId != null  ){
+					      if(window.confirm("${msgs['baf.currencytree.isDelTree']}:'"+innerText0.trim()+"'?")){
+					      	  curDelete(treeId);
+					      }
+				      }
+				 }  
+		  	}
+		  	
+		  	//编辑
+		  	function updateCurTree(){
+		  		curUpdate(treeId);
+		  	}
+		  	
+		  	//单击列表行，编辑
+		  	function onDblClickCurEdit(treeId){
+		  		curUpdate(treeId);
+		  	}
+		  	
+		  	//新增预览数据非空验证
+			function argPass(){
+				var nodeId = document.getElementById("currTreeForm:nodeId").value;
+				var nodeName = document.getElementById("currTreeForm:nodeName").value;
+				var parentId = document.getElementById("currTreeForm:parentId").value;
+				var queryScript = document.getElementById("currTreeForm:queryScript").value;
+			    if(queryScript=="" || parentId=="" || nodeName=="" || nodeId==""){
+			   	   alert("${msgs['baf.currencytree.baseAttributesExist']}");
+			   	   return false;
+			    }else{
+		  			return true;
+				}
+			}
+			
+			//新增预览oncomplete事件
+			function onAddPreviewComplete(data){
+				 if(data == "P"){
+			       		document.getElementById('paramPreviewForm:typePreviewParam').value = "";
+						Richfaces.showModalPanel('paramPreviewPanel');
+						//设置焦点
+						setFocus("paramPreviewForm:typePreviewParam");
+			       }else if (data == "N") {
+					  //SQL出错，请确认语句正确性！
+					  	alert("${msgs['baf.currencytree.SQLCheck']}");
+				   }else{
+				   		if(document.getElementById('conform:ttt').value=="true"){
+							moduleTree_tree.setXMLAutoLoading('${request.contextPath}'+'/baf/jsp/tree/publicTreeXMLData.jsp?showFullPath=0&isPreview=Y');
+					   		moduleTree_tree.refreshItem('0');
+				   		}
+						Richfaces.showModalPanel('previewPanel');
+						if(document.getElementById('conform:ttt').value=='false'){
+		  					refresh();
+		  				}
+					}
+			}
+			
+			//新增预览动态参数传递完成
+			function onShowPreview(data){
+			  if (data == "N") {
+				  //SQL出错，请确认语句正确性！
+				  	alert("${msgs['baf.currencytree.SQLCheck']}");
+			   }else{
+			   		showPrePanel();
+				}
+			}
+			
+			function show(){
+				document.getElementById('paramPreviewForm:itemsPreCancel').onclick();
+		   		if(document.getElementById('conform:ttt').value=='false'){
+	  				refresh();
+	  			}
+	  			if(document.getElementById('conform:ttt').value=="true"){
+					moduleTree_tree.setXMLAutoLoading('${request.contextPath}'+'/baf/jsp/tree/publicTreeXMLData.jsp?showFullPath=0&isPreview=Y');
+					moduleTree_tree.refreshItem("0");
+				}
+				Richfaces.showModalPanel('previewPanel');
+			}
+			
+		  	//右键菜单预览
+		  	function selectCurTree(){
+		  		curShow(treeId);
+		  	}
+		  	
+		  	//右键菜单预览完成事件
+		  	function onRightPreviewComplete(data){
+		  		if(data == "P"){
+			       		document.getElementById('paramPreviewRightForm:typePreviewParamRight').value = "";
+						Richfaces.showModalPanel('paramPreviewRightPanel');
+						//设置焦点
+						setFocus("paramPreviewRightForm:typePreviewParamRight");
+			       }else if (data == "N") {
+					  //SQL出错，请确认语句正确性！
+					  	alert("${msgs['baf.currencytree.SQLCheck']}");
+				   }else{
+		  			var talias = document.getElementById("currTreeForm:alias").value;
+		  			if(document.getElementById('conform:ttt').value=="true"){
+		  			alert(talias);
+		  				moduleTree_tree.setXMLAutoLoading('${request.contextPath}'+'/baf/jsp/tree/publicTreeXMLData.jsp?dataSource='+talias+'&showFullPath=0&isPreview=N');
+				  		moduleTree_tree.refreshItem("0");
+			  		}
+					Richfaces.showModalPanel('previewPanel');
+			  		if(document.getElementById('conform:ttt').value=='false'){
+			  			refresh();
+			  		}
+			  	}
+		  	}
+		  	
+		  	//右键预览动态参数传递完成
+			function onShowRKeyPreview(data){
+			  //获得参数输入框中的数据
+			  var typePAR = document.getElementById('paramPreviewRightForm:typePreviewParamRight').value;
+			  if (data == "N") {
+				  //SQL出错，请确认语句正确性！
+				  	alert("${msgs['baf.currencytree.SQLCheck']}");
+			   }else{
+		   		if(document.getElementById('conform:ttt').value=='false'){
+	  				refresh();
+		  		}
+		  		var talias = document.getElementById("currTreeForm:alias").value;
+	  			document.getElementById('paramPreviewRightForm:itemsPreRightCancel').onclick();
+	  			if(document.getElementById('conform:ttt').value=="true"){
+	  				moduleTree_tree.setXMLAutoLoading('${request.contextPath}'+'/baf/jsp/tree/publicTreeXMLData.jsp?dataSource='+talias+'&showFullPath=0&isPreview=N&param='+typePAR+'');
+			  		moduleTree_tree.refreshItem("0");
+		  		}
+				Richfaces.showModalPanel('previewPanel');
+				}
+			}
+			
+		  	//保存完成触发事件
+			function onSaveCurrency(data){			
+				var tralias = document.getElementById("currTreeForm:treeAlias").value;
+				if(tralias == ""){
+					alert("${msgs['baf.currencytree.confirm']}");
+					return false;
+				}
+				if(data=="R"){
+		   			alert("${msgs['baf.currencytree.treeCodeExist']}");
+		   			return false;
+		   		}
+		   		if(data=="S"){
+		   			alert("${msgs['baf.currencytree.selsectValue']}");
+		   			return false;
+		   		}
+		   		if(data=="N"){
+		   			alert("${msgs['baf.desktop.saveSuccess']}");
+		   			return false;
+		   		}
+		   		if(data=="D"){
+		   			alert("${msgs['baf.currencytree.SQLCheck']}");
+		   			return false;
+		   		}
+		   		if(a4jcomplete()==false){
+		 			return;
+		 		}   		
+		   } 
+		   
+		   //删除完成
+			function onDelCurrencyTree(data) {
+				if(a4jcomplete()==false){
+				 	return;
+			 	}
+				if (data == "N") {
+					//处理失败
+					alert("${msgs['baf.org.WarningHandleFailure']}");
+					return false;
+			    }
+			} 
+		   
+		  	//检查通用树的SQL配置是否有效
+		    function checkSqlCurTree(data) {
+		       if(data == "P"){
+		       		document.getElementById('paramForm:typeParam').value = "";
+					Richfaces.showModalPanel('paramPanel');
+		       }else if (data == "N") {
+				  //SQL出错，请确认语句正确性！
+				  	alert("${msgs['baf.currencytree.SQLCheck']}");
+			   }else{
+					attributeLoad();
+				}
+			}
+			
+			//SQL字段名提取
+			function attributeLoad(){
+				var strSQL = document.getElementById("currTreeForm:queryScript").value;
+				sqlPar(strSQL);
+			}
+			
+			//判断基本属性是否为空
+			function validateTreeName(returnvalue){
+				var nid = document.getElementById("currTreeForm:nodeId").value;	
+				var nname = document.getElementById("currTreeForm:nodeName").value;	
+				var pid = document.getElementById("currTreeForm:parentId").value;	
+			    var treepath = document.getElementById("currTreeForm:tpath").value;
+			    if(nid=="" && nname==""&& pid==""&& treepath=="" ){
+			   	    RichFaces.switchTab('currTreeForm:subtabPanel','currTreeForm:subtabPanel','subtabPanel');	 
+			   	    returnvalue = false;
+			    }
+			    return returnvalue;
+			}
+			
+			//切换tab页时对基本属性进行验证
+			function tabValidate(){
+				var isSuccess = true;
+				if(event.srcElement.id !='currTreeForm:subtabPanel_lbl'){
+					isSuccess = validateForm(currTreeForm);
+				}
+				if(isSuccess==false){
+					return isSuccess;
+				}
+				if(event.srcElement.id!="currTreeForm:subtabPanel_lbl"){
+			     	//判断基本属性是否为空
+			     	isSuccess = validateTreeName(isSuccess);
+			     	return isSuccess ;
+		    	 }
+			}
+			
+			//按回车调用查询按钮的单击事件
+			function forSelect(){
+				if(event.keyCode==13){
+					document.getElementById('conform:selectBtn').onclick();
+				}
+			}
+			//]]>
+		</script>
+		 <style type="text/css">
+		 .column1{
+		 	width:30%;
+		 }
+		 .column2{
+		 	width:70%;
+		 }
+		 </style> 
+	</head>
+	<body >
+		<f:loadBundle basename="messages" var="msgs" />
+		<regaltec:viewPort ctCls="panel-bdColor">
+			<regaltec:viewPortPanel region="east" id="eastpanel"
+									autoScroll="true" contentEl="east-panel" split="true" width="250"
+									minSize="200" maxSize="400" collapsible="true" margins="0 0 0 0"
+			            			layout="accordion"/>		
+			<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+									contentEl="center"/>			
+		</regaltec:viewPort>
+		
+		<regaltec:extContextMenu id="curtreemenu">
+	    	<regaltec:extContextMenuItem  id="addCurr"  text="#{msgs['baf.currencytree.addCur']}" handler="addCurTree" />
+	    	<regaltec:extContextMenuItem  id="delCurr"  text="#{msgs['baf.currencytree.delCur']}" handler="delCurTree" />
+	    	<regaltec:extContextMenuItem  id="updateCurr" text="#{msgs['baf.currencytree.updateCur']}" handler="updateCurTree" />
+	    	<regaltec:extContextMenuItem  id="selectCurr" text="#{msgs['baf.currencytree.selectCur']}" handler="selectCurTree" />
+	    </regaltec:extContextMenu>
+	  <h:form id="tform">
+		<h:outputText id="currencyModuleTree" rendered="#{currencyTreeBean.treeRendered}">
+			<regaltec:dhtmlXtree id="moduleTree" imagePath="/baf/images/dhtmlxtree/" loadXML="/baf/jsp/tree/publicTreeXMLData.jsp?showFullPath=0&amp;isPreview=#{currencyTreeBean.isprev}&amp;param=#{currencyTreeBean.typeParameter}" 
+				xmlAutoLoading="/baf/jsp/tree/publicTreeXMLData.jsp?showFullPath=0&amp;isPreview=#{currencyTreeBean.isprev}&amp;param=#{currencyTreeBean.typeParameter}" 
+				dataSource="#{currencyTreeBean.treeAlias}" showFullPath="0" contentEl="moduleTree_tree">
+		    </regaltec:dhtmlXtree>
+		</h:outputText>
+	</h:form>
+	<!-- 右边树列表-->
+	<div id="east-panel">
+		<rich:tabPanel id="currencyTabPanel" style="width:100%;height:100%;" switchType="client" >
+			<rich:tab id="currency" label="#{msgs['baf.currencytree.select']}" switchType="client" style="text-align:center;">
+			<rich:spacer height="5px"/>
+				<h:form id="conform">
+				 <h:inputHidden id="ttt" value="#{currencyTreeBean.treeRendered}"></h:inputHidden>
+				<h:panelGroup id="condition">
+				<h:panelGrid id="user" columns="2" columnClasses="column1,column2" style="font-size:13px;width:100%;display:block;" styleClass=".rich-text-color-general">
+					<h:outputText value="#{msgs['baf.currencytree.treeName']}:"/>
+					<h:inputText id="search_treeName" value="#{currencyTreeBean.search_treeName}" style="width:90%;height:23px;" styleClass="rich-gradient-input">
+						<rich:hotKey key="return" handler="forSelect();"/>
+					</h:inputText>
+					<h:outputText value="#{msgs['baf.currencytree.treeCode']}:"/>
+					<h:inputText id="search_treeAlias" value="#{currencyTreeBean.search_treeAlias}" style="width:90%;height:23px;" styleClass="rich-gradient-input">
+						<rich:hotKey key="return" handler="forSelect();"/>
+					</h:inputText>
+				</h:panelGrid>	
+				</h:panelGroup>
+				<rich:spacer height="5px"/>	  		
+				<center>
+					<a4j:commandButton id="selectBtn" value="#{msgs['baf.Select']}" styleClass="rich-button" limitToList="true" action="#{currencyTreeBean.selectAllCurTreeForPage}" reRender="itemLists,pageNo,pageSize,itemScroller"/>
+					<rich:spacer width="10px"/>
+					<h:commandButton  id="export" value="#{msgs['baf.impexp.data.export']}" styleClass="rich-button" limitToList="true" actionListener="#{currencyTreeBean.export}" />
+				</center>	 
+			<rich:spacer height="20px"/>	  
+	        <rich:dataTable width="100%" id="itemLists" columnClasses="col" rows="#{currencyTreeBean.pageSize}"  onRowContextMenu="openCurTreeContextMenu(event);treeId='#{cur.treeId}';return false;"
+	            value="#{currencyTreeBean.defaultDataModel}" var="cur" headerClass="rich-gradient-tab" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" 	            
+	            onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" onRowClick="onDblClickCurEdit('#{cur.treeId}');">
+	            <rich:column>
+	            	<f:facet name="header">
+			        	<h:outputText styleClass="headerText " value="#{msgs['baf.currencytree.treeName']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <center><h:outputText value="#{cur.treeName}" /></center>
+	            </rich:column>
+	            <rich:column>
+	            	<f:facet name="header">
+			        	<h:outputText styleClass="headerText " value="#{msgs['baf.currencytree.treeCode']}" style="font-weight:normal;"/>
+			        </f:facet>
+	                <center><h:outputText value="#{cur.treeAlias}" /></center>
+	            </rich:column>
+	        </rich:dataTable>
+				<rich:datascroller align="right"  for="itemLists" fastStep="0"  page="#{currencyTreeBean.scrollerPage}" id="itemScroller" />							
+			</h:form>	
+		</rich:tab>
+	 </rich:tabPanel>  
+	</div>	
+	
+	<!-- 公共树配置-->
+	<div id="center" style="background:white;height: 100%;wmargin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel" style="width:100%;height:97%;" switchType="client" >
+		<rich:tab id="curTree" label="#{msgs['baf.currencytree.lable']}" switchType="client" style="text-align:center;">	
+			<a4j:form id="currTreeForm">
+				<center>
+				<table  width="90%">
+					<tr align="center" style="height:30px;">
+						<td style="width:10%;" align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.treeName']}: "/></td>
+						<td style="width:30%;">
+							<h:inputText id="treeName" value="#{currencyTreeBean.treeName}"  style="width:100%;height:23px;" styleClass="rich-gradient-input" />
+						</td>
+						<td style="width:10%;" align="right">
+							<h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.treeCode']}: "/></td>
+						<td style="width:30%;">
+							<h:inputText id="treeAlias" value="#{currencyTreeBean.treeAlias}" onchange="javascript:this.value = this.value.toUpperCase();" style="width:100%;height:23px;" styleClass="rich-gradient-input">
+							</h:inputText>
+						</td>
+					</tr>
+					<tr align="center">
+						<td align="right"><h:outputText style="font-size:13px;"  value="#{msgs['baf.currencytree.permissionFactor']}: "/></td>
+						<td>
+							<h:selectOneMenu id="rightFactorCode" style="width:100%;height:23px;" value="#{currencyTreeBean.rightFactorCode}">
+								<f:selectItems value="#{currencyTreeBean.rightFactorMap}"  />
+							</h:selectOneMenu>
+						</td>
+						<td style="width:10%;" align="right"><h:outputText style="font-size:13px;"  value="#{msgs['baf.currencytree.shortorder']}: "/></td>
+						<td>
+							<h:inputText id="treesortOrder" value="#{currencyTreeBean.sortOrder}" style="width:100%;height:23px;" styleClass="rich-gradient-input">
+							</h:inputText>
+						</td>
+					</tr>
+					<tr align="center">
+						<td align="right"><h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="SQL: " /></td>
+						<td colspan="3" ><h:inputTextarea  id="queryScript" rows="6" value="#{currencyTreeBean.queryScript}" style="width:100%;" styleClass="rich-gradient-input"/></td>
+					</tr>
+					<tr style="height:30px;">
+						<td colspan="4" align="right">
+						<a4j:commandButton styleClass="rich-button" type="submit" id="curTreeDete" value="#{msgs['baf.currencytree.sqlDetection']}" >
+							<a4j:support  event="onclick" action="#{currencyTreeBean.ValidateSQL}" data="#{currencyTreeBean.dealFlag}" oncomplete="checkSqlCurTree(data);" />
+						</a4j:commandButton>	
+						</td>
+					</tr>
+				</table>
+				<rich:spacer height="2px"/>	<rich:spacer height="2px"/>	
+				<fieldset style="height:60%;width:92%" >
+					<legend><h:outputText value="#{msgs['baf.currencytree.bind']}" /></legend>
+					<rich:spacer height="2px"/>	
+					<rich:tabPanel id="subtabPanel" ontabchange="return tabValidate();" switchType="client" style="height:90%;width:90%" selectedTab="#{currencyTreeBean.selectTab}">
+				         <rich:tab id="testTab" label="#{msgs['baf.currencytree.baseAttributes']}" >
+				         <rich:spacer height="2px"/>	
+				            <table style="width:75%;" align="center">
+								<tr style="height:60px;">
+									<td align="right"><h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="ID: "/></td>
+									<td>
+										<h:selectOneMenu id="nodeId" style="width:150px;height:23px;" value="#{currencyTreeBean.nodeId}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+											<s:commonsValidator type="required" arg="ID" server="false" client="true"/>
+										</h:selectOneMenu>
+									</td>
+									<td align="right"><h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.tagName']}: "/></td>
+									<td>
+										<h:selectOneMenu id="nodeName" style="width:150px;height:23px;" value="#{currencyTreeBean.nodeName}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+											<s:commonsValidator type="required" arg="#{msgs['baf.currencytree.tagName']}" server="false" client="true"/>
+										</h:selectOneMenu>
+									</td>
+								</tr>
+								<tr style="height:60px;">
+									<td align="right"><h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="parentID: "/></td>
+									<td>
+										<h:selectOneMenu id="parentId" style="width:150px;height:23px;" value="#{currencyTreeBean.parentId}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+											<s:commonsValidator type="required" arg="parentID" server="false" client="true"/>
+										</h:selectOneMenu>
+									</td>
+									<td align="right"><h:outputText value="* " style="color: red;"></h:outputText><h:outputText style="font-size:13px;" value="path: "/></td>
+									<td>
+										<h:selectOneMenu id="path" style="width:150px;height:23px;" value="#{currencyTreeBean.path}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+											<s:commonsValidator type="required" arg="path" server="false" client="true"/>
+										</h:selectOneMenu>
+									</td>
+								</tr>
+								<tr style="height:60px;">
+									<td colspan="4" align="center"></td>
+								</tr>
+						 </table>
+					    </rich:tab>
+				        <rich:tab id="testTab1" label="#{msgs['baf.currencytree.bseniorAttributes']}" >
+				           <table id="tab" style="width:90%;" align="center">
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodePromptContent']}: "/></td>
+									<td>
+										<rich:comboBox id="tooltip" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.tooltip}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeSelectCallbackFunction']}: "/></td>
+									<td>
+										<rich:comboBox id="call" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.call}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeDefaultUCS']}: "/></td>
+									<td>
+										<rich:comboBox id="img0" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.img0}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeIfShowCombox']}: "/></td>
+									<td>
+										<rich:comboBox id="nocheckbox" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.nocheckbox}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeExpandUCS']}: "/></td>
+									<td>
+										<rich:comboBox id="img1" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.img1}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeIsCombox']}: "/></td>
+									<td>
+										<rich:comboBox id="checked" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}"  value="#{currencyTreeBean.checked}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeCloseUCS']}: "/></td>
+									<td>
+										<rich:comboBox id="img2" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.img2}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeIsChild']}: "/></td>
+									<td>
+										<rich:comboBox id="child" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.child}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeUCSHeight']}: "/></td>
+									<td>
+										<rich:comboBox id="imgHeight" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.imgHeight}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeContentStyle']}: "/></td>
+									<td>
+										<rich:comboBox id="style" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.style}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeUCSWinth']}: "/></td>
+									<td>
+										<rich:comboBox id="imgWidth"  selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.imgWidth}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}" />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeIsOpen']}: "/></td>
+									<td>
+										<rich:comboBox id="open" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.open}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeNoSelectCol']}: "/></td>
+									<td>
+										<rich:comboBox id="acol" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.acol}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeSelectCol']}: "/></td>
+									<td>
+										<rich:comboBox id="scol" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.scol}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+								<tr style="height:23px;">
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeIfSelect']}: "/></td>
+									<td>
+										<rich:comboBox id="isSelect" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.isSelect}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+									<td align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.nodeType']}: "/></td>
+									<td>
+										<rich:comboBox id="nodeType" selectFirstOnUpdate="false" defaultLabel="#{msgs['baf.PleaseChose']}" value="#{currencyTreeBean.treeNodeType}" >
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</rich:comboBox>
+									</td>
+								</tr>
+						 </table>
+				        </rich:tab>
+				        <rich:tab id="testTab2" label="#{msgs['baf.currencytree.extendAttributes']}" >
+				        <rich:spacer height="2px"/>	<rich:spacer height="2px"/>	
+				            <table  id="myTable" align="center" style="width:75%;">
+				            	<tr align="center" style="height:30px;">
+				            		<td><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.extendAttributes1Name']}: "/></td>
+									<td>
+										<h:selectOneMenu id="select1" style="width:150px;height:23px;" value="#{currencyTreeBean.userData1}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</h:selectOneMenu>
+									</td>
+				            	</tr>
+				            	<tr id="extend2" align="center" style="height:30px;">
+				            		<td><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.extendAttributes2Name']}: " /></td>
+									<td>
+										<h:selectOneMenu id="select2" style="width:150px;height:23px;" value="#{currencyTreeBean.userData2}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</h:selectOneMenu>
+									</td>
+				            	</tr>
+				            	<tr id="extend3" align="center" style="height:30px;">
+				            		<td><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.extendAttributes3Name']}: " /></td>
+									<td>
+										<h:selectOneMenu id="select3" style="width:150px;height:23px;" value="#{currencyTreeBean.userData3}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</h:selectOneMenu>
+									</td>
+				            	</tr>
+				            	<tr id="extend4" align="center" style="height:30px;">
+				            		<td><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.extendAttributes4Name']}: "/></td>
+									<td>
+										<h:selectOneMenu id="select4" style="width:150px;height:23px;" value="#{currencyTreeBean.userData4}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</h:selectOneMenu>
+									</td>
+				            	</tr>
+				            	<tr id="extend5" align="center" style="height:30px;">
+				            		<td><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.extendAttributes5Name']}: " /></td>
+									<td>
+										<h:selectOneMenu id="select5" style="width:150px;height:23px;" value="#{currencyTreeBean.userData5}">
+											<f:selectItems value="#{currencyTreeBean.nodeIdMap}"  />
+										</h:selectOneMenu>
+									</td>
+				            	</tr>
+				            	<tr style="height:23px;">
+				            		<td></td>
+									<td></td>
+				            	</tr>
+				            </table>
+				            <rich:spacer height="2px"/>	<rich:spacer height="2px"/>	
+					    </rich:tab>
+					</rich:tabPanel>
+				<rich:spacer height="2px"/>	 
+			 	</fieldset>
+			 	<h:inputHidden id="dealFlag" value="#{currencyTreeBean.dealFlag}"/>	
+			 	<h:inputHidden id="treeid" value="#{currencyTreeBean.treeId}"/>	
+			 	<h:inputHidden id="alias" value="#{currencyTreeBean.testTreeAlias}"/>
+			 	<table>
+	        		<tr>
+	        			<td>
+							<a4j:commandButton styleClass="rich-button" id="curTreeSave" type="submit" value="#{msgs['baf.currencytree.save']}" action="#{currencyTreeBean.save}" oncomplete="onSaveCurrency(data);" data="#{currencyTreeBean.dealFlag}" reRender="itemLists,itemScroller,currTreeForm" />
+							<rich:spacer width="10px"/>
+							<a4j:commandButton styleClass="rich-button" id="preview" type="button"  value="#{msgs['baf.currencytree.selectCur']}">
+								<a4j:support event="onclick" onsubmit="if(argPass()==false) return false;" action="#{currencyTreeBean.doPreview}" oncomplete="onAddPreviewComplete(data);" data="#{currencyTreeBean.dealFlag}"/>
+							</a4j:commandButton>
+						</td>
+	        		</tr>
+		        </table>
+				</center>
+			</a4j:form>
+			
+			<a4j:keepAlive  beanName= "currencyTreeBean" />
+			<s:validatorScript functionName="validateForm"/>
+			
+		<!-- 右键预览动态SQL参数传入 -->
+			<rich:modalPanel id="paramPreviewRightPanel" autosized="false" keepVisualState="false" width="400" height="150">
+	    	    <f:facet name="header">
+					<h:outputText value="#{msgs['baf.currencytree.SQLParameter']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png" id="hidelinkRight" styleClass="hidelink"/>
+					    <rich:componentControl for="paramPreviewRightPanel" attachTo="hidelinkRight" operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>			       
+					<a4j:form id="paramPreviewRightForm">    		
+			       		<rich:spacer height="1px;"/>	
+			       		<table style="width:90%;height:40%;overflow-x:auto;overflow-y:auto;">
+			      			<tr>
+			      				<td style="width:40%;" align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.SQLParameter']}: "/></td>
+				      			<td>
+				      				<h:inputText id="typePreviewParamRight" value="#{currencyTreeBean.typeParameter}" title="#{msgs['baf.currencytree.format']}:name=value:type$name=value:type   #{msgs['baf.currencytree.model']}:treeCode=0001:string" style="width:100%;height:23px;" styleClass="rich-gradient-input" />
+				      			</td>
+			      			</tr>
+			      		</table>
+		    	   		<center>
+			    	    	<rich:spacer height="4px;"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="submit" id="savePreParamRight" value="#{msgs['baf.org.Save']}">
+			    	    		<a4j:support  event="onclick" onsubmit="if (validateForm(document.getElementById('paramPreviewRightForm'))==false) {return false;}" action="#{currencyTreeBean.paramValidateSQL}" data="#{currencyTreeBean.dealFlag}" oncomplete="onShowRKeyPreview(data);"/>
+			    	    	</a4j:commandButton>
+			    	    	<rich:spacer width="10px"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="button" id="itemsPreRightCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('paramPreviewRightPanel')}.hide(); return false;" />
+						</center>
+					</a4j:form>
+			</rich:modalPanel>	
+		
+			<!-- 预览动态SQL参数传入 -->
+			<rich:modalPanel id="paramPreviewPanel" autosized="false" keepVisualState="false" width="400" height="150">
+	    	    <f:facet name="header">
+					<h:outputText value="#{msgs['baf.currencytree.SQLParameter']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png" id="hidelinkss" styleClass="hidelink"/>
+					    <rich:componentControl for="paramPreviewPanel" attachTo="hidelinkss" operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>			       
+					<a4j:form id="paramPreviewForm">    		
+			       		<rich:spacer height="1px;"/>	
+			       		<table style="width:90%;height:40%;overflow-x:auto;overflow-y:auto;">
+			      			<tr>
+			      				<td style="width:40%;" align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.SQLParameter']}: "/></td>
+				      			<td>
+				      				<h:inputText id="typePreviewParam" value="#{currencyTreeBean.typeParameter}" title="#{msgs['baf.currencytree.format']}:name=value:type$name=value:type   #{msgs['baf.currencytree.model']}:treeCode=0001:string" style="width:100%;height:23px;" styleClass="rich-gradient-input" />
+				      			</td>
+			      			</tr>
+			      		</table>
+		    	   		<center>
+			    	    	<rich:spacer height="4px;"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="submit" id="savePreParam" value="#{msgs['baf.org.Save']}">
+			    	    		<a4j:support  event="onclick" onsubmit="if (validateForm(document.getElementById('paramPreviewForm'))==false) {return false;}" action="#{currencyTreeBean.checkSQL}" data="#{currencyTreeBean.dealFlag}" oncomplete="onShowPreview(data);"/>
+			    	    	</a4j:commandButton>
+			    	    	<rich:spacer width="10px"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="button" id="itemsPreCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('paramPreviewPanel')}.hide(); return false;" />
+						</center>
+					</a4j:form>
+			</rich:modalPanel>
+			
+			<!-- 动态SQL参数传入 -->
+			 <rich:modalPanel id="paramPanel" autosized="false" keepVisualState="false" width="400" height="150">
+	    	    <f:facet name="header">
+					<h:outputText value="#{msgs['baf.currencytree.SQLParameter']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png" id="hidelink" styleClass="hidelink"/>
+					    <rich:componentControl for="paramPanel" attachTo="hidelink" operation="hide" event="onclick" />
+					</h:panelGroup>
+				</f:facet>			       
+					<a4j:form id="paramForm">    		
+			       		<rich:spacer height="1px;"/>	
+			       		<table style="width:90%;height:40%;overflow-x:auto;overflow-y:auto;">
+			      			<tr>
+			      				<td style="width:40%;" align="right"><h:outputText style="font-size:13px;" value="#{msgs['baf.currencytree.SQLParameter']}: "/></td>
+				      			<td>
+				      				<h:inputText id="typeParam" value="#{currencyTreeBean.typeParameter}" title="#{msgs['baf.currencytree.format']}:name=value:type$name=value:type   #{msgs['baf.currencytree.model']}:treeCode=0001:string" style="width:100%;height:23px;" styleClass="rich-gradient-input" />
+				      			</td>
+			      			</tr>
+			      		</table>
+		    	   		<center>
+			    	    	<rich:spacer height="4px;"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="submit" id="saveParam" value="#{msgs['baf.org.Save']}">
+			    	    		<a4j:support  event="onclick"  onsubmit="if (validateForm(document.getElementById('paramForm'))==false) {return false;}"  action="#{currencyTreeBean.checkSQL}" data="#{currencyTreeBean.dealFlag}" oncomplete="checkSqlCurTree(data); if(data=='Y') {#{rich:component('paramPanel')}.hide();}"/>
+			    	    	</a4j:commandButton>
+			    	    	<rich:spacer width="10px"/>
+			    	    	<a4j:commandButton styleClass="rich-button" type="button" id="itemsCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('paramPanel')}.hide(); return false;" />
+						</center>
+					</a4j:form>
+			</rich:modalPanel>
+			
+			<!-- 预览模态框 -->
+			 <rich:modalPanel id="previewPanel" autosized="false" keepVisualState="false" width="450" height="400">
+	    	    <f:facet name="header">
+					<h:outputText value="#{msgs['baf.currencytree.treePreviewPanel']}"/>
+				</f:facet>
+				<!-- 关闭按钮 -->
+				<f:facet name="controls">
+				<h:panelGroup>
+				    <h:graphicImage value="/baf/images/icons/close.png" id="hidelinks" styleClass="hidelink"/>
+				    <rich:componentControl for="previewPanel" attachTo="hidelinks" operation="hide" event="onclick" />
+				</h:panelGroup>
+				</f:facet>	
+				<fieldset style="width:100%;height:90%">
+		       		<legend><h:outputText value="#{msgs['baf.currencytree.treePreviewPanel']}" /></legend>				           		
+		       		<rich:spacer height="1px;"/>	
+		       		<table style="width:100%;height:92%;overflow-x:auto;overflow-y:auto;">
+		      			<tr><td id="moduleTree_tree"></td></tr>
+		      		</table>
+				</fieldset>
+	    	    <center>
+	    	    	<a4j:commandButton styleClass="rich-button" type="button" id="itemCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('previewPanel')}.hide(); return false;" />
+				</center>
+			</rich:modalPanel>
+		</rich:tab>
+		</rich:tabPanel>
+		
+		<a4j:form>
+		<a4j:jsFunction name="initCurTree" action="#{currencyTreeBean.initialization}" reRender="currTreeForm">
+		</a4j:jsFunction>
+		<a4j:jsFunction name="sqlPar" action="#{currencyTreeBean.doExtractSQLString}" reRender="subtabPanel">
+			<a4j:actionparam name="sqlstr" assignTo="#{currencyTreeBean.queryScript}"/>
+		</a4j:jsFunction>
+		 <a4j:jsFunction name="curDelete" oncomplete="onDelCurrencyTree(data);" action="#{currencyTreeBean.delCurrTree}"  data="#{currencyTreeBean.dealFlag}" reRender="itemLists,itemScroller">
+            <a4j:actionparam name="treeId" assignTo="#{currencyTreeBean.treeId}" />                
+        </a4j:jsFunction>
+        <a4j:jsFunction name="curUpdate" action="#{currencyTreeBean.showEditCurTree}" reRender="currTreeForm">    
+        	<a4j:actionparam name="treeId" assignTo="#{currencyTreeBean.treeId}" />      
+        </a4j:jsFunction>
+        <a4j:jsFunction name="updateCurrTree" action="#{currencyTreeBean.updateCurTree}" oncomplete="onSaveCurrency(data);" data="#{currencyTreeBean.dealFlag}"  reRender="currTreeForm,east-panel">        
+        </a4j:jsFunction>
+        <a4j:jsFunction name="curShow" action="#{currencyTreeBean.doRightKey}" oncomplete="onRightPreviewComplete(data);" data="#{currencyTreeBean.dealFlag}" reRender="alias,itemLists,itemScroller">   
+        	<a4j:actionparam name="treeId" assignTo="#{currencyTreeBean.treeId}" />    
+        </a4j:jsFunction>
+        <a4j:jsFunction name="refresh" action="#{currencyTreeBean.refresh}" reRender="tform,ttt">  
+        </a4j:jsFunction>
+        <a4j:jsFunction name="showPrePanel" action="#{currencyTreeBean.doPreviewCurrencyTree}" oncomplete="show();">  
+        </a4j:jsFunction>
+		</a4j:form>
+	</div>		
+		<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+	</body>
+</f:view>
+</html>

@@ -1,0 +1,600 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:a4j="http://richfaces.org/a4j"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:s="http://shale.apache.org/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jstl/functions"
+      xmlns:regaltec="http://regaltec.org/customConponent" >
+<head>
+	<script>	
+	//<![CDATA[
+	//触发事件
+	function onObjectFireMouseEvent(obj, eventname) { 					
+		if (document.all) {
+		//IE
+			obj.fireEvent(eventname);
+		} else {
+		//firefox						
+			var name = eventname.replace("on", "");
+			var evtObj = document.createEvent('MouseEvents');     
+			evtObj.initMouseEvent(name, true, true, document.defaultView, 1, 0, 0, 0, 0, false, false, true, false, 0, null);     
+			obj.dispatchEvent(evtObj);
+		}
+	}
+	
+	//表单校验扩展
+	function validateAll(formobj)
+	{
+	   var returnvalue = true;	   
+	   returnvalue = validateForm(formobj);
+	   return returnvalue;
+	}
+	
+	//保存或修改完触发事件
+    function onItemAddOrEditComplete(data) {
+    	
+    	document.getElementById("queryForm:gotItemIdValues").value = "";
+   	   if (data == "N") {
+		  //处理失败
+		  alert("${msgs['baf.Failure']}");
+	   }
+	     // alert("${msgs['baf.Success']}");
+    	if(a4jcomplete()==false){
+			return;
+		}
+ 			
+	   checkChkAll();
+	}
+	
+	
+    //编辑,判断是否选择了一行
+    function checkSelectOneRow() {
+    	//alert("编辑,判断是否选择了一行");										
+	  var oTable = document.getElementById("queryForm:itemLists");
+	  //获取当前页码数
+	  var pageNum = document.getElementById("queryForm:pageNo").value;
+	  if (pageNum <= 0) pageNum = 1;
+	  //获取每页数据个数
+	  var pageSize = document.getElementById("queryForm:pageSize").value;
+	  var size = oTable.rows.length - 1; //去除列头一行
+	  var selectCount = 0;
+	  if (size != null) {
+	  	for (var i=0; i < size; i++) {
+	   	    var realNum = (pageNum-1)*pageSize + i;
+			var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");						
+			if (e != null && e.checked) {
+		    	selectCount ++;
+			}
+	  	}
+	  	if (selectCount != 1) {
+	   		 //请勾选一行需要编辑的数据
+			alert("${msgs['baf.org.WarningEditOneRow']}");
+			return false;
+	  	}
+	  }
+	  return true;
+	}	
+	
+    //响应check点击事件
+	function checkBoxClick(object, value) {	
+		//alert("响应check点击事件");	
+	   var itemIdsArr = document.getElementById("queryForm:gotItemIdValues").value;
+	   if (itemIdsArr == null || itemIdsArr == "") {
+	   	 if (object.checked == true) {							
+			itemIdsArr = value;
+		 } 
+	   } else {
+		    if (object.checked == true) {
+				itemIdsArr = itemIdsArr + "#" + value;	 			
+			} 
+			else { //去掉取消选中的值
+				var index = itemIdsArr.indexOf(value);
+				if (index >= 0) {																
+					var str = "";
+					if(index > 0){
+						str = "#"+value;
+					} else {
+						if(index==0 && itemIdsArr.indexOf("#")!=-1){
+							str = value + "#";
+						} else {
+							str = value;
+						}
+					}
+				itemIdsArr = itemIdsArr.replace(str, "");
+				}
+			}
+		}
+		//保存勾选的itemID值， 格式为 itemId#itemId#itemId
+		document.getElementById("queryForm:gotItemIdValues").value = itemIdsArr;
+	}
+	
+	//点击新增按钮
+	function onAddNew(){
+		var e = document.getElementById("addHolidayForm:isBatchSave");
+		if (e.checked)
+		{
+			  e.checked = !e.checked;
+		}
+		//设置焦点
+		setFocus("addHolidayForm:holidaysName");
+	}
+	
+	
+	//点击编辑按钮，修改
+	function onItemInTabEdit() {			
+		document.getElementById("addHolidayForm:addOrEdit").value = "edit";	
+		var e = document.getElementById("addHolidayForm:isBatchSave");
+		var isBatchSaveGroup = document.getElementById("addHolidayForm:isBatchSaveGroup");
+			isBatchSaveGroup.style.visibility = "hidden";
+		if (e.checked)
+		{
+		  e.checked = !e.checked;
+		}
+		//设置焦点
+		setFocus("addHolidayForm:holidaysName");
+	}
+	
+    //判断是否选择单行或者多行
+	function checkSelectRow() {	
+		//alert("进入判断是否选择单行或者多行");				
+		var oTable = document.getElementById("queryForm:itemLists");
+		//获取当前页码数
+		var pageNum = document.getElementById("queryForm:pageNo").value;
+		if (pageNum <= 0) {
+			pageNum = 1;
+		}
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value;					
+		var size = oTable.rows.length - 1; //去除列头一行
+		var selectCount = 0;
+		if (size != null) {
+	    	for (var i=0; i < size; i++) {
+				var realNum = (pageNum-1)*pageSize + i;
+				var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");							
+				if (e != null && e.checked) {
+					selectCount ++;
+				}
+			}
+			if (selectCount <= 0) {
+				//请勾选需要删除的数据
+				alert("${msgs['baf.org.WarningDeleteRow']}");
+				return false;
+			}
+		}
+		return true;
+	}
+	
+    //全选select操作表所有项
+	function onSelectALlItems() {
+	   // alert("全选select操作表所有项");
+		var oTable = document.getElementById("queryForm:itemLists");
+		var oChkAll = document.getElementById("queryForm:itemLists:selectAll"); 
+		//当条目全选按钮由checked变为unchecked时,清空itemIDs#itemIDs串
+	    if (!oChkAll.checked){
+	      document.getElementById("queryForm:gotItemIdValues").value = "";
+	    }
+	    
+		//获取当前页码数
+		var pageNum = document.getElementById("queryForm:pageNo").value;
+		if (pageNum <= 0) pageNum = 1;
+		//获取每页数据个数
+		var pageSize = document.getElementById("queryForm:pageSize").value; 
+		if (oTable != null && oChkAll != null) {
+			for (j = 0; j < oTable.rows.length -1; j++) {
+				var realNum = (pageNum-1)*pageSize + j;
+				//取得当前页中的第几行
+				var e = document.getElementById("queryForm:itemLists:"+realNum+":selectedItem");
+				if (e.id.indexOf("selectedItem") >= 0) {   
+					//触发CheckBox onclick事件，用来设置itemid
+					if (document.all) {
+						//IE
+						//alert(e);
+						var oldValue= e.checked;
+						//alert("oldValue="+oldValue);
+						e.checked = oChkAll.checked;
+						if (!oldValue && e.checked) {
+							onObjectFireMouseEvent(e, "onclick");
+						}
+					} else {
+						//firefox
+						if (oChkAll.checked) {
+							var oldValue= e.checked;
+							if (!oldValue)
+								onObjectFireMouseEvent(e, "onclick");
+							} else {
+								e.checked = oChkAll.checked;
+							}
+						}
+					}
+				}
+		 	}
+		}		
+	
+	//标识当前是点击查询按钮执行的查询
+	function checkQueryInputValues(){
+	   document.getElementById("queryForm:flagId").value = "Y";
+	   return true;
+	}
+	
+	//按回车调用查询按钮的单击事件
+	function forSelect(){
+		if(event.keyCode==13){
+			document.getElementById('queryForm:itemForSearch').onclick();
+		}
+	}	
+	
+	//屏蔽退格键的事件监听
+	function forCheck(){
+		if(event.keyCode == 8){
+		    event.returnValue   =   false;
+		}
+	}
+	
+	//删除完成
+	function onDicItemsDelComplete(data) {
+		if(a4jcomplete()==false){
+		 	return;
+	 	}
+		if (data == "N") {
+			//处理失败
+			alert("${msgs['baf.org.WarningHandleFailure']}");
+			
+	    }else{    
+	    	document.getElementById("queryForm:gotItemIdValues").value = "";
+	    	rereshItemScroller();
+	    }
+		//如果全选框已经选中，则撤销掉勾选
+		var oChkAll = document.getElementById("queryForm:itemLists:selectAll");  
+		if (oChkAll.checked)
+			oChkAll.checked = !oChkAll.checked;
+	}
+	//翻页时全选框撤销掉勾选
+	function checkChkAll(){
+		var oChkAll = document.getElementById("queryForm:itemLists:selectAll"); 
+		if (oChkAll.checked)
+		oChkAll.checked = !oChkAll.checked;
+	}
+	
+	//保存时
+	function beforeSave(){
+		var start=document.getElementById("addHolidayForm:startDateInputDate").value;
+		var end=document.getElementById("addHolidayForm:endDateInputDate").value;
+		//alert(start);
+		if(timeCompare(start,end)){
+            return true;
+			}
+			return false;
+	}             		
+	//开始时间不能大于结束时间,如果大于则返回FALSE
+	function timeCompare(start,end){
+		var arr=start.split("-");
+		var starttime=new Date(arr[0],arr[1],arr[2]);
+		var starttimes=starttime.getTime();
+		var arrs=end.split("-");
+		var lktime=new Date(arrs[0],arrs[1],arrs[2]);
+		var lktimes=lktime.getTime();
+
+		if(starttimes > lktimes)
+		{
+		alert("${msgs['baf.calendar.timeCompareHoliday']}");
+		return false;
+		}
+		else
+		return true;
+	}
+	function numberOnly() {
+	    if (! ((window.event.keyCode >= 48) && (window.event.keyCode <= 57))) {
+			window.event.keyCode = 0;
+		}
+	}
+	//检查输入字符是否为数字,如果有非数字就返回false
+	function checkIsInt(obj){
+		var num="0123456789.";
+		var str=obj.value;
+		var ch;
+		for(i=0;i < str.length;i++){
+		ch=str.charAt(i);
+			if(num.indexOf(ch)==-1){
+				alert("${msgs['baf.bureau.WaringNotInt']}");
+				obj.value="";
+				obj.focus();
+				return false;
+			}
+		}
+		return true;
+	}
+
+	//双击列表行，修改模板
+	function onDblClickTemplateEdit(rowID) {			
+		rowDblClick(rowID);
+	}
+	//双击列表一行
+	function onRowDblClick(id, name, sdate, edate, islunar, isyear, helyear, describe) {			
+		document.getElementById("addHolidayForm:HolidayId").value = id;
+		document.getElementById("addHolidayForm:holidaysName").value = name;
+		document.getElementById("addHolidayForm:startDate").value = sdate;
+		document.getElementById("addHolidayForm:endDate").value = edate;
+		document.getElementById("addHolidayForm:islunar").value = islunar;
+		document.getElementById("addHolidayForm:isyearperiod").value = isyear;
+		document.getElementById("addHolidayForm:belongYear").value = helyear;	
+		document.getElementById("addHolidayForm:describe").value = describe;		
+	}
+	//]]>
+	</script>
+	<style type="text/css">
+	.column1{
+		width:20%;
+		text-align:right;
+	}
+	.column2{
+		width:80%;
+		text-align:right;
+	}
+	</style>
+</head>
+<body>
+<f:view  contentType="text/html">
+<f:loadBundle basename="messages" var="msgs" />
+
+	<regaltec:viewPort ctCls="panel-bdColor">	
+		<regaltec:viewPortPanel region="center" id="center-panel" autoScroll="true"
+			contentEl="center"/>
+	</regaltec:viewPort>
+	
+	<div id="center" style="background:white;height:99%;width:100%;margin-top:0px;margin-bottom:0px;">
+		<rich:tabPanel id="tabPanel" style="margin-left:5px;margin-right:5px;margin-top:5px;margin-bottom:5px;width:98%;height:98%;" switchType="client" >
+			<rich:tab id="holidays" label="#{msgs['baf.calendar.holidaysCfg']}" switchType="client">			 
+	        	<br/>
+	        	<a4j:form id="queryForm">
+	        	<center>
+				<rich:panel style="width:95%;">				
+					<h:panelGrid id="panelGrid" columns="3" style="font-size:13px;" styleClass=".rich-text-color-general">	
+						<h:panelGroup>
+							<h:outputText value="#{msgs['baf.calendar.holidaysName']}: "/>
+							<h:inputText id="holidayName" value="#{holidayBean.search_HolidayName}" style="width:150px;height:23px;" styleClass="rich-gradient-input"/>
+							<rich:hotKey key="return" handler="forSelect();"/>
+						</h:panelGroup>
+						
+						<rich:spacer width="10px"/>
+						
+						<h:panelGroup>
+							<h:outputText value="#{msgs['baf.calendar.belongYear']}: "/>
+							<h:inputText id="belongYear" value="#{holidayBean.search_Year}" onkeypress="numberOnly()" onblur="checkIsInt(this);" style="width:150px;height:23px;" styleClass="rich-gradient-input">
+								<s:commonsValidator type="mask" mask="[0-9]" arg="#{msgs['baf.calendar.belongYear']}" server="false" client="true"/>
+								<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.belongYear']}" maxLength="4"  server="false" client="true"/>				 
+								<rich:hotKey key="return" handler="forSelect();"/>
+							</h:inputText>
+							<rich:spacer width="10px"/>
+							
+							<a4j:commandButton styleClass="rich-button" type="submit" id="itemForSearch" value="#{msgs['baf.calendar.select']}">
+								<a4j:support event="onclick" onsubmit="if (checkQueryInputValues()==false) return false;" action="#{holidayBean.searchItems}" limitToList="true" reRender="panelGroupItem,itemScroller,pageNo,pageSize"/>
+							</a4j:commandButton>
+						
+						</h:panelGroup>
+						
+						
+					</h:panelGrid>				
+				</rich:panel>
+				<rich:spacer height="2px"/>		 				 
+				<center>							 
+				<a4j:commandButton styleClass="rich-button" type="submit" id="HolidaysAdd" value="#{msgs['baf.calendar.add']}">
+					<a4j:support event="onclick" action="#{holidayBean.addHoliday}" oncomplete="#{rich:component('modalPanel')}.show();onAddNew(); " reRender="addHolidayForm"/>
+					<rich:spacer width="40px"/>
+				</a4j:commandButton>
+				<a4j:commandButton styleClass="rich-button" type="submit" id="HolidaysEdit" value="#{msgs['baf.calendar.edit']}"> 
+					<a4j:support event="onclick" onsubmit="if (checkSelectOneRow()==false) return false;" action="#{holidayBean.showEditHoliday}" oncomplete="#{rich:component('modalPanel')}.show();onItemInTabEdit();" reRender="addHolidayForm"/>
+					<rich:spacer width="40px"/>	
+				</a4j:commandButton>
+				<a4j:commandButton styleClass="rich-button" type="button" id="HolidaysDelete" value="#{msgs['baf.calendar.delete']}"> 
+					<a4j:support event="onclick" onsubmit="if (checkSelectRow()==true) {#{rich:component('delItemPanel')}.show();} return false;"/>
+					<rich:spacer width="40px"/>
+				</a4j:commandButton>
+				</center>	
+				<rich:spacer height="10px"/>
+				<!-- 显示列表 -->
+				<h:panelGroup id="panelGroupItem" style="width:100%;">
+					<rich:dataTable width="95%" id="itemLists" rows="#{holidayBean.pageSize}" columnClasses="col"
+			            value="#{holidayBean.defaultDataModel}" var="caleItem" onRowMouseOver="this.style.backgroundColor='#F8F8F8'" onRowMouseOut="this.style.backgroundColor='#{a4jSkin.tableBackgroundColor}'" 
+			            title="#{msgs['baf.org.dataTableTip']}" onRowDblClick="onDblClickTemplateEdit('#{caleItem.holidayid}');">
+			            <rich:column width="5%" style="text-align:center;">
+					        <f:facet name="header">
+					        	<h:selectBooleanCheckbox id="selectAll" onclick="onSelectALlItems();"/>
+					        </f:facet>
+				            <h:selectBooleanCheckbox id="selectedItem" onclick="checkBoxClick(this, '#{caleItem.holidayid}');"/>
+				        </rich:column>	  
+			            
+			            <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText " value="#{msgs['baf.calendar.holidaysName']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{caleItem.holidayname}" /></center>
+			            </rich:column>
+			            <rich:column id="startdate">
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.startTime']}" style="font-weight:normal;"/>
+					        </f:facet>
+					        <center><h:outputLabel value="#{caleItem.startdate}">
+								<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+							</h:outputLabel></center>
+			            </rich:column>
+			            <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.endTime']}" style="font-weight:normal;"/>
+					        </f:facet>
+					        <center><h:outputLabel value="#{caleItem.enddate}">
+								<f:convertDateTime pattern="yyyy-MM-dd" timeZone="GMT+8"/>
+							</h:outputLabel></center>
+			            </rich:column>
+			            <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.isCale']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{caleItem.islunar}" /></center>
+			            </rich:column>
+			            <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.isCycle']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{caleItem.isyearperiod}" /></center>
+			            </rich:column>
+			            <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.belongYear']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <h:outputText value="#{caleItem.year}" />
+			            </rich:column>
+			             <rich:column>
+			            	<f:facet name="header">
+					        	<h:outputText styleClass="headerText" value="#{msgs['baf.calendar.describe']}" style="font-weight:normal;"/>
+					        </f:facet>
+			                <center><h:outputText value="#{caleItem.holidaydesc}" /></center>
+			            </rich:column>
+			        </rich:dataTable>
+			        <table width="95%">
+			            <tr>
+				            <td>
+								<rich:datascroller align="right"  for="itemLists" fastStep="1"  page="#{holidayBean.scrollerPage}" id="itemScroller" reRender="pageNo" oncomplete="document.getElementById('queryForm:gotItemIdValues').value=''; checkChkAll();"/>							
+							</td>
+						</tr>
+					</table>
+				</h:panelGroup>
+		        <h:inputHidden id="pageNo" value="#{holidayBean.scrollerPage}"/>
+		        <h:inputHidden id="pageSize" value="#{holidayBean.pageSize}"/>	
+		        			
+				 <!-- 删除确认模态框 -->
+				 <rich:modalPanel id="delItemPanel" autosized="true" width="300">
+		    	     <f:facet name="header">
+						<h:outputText value="#{msgs['baf.org.ConfirmDeleteData']}" style="padding-right:15px;" />
+			         	</f:facet> 
+						<!-- 关闭按钮 -->
+				    	<f:facet name="controls">
+							<h:panelGroup>
+					 			<h:graphicImage value="/baf/images/icons/close.png"
+					 				id="hidelinkDelete" styleClass="hidelink"/>
+								<rich:componentControl for="delItemPanel" attachTo="hidelinkDelete"
+									operation="hide" event="onclick" />
+							</h:panelGroup>
+						</f:facet>	
+					<center>
+						<a4j:commandButton value="#{msgs['baf.Confirm']}" type="submit" styleClass="rich-button"
+					                 	data="#{holidayBean.dealFlag}"
+					                    action="#{holidayBean.deleteHoliday}"
+					                    oncomplete="#{rich:component('delItemPanel')}.hide();onDicItemsDelComplete(data);"
+					                    reRender="itemLists,itemScroller,pageNo,pageSize" />
+						<rich:spacer width="40px"/>
+						<a4j:commandButton value="#{msgs['baf.Cancel']}" type="button" styleClass="rich-button" onclick="#{rich:component('delItemPanel')}.hide();return false;" />
+					</center>
+				</rich:modalPanel>	
+				
+				<h:inputHidden id="gotItemIdValues" value="#{holidayBean.selectedItemIds}" />
+			    <h:inputHidden id="flagId" value="#{holidayBean.searchFlag}" />
+				<a4j:keepAlive beanName="holidayBean"/>
+				</center>
+			    </a4j:form>	
+			    	
+			    <!--新增/编辑模态框 -->
+				<rich:modalPanel id="modalPanel" autosized="true" keepVisualState="false" width="480" height="370">			
+				   <f:facet name="header">
+						<h:outputText value="#{msgs['baf.calendar.holidayInfo']}"/>
+					</f:facet>
+					<!-- 关闭按钮 -->
+					<f:facet name="controls">
+					<h:panelGroup>
+					    <h:graphicImage value="/baf/images/icons/close.png"
+					        id="hidelink" styleClass="hidelink"/>
+					    <rich:componentControl for="modalPanel" attachTo="hidelink"
+					        operation="hide" event="onclick" />
+						</h:panelGroup>
+					</f:facet>				
+					<a4j:form id="addHolidayForm">
+					  <center><br/><br/>   
+						<h:panelGrid id="holidayItem" columns="2" columnClasses="column1,column2" style="font-size:13px;width:90%;">						
+							<h:outputText value="#{msgs['baf.calendar.holidaysName']}: "/>
+							<h:inputText id="holidaysName" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{holidayBean.holidayname}">
+								<s:commonsValidator type="required" arg="#{msgs['baf.calendar.holidaysName']}" server="false" client="true"/>
+								<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.holidaysName']}" maxLength="64"  server="false" client="true"/>				 
+							</h:inputText>
+							
+							<h:outputText value="#{msgs['baf.calendar.startTime']}: "/>
+							<h:panelGroup>
+								<rich:calendar id="startDate" value="#{holidayBean.startdate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:89%;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+									<s:commonsValidator type="required" arg="#{msgs['baf.calendar.startTime']}" server="false" client="true"/>
+								</rich:calendar>
+							</h:panelGroup>
+							
+							<h:outputText value="#{msgs['baf.calendar.endTime']}: "/>
+							<h:panelGroup>
+								<rich:calendar id="endDate" value="#{holidayBean.enddate}" datePattern="yyyy-MM-dd"  weekDayLabelsShort="日,一,二,三,四,五,六" oninputkeydown="forCheck();" inputStyle="width:89%;height:23px;" inputClass="rich-gradient-input" styleClass="rich-gradient-input"> 
+									<s:commonsValidator type="required" arg="#{msgs['baf.calendar.endTime']}" server="false" client="true"/>
+								</rich:calendar>
+							</h:panelGroup>
+						
+							<h:outputText value="#{msgs['baf.calendar.isCale']}: " />
+							<h:selectOneMenu id="islunar" value="#{holidayBean.islunar}" style="width:95%;height:23px;">					
+								<f:selectItems value="#{holidayBean.holidayLunarMap}" />
+							</h:selectOneMenu>
+							
+							<h:outputText value="#{msgs['baf.calendar.isCycle']}: " />
+								<h:selectOneMenu style="width:95%;height:23px;" id="isyearperiod"  value="#{holidayBean.isyearperiod}" >
+									<f:selectItems value="#{holidayBean.yearperiodMap}" />
+								</h:selectOneMenu>
+							
+							<h:outputText value="#{msgs['baf.calendar.belongYear']}: " />
+							<h:inputText id="belongYear" style="width:95%;height:23px;" styleClass="rich-gradient-input" value="#{holidayBean.year}">
+								<s:commonsValidator type="mask" mask="[0-9]" arg="#{msgs['baf.calendar.belongYear']}" server="false" client="true"/>
+								<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.belongYear']}" maxLength="4"  server="false" client="true"/>				 
+							</h:inputText>
+							
+							<h:outputText value="#{msgs['baf.calendar.describe']}: " />
+							<h:inputTextarea id="describe" style="width:95%;resize:none;" rows="5" styleClass="rich-gradient-input" value="#{holidayBean.holidaydesc}">				
+								<s:commonsValidator type="maxlength"  arg="#{msgs['baf.calendar.describe']}" maxLength="255"  server="false" client="true"/>				 
+							</h:inputTextarea>									
+						</h:panelGrid>	
+					  </center>	
+					  <rich:spacer height="20px"/>
+					  <h:inputHidden id="HolidayId" value="#{holidayBean.holidayid}"/>
+			    	  <h:inputHidden id="addOrEdit" value="#{holidayBean.addOrEdit}"/>
+					  <center>
+				        <h:panelGroup id="isBatchSaveGroup">	
+				           <h:outputLabel value="#{msgs['baf.org.BatchAddNew']}"/>
+				           <h:selectBooleanCheckbox id="isBatchSave"/>
+				        </h:panelGroup>
+				
+				        <rich:toolTip for="isBatchSave" value="#{msgs['baf.org.BatchAddNewTip']}">
+				        </rich:toolTip>
+						<rich:spacer height="2px"/> 
+				        <a4j:commandButton styleClass="rich-button" type="submit" id="itemAddOrEditSave" value="#{msgs['baf.org.Save']}">	
+					       <a4j:support event="onclick" onsubmit="if (validateForm(document.getElementById('addHolidayForm'))==false) {return false;} if(!beforeSave()){return false;}" action="#{holidayBean.addOrEdit}" data="#{holidayBean.dealFlag}" oncomplete="var e=document.getElementById('addHolidayForm:isBatchSave'); onItemAddOrEditComplete(data); if(data=='Y' &amp;&amp; !e.checked) {#{rich:component('modalPanel')}.hide();}" reRender="queryForm,HolidayId,itemScroller" />
+				        </a4j:commandButton> 
+						<rich:spacer height="2px"/>
+				        <a4j:commandButton styleClass="rich-button" type="button" id="itemCancel" value="#{msgs['baf.org.Cancel']}" onclick="#{rich:component('modalPanel')}.hide(); return false;"/>
+				     </center>	  
+				     <s:validatorScript functionName="validateForm"/>  	
+				     
+				   </a4j:form>
+				</rich:modalPanel>			
+			</rich:tab>
+		</rich:tabPanel>
+		
+		<a4j:form>
+			<a4j:jsFunction name="refresh" actionListener="#{holidayBean.refresh}" reRender="panelGroupItem">
+				<a4j:actionparam name="dictId" assignTo="#{holidayBean.holidayid}"/>
+				<a4j:actionparam name="scrollerPage"  value="1" assignTo="#{holidayBean.scrollerPage}"  />
+			</a4j:jsFunction>
+			
+	        <a4j:jsFunction name="rereshItemScroller" action="#{holidayBean.searchItems}" reRender="pageNo">
+		    </a4j:jsFunction>			
+		    
+		     <a4j:jsFunction name="rowDblClick" action="#{holidayBean.showEditHoliday}" oncomplete="#{rich:component('modalPanel')}.show();onItemInTabEdit();" reRender="addHolidayForm">
+			    	<a4j:actionparam name="rowID" value=""  assignTo="#{holidayBean.selectedItemIds}"/>
+			 </a4j:jsFunction>
+		</a4j:form>
+	</div>
+</f:view>
+<ui:include src="/baf/jsp/template/operationPromptTemplate.xhtml"/>
+</body>
+</html>

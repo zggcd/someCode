@@ -1,0 +1,5 @@
+1.monitor.html，每10秒刷新，并且修改地图加载方法
+2.manpower.html，可一开始不加载，并能随查询刷新图表
+
+
+css，html都有修改

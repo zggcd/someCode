@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ccssoft.rsas.pwb.portal.dao.PdwPortalInstanceMapper" >
+  <resultMap id="BaseResultMap" type="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstance" >
+    <id column="INSTANCE_ID" property="instanceId" jdbcType="VARCHAR" />
+    <result column="INSTANCE_NAME" property="instanceName" jdbcType="VARCHAR" />
+    <result column="LAYOUT_ID" property="layoutId" jdbcType="VARCHAR" />
+    <result column="LAYOUT_NAME" property="layoutName" jdbcType="VARCHAR" />
+    <result column="CREATED_TIME" property="createdTime" jdbcType="TIMESTAMP" />
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <result column="IS_RELEASE" property="isRelease" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    INSTANCE_ID, INSTANCE_NAME, LAYOUT_ID, LAYOUT_NAME, CREATED_TIME, CREATOR, IS_RELEASE, 
+    REMARK
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstanceExample" >
+    <include refid="OracleDialectPrefix" />
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <include refid="OracleDialectSuffix" />
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from PDW_PORTAL_INSTANCE
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from PDW_PORTAL_INSTANCE
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstanceExample" >
+    delete from PDW_PORTAL_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstance" >
+    insert into PDW_PORTAL_INSTANCE (INSTANCE_ID, INSTANCE_NAME, LAYOUT_ID, 
+      LAYOUT_NAME, CREATED_TIME, CREATOR, 
+      IS_RELEASE, REMARK)
+    values (#{instanceId,jdbcType=VARCHAR}, #{instanceName,jdbcType=VARCHAR}, #{layoutId,jdbcType=VARCHAR}, 
+      #{layoutName,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, 
+      #{isRelease,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstance" >
+    insert into PDW_PORTAL_INSTANCE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="instanceId != null" >
+        INSTANCE_ID,
+      </if>
+      <if test="instanceName != null" >
+        INSTANCE_NAME,
+      </if>
+      <if test="layoutId != null" >
+        LAYOUT_ID,
+      </if>
+      <if test="layoutName != null" >
+        LAYOUT_NAME,
+      </if>
+      <if test="createdTime != null" >
+        CREATED_TIME,
+      </if>
+      <if test="creator != null" >
+        CREATOR,
+      </if>
+      <if test="isRelease != null" >
+        IS_RELEASE,
+      </if>
+      <if test="remark != null" >
+        REMARK,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="instanceId != null" >
+        #{instanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="instanceName != null" >
+        #{instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="layoutId != null" >
+        #{layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="layoutName != null" >
+        #{layoutName,jdbcType=VARCHAR},
+      </if>
+      <if test="createdTime != null" >
+        #{createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="isRelease != null" >
+        #{isRelease,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstanceExample" resultType="java.lang.Integer" >
+    select count(*) from PDW_PORTAL_INSTANCE
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update PDW_PORTAL_INSTANCE
+    <set >
+      <if test="record.instanceId != null" >
+        INSTANCE_ID = #{record.instanceId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.instanceName != null" >
+        INSTANCE_NAME = #{record.instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.layoutId != null" >
+        LAYOUT_ID = #{record.layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.layoutName != null" >
+        LAYOUT_NAME = #{record.layoutName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createdTime != null" >
+        CREATED_TIME = #{record.createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.creator != null" >
+        CREATOR = #{record.creator,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isRelease != null" >
+        IS_RELEASE = #{record.isRelease,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null" >
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update PDW_PORTAL_INSTANCE
+    set INSTANCE_ID = #{record.instanceId,jdbcType=VARCHAR},
+      INSTANCE_NAME = #{record.instanceName,jdbcType=VARCHAR},
+      LAYOUT_ID = #{record.layoutId,jdbcType=VARCHAR},
+      LAYOUT_NAME = #{record.layoutName,jdbcType=VARCHAR},
+      CREATED_TIME = #{record.createdTime,jdbcType=TIMESTAMP},
+      CREATOR = #{record.creator,jdbcType=VARCHAR},
+      IS_RELEASE = #{record.isRelease,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstance" >
+    update PDW_PORTAL_INSTANCE
+    <set >
+      <if test="instanceName != null" >
+        INSTANCE_NAME = #{instanceName,jdbcType=VARCHAR},
+      </if>
+      <if test="layoutId != null" >
+        LAYOUT_ID = #{layoutId,jdbcType=VARCHAR},
+      </if>
+      <if test="layoutName != null" >
+        LAYOUT_NAME = #{layoutName,jdbcType=VARCHAR},
+      </if>
+      <if test="createdTime != null" >
+        CREATED_TIME = #{createdTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="isRelease != null" >
+        IS_RELEASE = #{isRelease,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ccssoft.rsas.pwb.portal.model.PdwPortalInstance" >
+    update PDW_PORTAL_INSTANCE
+    set INSTANCE_NAME = #{instanceName,jdbcType=VARCHAR},
+      LAYOUT_ID = #{layoutId,jdbcType=VARCHAR},
+      LAYOUT_NAME = #{layoutName,jdbcType=VARCHAR},
+      CREATED_TIME = #{createdTime,jdbcType=TIMESTAMP},
+      CREATOR = #{creator,jdbcType=VARCHAR},
+      IS_RELEASE = #{isRelease,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR}
+    where INSTANCE_ID = #{instanceId,jdbcType=VARCHAR}
+  </update>
+  <sql id="OracleDialectPrefix" >
+    <if test="page != null" >
+      select * from ( select row_.*, rownum rownum_ from ( 
+    </if>
+  </sql>
+  <sql id="OracleDialectSuffix" >
+    <if test="page != null" >
+      <![CDATA[ ) row_  where rownum <= #{page.end} ) where rownum_ > #{page.begin}  ]]>
+    </if>
+  </sql>
+</mapper>
