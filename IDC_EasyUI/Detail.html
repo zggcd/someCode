@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Detail-tableIn3</title>
+        <link rel="stylesheet" type="text/css" href="lib/themes/easyui.css">
+        <script type="text/javascript" src="lib/jquery.min.js"></script>
+        <script type="text/javascript" src="lib/jquery.easyui.min.js"></script>
+    </head>
+    <body>
+        <style type="text/css">
+            body{margin:0;padding:0;}
+            .table-bordered {margin:5px 5px 5px 5px;border-collapse:collapse;border:none;font-size:12px;width:95%;}
+		    .table-bordered td,.table-bordered th{border:1px solid #ddd;padding:8px;}
+            .list{margin:0;padding:0;width:100%;text-align:center;border-collapse:collapse;border:0;font-size:12px;}
+            .list th{width:25%;padding:8px;}
+            .list tr{border-bottom:1px solid #ddd;}
+            .list td{padding:8px;word-wrap:break-word;}
+            .list tbody tr:nth-of-type(odd){background-color:#f9f9f9;}
+        </style>
+        <div>
+            <div class="easyui-panel" title="详情" style="max-height:350px;border-bottom:0;">
+                <fieldset style="border-color:#F7F7F7;margin: 15px 15px " >
+                    <legend>机架基本信息</legend>
+                    <table align="center"  style="margin: 5px auto;text-align: center;" class="table-bordered">
+                        <tr>
+                            <td>机架编码:</td>
+                            <td>${rackPage.no }</td>
+                            <td>机架名称:</td>
+                            <td>${rackPage.name }</td>
+                            <td>机架名称:</td>
+                            <td>${rackPage.name }</td>
+                        </tr>
+                            <tr>
+                            <td>所属分公司:</td>
+                            <td>${rackPage.parentareaname }</td>
+                            <td>所属IDC中心:</td>
+                            <td>${rackPage.areaName }</td>
+                            <td>所属IDC中心:</td>
+                            <td>${rackPage.areaName }</td>
+                        </tr>
+                        <tr>
+                            <td>所属机房:</td>
+                            <td>${rackPage.roomName }</td>
+                            <td>所属机房:</td>
+                            <td>${rackPage.roomName }</td>
+                            <td>业务状态:</td>
+                            <td>${rackPage.serviceStatusName }</td>
+                        </tr>
+                        <tr>
+                            <td>机架列号:</td>
+                            <td>${rackPage.colno }</td>
+                            <td>机架行号:</td>
+                            <td>${rackPage.rowno }</td>
+                            <td>机架行号:</td>
+                            <td>${rackPage.rowno }</td>
+                        </tr>
+                    </table>
+                </fieldset>
+            </div>
+            <div class="easyui-tabs">
+                <div title="列表">
+                    <table class="list">
+						<thead>
+							<tr>
+								<th>机架编码</th>
+								<th>机架名称</th>
+								<th>所属机房</th>
+                                <th>所属IDC中心</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>BJ-BJ-YZDC-YZ06-K-12</td>
+								<td>${rackPage.name }</td>
+								<td>亦庄6</td>
+								<td>亦庄DC数据中心</td>
+							</tr>
+							<tr>
+								<td>BJ-BJ-YZDC-YZ06-K-12</td>
+								<td>${rackPage.name }</td>
+								<td>亦庄6</td>
+								<td>亦庄DC数据中心</td>
+							</tr>
+						</tbody>
+					</table>
+                </div>
+                <div title="表格">
+                    <fieldset style="border-color:#F7F7F7;margin: 15px 15px " >
+                        <legend>机架基本信息</legend>
+                        <table align="center"  style="margin: 5px auto;text-align: center;" class="table-bordered">
+                            <tr>
+                                <td>机架编码:</td>
+                                <td>${rackPage.no }</td>
+                                <td>机架名称:</td>
+                                <td>${rackPage.name }</td>
+                                <td>机架名称:</td>
+                                <td>${rackPage.name }</td>
+                            </tr>
+                                <tr>
+                                <td>所属分公司:</td>
+                                <td>${rackPage.parentareaname }</td>
+                                <td>所属IDC中心:</td>
+                                <td>${rackPage.areaName }</td>
+                                <td>所属IDC中心:</td>
+                                <td>${rackPage.areaName }</td>
+                            </tr>
+                            <tr>
+                                <td>所属机房:</td>
+                                <td>${rackPage.roomName }</td>
+                                <td>所属机房:</td>
+                                <td>${rackPage.roomName }</td>
+                                <td>业务状态:</td>
+                                <td>${rackPage.serviceStatusName }</td>
+                            </tr>
+                            <tr>
+                                <td>机架列号:</td>
+                                <td>${rackPage.colno }</td>
+                                <td>机架行号:</td>
+                                <td>${rackPage.rowno }</td>
+                                <td>机架行号:</td>
+                                <td>${rackPage.rowno }</td>
+                            </tr>
+                        </table>
+                    </fieldset>
+                </div>
+                <div title="空白框" style="padding:10px">
+                    This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.This is the content.
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
