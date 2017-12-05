@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>北京电信IDC资源与业务视图</title>
+		<link rel="stylesheet" type="text/css" href="public/css/bootstrap.css"></link>
+		<link rel="stylesheet" type="text/css" href="public/css/style.css"></link>
+		
+		<style>
+			html,body,.wrapper{
+				height:100%;
+				width:100%;
+			}
+			*,html,body{
+				font-family: "微软雅黑";
+				color:#fff;
+			}
+			body{
+				background:url("public/img/bjidc-bg.png");
+				background-size:cover;
+				background-repeat:no-repeat;
+			}
+			.fl{
+				float:left;
+			}
+			.fr{
+				float:right;
+			}
+			.wrapper{
+				padding-top:25px;
+			}
+			.header{
+				width:100%;
+				height:40px;
+				line-height: 40px;
+				
+				background:url("public/img/header-bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+				
+			}
+			.header-left{
+				margin-left:20px;
+			}
+			.header-right{
+				margin-right:20px;
+			}
+			.header-left span,.header-right span{
+				color:#49d9fe;
+			}
+			.header-center{
+				position: absolute;
+				top:0;
+				left:50%;
+				margin-left:-127px;
+				font-size: 22px;
+			}
+			.order{
+				width:100%;
+				height:14%;
+				padding-top: 10px;;
+			}
+			.order-left,.order-center,.order-right{
+				width:27%;
+				height:100%;
+				background:url("public/img/gds-bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+			}
+			.order-left{
+				margin-left:14%;
+			}
+			.order-center{
+				margin-left:2%;
+			}
+			.order-right{
+				margin-right:20px;
+			}
+			.spanname{
+				float:left;
+				font-size:17px;
+				padding-top:2px;
+			}
+			.span1{
+				display: inline-block;
+				width:20px;
+				height:30px;
+				border:1px solid #00bbec;
+				text-align: center;
+				vertical-align: middle;
+				padding-top:5px;
+				background: #102640;
+			}
+			.gds{
+				position: absolute;
+				top:50%;
+				margin-top:-5px;
+				left:50%;
+				margin-left:-145px;
+			}
+			.content{
+				width:100%;
+				height:79%;
+				padding:20px 20px 0px 20px;
+				position: relative;
+			}
+			.content-left{
+				width:62%;
+				height:100%;
+				background:url("public/img/map_bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+			}
+			.content-right{
+				width:37%;
+				height:100%;
+			}
+			#bjmap{
+				width:78%;
+				height:85%;
+				margin-top:2.5%;
+				position: absolute;
+				top:0px;
+				left:0px;
+				z-index: 99999;
+			}
+			.num{
+				width:17%;
+				height:100%;
+				padding-top:40px;
+				margin-right:5%
+			}
+			.customdev-num,.IP-num{
+				width:100%;
+				height:12.5%;
+				background:url("public/img/shebeibg1.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				margin-bottom:10px;
+				padding:10px 0px 0px 10px;
+			}
+			.custom-num,.IDC-num{
+				width:100%;
+				height:12.5%;
+				background:url("public/img/shebeibg2.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				margin-bottom:10px;
+				padding:10px 0px 0px 10px;
+			}
+			.rack-num,.port-num{
+				width:100%;
+				height:12.5%;
+				background:url("public/img/shebeibg3.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				margin-bottom:10px;
+				padding:10px 0px 0px 10px;
+			}
+			.flowchart-top,.flowchart-middle,.flowchart-bottom{
+				width:100%;
+				height:33.3%;
+			}
+			.flowchart-top{
+				background:url("public/img/jijiaflow-bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+			}
+			.flowchart-middle{
+				background:url("public/img/portflow-bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+			}
+			.flowchart-bottom{
+				background:url("public/img/sgscflow-bg.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: relative;
+			}
+			.bjmap-head{
+				width:150px;
+				height:107px;
+				background:url("public/img/map-head.png");
+				background-size:100% 100%;
+				background-repeat:no-repeat;
+				position: absolute;
+				top:-70px;
+				left:20px;
+			}
+			.bjmap-title{
+				position: absolute;
+				top:10px;
+				left:110px;
+				font-size:17px;
+			}
+			.flowchart-top-title{
+				position: absolute;
+				top:-4px;
+				left:19px;
+				font-size:14px;
+			}
+			.flowchart-middle-title,.flowchart-bottom-title{
+				position: absolute;
+				top:-6px;
+				left:19px;
+				font-size:14px;
+			}
+			#rackflowchart,#portflowchart,#sgscflowchart{
+				width:100%;
+				height:100%;
+			}
+		</style>
+		
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="header">
+				<div class="header-left fl">
+					<iframe width="400" scrolling="no" height="30" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=1&color=%2300B0F0&icon=1&wind=1&num=1&site=12" style="padding-top:10px;"></iframe>
+					<!--<span>2017/09/28 周五 10:16</span>
+					<span>天气：晴转多云</span>-->
+				</div>
+				<div class="header-center">
+					北京电信IDC资源与业务视图
+				</div>
+				<div class="header-right fr">
+					<span>最新检测时间：</span>
+					<span id="time"></span>
+				</div>
+			</div>
+			<div class="order">
+				<div class="order-left fl">
+					<div class="gds">
+						<span class="spanname">网管发起工单数</span>&nbsp;
+						<span class="span1">0</span>
+						<span class="span1">7</span>
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+						<span class="span1">6</span>
+						<span class="span1">2</span>
+					</div>
+				</div>
+				<div class="order-center fl">
+					<div class="gds">
+						<span class="spanname">自服务发起工单数</span>&nbsp;
+						<span class="span1">0</span>
+						<span class="span1">2</span>
+						<span class="span1">6</span>
+						<span class="span1">8</span>
+						<span class="span1">6</span>
+						<span class="span1">1</span>
+					</div>
+				</div>
+				<div class="order-right fr">
+					<div class="gds">
+						<span class="spanname">超时工单数</span>&nbsp;
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+						<span class="span1">0</span>
+					</div>
+				</div>
+			</div>
+			<div class="content">
+				<div class="radar"></div>
+				<div class="bjmap-head">
+					
+				</div>
+				<div class="bjmap-title">
+					总体态势
+				</div>
+				<div class="content-left fl">
+					<div id="bjmap" class="fl">
+						
+					</div>
+					<div class="num fr">
+						<div class="customdev-num">
+							<div>客户设备数</div>
+							<div><span>244011</span><span>（台）</span></div>
+						</div>
+						<div class="custom-num">
+							<div>客户总数</div>
+							<div><span>571</span><span>（个）</span></div>
+						</div>
+						<div class="rack-num">
+							<div>机架总数</div>
+							<div><span>30247</span><span>（个）</span></div>
+						</div>
+						<div class="IP-num">
+							<div>IP总数</div>
+							<div><span>178218</span><span>（个）</span></div>
+						</div>
+						<div class="IDC-num">
+							<div>IDC总数</div>
+							<div><span>25</span><span>（个）</span></div>
+						</div>
+						<div class="port-num">
+							<div>万兆端口总数数</div>
+							<div><span>4666</span><span>（个）</span></div>
+						</div>
+					</div>
+				</div>
+				<div class="content-right fr">
+					<div class="flowchart-top">
+						<div class="flowchart-top-title">
+							机架占用率统计
+						</div>
+						<div id="rackflowchart"></div>
+					</div>
+					<div class="flowchart-middle">
+						<div class="flowchart-middle-title">
+							端口总数排名
+						</div>
+						<div id="portflowchart"></div>
+					</div>
+					<div class="flowchart-bottom">
+						<div class="flowchart-bottom-title">
+							申告平均处理时长（小时）
+						</div>
+						<div id="sgscflowchart"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" charset="UTF-8" src="public/js/jquery.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="public/js/bootstrap.js"></script>
+		<script src="public/echarts-2.2.7/build/dist/echarts-all.js" type="text/javascript"></script>
+		<script src="public/echarts-2.2.7/build/dist/echarts.js" type="text/javascript"></script>
+		<script type="text/javascript" src="public/js/highcharts.js"></script>
+		<script>
+//			window.onload=function(){
+//				fnDate();
+//				//定时器每秒调用一次fnDate()
+////				setInterval(function(){
+////					fnDate();
+////				},1000);
+//			}
+			$(function(){
+				fnDate();
+			})
+			//js 获取当前时间
+			function fnDate(){
+				var oTime=document.getElementById("time");
+				var date=new Date();
+				var year=date.getFullYear();//当前年份
+				var month=date.getMonth();//当前月份
+				var data=date.getDate();//天
+				var hours=date.getHours();//小时
+				var minute=date.getMinutes();//分
+				var second=date.getSeconds();//秒
+				var time=year+"/"+fnW((month+1))+"/"+fnW(data)+" "+fnW(hours)+":"+fnW(minute)+":"+fnW(second);
+				oTime.innerHTML=time;
+			}
+			//补位 当某个字段不是两位数时补0
+			function fnW(str){
+				var num;
+				str>=10?num=str:num="0"+str;
+				return num;
+			} 
+		</script>
+	 	<script>
+			require.config({
+			        paths: {
+			            echarts: 'public/echarts-2.2.7/build/dist/'
+			        }
+			    });
+			    require(
+			            [
+			                'echarts',
+			                'echarts/chart/map'
+			            ],
+			            function (ec) {
+			                // 基于准备好的dom，初始化echarts图表
+			                var myChart = ec.init(document.getElementById('bjmap'));
+			
+			                var mapType = [
+			                    'china',
+			                    // 23个省
+			                    '广东', '青海', '四川', '海南', '陕西',
+			                    '甘肃', '云南', '湖南', '湖北', '黑龙江',
+			                    '贵州', '山东', '江西', '河南', '河北',
+			                    '山西', '安徽', '福建', '浙江', '江苏',
+			                    '吉林', '辽宁', '台湾',
+			                    // 5个自治区
+			                    '新疆', '广西', '宁夏', '内蒙古', '西藏',
+			                    // 4个直辖市
+			                    '北京', '天津', '上海', '重庆',
+			                    // 2个特别行政区
+			                    '香港', '澳门'
+			                ];
+			                var option = {
+			                    color: ['#ff7f50'],
+			                    title: {
+			                        text : '',
+			                        subtext : ''
+			                    },
+			                    legend: { 
+									show:false,
+									orient: 'vertical',  
+									x:'left',  
+									data:['机架','IP','端口'],
+									selectedMode: 'single',
+									
+								},
+			                    tooltip : {  
+			//                  	showContent: false,
+									trigger: 'item', 
+									show:false,
+									formatter: function (params,ticket,callback) {  
+										var res = '' + params[1];  
+										var jijia = "";  
+										var ip = ""; 
+										var duankou = ""; 
+										
+										
+										for(var i = 0; i <option.series[0].data.length; i++)  
+										{  
+											if(option.series[0].data[i].name == params[1])  
+											{  
+												jijia = option.series[0].data[i].value;  
+											}  
+			  
+										}  
+										for(var j = 0; j <option.series[1].data.length; j++)  
+										{  
+											if(option.series[1].data[j].name == params[1])  
+											{  
+												ip = option.series[1].data[j].value;  
+											}  
+			  
+										} 
+										for(var m = 0; m <option.series[2].data.length; m++)  
+										{  
+											if(option.series[2].data[m].name == params[1])  
+											{  
+												duankou = option.series[2].data[m].value;  
+											}  
+			  
+										} 
+										
+										res += '<br/>'+"机架:"+jijia+'<br/>'+"IP:"+ip+'<br/>'+"端口:"+duankou+'<br/>';  
+			                          
+			                          setTimeout(function (){  
+			                            // 仅为了模拟异步回调,每隔1000毫秒刷新一次  
+			                            callback(ticket, res);  
+			                        }, 1000)  
+			                        return 'loading';  
+										
+									}  
+								}, 
+			                    series : [
+			                        {
+			                            name: '机架',
+			                            type: 'map',
+			                            mapType: '北京',
+			                            hoverable: false,
+			                            selectedMode : 'single',
+			                            itemStyle: {
+			                                normal: {
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: 'rgba(255,255,255,0.7)',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        },
+			//                                        formatter: '正常'
+			                                    },
+			                                    borderColor: 'rgba(255,255,255,0.8)',
+			                                    borderWidth: 1.5,
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                },
+			                                emphasis:{
+			                                    borderColor: '#ffffff',
+			                                    borderWidth: 2.3,
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: '#ffffff',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        }
+			                                    },
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                }
+			                            },
+			                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:112,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:115,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:122,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:132,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:142,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:152,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:162,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:172,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:182,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:192,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:212,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:312,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:222,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:232,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:242,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:252,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ],
+			                            roam: false,
+			                            hoverable: true,
+			                           
+			                                                        markPoint : {
+			                                                            symbol:'emptyCircle',
+												                        symbolSize : 5,      // 标注大小，半宽（半径）参数，当图形为方向或菱形则总宽度为symbolSize * 2
+												                       tooltip : {  
+			//                  	showContent: false,
+									trigger: 'item', 
+									show:true,
+									formatter: function (params,ticket,callback) {  
+										var res = '' + params[1];  
+										var jijia = "";  
+										var ip = ""; 
+										var duankou = ""; 
+										
+										
+										for(var i = 0; i <option.series[0].data.length; i++)  
+										{  
+											if(option.series[0].data[i].name == params[1])  
+											{  
+												jijia = option.series[0].data[i].value;  
+											}  
+			  
+										}  
+										for(var j = 0; j <option.series[1].data.length; j++)  
+										{  
+											if(option.series[1].data[j].name == params[1])  
+											{  
+												ip = option.series[1].data[j].value;  
+											}  
+			  
+										} 
+										for(var m = 0; m <option.series[2].data.length; m++)  
+										{  
+											if(option.series[2].data[m].name == params[1])  
+											{  
+												duankou = option.series[2].data[m].value;  
+											}  
+			  
+										} 
+										
+										res += '<br/>'+"机架:"+jijia+'<br/>'+"IP:"+ip+'<br/>'+"端口:"+duankou+'<br/>';  
+			                          
+			                          setTimeout(function (){  
+			                            // 仅为了模拟异步回调,每隔1000毫秒刷新一次  
+			                            callback(ticket, res);  
+			                        }, 1000)  
+			                        return 'loading';  
+										
+									}  
+								}, 
+												                        itemStyle: {
+												                            normal: {
+												                                borderColor: '#1e90ff',
+												                                borderWidth: 1,            // 标注边线线宽，单位px，默认为1
+												                                label: {
+												                                    show: false
+												                                }
+												                            },
+												                            emphasis: {
+												                                borderColor: '#87cefa',
+												                                borderWidth: 1.5,
+												                                label: {
+												                                    show: false
+												                                }
+												                            }
+												                        },
+			                                                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:112,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:115,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:122,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:132,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:142,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:152,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:162,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:172,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:182,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:192,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:212,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:312,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:222,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:232,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:242,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:252,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ]
+			                                                        },
+			                            geoCoord: {
+			                        '东城区': [116.40,39.98],
+			                        '北京市西单IDC数据中心': [116.35,39.92],
+			                        '北京市德胜IDC数据中心': [116.29,39.95],
+			                        '西城区': [116.27,39.92],
+			                        '崇文区': [116.46,39.83],
+			                        '宣武区': [116.25,39.87],
+			                        '朝阳区': [116.63,39.99],
+			                        '北京市静安IDC数据中心': [116.50,39.96],
+			                        '北京市兆维IDC数据中心': [116.57,39.94],
+			                        '北京市大郊亭IDC数据中心': [116.56,39.87],
+			                        '北京酒仙桥IDC数据中心': [116.52,40.03],
+			                        '北京市东四IDC数据中心': [116.48,39.91],
+			                        '北京市数字大厦IDC中心': [116.44,40.02],
+			                        '丰台区': [116.21,39.82],
+			                        '北京市洋桥IDC数据中心': [116.33,39.82],
+			                        '石景山区':[116.02,39.95],
+			                        '北京市西二旗IDC数据中心':[116.31,40.02],
+			                        '北京市永丰IDC数据中心':[116.21,40.08],
+			                        '海淀区':[116.24,40.04],
+			                        '门头沟区':[115.8,39.99],
+			                        '房山区':[115.83,39.75],
+			                        '通州区':[116.68,39.79],
+			                        '中兴马驹桥合作机房':[116.68,39.72],
+			                        '顺义区':[116.65,40.13],
+			                        '昌平区':[116.23,40.22],
+			                        '北京市北七家IDC数据中心':[116.44,40.17],
+			                        '北京市润泽IDC数据中心':[116.58,39.58],
+			                        '大兴区':[116.38,39.64],
+			                        '北京亦庄瀛海IDC':[116.38,39.70],
+			                        '北京市亦庄IDC数据中心':[116.48,39.70],
+			                        '怀柔区':[116.63,40.72],
+			                        '平谷区':[117.12,40.19],
+			                        '密云县':[116.99,40.45],
+			                        '延庆县':[116.10,40.51]
+			                    }
+			                        },
+			                        {
+			                            name: 'IP',
+			                            type: 'map',
+			                            mapType: '北京',
+			                            hoverable: false,
+			                            selectedMode : 'single',
+			                            itemStyle: {
+			                                normal: {
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: 'rgba(255,255,255,0.7)',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        },
+			//                                        formatter: '正常'
+			                                    },
+			                                    borderColor: 'rgba(255,255,255,0.8)',
+			                                    borderWidth: 1.5,
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                },
+			                                emphasis:{
+			                                    borderColor: '#ffffff',
+			                                    borderWidth: 2.3,
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: '#ffffff',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        }
+			                                    },
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                }
+			                            },
+			                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:135,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:136,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:137,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:138,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:139,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:140,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:141,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:142,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:143,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:144,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:145,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:146,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:147,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:148,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:149,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:150,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ],
+			                            roam: false,
+			                            hoverable: true,
+			                           
+			                                                        markPoint : {
+			                                                            symbol:'emptyCircle',
+												                        symbolSize : 5,      // 标注大小，半宽（半径）参数，当图形为方向或菱形则总宽度为symbolSize * 2
+												                       tooltip : {  
+			//                  	showContent: false,
+									trigger: 'item', 
+									show:true,
+									formatter: function (params,ticket,callback) {  
+										var res = '' + params[1];  
+										var jijia = "";  
+										var ip = ""; 
+										var duankou = ""; 
+										
+										
+										for(var i = 0; i <option.series[0].data.length; i++)  
+										{  
+											if(option.series[0].data[i].name == params[1])  
+											{  
+												jijia = option.series[0].data[i].value;  
+											}  
+			  
+										}  
+										for(var j = 0; j <option.series[1].data.length; j++)  
+										{  
+											if(option.series[1].data[j].name == params[1])  
+											{  
+												ip = option.series[1].data[j].value;  
+											}  
+			  
+										} 
+										for(var m = 0; m <option.series[2].data.length; m++)  
+										{  
+											if(option.series[2].data[m].name == params[1])  
+											{  
+												duankou = option.series[2].data[m].value;  
+											}  
+			  
+										} 
+										
+										res += '<br/>'+"机架:"+jijia+'<br/>'+"IP:"+ip+'<br/>'+"端口:"+duankou+'<br/>';  
+			                          
+			                          setTimeout(function (){  
+			                            // 仅为了模拟异步回调,每隔1000毫秒刷新一次  
+			                            callback(ticket, res);  
+			                        }, 1000)  
+			                        return 'loading';  
+										
+									}  
+								}, 
+												                        itemStyle: {
+												                            normal: {
+												                                borderColor: '#1e90ff',
+												                                borderWidth: 1,            // 标注边线线宽，单位px，默认为1
+												                                label: {
+												                                    show: false
+												                                }
+												                            },
+												                            emphasis: {
+												                                borderColor: '#87cefa',
+												                                borderWidth: 1.5,
+												                                label: {
+												                                    show: false
+												                                }
+												                            }
+												                        },
+			                                                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:135,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:136,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:137,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:138,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:139,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:140,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:141,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:142,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:143,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:144,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:145,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:146,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:147,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:148,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:149,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:150,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ]
+			                                                        },
+			                            geoCoord: {
+			                        '东城区': [116.40,39.98],
+			                        '北京市西单IDC数据中心': [116.35,39.92],
+			                        '北京市德胜IDC数据中心': [116.29,39.95],
+			                        '西城区': [116.27,39.92],
+			                        '崇文区': [116.46,39.83],
+			                        '宣武区': [116.25,39.87],
+			                        '朝阳区': [116.63,39.99],
+			                        '北京市静安IDC数据中心': [116.50,39.96],
+			                        '北京市兆维IDC数据中心': [116.57,39.94],
+			                        '北京市大郊亭IDC数据中心': [116.56,39.87],
+			                        '北京酒仙桥IDC数据中心': [116.52,40.03],
+			                        '北京市东四IDC数据中心': [116.48,39.91],
+			                        '北京市数字大厦IDC中心': [116.44,40.02],
+			                        '丰台区': [116.21,39.82],
+			                        '北京市洋桥IDC数据中心': [116.33,39.82],
+			                        '石景山区':[116.02,39.95],
+			                        '北京市西二旗IDC数据中心':[116.31,40.02],
+			                        '北京市永丰IDC数据中心':[116.21,40.08],
+			                        '海淀区':[116.24,40.04],
+			                        '门头沟区':[115.8,39.99],
+			                        '房山区':[115.83,39.75],
+			                        '通州区':[116.68,39.79],
+			                        '中兴马驹桥合作机房':[116.68,39.72],
+			                        '顺义区':[116.65,40.13],
+			                        '昌平区':[116.23,40.22],
+			                        '北京市北七家IDC数据中心':[116.44,40.17],
+			                        '北京市润泽IDC数据中心':[116.58,39.58],
+			                        '大兴区':[116.38,39.64],
+			                        '北京亦庄瀛海IDC':[116.38,39.70],
+			                        '北京市亦庄IDC数据中心':[116.48,39.70],
+			                        '怀柔区':[116.63,40.72],
+			                        '平谷区':[117.12,40.19],
+			                        '密云县':[116.99,40.45],
+			                        '延庆县':[116.10,40.51]
+			                    }
+			                        },
+			                        {
+			                            name: '端口',
+			                            type: 'map',
+			                            mapType: '北京',
+			                            hoverable: false,
+			                            selectedMode : 'single',
+			                            itemStyle: {
+			                                normal: {
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: 'rgba(255,255,255,0.7)',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        },
+			//                                        formatter: '正常'
+			                                    },
+			                                    borderColor: 'rgba(255,255,255,0.8)',
+			                                    borderWidth: 1.5,
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                },
+			                                emphasis:{
+			                                    borderColor: '#ffffff',
+			                                    borderWidth: 2.3,
+			                                    label: {
+			                                        show: false,
+			                                        textStyle: {
+			                                            color: '#ffffff',
+			                                            fontFamily:'Microsoft YaHei'
+			                                        }
+			                                    },
+			                                    areaStyle: {
+			                                        color: 'rgba(31,118,163,0.5)'
+			                                    }
+			                                }
+			                            },
+			                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:140,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:150,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:160,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:170,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:180,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:190,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:200,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:210,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:220,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:230,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:240,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:250,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:260,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:270,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:280,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:290,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ],
+			                            roam: false,
+			                            hoverable: true,
+			                           
+			                                                        markPoint : {
+			                                                            symbol:'emptyCircle',
+												                        symbolSize : 5,      // 标注大小，半宽（半径）参数，当图形为方向或菱形则总宽度为symbolSize * 2
+												                       tooltip : {  
+			//                  	showContent: false,
+									trigger: 'item', 
+									show:true,
+									formatter: function (params,ticket,callback) {  
+										var res = '' + params[1];  
+										var jijia = "";  
+										var ip = ""; 
+										var duankou = ""; 
+										
+										
+										for(var i = 0; i <option.series[0].data.length; i++)  
+										{  
+											if(option.series[0].data[i].name == params[1])  
+											{  
+												jijia = option.series[0].data[i].value;  
+											}  
+			  
+										}  
+										for(var j = 0; j <option.series[1].data.length; j++)  
+										{  
+											if(option.series[1].data[j].name == params[1])  
+											{  
+												ip = option.series[1].data[j].value;  
+											}  
+			  
+										} 
+										for(var m = 0; m <option.series[2].data.length; m++)  
+										{  
+											if(option.series[2].data[m].name == params[1])  
+											{  
+												duankou = option.series[2].data[m].value;  
+											}  
+			  
+										} 
+										
+										res += '<br/>'+"机架:"+jijia+'<br/>'+"IP:"+ip+'<br/>'+"端口:"+duankou+'<br/>';  
+			                          
+			                          setTimeout(function (){  
+			                            // 仅为了模拟异步回调,每隔1000毫秒刷新一次  
+			                            callback(ticket, res);  
+			                        }, 1000)  
+			                        return 'loading';  
+										
+									}  
+								}, 
+												                        itemStyle: {
+												                            normal: {
+												                                borderColor: '#1e90ff',
+												                                borderWidth: 1,            // 标注边线线宽，单位px，默认为1
+												                                label: {
+												                                    show: false
+												                                }
+												                            },
+												                            emphasis: {
+												                                borderColor: '#87cefa',
+												                                borderWidth: 1.5,
+												                                label: {
+												                                    show: false
+												                                }
+												                            }
+												                        },
+			                                                            data : [
+			                            //                                    {name: "东城区",symbol: 'image:///public/img/building.png',x:217,y:327},
+			                            {name: "北京市西单IDC数据中心",value:140,symbol: '',},
+			                            {name: "北京市德胜IDC数据中心",value:150,symbol: '',},
+			                            //                                                                {name: "崇文区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "宣武区",symbol: 'image:///public/img/building.png'},
+			                            //                                    {name: "朝阳区",symbol: '',x:213,y:280,selected:true,},
+			                            {name: "北京市静安IDC数据中心",value:160,symbol: '',},
+			                            {name: "北京市兆维IDC数据中心",value:170,symbol: '',},
+			                            {name: "北京市大郊亭IDC数据中心",value:180,symbol: '',},
+			                            {name: "北京市东四IDC数据中心",value:190,symbol: '',},
+			                            {name: "北京市数字大厦IDC中心",value:200,symbol: '',},
+			                            //                                    {name: "朝阳区",symbol: '',x:225,y:305},
+			                            //                                    {name: "朝阳区",symbol: '',x:205,y:305},
+			
+			                            {name: "北京市洋桥IDC数据中心",value:210,symbol: '',},
+			                            //                                                                {name: "石景山区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市西二旗IDC数据中心",value:220,symbol: '',},
+			                            {name: "北京市永丰IDC数据中心",value:230,symbol: '',},
+			                            //                                                                {name: "门头沟区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "房山区",},
+			                            {name: "中兴马驹桥合作机房",value:240,symbol: '',},
+			                            //                                    {name: "通州区",symbol: 'image:///public/img/building.png',x:285,y:355},
+			                            //                                                                {name: "顺义区",symbol: 'image:///public/img/building.png'},
+			                            {name: "北京市北七家IDC数据中心",value:250,symbol: '',},
+			                            {name: "北京亦庄瀛海IDC",value:260,symbol:'',},
+			                            {name: "北京市亦庄IDC数据中心",value:270,symbol:'',},
+			                            {name: "北京市润泽IDC数据中心",value:280,symbol:'',},
+			                            {name: "北京酒仙桥IDC数据中心",value:290,symbol: '',}
+			                            //                                    {name: "大兴区",symbol: 'image:///public/img/building.png',x:210,y:400},
+			                            //                                                                {name: "怀柔区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "平谷区",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "密云县",symbol: 'image:///public/img/building.png'},
+			                            //                                                                {name: "延庆县",symbol: 'image:///public/img/building.png'},
+			                        ]
+			                                                        },
+			                            geoCoord: {
+			                        '东城区': [116.40,39.98],
+			                        '北京市西单IDC数据中心': [116.35,39.92],
+			                        '北京市德胜IDC数据中心': [116.29,39.95],
+			                        '西城区': [116.27,39.92],
+			                        '崇文区': [116.46,39.83],
+			                        '宣武区': [116.25,39.87],
+			                        '朝阳区': [116.63,39.99],
+			                        '北京市静安IDC数据中心': [116.50,39.96],
+			                        '北京市兆维IDC数据中心': [116.57,39.94],
+			                        '北京市大郊亭IDC数据中心': [116.56,39.87],
+			                        '北京酒仙桥IDC数据中心': [116.52,40.03],
+			                        '北京市东四IDC数据中心': [116.48,39.91],
+			                        '北京市数字大厦IDC中心': [116.44,40.02],
+			                        '丰台区': [116.21,39.82],
+			                        '北京市洋桥IDC数据中心': [116.33,39.82],
+			                        '石景山区':[116.02,39.95],
+			                        '北京市西二旗IDC数据中心':[116.31,40.02],
+			                        '北京市永丰IDC数据中心':[116.21,40.08],
+			                        '海淀区':[116.24,40.04],
+			                        '门头沟区':[115.8,39.99],
+			                        '房山区':[115.83,39.75],
+			                        '通州区':[116.68,39.79],
+			                        '中兴马驹桥合作机房':[116.68,39.72],
+			                        '顺义区':[116.65,40.13],
+			                        '昌平区':[116.23,40.22],
+			                        '北京市北七家IDC数据中心':[116.44,40.17],
+			                        '北京市润泽IDC数据中心':[116.58,39.58],
+			                        '大兴区':[116.38,39.64],
+			                        '北京亦庄瀛海IDC':[116.38,39.70],
+			                        '北京市亦庄IDC数据中心':[116.48,39.70],
+			                        '怀柔区':[116.63,40.72],
+			                        '平谷区':[117.12,40.19],
+			                        '密云县':[116.99,40.45],
+			                        '延庆县':[116.10,40.51]
+			                    }
+			                        },
+			                    ]
+			                };
+			                // 为echarts对象加载数据
+			                myChart.setOption(option, true);
+			//              myChart.chart.map.showTip({'name':'地名'})
+			                window.onresize = myChart.resize;
+			            }
+			
+			    );
+	 	
+			$(function () {
+		        $('#rackflowchart').highcharts({
+		            chart: {
+		                type: 'bar',
+		                backgroundColor:'rgba(52,81,102,0)',
+		                marginRight:40,
+		                marginBottom: 40,
+		                marginLeft:60,
+		                marginTop:20
+		            },
+		            title: {
+		                text: '',
+		                style:{
+		                    color:'#fff',
+		                    fontFamily:'Microsoft YaHei'
+		                },
+		                floating: true
+		            },
+		            xAxis: {
+		                categories: ['兆维', '永丰',  '马驹桥','润泽'],
+		                labels: {
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		            },
+		            yAxis: {
+		                min:0, // 定义最小值
+		                max:5500, // 定义Y轴 最大值
+		                gridLineWidth:1,
+		                minTickInterval:null,
+		                tickPixelInterval:100,//设置横坐标密度
+		                tickInterval:1100, // 刻度值
+		                title: {
+		                    text: ''
+		                },
+		                labels: {
+		                	
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		
+		            },
+		            legend: {
+		                borderColor: '#fff',
+		                backgroundColor: 'rgba(255,255,255,0.1)',
+		                itemStyle: { cursor: 'pointer', color: '#fff',fontFamily:'Microsoft YaHei' },
+		                reversed: true,
+		                enabled: false
+		            },
+		            plotOptions: {
+		                series: {
+		                    stacking: 'normal'
+		                },
+		                bar: {
+		                    dataLabels: {
+		                        enabled: false,
+		                        style:{
+		                            color:'#fff',
+		                            fontFamily:'Microsoft YaHei'
+		                        },
+		                    }
+		                }
+		            },
+		            credits: {
+		                enabled: false
+		            },
+		            series: [{
+		                name: '空闲',
+		                color:'#7774f1',
+		                data: [336,344,273,779]
+		            }, {
+		                name: '非空闲',
+		                color:'#00ebd8',
+		                data: [4969,4127,2585,1845]
+		            }]
+		        });
+		    });
+		    $(function () {
+		        $('#portflowchart').highcharts({
+		            chart: {
+		                type: 'line',
+		                backgroundColor:'rgba(52,81,102,0)',
+		                marginRight:30,
+		                marginBottom: 50,
+		                marginLeft:60,
+		                marginTop:30
+		            },
+		            title: {
+		                text: '',
+		                style:{
+		                    color:'#fff',
+		                    fontFamily:'Microsoft YaHei'
+		                },
+		                floating: true
+		            },
+		            subtitle: {
+		                text: ''
+		            },
+		            xAxis: {
+		
+		                categories: ['兆维', '永丰', '西二旗', '酒仙桥', '静安', '东四'],
+		                labels: {
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		            },
+		            yAxis: {
+		                min:0, // 定义最小值
+		                max:2500, // 定义Y轴 最大值
+		                gridLineWidth:1,
+		                minTickInterval:null,
+		                tickPixelInterval:100,//设置横坐标密度
+		                tickInterval:500, // 刻度值
+		                title: {
+		                    text: ''
+		                },
+		                labels: {
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		            },
+		            legend: {
+		                borderColor: '#fff',
+		                backgroundColor: 'rgba(255,255,255,0.1)',
+		                itemStyle: { cursor: 'pointer', color: '#fff',fontFamily:'Microsoft YaHei' },
+		                reversed: true,
+		                enabled: false
+		            },
+		            tooltip: {
+		                enabled: true,
+		                formatter: function() {
+		                    return '<b>'+ this.series.name +'</b><br/>'+this.x +': '+ this.y +'°C';
+		                }
+		            },
+		            plotOptions: {
+		                line: {
+		                    dataLabels: {
+		                        enabled: true,
+		                        style:{
+		                            color:'#fff',
+		                            fontFamily:'Microsoft YaHei'
+		                        },
+		                    },
+		                    enableMouseTracking: false
+		                }
+		            },
+		            credits: {
+		                enabled: false
+		            },
+		            series: [{
+		                name: '端口数量',
+		                color:'#00ebd8',
+		                data: [2207, 1127, 994, 698, 536, 450]
+		            }]
+		        });
+		    });
+		    $(function () {
+		        $('#sgscflowchart').highcharts({
+		            chart: {
+		                type: 'column',
+		                backgroundColor:'rgba(52,81,102,0)',
+		                marginRight:30,
+		                marginBottom: 50,
+		                marginLeft:50,
+		                marginTop:30
+		            },
+		            title: {
+		                text: '',
+		                style:{
+		                    color:'#fff',
+		                    fontFamily:'Microsoft YaHei'
+		                },
+		                floating: true
+		            },
+		            subtitle: {
+		                text: ''
+		            },
+		            legend: {
+		                borderColor: '#fff',
+		                backgroundColor: 'rgba(255,255,255,0.1)',
+		                itemStyle: { cursor: 'pointer', color: '#fff',fontFamily:'Microsoft YaHei' },
+		                reversed: true,
+		                enabled: false
+		            },
+		            xAxis: {
+		                categories: [
+		                    '8月',
+		                    '9月',
+		                    '10月',
+		                    '11月',
+		                    '12月',
+		                    '1月'
+		                ],
+		                labels: {
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		            },
+		            yAxis: {
+		                min:0, // 定义最小值
+		                max:2.5, // 定义Y轴 最大值
+		                gridLineWidth:1,
+		                minTickInterval:null,
+		                tickPixelInterval:100,//设置横坐标密度
+		                tickInterval:0.5, // 刻度值
+		                title: {
+		                    text: ''
+		                },
+		                labels: {
+		                    style:{
+		                        color:'#fff',
+		                        fontFamily:'Microsoft YaHei'
+		                    },
+		                }
+		            },
+		            tooltip: {
+		                headerFormat: '<span style="color:#000;font-size:10px">{point.key}</span><table>',
+		                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+		                '<td style="color:#000;padding:0"><b style="color:#000;padding:0">{point.y:.1f} 小时</b></td></tr>',
+		                footerFormat: '</table>',
+		                shared: true,
+		                useHTML: true
+		            },
+		            plotOptions: {
+		                column: {
+		                    pointPadding: 0.2,
+		                    borderWidth: 0,
+		                    dataLabels: {
+		                        enabled: true,
+		                        style:{
+		                            color:'#fff',
+		                            fontFamily:'Microsoft YaHei'
+		                        },
+		                    },
+		                }
+		            },
+		            credits: {
+		                enabled: false
+		            },
+		            series: [{
+		                name: '处理平均时长',
+		                color:'#00ebd8',
+		                data: [1.25, 0.85, 1.0, 1.75,2.0,1.5]
+		
+		            }]
+		        });
+		    });
+	 	</script>
+	</body>
+</html>

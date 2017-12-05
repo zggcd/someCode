@@ -1,0 +1,378 @@
+﻿LinkEditorDemo = function () {
+    this.box = new ElementBox();
+    this.network = demo.Util.createDraggableNetwork(this.box);
+    this.sheet = new PropertySheet(this.box);
+    this.imageNodesDiv = document.createElement('div');
+    this.shapeNodesDiv = document.createElement('div');
+    this.linksDiv = document.createElement('div');
+    this.accordion = new Accordion();
+     
+};
+//注册图片方法 
+function registerNormalImage(url, name,width,height) {
+	this.box = new ElementBox();
+    this.network = demo.Util.createDraggableNetwork(this.box);
+    this.sheet = new PropertySheet(this.box);
+    this.imageNodesDiv = document.createElement('div');
+    this.shapeNodesDiv = document.createElement('div');
+    this.linksDiv = document.createElement('div');
+    this.accordion = new Accordion();
+ var image = new Image();
+ 
+ image.src = url;
+ image.onload = function() {
+ twaver.Util.registerImage(name, image, width, height)
+ image.onload = null;
+ network.invalidateElementUIs();
+ };
+ }
+//注册图片
+registerNormalImage('public/img/sb1-bd.png','设备',50,50);
+registerNormalImage('public/img/sb2-bd.png','设备1',50,50);
+registerNormalImage('public/img/sb3-bd.png','设备2',50,50);
+registerNormalImage('public/img/sjzx-bd.png','海淀数据中心',50,50);   
+registerNormalImage('public/img/sjzx-bd.png','北七家数据中心',50,50);   
+registerNormalImage('public/img/sjzx-bd.png','东城数据中心',50,50);   
+
+ 
+
+twaver.Util.ext('LinkEditorDemo', Object, {
+    init: function () {
+	    var box = new twaver.ElementBox();
+	    var network = new twaver.vector.Network(box);  
+	 
+	    document.body.appendChild(network.getView());
+	    network.adjustBounds({x:100, y:130, width:1200, height:500});
+	 
+	    var node1 = new twaver.Node();
+	    node1.setName("海淀数据中心");
+	    node1.setLocation(100, 160);
+	    node1.setImage('海淀数据中心');
+	    box.add(node1);  
+	 
+	    var node2 = new twaver.Node();
+	    node2.setName("北七家数据中心");
+	    node2.setLocation(300, 200);
+	    node2.setImage('海淀数据中心');
+	    box.add(node2); 
+	    
+	    var node3 = new twaver.Node();
+	    node3.setName("东城数据中心");
+	    node3.setLocation(80, 240);
+	    node3.setImage('海淀数据中心');
+	    box.add(node3); 
+	    
+	    var node4 = new twaver.Node();
+	    node4.setName("设备");
+	    node4.setImage('设备');
+	    node4.setLocation(500, 120);
+	    box.add(node4); 
+	    
+	    var node5 = new twaver.Node();
+	    node5.setName("设备");
+	    node5.setImage('设备');
+	    node5.setLocation(510, 200);
+	    box.add(node5); 
+	    
+	    var node6 = new twaver.Node();
+	    node6.setName("设备");
+	    node6.setImage('设备');
+	    node6.setLocation(500, 280);
+	    box.add(node6);
+	    
+	    var node7 = new twaver.Node();
+	    node7.setName("设备");
+	    node7.setImage('设备1');
+	    node7.setLocation(700, 80);
+	    box.add(node7); 
+	    
+	    var node8 = new twaver.Node();
+	    node8.setName("设备");
+	    node8.setImage('设备1');
+	    node8.setLocation(700, 160);
+	    box.add(node8); 
+	    
+	    var node9 = new twaver.Node();
+	    node9.setName("设备");
+	    node9.setImage('设备1');
+	    node9.setLocation(700, 240);
+	    box.add(node9); 
+	    
+	    var node10 = new twaver.Node();
+	    node10.setName("设备");
+	    node10.setImage('设备1');
+	    node10.setLocation(700, 320);
+	    box.add(node10);
+	    
+	    var node11 = new twaver.Node();
+	    node11.setName("设备");
+	    node11.setImage('设备2');
+	    node11.setLocation(950, 0);
+	    box.add(node11); 
+	    
+	    var node12 = new twaver.Node();
+	    node12.setName("设备");
+	    node12.setImage('设备2');
+	    node12.setLocation(880, 70);
+	    box.add(node12);
+	    
+	    var node13 = new twaver.Node();
+	    node13.setName("设备");
+	    node13.setImage('设备2');
+	    node13.setLocation(900, 160);
+	    box.add(node13); 
+	    
+	    var node14 = new twaver.Node();
+	    node14.setName("设备");
+	    node14.setImage('设备2');
+	    node14.setLocation(920, 240);
+	    box.add(node14); 
+	    
+	    var node15 = new twaver.Node();
+	    node15.setName("设备");
+	    node15.setImage('设备2');
+	    node15.setLocation(950, 340);
+	    box.add(node15); 
+	    
+	    var node16 = new twaver.Node();
+	    node16.setName("设备");
+	    node16.setImage('设备2');
+	    node16.setLocation(920, 420);
+	    box.add(node16);
+	 
+	    var link = new twaver.Link(node2, node1);
+	    link.setStyle('link.color','#49d9fe');
+	    link.setStyle('link.width',1);
+	    link.setStyle('link.xradius','200');
+	    link.setStyle('link.yradius','100');
+	    link.setStyle('arrow.to',true);
+	    link.setStyle('arrow.to.color','#49d9fe');
+	    link.setStyle('arrow.to.width','20');
+	    link.setStyle('arrow.to.height','6');
+	    link.setStyle('arrow.to.xoffset',50);
+	    link.setStyle('link.type','orthogonal.V.H');
+	    
+	    var link1 = new twaver.Link(node2, node3);
+	    link1.setStyle('link.color','#49d9fe');
+	    link1.setStyle('link.width',1);
+	    link1.setStyle('link.xradius','200');
+	    link1.setStyle('link.yradius','100');
+	    link1.setStyle('arrow.to',true);
+	    link1.setStyle('arrow.to.color','#49d9fe');
+	    link1.setStyle('arrow.to.width','20');
+	    link1.setStyle('arrow.to.height','6');
+	    link1.setStyle('arrow.to.xoffset',50);
+	    link1.setStyle('link.type','orthogonal.V.H');
+	    var link2 = new twaver.Link(node2, node4);
+	    link2.setStyle('link.color','#49d9fe');
+	    link2.setStyle('link.width',1);
+	    link2.setStyle('link.xradius','200');
+	    link2.setStyle('link.yradius','100');
+	    link2.setStyle('arrow.to',true);
+	    link2.setStyle('arrow.to.color','#49d9fe');
+	    link2.setStyle('arrow.to.width','20');
+	    link2.setStyle('arrow.to.height','6');
+	    link2.setStyle('arrow.to.xoffset',50);
+	    link2.setStyle('link.type','orthogonal.V.H');
+	    var link3 = new twaver.Link(node2, node5);
+	    link3.setStyle('link.color','#49d9fe');
+	    link3.setStyle('link.width',1);
+	    link3.setStyle('link.xradius','200');
+	    link3.setStyle('link.yradius','100');
+	    link3.setStyle('arrow.to',true);
+	    link3.setStyle('arrow.to.color','#49d9fe');
+	    link3.setStyle('arrow.to.width','20');
+	    link3.setStyle('arrow.to.height','6');
+	    link3.setStyle('arrow.to.xoffset',50);
+	    link3.setStyle('link.type','orthogonal.V.H');
+	    var link4 = new twaver.Link(node2, node6);
+	    link4.setStyle('link.color','#49d9fe');
+	    link4.setStyle('link.width',1);
+	    link4.setStyle('link.xradius','200');
+	    link4.setStyle('link.yradius','100');
+	    link4.setStyle('arrow.to',true);
+	    link4.setStyle('arrow.to.color','#49d9fe');
+	    link4.setStyle('arrow.to.width','20');
+	    link4.setStyle('arrow.to.height','6');
+	    link4.setStyle('arrow.to.xoffset',50);
+	    link4.setStyle('link.type','orthogonal.V.H');
+	    var link5 = new twaver.Link(node4, node7);
+	    link5.setStyle('link.color','#49d9fe');
+	    link5.setStyle('link.width',1);
+	    link5.setStyle('link.xradius','200');
+	    link5.setStyle('link.yradius','100');
+	    link5.setStyle('arrow.to',true);
+	    link5.setStyle('arrow.to.color','#49d9fe');
+	    link5.setStyle('arrow.to.width','20');
+	    link5.setStyle('arrow.to.height','6');
+	    link5.setStyle('arrow.to.xoffset',50);
+	    link5.setStyle('link.type','orthogonal.V.H');
+	    var link6 = new twaver.Link(node4, node9);
+	    link6.setStyle('link.color','#49d9fe');
+	    link6.setStyle('link.width',1);
+	    link6.setStyle('link.xradius','200');
+	    link6.setStyle('link.yradius','100');
+	    link6.setStyle('arrow.to',true);
+	    link6.setStyle('arrow.to.color','#49d9fe');
+	    link6.setStyle('arrow.to.width','20');
+	    link6.setStyle('arrow.to.height','6');
+	    link6.setStyle('arrow.to.xoffset',50);
+	    link6.setStyle('link.type','orthogonal.V.H');
+	    var link7 = new twaver.Link(node5, node8);
+	    link7.setStyle('link.color','#49d9fe');
+	    link7.setStyle('link.width',1);
+	    link7.setStyle('link.xradius','200');
+	    link7.setStyle('link.yradius','100');
+	    link7.setStyle('arrow.to',true);
+	    link7.setStyle('arrow.to.color','#49d9fe');
+	    link7.setStyle('arrow.to.width','20');
+	    link7.setStyle('arrow.to.height','6');
+	    link7.setStyle('arrow.to.xoffset',50);
+	    link7.setStyle('link.type','orthogonal.V.H');
+	    var link8 = new twaver.Link(node6, node8);
+	    link8.setStyle('link.color','#49d9fe');
+	    link8.setStyle('link.width',1);
+	    link8.setStyle('link.xradius','200');
+	    link8.setStyle('link.yradius','100');
+	    link8.setStyle('arrow.to',true);
+	    link8.setStyle('arrow.to.color','#49d9fe');
+	    link8.setStyle('arrow.to.width','20');
+	    link8.setStyle('arrow.to.height','6');
+	    link8.setStyle('arrow.to.xoffset',50);
+	    link8.setStyle('link.type','orthogonal.V.H');
+	    var link9 = new twaver.Link(node6, node9);
+	    link9.setStyle('link.color','#49d9fe');
+	    link9.setStyle('link.width',1);
+	    link9.setStyle('link.xradius','200');
+	    link9.setStyle('link.yradius','100');
+	    link9.setStyle('arrow.to',true);
+	    link9.setStyle('arrow.to.color','#49d9fe');
+	    link9.setStyle('arrow.to.width','20');
+	    link9.setStyle('arrow.to.height','6');
+	    link9.setStyle('arrow.to.xoffset',50);
+	    link9.setStyle('link.type','orthogonal.V.H');
+	    var link10 = new twaver.Link(node6, node10);
+	    link10.setStyle('link.color','#49d9fe');
+	    link10.setStyle('link.width',1);
+	    link10.setStyle('link.xradius','200');
+	    link10.setStyle('link.yradius','100');
+	    link10.setStyle('arrow.to',true);
+	    link10.setStyle('arrow.to.color','#49d9fe');
+	    link10.setStyle('arrow.to.width','20');
+	    link10.setStyle('arrow.to.height','6');
+	    link10.setStyle('arrow.to.xoffset',50);
+	    link10.setStyle('link.type','orthogonal.V.H');
+	    var link11 = new twaver.Link(node7, node11);
+	    link11.setStyle('link.color','#49d9fe');
+	    link11.setStyle('link.width',1);
+	    link11.setStyle('link.xradius','200');
+	    link11.setStyle('link.yradius','100');
+	    link11.setStyle('arrow.to',true);
+	    link11.setStyle('arrow.to.color','#49d9fe');
+	    link11.setStyle('arrow.to.width','20');
+	    link11.setStyle('arrow.to.height','6');
+	    link11.setStyle('arrow.to.xoffset',50);
+	    link11.setStyle('link.type','orthogonal.V.H');
+	    var link12 = new twaver.Link(node7, node12);
+	    link12.setStyle('link.color','#49d9fe');
+	    link12.setStyle('link.width',1);
+	    link12.setStyle('link.xradius','200');
+	    link12.setStyle('link.yradius','100');
+	    link12.setStyle('arrow.to',true);
+	    link12.setStyle('arrow.to.color','#49d9fe');
+	    link12.setStyle('arrow.to.width','20');
+	    link12.setStyle('arrow.to.height','6');
+	    link12.setStyle('arrow.to.xoffset',50);
+	    link12.setStyle('link.type','orthogonal.V.H');
+	    var link13 = new twaver.Link(node8, node12);
+	    link13.setStyle('link.color','#49d9fe');
+	    link13.setStyle('link.width',1);
+	    link13.setStyle('link.xradius','200');
+	    link13.setStyle('link.yradius','100');
+	    link13.setStyle('arrow.to',true);
+	    link13.setStyle('arrow.to.color','#49d9fe');
+	    link13.setStyle('arrow.to.width','20');
+	    link13.setStyle('arrow.to.height','6');
+	    link13.setStyle('arrow.to.xoffset',50);
+	    link13.setStyle('link.type','orthogonal.V.H');
+	    var link14 = new twaver.Link(node8, node13);
+	    link14.setStyle('link.color','#49d9fe');
+	    link14.setStyle('link.width',1);
+	    link14.setStyle('link.xradius','100');
+	    link14.setStyle('link.yradius','100');
+	    link14.setStyle('arrow.to',true);
+	    link14.setStyle('arrow.to.color','#49d9fe');
+	    link14.setStyle('arrow.to.width','20');
+	    link14.setStyle('arrow.to.height','6');
+	    link14.setStyle('arrow.to.xoffset',50);
+	    link14.setStyle('link.type','orthogonal.V.H');
+	    var link15 = new twaver.Link(node8, node14);
+	    link15.setStyle('link.color','#49d9fe');
+	    link15.setStyle('link.width',1);
+	    link15.setStyle('link.xradius','200');
+	    link15.setStyle('link.yradius','100');
+	    link15.setStyle('arrow.to',true);
+	    link15.setStyle('arrow.to.color','#49d9fe');
+	    link15.setStyle('arrow.to.width','20');
+	    link15.setStyle('arrow.to.height','6');
+	    link15.setStyle('arrow.to.xoffset',50);
+	    link15.setStyle('link.type','orthogonal.V.H');
+	    var link16 = new twaver.Link(node9, node15);
+	    link16.setStyle('link.color','#49d9fe');
+	    link16.setStyle('link.width',1);
+	    link16.setStyle('link.xradius','200');
+	    link16.setStyle('link.yradius','100');
+	    link16.setStyle('arrow.to',true);
+	    link16.setStyle('arrow.to.color','#49d9fe');
+	    link16.setStyle('arrow.to.width','20');
+	    link16.setStyle('arrow.to.height','6');
+	    link16.setStyle('arrow.to.xoffset',50);
+	    link16.setStyle('link.type','orthogonal.V.H');
+	    var link17 = new twaver.Link(node10, node14);
+	    link17.setStyle('link.color','#49d9fe');
+	    link17.setStyle('link.width',1);
+	    link17.setStyle('link.xradius','200');
+	    link17.setStyle('link.yradius','100');
+	    link17.setStyle('arrow.to',true);
+	    link17.setStyle('arrow.to.color','#49d9fe');
+	    link17.setStyle('arrow.to.width','20');
+	    link17.setStyle('arrow.to.height','6');
+	    link17.setStyle('arrow.to.xoffset',50);
+	    link17.setStyle('link.type','orthogonal.V.H');
+	    var link18 = new twaver.Link(node10, node16);
+	    link18.setStyle('link.color','#49d9fe');
+	    link18.setStyle('link.width',1);
+	    link18.setStyle('link.xradius','200');
+	    link18.setStyle('link.yradius','100');
+	    link18.setStyle('arrow.to',true);
+	    link18.setStyle('arrow.to.color','#49d9fe');
+	    link18.setStyle('arrow.to.width','20');
+	    link18.setStyle('arrow.to.height','6');
+	    link18.setStyle('arrow.to.xoffset',50);
+	    link18.setStyle('link.type','orthogonal.V.H');
+
+	    box.add(link);
+	    box.add(link1);
+	    box.add(link2);
+	    box.add(link3);
+	    box.add(link4);
+	    box.add(link5);
+	    box.add(link6);
+	    box.add(link7);
+	    box.add(link8);
+	    box.add(link9);
+	    box.add(link10);
+	    box.add(link11);
+	    box.add(link12);
+	    box.add(link13);
+	    box.add(link14);
+	    box.add(link15);
+	    box.add(link16);
+	    box.add(link17);
+	    box.add(link18);
+	    twaver.Styles.setStyle('label.color','#fff'); 
+        twaver.Styles.setStyle('label2.color','#57ab9a'); 
+        twaver.Styles.setStyle('select.color','#ef8200'); 
+    },
+    
+});
