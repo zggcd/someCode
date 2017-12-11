@@ -8,31 +8,30 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>北京电信IDC云资源池总体视图</title>
-		<link rel="stylesheet" type="text/css" href="public/css/bootstrap.css"></link>
-		<link rel="stylesheet" type="text/css" href="public/css/style.css"></link>
 		<style>
-			html,body,.wrapper{height:100%;width:100%;}
-			*,html,body{font-family: "微软雅黑";color:#fff;}
+			*,html,body{box-sizing:border-box;color:#fff;font-family:"微软雅黑";}
+			html,body,.wrapper{height:100%;width:100%;overflow:hidden;}
 			body{background:url("public/img/bjidc-bg.png");background-size:cover;background-repeat:no-repeat;}
-			.fl{float:left;}
-			.fr{float:right;}
+			.fl{float:left;}.fr{float:right;}
 			.wrapper{position:relative;padding-top:25px;}
 			.header{position:absolute;width:100%;height:40px;line-height:40px;background:url("public/img/header-bg.png");background-size:100% 100%;background-repeat:no-repeat;}
-			.header-left{margin-left:20px;}
-			.header-right{margin-right:20px;}
+			.header-left{margin-left:20px;}.header-right{margin-right:20px;}
 			.header-left span,.header-right span{color:#49d9fe;}
-			.header-center{position: absolute;top:0;left:50%;margin-left:-127px;font-size:22px;}
+			.header-center{position:absolute;top:0;left:50%;margin-left:-127px;font-size:22px;}
 			.content{position:absolute;width:50%;height:100%;top:70px;padding:20px 20px 0px 20px;}
-			.content-left{width:100%;height:100%;background-size:100% 100%;background-repeat:no-repeat;}
-			.content-right{width:100%;height:100%;}
 			.num{width:100%;height:100%;}
 			.company{width:100%;height:55px;margin-bottom:6px;margin-left:60px;}
-			.company-top1{background:url("public/img/top1.png");}
-			.company-top2{background:url("public/img/top2.png");}
+			.company-top1{background:url("public/img/top1.png");}.company-top2{background:url("public/img/top2.png");}
 			.company-top1,.company-top2{width:48px;height:48px;background-size:100% 100%;background-repeat:no-repeat;}
 			.companyname{width:260px;height:100%;padding-top:15px;padding-left:5%;color:#a5d5ff;background:url("public/img/rank-bg.png");background-size:100% 100%;background-repeat:no-repeat;}
-			.view{position:absolute;width:100%;height:100%;top:150px;left:50%;margin-left:-38%;}
-			#main{width:80%;height:80%;}
+			.view{position:relative;width:100%;height:100%;font-weight:bold;background:url("public/img/idczyc-bg1.png");background-repeat:no-repeat;background-position:center center;background-size:43%;}
+			.dataLeft{position:absolute;width:50%;height:100%;}.dataRight{position:absolute;width:50%;height:100%;left:50%;}
+			.dataLeftBg{position:absolute;width:171px;height:64px;padding-left:30px;padding-top:20px;background:url("public/img/data-left-bg.png");background-repeat:no-repeat;}
+			.dataRightBg{position:absolute;width:171px;height:64px;padding-left:30px;padding-top:20px;background:url("public/img/data-right-bg.png");background-repeat:no-repeat;}
+			.leftLocal1{right:61%;bottom:39%;}.leftLocal2{right:54%;bottom:29%;}.leftLocal3{right:47%;bottom:19%;}.leftLocal4{right:40%;bottom:9%;}
+			.rightLocal1{left:40%;top:9%;}.rightLocal2{left:47%;top:19%;}.rightLocal3{left:54%;top:29%;}.rightLocal4{left:61%;top:39%;}
+			.viewTxt{position:absolute;width:100%;height:100%;left:50%;margin-left:-35px;}
+			.viewTxt span{font-size:18px;color:#4092d8;}
 		</style>
 	</head>
 	<body>
@@ -48,7 +47,7 @@
 				</div>
 			</div>
 			<div class="content">
-				<div class="content-left fl">
+				<div class="fl" style="width:100%">
 					<div class="num">
 						<div class="company-top1 fl"></div>
 						<div class="company">
@@ -62,14 +61,29 @@
 				</div>
 			</div>
 			<div class="view">
-				<div id="main"></div>
+				<div class="viewTxt">
+					<div style="position:absolute;top:5%"><span style="font-size:24px;color:#6caae0">行业云</span></div>
+					<div style="position:absolute;bottom:5%"><span style="font-size:24px;color:#6caae0">业务云</span></div>
+					<div style="position:absolute;top:18%;left:-16%;"><span>兆维</span></div>
+					<div style="position:absolute;top:18%;left:17.5%;"><span>永丰</span></div>
+					<div style="position:absolute;bottom:2%;left:10px;"><span>大郊亭</span></div>
+					<div style="position:absolute;top:46.5%;left:-24.5%;"><span>瀛海 / <span style="font-size:14px;">在建</span></span></div>
+					<div style="position:absolute;top:46.5%;;left:24%;"><span>瀛海 / <span style="font-size:14px;">在建</span></span></div>
+				</div>
+				<div class="dataLeft">
+					<div class="dataLeftBg leftLocal1"><span>CPU : 2560 / 核</span></div>
+					<div class="dataLeftBg leftLocal2"><span>内存 : 20480 / G</span></div>
+					<div class="dataLeftBg leftLocal3"><span>存储 : 548 / T</span></div>
+					<div class="dataLeftBg leftLocal4"><span>业务平台 : 35 / 个</span></div>
+				</div>
+				<div class="dataRight">
+					<div class="dataRightBg rightLocal1"><span>CPU : 2348 / 核</span></div>
+					<div class="dataRightBg rightLocal2"><span>内存 : 27104 / G</span></div>
+					<div class="dataRightBg rightLocal3"><span>存储 : 548 / T</span></div>
+					<div class="dataRightBg rightLocal4"><span>客户 : 173 / 家</span></div>
+				</div>
 			</div>
 		</div>
-		<script type="text/javascript" charset="UTF-8" src="public/js/jquery.js"></script>
-		<script type="text/javascript" charset="UTF-8" src="public/js/bootstrap.js"></script>
-		<script type="text/javascript" src="public/echarts-2.2.7/build/dist/echarts-all.js"></script>
-		<script type="text/javascript" src="public/echarts-2.2.7/build/dist/echarts.js"></script>
-		<script type="text/javascript" src="public/js/highcharts.js"></script>
 		<script>
 			window.onload=function(){
 				fnDate();
@@ -94,120 +108,5 @@
 				return num;
 			} 
 		</script>
-	 	<script>
-			require.config({
-				paths: {
-					echarts: 'public/echarts-2.2.7/build/dist/'
-				}
-			})
-			require(['echarts','echarts/chart/map'],function (ec){
-				var myChart = echarts.init(document.getElementById('main'));
-				var empty = function(num){
-					return {
-						"name": " ",
-						"value": num,
-						"itemStyle": {
-							"normal": {
-								"label": {"show": false},
-								"labelLine": {"show": false},
-								"color": 'rgba(0,0,0,0)',
-								"borderColor": 'rgba(0,0,0,0)',
-								"borderWidth": 0
-							},
-							"emphasis": {
-								"color": 'rgba(0,0,0,0)',
-								"borderColor": 'rgba(0,0,0,0)',
-								"borderWidth": 0
-							}
-						}
-					}
-				}
-				var option = {
-					series: [
-						{
-							name: '',
-							type: 'pie',
-							radius: ['98%', '100%'],
-							startAngle:204,
-							label: {
-								normal: {
-									textStyle: {
-										color : '#49d9fe',
-										fontSize :18,
-										fontWeight :'bold'
-									}
-								}
-							},
-							data: [
-								{
-									value: 1,
-									name: "瀛海/在建",
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								},empty(3),{
-									value: 1,
-									name: "瀛海/在建",
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								},empty(3)
-							]
-						},{
-							name: '',
-							type: 'pie',
-							radius: ['84%', '85%'],
-							startAngle:178,
-							label: {
-								normal: {
-									textStyle: {
-										color : '#49d9fe',
-										fontSize :18,
-										fontWeight :'bold'
-									}
-								}
-							},
-							data: [
-								{
-									value: 28,
-									name: '兆维',
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								},{
-									value: 28,
-									name: '永丰',
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								},{
-									value: 59,
-									name: '大郊亭',
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								}
-							]
-						},{
-							name: '',
-							type: 'pie',
-							radius: ['80%', '82%'],
-							startAngle:178,
-							label: {
-								normal: {
-									textStyle: {
-										color : '#49d9fe',
-										fontSize :18,
-										fontWeight :'bold'
-									}
-								}
-							},
-							data: [
-								{
-									value: 54,
-									name: '行业云',
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								},{
-									value: 54,
-									name: '业务云',
-									itemStyle: {normal:{color:"#5886f0"},emphasis:{color:"#1b93fb"}}
-								}
-							]
-						}
-					]
-				};
-				myChart.setOption(option)
-			})
-	 	</script>
 	</body>
 </html>

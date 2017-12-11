@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="cache-control" content="no-cache">
+		<meta http-equiv="expires" content="0">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>北京电信IDC云资源池总体视图</title>
+		<link rel="stylesheet" type="text/css" href="public/css/bootstrap.css"></link>
+		<link rel="stylesheet" type="text/css" href="public/css/style.css"></link>
+		<style>
+			html,body,.wrapper{height:100%;width:100%;}
+			*,html,body{font-family: "微软雅黑";color:#fff;}
+			body{background:url("public/img/bjidc-bg.png");background-size:cover;background-repeat:no-repeat;}
+			.fl{float:left;}
+			.fr{float:right;}
+			.wrapper{position:relative;padding-top:25px;}
+			.header{position:absolute;width:100%;height:40px;line-height:40px;background:url("public/img/header-bg.png");background-size:100% 100%;background-repeat:no-repeat;}
+			.header-left{margin-left:20px;}
+			.header-right{margin-right:20px;}
+			.header-left span,.header-right span{color:#49d9fe;}
+			.header-center{position:absolute;top:0;left:50%;margin-left:-127px;font-size:22px;}
+			.content{position:absolute;width:50%;height:100%;top:70px;padding:20px 20px 0px 20px;}
+			.num{width:100%;height:100%;}
+			.company{width:100%;height:55px;margin-bottom:6px;margin-left:60px;}
+			.company-top1{background:url("public/img/top1.png");}
+			.company-top2{background:url("public/img/top2.png");}
+			.company-top1,.company-top2{width:48px;height:48px;background-size:100% 100%;background-repeat:no-repeat;}
+			.companyname{width:260px;height:100%;padding-top:15px;padding-left:5%;color:#a5d5ff;background:url("public/img/rank-bg.png");background-size:100% 100%;background-repeat:no-repeat;}
+			.view{position:relative;width:100%;height:100%;}
+			.viewbg{position:absolute;width:100%;height:100%;left:50%;margin-left:-38%;z-index:2}
+			#main{position:absolute;width:100%;height:100%;}
+			.dataLeft{position:absolute;width:50%;height:100%;}
+			.dataRight{position:absolute;width:50%;height:100%;left:50%;}
+			.dataLeftBg{position:absolute;width:171px;height:64px;padding-left:30px;padding-top:20px;background:url("public/img/data-left-bg.png");background-repeat:no-repeat;}
+			.dataRightBg{position:absolute;width:171px;height:64px;padding-left:30px;padding-top:20px;background:url("public/img/data-right-bg.png");background-repeat:no-repeat;}
+			.leftLocal1{right:61%;bottom:39%;}.leftLocal2{right:54%;bottom:29%;}.leftLocal3{right:47%;bottom:19%;}.leftLocal4{right:40%;bottom:9%;}
+			.rightLocal1{left:40%;top:9%;}.rightLocal2{left:47%;top:19%;}.rightLocal3{left:54%;top:29%;}.rightLocal4{left:61%;top:39%;}
+			.dataTxt{font-weight:bold;}
+			.viewTxt{position:absolute;width:100%;height:100%;left:50%;margin-left:-35px;}
+			.viewTxt span{font-size:18px;color:#4092d8;font-weight:bold;}
+		</style>
+	</head>
+	<body>
+		<div class="wrapper">
+			<div class="header">
+				<div class="header-left fl">
+					<iframe width="400" scrolling="no" height="30" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=1&color=%2300B0F0&icon=1&wind=1&num=1&site=12" style="padding-top:10px;"></iframe>
+				</div>
+				<div class="header-center">北京电信IDC云资源池总体视图</div>
+				<div class="header-right fr">
+					<span>最新检测时间：</span>
+					<span id="time"></span>
+				</div>
+			</div>
+			<div class="content">
+				<div class="fl" style="width:100%">
+					<div class="num">
+						<div class="company-top1 fl"></div>
+						<div class="company">
+							<div class="companyname">具备虚拟机异地迁移功能</div>
+						</div>
+						<div class="company-top2 fl"></div>
+						<div class="company">
+							<div class="companyname">具备容灾备份功能</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="view">
+				<div class="viewbg"></div>
+				<!-- <div class="radar"></div> -->
+				<div id="main"></div>
+				<!-- <div class="viewTxt">
+					<div style="position:absolute;top:5%"><span style="font-size:24px;color:#6caae0">行业云</span></div>
+					<div style="position:absolute;bottom:5%"><span style="font-size:24px;color:#6caae0">业务云</span></div>
+					<div style="position:absolute;top:18%;left:-16%;"><span>兆维</span></div>
+					<div style="position:absolute;top:18%;left:17.5%;"><span>永丰</span></div>
+					<div style="position:absolute;bottom:2%;left:10px;"><span>大郊亭</span></div>
+					<div style="position:absolute;top:46.5%;left:-24.5%;"><span>瀛海 / <span style="font-size:14px;">在建</span></span></div>
+					<div style="position:absolute;top:46.5%;;left:24%;"><span>瀛海 / <span style="font-size:14px;">在建</span></span></div>
+				</div> -->
+				<div class="dataLeft">
+					<div class="dataLeftBg leftLocal1"><span class="dataTxt">CPU : 2560 / 核</span></div>
+					<div class="dataLeftBg leftLocal2"><span class="dataTxt">内存 : 20480 / G</span></div>
+					<div class="dataLeftBg leftLocal3"><span class="dataTxt">存储 : 548 / T</span></div>
+					<div class="dataLeftBg leftLocal4"><span class="dataTxt">业务平台 : 35 / 个</span></div>
+				</div>
+				<div class="dataRight">
+					<div class="dataRightBg rightLocal1"><span class="dataTxt">CPU : 2348 / 核</span></div>
+					<div class="dataRightBg rightLocal2"><span class="dataTxt">内存 : 27104 / G</span></div>
+					<div class="dataRightBg rightLocal3"><span class="dataTxt">存储 : 548 / T</span></div>
+					<div class="dataRightBg rightLocal4"><span class="dataTxt">客户 : 173 / 家</span></div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" charset="UTF-8" src="public/js/jquery-1.11.3.min.js"></script>
+		<script type="text/javascript" charset="UTF-8" src="public/js/bootstrap.js"></script>
+		<script type="text/javascript" src="public/echarts-2.2.7/build/dist/echarts-all.js"></script>
+		<script type="text/javascript" src="public/echarts-2.2.7/build/dist/echarts.js"></script>
+		<script type="text/javascript" src="public/js/highcharts.js"></script>
+		<script>
+			window.onload=function(){
+				fnDate();
+			}
+			//获取当前时间
+			function fnDate(){
+				var oTime=document.getElementById("time");
+				var date=new Date();
+				var year=date.getFullYear();//当前年份
+				var month=date.getMonth();//当前月份
+				var data=date.getDate();//天
+				var hours=date.getHours();//小时
+				var minute=date.getMinutes();//分
+				var second=date.getSeconds();//秒
+				var time=year+"/"+fnW((month+1))+"/"+fnW(data)+" "+fnW(hours)+":"+fnW(minute)+":"+fnW(second);
+				oTime.innerHTML=time;
+			}
+			//补位 当某个字段不是两位数时补0
+			function fnW(str){
+				var num;
+				str>=10?num=str:num="0"+str;
+				return num;
+			} 
+		</script>
+	 	<script>
+			require.config({
+				paths: {
+					echarts: 'public/echarts-2.2.7/build/dist/'
+				}
+			})
+			require(['echarts','echarts/chart/map'],function (ec){
+				var myChart = echarts.init(document.getElementById('main'))
+				//var geoCoordMap = {'东城区': [116.40,39.98],'北京市西单IDC数据中心': [116.35,39.92],'北京市德胜IDC数据中心': [116.29,39.95],'西城区': [116.27,39.92],'崇文区': [116.46,39.83],'宣武区': [116.25,39.87],'朝阳区': [116.63,39.99],'北京市静安IDC数据中心': [116.50,39.96],'北京市兆维IDC数据中心': [116.57,39.94],'北京市大郊亭IDC数据中心': [116.56,39.87],'北京酒仙桥IDC数据中心': [116.52,40.03],'北京市东四IDC数据中心': [116.48,39.91],'北京市数字大厦IDC中心': [116.44,40.02],'丰台区': [116.21,39.82],'北京市洋桥IDC数据中心': [116.33,39.82],'石景山区':[116.02,39.95],'北京市西二旗IDC数据中心':[116.31,40.02],'北京市永丰IDC数据中心':[116.21,40.08],'海淀区':[116.24,40.04],'门头沟区':[115.8,39.99],'房山区':[115.83,39.75],'通州区':[116.68,39.79],'中兴马驹桥合作机房':[116.68,39.72],'顺义区':[116.65,40.13],'昌平区':[116.23,40.22],'北京市北七家IDC数据中心':[116.44,40.17],'北京市润泽IDC数据中心':[116.58,39.58],'大兴区':[116.38,39.64],'北京亦庄瀛海IDC':[116.38,39.70],'北京市亦庄IDC数据中心':[116.48,39.70],'怀柔区':[116.63,40.72],'平谷区':[117.12,40.19],'密云县':[116.99,40.45],'延庆县':[116.10,40.51]}
+				var uploadedDataURL = "./public/json/data-1482909892121-BJ3auk-Se.json";
+				myChart.showLoading();
+				$.getJSON(uploadedDataURL, function(geoJson) {
+					echarts.registerMap('jiangxi', geoJson);
+					myChart.hideLoading();
+					var geoCoordMap = {
+						'济南市': [117.121225, 36.66466],
+						'吉安市': [114.986373, 27.111699],
+						'上饶市': [117.971185, 28.44442],
+						'九江市': [115.992811, 29.712034],
+						'抚州市': [116.358351, 27.98385],
+						'宜春市': [114.391136, 27.8043],
+						'南昌市': [115.892151, 28.676493],
+						'景德镇市': [117.214664, 29.29256],
+						'萍乡市': [113.852186, 27.622946],
+						'鹰潭市': [117.033838, 28.238638],
+						'新余市': [114.930835, 27.810834],
+					}
+					var data = [{
+						name: '济南市',
+						value: 199
+					}, {
+						name: '吉安市',
+						value: 39
+					}, {
+						name: '上饶市',
+						value: 152
+					}, {
+						name: '九江市',
+						value: 299
+					}, {
+						name: '抚州市',
+						value: 89
+					}, {
+						name: '宜春市',
+						value: 52
+					}, {
+						name: '南昌市',
+						value: 9
+					}, {
+						name: '景德镇市',
+						value: 352
+					}, {
+						name: '萍乡市',
+						value: 99
+					}, {
+						name: '鹰潭市',
+						value: 39
+					}, {
+						name: '新余市',
+						value: 480
+					}, ];
+					var max = 480,
+						min = 9; // todo 
+					var maxSize4Pin = 100,
+						minSize4Pin = 20;
+
+					var convertData = function(data) {
+						var res = [];
+						for (var i = 0; i < data.length; i++) {
+							var geoCoord = geoCoordMap[data[i].name];
+							if (geoCoord) {
+								res.push({
+									name: data[i].name,
+									value: geoCoord.concat(data[i].value)
+								});
+							}
+						}
+						return res;
+					};
+
+
+					option = {
+						backgroundColor: '#021926',
+						title: {
+							text: '“绿色金融” - 江西省',
+							subtext: '',
+							x: 'center',
+							textStyle: {
+								color: '#ccc'
+							}
+						},
+						tooltip: {
+							trigger: 'item',
+							formatter: function(params) {
+								if (typeof(params.value)[2] == "undefined") {
+									return params.name + ' : ' + params.value;
+								} else {
+									return params.name + ' : ' + params.value[2];
+								}
+							}
+						},
+						legend: {
+							orient: 'vertical',
+							y: 'bottom',
+							x: 'right',
+							data: ['credit_pm2.5'],
+							textStyle: {
+								color: '#fff'
+							}
+						},
+						visualMap: {
+							show: false,
+							min: 0,
+							max: 500,
+							left: 'left',
+							top: 'bottom',
+							text: ['高', '低'], // 文本，默认为数值文本
+							calculable: true,
+							seriesIndex: [1],
+							inRange: {
+								// color: ['#3B5077', '#031525'] // 蓝黑
+								// color: ['#ffc0cb', '#800080'] // 红紫
+								// color: ['#3C3B3F', '#605C3C'] // 黑绿
+								color: ['#0f0c29', '#302b63', '#24243e'] // 黑紫黑
+									// color: ['#23074d', '#cc5333'] // 紫红
+									// color: ['#00467F', '#A5CC82'] // 蓝绿
+									// color: ['#1488CC', '#2B32B2'] // 浅蓝
+									// color: ['#00467F', '#A5CC82'] // 蓝绿
+									// color: ['#00467F', '#A5CC82'] // 蓝绿
+									// color: ['#00467F', '#A5CC82'] // 蓝绿
+									// color: ['#00467F', '#A5CC82'] // 蓝绿
+
+							}
+						},
+						// toolbox: {
+						//     show: true,
+						//     orient: 'vertical',
+						//     left: 'right',
+						//     top: 'center',
+						//     feature: {
+						//             dataView: {readOnly: false},
+						//             restore: {},
+						//             saveAsImage: {}
+						//             }
+						// },
+						geo: {
+							show: true,
+							map: 'jiangxi',
+							label: {
+								normal: {
+									show: false
+								},
+								emphasis: {
+									show: false,
+								}
+							},
+							roam: true,
+							itemStyle: {
+								normal: {
+									areaColor: 'transparent',
+									borderColor: '#3fdaff',
+									borderWidth: 2,
+									shadowColor: 'rgba(63, 218, 255, 0.5)',
+									shadowBlur: 30
+								},
+								emphasis: {
+									areaColor: '#2B91B7',
+								}
+							}
+						},
+						series: [{
+								name: 'light',
+								type: 'scatter',
+								coordinateSystem: 'geo',
+								data: convertData(data),
+								symbolSize: function(val) {
+									return val[2] / 10;
+								},
+								label: {
+									normal: {
+										formatter: '{b}',
+										position: 'right',
+										show: true
+									},
+									emphasis: {
+										show: true
+									}
+								},
+								itemStyle: {
+									normal: {
+										color: '#05C3F9'
+									}
+								}
+							}, {
+								type: 'map',
+								map: 'jiangxi',
+								geoIndex: 0,
+								aspectScale: 0.75, //长宽比
+								showLegendSymbol: false, // 存在legend时显示
+								label: {
+									normal: {
+										show: false
+									},
+									emphasis: {
+										show: false,
+										textStyle: {
+											color: '#fff'
+										}
+									}
+								},
+								roam: true,
+								itemStyle: {
+									normal: {
+										areaColor: '#031525',
+										borderColor: '#3B5077',
+									},
+									emphasis: {
+										areaColor: '#2B91B7'
+									}
+								},
+								animation: false,
+								data: data
+							}, {
+								name: 'Top 5',
+								type: 'effectScatter',
+								coordinateSystem: 'geo',
+								data: convertData(data.sort(function(a, b) {
+									return b.value - a.value;
+								}).slice(0, 5)),
+								symbolSize: function(val) {
+									return val[2] / 10;
+								},
+								showEffectOn: 'render',
+								rippleEffect: {
+									brushType: 'stroke'
+								},
+								hoverAnimation: true,
+								label: {
+									normal: {
+										formatter: '{b}',
+										position: 'right',
+										show: true
+									}
+								},
+								itemStyle: {
+									normal: {
+										color: '#05C3F9',
+										shadowBlur: 10,
+										shadowColor: '#05C3F9'
+									}
+								},
+								zlevel: 1
+							},
+
+						]
+					};
+					myChart.setOption(option);
+				});
+			})
+	 	</script>
+	</body>
+</html>
