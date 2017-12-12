@@ -126,7 +126,7 @@
 						formatter: function (params) {
 							if(params.value>200){
 								return params.name + " ( 行业云 ) "
-							}else if(params.value>200&&params.value<100){
+							}else if(params.value<200&&params.value>100){
 								return params.name + " ( 在建 ) "
 							}else if(params.value<100){
 								return params.name + " ( 业务云 ) "
@@ -156,6 +156,10 @@
 						mapType : '北京',
 						itemStyle : {
 							normal : {
+								label:{  
+									show:false,  
+									textStyle:{color:'#00ffff'}  
+								},
 								color : '#021926',
 								borderColor : '#3fdaff',
 								borderWidth : 2,
@@ -175,8 +179,22 @@
 								shadowBlur : 0
 							},
 							itemStyle : {
-								normal : {label : {show : false}},
-								emphasis : {label : {show : false}}
+								normal : {
+									label : {  
+										show:true,  
+										textStyle:{color:'#fff'},
+										formatter: '{b}',
+										position: 'right',
+									}
+								},
+								emphasis : {  
+									label : {  
+										show:true,  
+										textStyle:{color:'#fff'},
+										formatter: '{b}',
+										position: 'right',
+									}
+								}
 							},
 							data : [
 								{name : "北京市兆维IDC数据中心",value : 300},
